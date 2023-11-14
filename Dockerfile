@@ -1,5 +1,5 @@
 FROM node:18.17.1 AS base
-WORKDIR /api
+WORKDIR /indexcards
 COPY ./ ./
 
 RUN npm i

@@ -58,7 +58,7 @@ case 'test':
 	config.sequelizeOptions.logging = false;
 	config.DB_HOST = 'localhost';
 	config.DB_USER = 'tabroom';
-	config.DB_PASS = 'C3Eil-aiQuaiseigoo4hee2YooG';
+	config.DB_PASS = 'thisisadbpassword';
 	break;
 
 case 'staging':
@@ -84,7 +84,7 @@ case 'production':
 case 'development':
 	config.DB_HOST = 'localhost';
 	config.DB_USER = 'tabroom';
-	config.DB_PASS = 'C3Eil-aiQuaiseigoo4hee2YooG';
+	config.DB_PASS = 'thisisadbpassword';
 default:
 	break;
 }
