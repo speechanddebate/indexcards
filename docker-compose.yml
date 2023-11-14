@@ -6,7 +6,10 @@ services:
     restart: always
     ports:
         - 3000:3000
+    environment:
+      - NODE_ENV=production
     volumes:
-      - /etc/config.js:/indexcards/config/config.js:ro
+      - /etc/tabroom/indexcards.config.js:/indexcards/config/config.js:ro
+      - /var/log/indexcards:/var/log/indexcards:rw
     extra_hosts:
       - "host.docker.internal:host-gateway"

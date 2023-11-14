@@ -44,6 +44,10 @@ export const sideCounts = {
 		const sideCounter = {};
 
 		for (const result of sideResults) {
+
+			result.aff = result.aff || 'Aff';
+			result.neg = result.neg || 'Neg';
+			
 			if (result.side === 1) {
 				if (!sideCounter[result.aff]) {
 					sideCounter[result.aff] = 1;
