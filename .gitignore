@@ -1,0 +1,12 @@
+node_modules/
+coverage/
+/.env
+logs/
+.pm2/
+config/config.js
+*.swp
+*.swo
+#sorry
+.vscode
+npm*
+*.nvimlog
