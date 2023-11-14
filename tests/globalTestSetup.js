@@ -1,4 +1,4 @@
-import db from '../indexcards/helpers/db';
+import db from '../api/helpers/db';
 import testData from './testFixtures';
 
 export const setup = async () => {
