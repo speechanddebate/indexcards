@@ -25,7 +25,7 @@ jobs:
       run: echo COMMIT_VERSION=$(echo $GITHUB_SHA) >> $GITHUB_ENV
 
     - name: Publish Indexcards image to Registry
-      uses: elgohr/Publish-Docker-Github-Action@master
+      uses: elgohr/Publish-Docker-Github-Action@v4
       with:
         name: nsda/indexcards
         username: ${{ secrets.REGISTRY_USERNAME }}
