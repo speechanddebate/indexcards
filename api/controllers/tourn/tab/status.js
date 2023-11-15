@@ -517,8 +517,8 @@ export const attendance = {
 
 				await db.campusLog.create(log);
 
-				// Oh for the days I have react going and don't need to do the
-				// following nonsense
+				// Oh for the days I have active webpages going and don't need
+				// to do the following nonsense
 
 				return res.status(201).json({
 					error   : false,

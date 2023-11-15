@@ -386,9 +386,10 @@ export const changeEventAccess = {
 
 						logString += event.abbr;
 
-						// Need to add the button to the listing.  God this will be so
-						// much easier with React.  This is basically why react/angular
-						// etc were created I guess.  Anguish.
+						// Need to add the button to the listing.  God this
+						// will be so much easier with Svelte.  This is
+						// basically why angular etc were created I guess.
+						// Anguish.
 
 						replyButtons += `<div
 							class = "third padvertless semibold greentext yellowhover centeralign nospace smaller"
