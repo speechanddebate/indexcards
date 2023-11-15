@@ -1,3 +1,5 @@
+import { roundCheck } from '../../../helpers/auth.js';
+
 // Merges and unmerges all the rounds in a given timeslot and judge category
 // for unified judge placement.  This method should be more robust than the
 // stash & store method.
@@ -8,6 +10,14 @@ export const mergeTimeslotRounds = {
 
 		const db = req.db;
 		const roundId = req.params.roundId;
+
+		const permOK = await roundCheck(req, res, roundId);
+		if (!permOK) {
+			res.status(200).json({
+				error   : true,
+				message : `You do not have permission to merge those rounds`,
+			});
+		}
 
 		try {
 			await db.sequelize.query(`
@@ -58,6 +68,14 @@ export const unmergeTimeslotRounds = {
 	POST: async (req, res) => {
 		const db = req.db;
 		const roundId = req.params.roundId;
+
+		const permOK = await roundCheck(req, res, roundId);
+		if (!permOK) {
+			res.status(200).json({
+				error   : true,
+				message : `You do not have permission to merge those rounds`,
+			});
+		}
 
 		try {
 			await db.sequelize.query(`

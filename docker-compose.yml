@@ -5,11 +5,12 @@ services:
     image: indexcards:latest
     restart: always
     ports:
-        - 3000:3000
+        - 9001:3000
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=staging
     volumes:
       - /etc/tabroom/indexcards.config.js:/indexcards/config/config.js:ro
       - /var/log/indexcards:/var/log/indexcards:rw
+      - /var/lib/GeoIP:/var/lib/GeoIP
     extra_hosts:
       - "host.docker.internal:host-gateway"
