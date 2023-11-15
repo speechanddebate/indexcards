@@ -41,7 +41,7 @@
 		"@alt3/sequelize-to-json-schemas" : "^0.3.55",
 		"@aws-sdk/client-s3"              : "^3.397.0",
 		"@maxmind/geoip2-node"            : "^3.2.0",
-		"@speechanddebate/nsda-js-utils"  : "^1.0.23",
+		"@speechanddebate/nsda-js-utils"  : "^1.0.14",
 		"argon2"                          : "^0.28.2",
 		"authorizenet"                    : "^1.0.8",
 		"axios"                           : "^1.5.1",
@@ -81,7 +81,7 @@
 		"xml2js"                          : "^0.4.19"
 	},
 	"devDependencies": {
-		"@speechanddebate/eslint-config-nsda" : "^1.0.20",
+		"@speechanddebate/eslint-config-nsda" : "^1.0.23",
 		"@vitest/coverage-v8"                 : "^0.34.6",
 		"chai"                                : "^4.2.0",
 		"eslint"                              : "^8.15.0",
