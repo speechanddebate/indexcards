@@ -13,11 +13,11 @@ const errorHandler = async (err, req, res, next) => {
 	if (err.status || err.errors) {
 		if (err.status === 400) {
 			return res.status(err.status).json({
-				message          : 'Validation error',
+				message          : `OpenAPI Validation error : ${err.message}`,
 				errors           : err.errors,
 				stack            : err.stack,
 				logCorrelationId : req.uuid,
-				env,
+				env              : process.env,
 			});
 		}
 		if (err.status === 401) {
@@ -44,7 +44,7 @@ const errorHandler = async (err, req, res, next) => {
 Stack
 ${err.stack}
 
-Login Session 
+Login Session
 ${JSON.stringify(req.session, null, 4)}
 
 Request Parameters
@@ -72,7 +72,7 @@ ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
 		logCorrelationId : req.uuid,
 		path             : req.path,
 		stack            : err.stack,
-		env,
+		env				 : process.env,
 	});
 };
 
