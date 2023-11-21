@@ -1,5 +1,6 @@
 import express from 'express';
 import helmet from 'helmet';
+import cors from 'cors';
 import rateLimiter from 'express-rate-limit';
 import uuid from 'uuid/v4.js';
 import expressWinston from 'express-winston';
@@ -33,6 +34,7 @@ debugLogger.info('Initializing API...');
 // Enable Helmet security
 app.use(helmet());
 
+
 // Enable getting forwarded client IP from proxy
 app.enable('trust proxy', 1);
 app.get('/v1/ip', (request, response) => response.send(request.ip));
@@ -61,19 +63,6 @@ const searchLimiter = rateLimiter({
 
 app.use('/v1/public/search', searchLimiter);
 
-// Enable CORS
-app.use((req, res, next) => {
-	// Can't use wildcard for CORS with credentials, so echo back the requesting domain
-	const allowedOrigin = req.get('Origin') || '*';
-	res.header('Access-Control-Allow-Origin', allowedOrigin);
-	res.header('Access-Control-Allow-Credentials', true);
-	res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-	res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization, X-Tabroom-Cookie');
-	res.header('Access-Control-Max-Age', 86400);
-	res.header('Access-Control-Expose-Headers', 'Content-Disposition');
-	next();
-});
-
 // Add a unique UUID to every request, and add the configuration for easy transport
 app.use((req, res, next) => {
 	req.uuid = uuid();
@@ -81,10 +70,25 @@ app.use((req, res, next) => {
 	return next();
 });
 
+//Enable CORS
+//
+var corsOptions = {
+	origin : [
+		'http://old.dev.tabroom.com',
+		'http://old.staging.tabroom.com',
+		'https://www.tabroom.com',
+	],
+	optionsSuccessStatus : 200,
+	credentials          : true,
+}
+
+app.use('/v1', cors(corsOptions));
+
 // Log all requests
 app.use(expressWinston.logger({
-	winstonInstance: requestLogger,
-	meta: true,
+	winstonInstance : requestLogger,
+	meta            : true,
+	env             : process.env.NODE_ENV,
 	dynamicMeta: (req, res) => {
 		return {
 			logCorrelationId: req.uuid,
@@ -106,8 +110,8 @@ if (process.env.NODE_ENV === 'development') {
 // Parse cookies and add them to the session
 app.use(cookieParser());
 
-// Database handle volleyball; don't have to call it in every last route.
-// For I am lazy, and unapologetic about being so.
+// Database handle volleyball; don't have to call it in every last route. For I
+// am lazy, and unapologetic about being so.
 
 app.use((req, res, next) => {
 	req.db = db;
@@ -170,8 +174,8 @@ const apiDocConfig = initialize({
 
 // Log global errors with Winston
 app.use(expressWinston.errorLogger({
-	winstonInstance: errorLogger,
-	meta: true,
+	winstonInstance : errorLogger,
+	meta            : true,
 	dynamicMeta: (req, res, next) => {
 		return {
 			logCorrelationId: req.uuid,

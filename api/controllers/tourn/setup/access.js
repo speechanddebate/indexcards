@@ -58,6 +58,9 @@ export const changeAccess = {
 
 		const already = await db.permission.findAll({
 			where : { tourn: tournId, person: adminId },
+			include : [
+				{ model: db.person, as: 'Person' },
+			],
 		});
 
 		parsePerms(already).then(async (existing) => {
@@ -113,6 +116,9 @@ export const changeAccess = {
 
 			const already = await db.permission.findOne({
 				where : { tourn: tournId, person: adminId, tag: 'contact' },
+				include : [
+					{ model: db.person, as: 'Person' },
+				],
 			});
 
 			if (already === null) {
@@ -342,10 +348,12 @@ export const changeEventAccess = {
 		if (accessType === 'event') {
 			events = await db.event.findAll({
 				where : { id: accessId },
+				raw: true,
 			});
 		} else if (accessType === 'category') {
 			events = await db.event.findAll({
 				where : { category: accessId },
+				raw: true,
 			});
 		} else if (accessType === 'type') {
 			events = await db.event.findAll({
@@ -353,30 +361,41 @@ export const changeEventAccess = {
 					type: accessId,
 					tourn: tournId,
 				},
+				raw: true,
 			});
 		}
 
 		const already = await db.permission.findAll({
 			where : {
-				tourn: tournId,
-				person: adminId,
+				tourn  : tournId,
+				person : adminId,
 			},
+			include : [
+				{ model: db.person, as: 'Person' },
+			],
 		});
 
+		console.log(already);
+
 		parsePerms(already).then(async (existing) => {
+
+			console.log(existing);
 
 			let logString = ' ';
 			let replyButtons = ' ';
 			const newAdmin = await db.person.findByPk(adminId);
+
+			existing.permObject.details = JSON.parse(existing.permObject.details);
 
 			if (existing.permObject.details === null) {
 				existing.permObject.details = {};
 			}
 
 			if (events) {
+
 				events.forEach( event => {
 
-					if (existing.permObject.details[event.id] !== accessLevel) {
+					if (existing.permObject.details?.[event.id] !== accessLevel) {
 
 						existing.permObject.details[event.id] = accessLevel;
 
@@ -424,6 +443,10 @@ export const changeEventAccess = {
 		});
 	},
 
+	GET : async (req, res) => {
+		res.status(200).json({'message': 'Hello', params: req.params, body: req.body });
+	},
+
 	// A delete will revoke access to that event
 
 	DELETE: async (req, res) => {
@@ -435,6 +458,9 @@ export const changeEventAccess = {
 
 		const already = await db.permission.findAll({
 			where : { tourn: tournId, person: adminId },
+			include : [
+				{ model: db.person, as: 'Person' },
+			],
 		});
 
 		const newAdmin = await db.person.findByPk(adminId);
