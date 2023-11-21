@@ -444,7 +444,7 @@ export const changeEventAccess = {
 	},
 
 	GET : async (req, res) => {
-		res.status(200).json({'message': 'Hello', params: req.params, body: req.body });
+		res.status(200).json({ message: 'Hello', params: req.params, body: req.body });
 	},
 
 	// A delete will revoke access to that event

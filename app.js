@@ -34,7 +34,6 @@ debugLogger.info('Initializing API...');
 // Enable Helmet security
 app.use(helmet());
 
-
 // Enable getting forwarded client IP from proxy
 app.enable('trust proxy', 1);
 app.get('/v1/ip', (request, response) => response.send(request.ip));
@@ -70,9 +69,9 @@ app.use((req, res, next) => {
 	return next();
 });
 
-//Enable CORS
+// Enable CORS
 //
-var corsOptions = {
+const corsOptions = {
 	origin : [
 		'http://old.dev.tabroom.com',
 		'http://old.staging.tabroom.com',
@@ -80,7 +79,7 @@ var corsOptions = {
 	],
 	optionsSuccessStatus : 200,
 	credentials          : true,
-}
+};
 
 app.use('/v1', cors(corsOptions));
 
