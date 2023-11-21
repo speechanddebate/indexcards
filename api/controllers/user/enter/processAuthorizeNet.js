@@ -113,9 +113,9 @@ export const processAuthorizeNet = {
 		const ctrl = new APIControllers.CreateTransactionController(createRequest.getJSON());
 
 		// Defaults to sandbox
-		// if (process.env.NODE_ENV === 'production') {
-		// 	ctrl.setEnvironment(authorizenet.Constants.endpoint.production);
-		// }
+		if (process.env.NODE_ENV === 'production') {
+			ctrl.setEnvironment(authorizenet.Constants.endpoint.production);
+		}
 
 		try {
 			const result = await new Promise((resolve, reject) => {
@@ -139,8 +139,8 @@ export const processAuthorizeNet = {
 								debugLogger.info(`Successful Authorize.net transaction. ID: ${transactionId}, Response Code: ${responseCode}, Message Code: ${messageCode}, Description: ${description}`);
 
 								const paymentObject = {
-									reason    : `Authorize.net Payment from ${payerName} (${orderData.person_email}), transaction ID ${transactionId}`,
-									amount    : parseFloat(orderData.base) * -1,
+									reason    : `Authorize.net Payment #${transactionId} from ${payerName} (${orderData.person_email})`,
+									amount    : parseFloat(total) * -1,
 									school    : orderData.school,
 									payment   : true,
 									levied_at : new Date(),
