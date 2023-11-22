@@ -1,26 +1,48 @@
 import authorizenet from 'authorizenet';
+import { debugLogger } from '../../../helpers/logger';
 
 export const processAuthorizeNet = {
 	POST: async (req, res) => {
 		const db = req.db;
+
+		const orderData = req.body;
+
 		const apiLogin = await db.tournSetting.findOne({
 			where : {
-				tourn: req.body?.tourn,
+				tourn: orderData.tourn,
 				tag  : 'authorizenet_api_login',
 			},
 		});
 		const transactionKey = await db.tournSetting.findOne({
 			where : {
-				tourn: req.body?.tourn,
+				tourn: orderData.tourn,
 				tag  : 'authorizenet_transaction_key',
 			},
 		});
-		const orderData = req.body?.orderData;
-		const payerName = `${req.body?.customerInformation.firstName} ${req.body?.customerInformation.lastName}`;
-		const payerEmail = orderData.payerEmail;
 
-		const dataDescriptor = req.body?.opaqueData?.dataDescriptor;
-		const dataValue = req.body?.opaqueData?.dataValue;
+		if (!apiLogin || !transactionKey) {
+			return res.status(500).json({ message: 'Missing Authorize.net credentials for this tournament' });
+		}
+
+		const payerName = `${orderData.customerInformation?.firstName} ${orderData.customerInformation?.lastName}`;
+
+		const dataDescriptor = orderData.opaqueData?.dataDescriptor;
+		const dataValue = orderData.opaqueData?.dataValue;
+
+		if (!dataDescriptor || !dataValue) {
+			return res.status(500).json({ message: 'Missing payment data' });
+		}
+
+		if (!orderData.base) {
+			return res.status(500).json({ message: 'Missing base amount' });
+		}
+		if (orderData.base < 10) {
+			return res.status(500).json({ message: '$10 minimum for online payments' });
+		}
+
+		const processing = orderData.base * 0.04;
+		let total = processing + orderData.base;
+		total = total.toFixed(2);
 
 		const APIContracts = authorizenet.APIContracts;
 		const APIControllers = authorizenet.APIControllers;
@@ -37,24 +59,18 @@ export const processAuthorizeNet = {
 		paymentType.setOpaqueData(opaqueData);
 
 		const orderDetails = new APIContracts.OrderType();
-		orderDetails.setDescription('Entry Fees');
+		orderDetails.setDescription(`${orderData.tourn_name} Registration Fees for ${orderData.school_name}`);
 
 		const billTo = new APIContracts.CustomerAddressType();
-		billTo.setFirstName('Ellen');
-		billTo.setLastName('Johnson');
-		billTo.setCompany('Souveniropolis');
-		billTo.setAddress('14 Main Street');
-		billTo.setCity('Pecan Springs');
-		billTo.setState('TX');
-		billTo.setZip('44628');
-		billTo.setCountry('USA');
+		billTo.setFirstName(orderData.customerInformation?.firstName);
+		billTo.setLastName(orderData.customerInformation?.lastName);
 
 		const lineItemId1 = new APIContracts.LineItemType();
 		lineItemId1.setItemId('1');
-		lineItemId1.setName('Entry Fee');
-		lineItemId1.setDescription('Entry Fee');
+		lineItemId1.setName(`Registration Fees`);
+		lineItemId1.setDescription(`${orderData.tourn_name} Registration Fees for ${orderData.school_name}`);
 		lineItemId1.setQuantity('1');
-		lineItemId1.setUnitPrice(100.00);
+		lineItemId1.setUnitPrice(total);
 
 		const lineItemList = [];
 		lineItemList.push(lineItemId1);
@@ -82,7 +98,7 @@ export const processAuthorizeNet = {
 			APIContracts.TransactionTypeEnum.AUTHCAPTURETRANSACTION
 		);
 		transactionRequestType.setPayment(paymentType);
-		transactionRequestType.setAmount('100.00');
+		transactionRequestType.setAmount(total);
 		transactionRequestType.setLineItems(lineItems);
 		transactionRequestType.setOrder(orderDetails);
 		transactionRequestType.setBillTo(billTo);
@@ -92,72 +108,93 @@ export const processAuthorizeNet = {
 		createRequest.setMerchantAuthentication(merchantAuthenticationType);
 		createRequest.setTransactionRequest(transactionRequestType);
 
-		// console.log(JSON.stringify(createRequest.getJSON(), null, 2));
+		// debugLogger.info(JSON.stringify(createRequest.getJSON(), null, 2));
 
 		const ctrl = new APIControllers.CreateTransactionController(createRequest.getJSON());
 
 		// Defaults to sandbox
-		// ctrl.setEnvironment(authorizenet.Constants.endpoint.production);
+		// if (process.env.NODE_ENV === 'production') {
+		// 	ctrl.setEnvironment(authorizenet.Constants.endpoint.production);
+		// }
 
-		ctrl.execute(async () => {
-			const apiResponse = ctrl.getResponse();
-			const response = new APIContracts.CreateTransactionResponse(apiResponse);
+		try {
+			const result = await new Promise((resolve, reject) => {
+				ctrl.execute(async () => {
+					const apiResponse = ctrl.getResponse();
+					const response = new APIContracts.CreateTransactionResponse(apiResponse);
 
-			// console.log(JSON.stringify(response, null, 2));
+					// debugLogger.info(JSON.stringify(response, null, 2));
 
-			if (response != null) {
-				if (response.getMessages().getResultCode() === APIContracts.MessageTypeEnum.OK) {
-					if (response.getTransactionResponse().getMessages() != null) {
-						console.log(`Successfully created transaction with Transaction ID: ${response.getTransactionResponse().getTransId()}`);
-						console.log(`Response Code: ${response.getTransactionResponse().getResponseCode()}`);
-						console.log(`Message Code: ${response.getTransactionResponse().getMessages().getMessage()[0].getCode()}`);
-						console.log(`Description: ${response.getTransactionResponse().getMessages().getMessage()[0].getDescription()}`);
+					if (response != null) {
+						if (response.getMessages().getResultCode() === APIContracts.MessageTypeEnum.OK) {
+							if (response.getTransactionResponse().getMessages() != null) {
+								const transactionId = response.getTransactionResponse()
+									.getTransId();
+								const responseCode = response.getTransactionResponse()
+									.getResponseCode();
+								const messageCode = response.getTransactionResponse()
+									.getMessages().getMessage()[0].getCode();
+								const description = response.getTransactionResponse()
+									.getMessages().getMessage()[0].getDescription();
+								debugLogger.info(`Successful Authorize.net transaction. ID: ${transactionId}, Response Code: ${responseCode}, Message Code: ${messageCode}, Description: ${description}`);
 
-						const paymentObject = {
-							reason    : `PayPal Payment from ${payerName} ${payerEmail}`,
-							amount    : parseFloat(orderData.purchase_units[0]?.amount.value) * -1,
-							school    : orderData.purchase_units[0]?.custom_id,
-							payment   : true,
-							levied_at : Date(orderData.create_time),
-							levied_by : orderData.person_id,
-						};
+								const paymentObject = {
+									reason    : `Authorize.net Payment #${transactionId} from ${payerName} (${orderData.person_email})`,
+									amount    : parseFloat(total) * -1,
+									school    : orderData.school,
+									payment   : true,
+									levied_at : new Date(),
+									levied_by : orderData.person_id,
+								};
 
-						const payPalObject = {
-							reason    : `Online Payment Processing Fee`,
-							amount    : parseFloat(orderData.payment_fee),
-							school    : orderData.purchase_units[0]?.custom_id,
-							payment   : false,
-							levied_at : Date(orderData.create_time),
-							levied_by : orderData.person_id,
-						};
+								const feeObject = {
+									reason    : `Online Payment Processing Fee`,
+									amount    : parseFloat(processing),
+									school    : orderData.school,
+									payment   : false,
+									levied_at : new Date(),
+									levied_by : orderData.person_id,
+								};
 
-						await db.fine.create(paymentObject);
-						await db.fine.create(payPalObject);
-					} else {
-						console.log('Failed Transaction.');
-						if (response.getTransactionResponse().getErrors() != null) {
-							console.log(`Error Code: ${response.getTransactionResponse().getErrors().getError()[0].getErrorCode()}`);
-							console.log(`Error message: ${response.getTransactionResponse().getErrors().getError()[0].getErrorText()}`);
+								await db.fine.create(paymentObject);
+								await db.fine.create(feeObject);
+								resolve(response);
+							} else {
+								debugLogger.info('Failed Transaction.');
+								if (response.getTransactionResponse().getErrors() != null) {
+									const errorCode = response.getTransactionResponse()
+										.getErrors().getError()[0].getErrorCode();
+									const errorText = response.getTransactionResponse()
+										.getErrors().getError()[0].getErrorText();
+									debugLogger.info(`Failed Authorize.net transaction. Error ${errorCode}: ${errorText}`);
+								}
+								reject(response);
+							}
+						} else {
+							if (response.getTransactionResponse() != null
+								&& response.getTransactionResponse().getErrors() != null) {
+								const errorCode = response.getTransactionResponse()
+									.getErrors().getError()[0].getErrorCode();
+								const errorText = response.getTransactionResponse()
+									.getErrors().getError()[0].getErrorText();
+								debugLogger.info(`Failed Authorize.net transaction. Error ${errorCode}: ${errorText}`);
+							} else {
+								const errorCode = response.getMessages().getMessage()[0].getCode();
+								const errorText = response.getMessages().getMessage()[0].getText();
+								debugLogger.info(`Failed Authorize.net transaction. Error ${errorCode}: ${errorText}`);
+							}
+							reject(response);
 						}
-					}
-				} else {
-					console.log('Failed Transaction. ');
-					if (response.getTransactionResponse() != null
-						&& response.getTransactionResponse().getErrors() != null) {
-
-						console.log(`Error Code: ${response.getTransactionResponse().getErrors().getError()[0].getErrorCode()}`);
-						console.log(`Error message: ${response.getTransactionResponse().getErrors().getError()[0].getErrorText()}`);
 					} else {
-						console.log(`Error Code: ${response.getMessages().getMessage()[0].getCode()}`);
-						console.log(`Error message: ${response.getMessages().getMessage()[0].getText()}`);
+						debugLogger.info('Failed Authorize.net transaction. Null response.');
+						reject(response);
 					}
-				}
-			} else {
-				console.log('Null Response.');
-			}
-		});
-
-		return res.status(200).json({ message: 'Transaction processed' });
+				});
+			});
+			return res.status(200).json(result);
+		} catch (err) {
+			return res.status(400).json(err);
+		}
 	},
 };
 
