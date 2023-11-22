@@ -45,7 +45,8 @@ const saveEventResult = async (db, eventId) => {
 	const eventQuery = `
 		select
 			tourn.id tournId,
-			event.id, event.abbr, tc.circuit, circuit.abbr circuitAbbr,
+			event.id, event.abbr, event.type,
+				tc.circuit, circuit.abbr circuitAbbr,
 				ruleset.value rulesetId,
 				qual_event.value eventCode,
 				count(distinct entry.id) entryCount,
@@ -276,15 +277,58 @@ const saveEventResult = async (db, eventId) => {
 			}
 		}
 
-		// Save the award points
-		Object.keys(entryPoints).forEach( async (entry) => {
-			await db.result.create({
-				result_set : newResultSet.id,
-				rank       : entryPoints[entry],
-				place      : entryPlace[entry],
-				entry,
+		if (eventRules.individuals) {
+
+			const entryStudentsQuery = `
+				select
+					entry.id entry, student.id student
+				from entry, entry_student es, student, score
+				where entry.event = :eventId
+					and entry.id = es.entry
+					and es.student = student.id
+					and student.id = score.student
+			`;
+
+			const entryStudent = await db.sequelize.query(entryStudentsQuery, {
+				replacements: { eventId },
+				type: db.sequelize.QueryTypes.SELECT,
 			});
-		});
+
+			const entryStudents = {};
+
+			for (const es of entryStudent) {
+				if (!entryStudents[es.entry]) {
+					entryStudents[es.entry] = [];
+				}
+				entryStudents[es.entry].push(es.student);
+			}
+
+			// Save the award points for entries
+			Object.keys(entryPoints).forEach( async (entry) => {
+				for (const student of entryStudents[entry]) {
+					await db.result.create({
+						result_set : newResultSet.id,
+						rank       : entryPoints[entry],
+						place      : entryPlace[entry],
+						student
+					});
+				}
+			});
+
+
+		} else {
+
+			// Save the award points for entries
+			Object.keys(entryPoints).forEach( async (entry) => {
+				await db.result.create({
+					result_set : newResultSet.id,
+					rank       : entryPoints[entry],
+					place      : entryPlace[entry],
+					entry,
+				});
+			});
+
+		}
 
 	});
 
