@@ -1,6 +1,5 @@
 const sweepAward = (sequelize, DataTypes) => {
 	return sequelize.define('sweepAward', {
-		table: 'sweep_award',
 		name: {
 			type: DataTypes.STRING(127),
 			allowNull: false,
@@ -30,6 +29,8 @@ const sweepAward = (sequelize, DataTypes) => {
 			type: DataTypes.INTEGER(6),
 			allowNull: true,
 		},
+	}, {
+		tableName: 'sweep_award',
 	});
 };
 

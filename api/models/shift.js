@@ -8,7 +8,7 @@ const shift = (sequelize, DataTypes) => {
 		type: {
 			type: DataTypes.ENUM('signup', 'strike', 'both'),
 			allowNull: false,
-			defaultValue: 'string',
+			defaultValue: 'both',
 		},
 		start: {
 			type: DataTypes.DATE,
