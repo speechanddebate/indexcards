@@ -3,6 +3,10 @@ services:
   indexcards:
     container_name: indexcards
     image: indexcards:latest
+    build:
+      context: .
+      cache_from:
+        - indexcards:latest
     restart: always
     ports:
         - 9001:3000
