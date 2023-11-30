@@ -12,12 +12,19 @@ export const saveRubric = {
 		// putting the judgeId into parameters and not the body because
 		// eventually I'll want to put these access checks up the chain
 
+		if (!req.session) {
+			res.status(200).json({
+				error   : true,
+				message : 'You do not appear to be logged in with a current active session',
+			});
+		}
+
 		const judgeOK = await checkJudgePerson(req, judgeId);
 
 		if (!judgeOK) {
 			res.status(200).json({
 				error: true,
-				message: 'You do not have permissions to change that ballot',
+				message: 'You do not have permission to change that ballot',
 			});
 		} else {
 

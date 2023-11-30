@@ -72,12 +72,12 @@ db.autoqueue.belongsTo(db.round  , { as: 'Round'     , foreignKey: 'round' });
 db.autoqueue.belongsTo(db.event  , { as: 'Event'     , foreignKey: 'event' });
 db.autoqueue.belongsTo(db.person , { as: 'CreatedBy' , foreignKey: 'created_by' });
 
-db.changeLog.belongsTo(db.person   , { as: 'Person'     , foreignKey: 'person' });
-db.changeLog.belongsTo(db.tourn    , { as: 'Tourn'      , foreignKey: 'tourn' });
-db.changeLog.belongsTo(db.event    , { as: 'Event'      , foreignKey: 'event' });
-db.changeLog.belongsTo(db.school   , { as: 'School'     , foreignKey: 'school' });
-db.changeLog.belongsTo(db.entry    , { as: 'Entry'      , foreignKey: 'entry' });
-db.changeLog.belongsTo(db.judge    , { as: 'Judge'      , foreignKey: 'judge' });
+db.changeLog.belongsTo(db.person , { as: 'Person' , foreignKey: 'person' });
+db.changeLog.belongsTo(db.tourn  , { as: 'Tourn'  , foreignKey: 'tourn' });
+db.changeLog.belongsTo(db.event  , { as: 'Event'  , foreignKey: 'event' });
+db.changeLog.belongsTo(db.school , { as: 'School' , foreignKey: 'school' });
+db.changeLog.belongsTo(db.entry  , { as: 'Entry'  , foreignKey: 'entry' });
+db.changeLog.belongsTo(db.judge  , { as: 'Judge'  , foreignKey: 'judge' });
 
 db.changeLog.belongsTo(db.section , { as: 'Section'     , foreignKey: 'panel' });
 db.changeLog.belongsTo(db.panel   , { as: 'Panel'       , foreignKey: 'panel' });
@@ -112,6 +112,10 @@ db.circuit.belongsToMany(db.chapter, { as: 'Chapters', foreignKey: 'circuit', th
 
 db.circuit.hasMany(db.file       , { as: 'Files'       , foreignKey: 'circuit' });
 db.circuit.hasMany(db.permission , { as: 'Permissions' , foreignKey: 'circuit' });
+
+db.contact.belongsTo(db.school , { as: 'School'  , foreignKey: 'school'});
+db.contact.belongsTo(db.person , { as: 'Person'  , foreignKey: 'person'});
+db.contact.belongsTo(db.person , { as: 'Creator' , foreignKey: 'created_by'});
 
 db.site.belongsTo(db.person,  { as: 'Host',    foreignKey: 'host' });
 db.site.belongsTo(db.circuit, { as: 'Circuit', foreignKey: 'circuit' });
@@ -326,6 +330,7 @@ db.school.belongsTo(db.tourn    , { as: 'Tourn'   , foreignKey: 'tourn' });
 db.school.belongsTo(db.chapter  , { as: 'Chapter' , foreignKey: 'chapter' });
 db.school.belongsTo(db.region   , { as: 'Region'  , foreignKey: 'region' });
 db.school.belongsTo(db.district , { as: 'District', foreignKey: 'district' });
+db.school.belongsToMany(db.person, { as: 'Contacts', foreignKey: 'school', through: 'contact'});
 
 db.fine.belongsTo(db.person  , { as: 'LeviedBy'  , foreignKey: 'levied_by' });
 db.fine.belongsTo(db.person  , { as: 'DeletedBy' , foreignKey: 'deleted_by' });

@@ -218,6 +218,10 @@ export const tournAuth = async function(req) {
 
 export const checkJudgePerson = async (req, judgeId) => {
 
+	if (!req.session) {
+		return false;
+	}
+
 	if (req.session.site_admin) {
 		return true;
 	}
