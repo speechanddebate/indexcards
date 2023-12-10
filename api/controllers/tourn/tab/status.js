@@ -1072,6 +1072,10 @@ export const eventDashboard = {
 
 	GET: async (req, res) => {
 
+		if (!req.params.tourn_id) {
+			return res.status(200).json({ error: true, message: 'No tournament ID was sent'});
+		}
+
 		const db = req.db;
 		const eventQuery = `
 			select
@@ -1195,25 +1199,28 @@ export const eventDashboard = {
 				};
 			}
 
-			if (result.audit) {
+			if (status[result.roundId].flights?.[result.flight]) {
 
-				// Is the ballot done?
-				status[result.roundId].flights[result.flight].done++;
-				status[result.roundId].started = true;
+				if (result.audit) {
 
-			} else if (status[result.roundId]?.flights?.[result.flight]) {
-
-				status[result.roundId].undone = true;
-
-				if (result.score_id) {
-					// Does the ballot have scores?
-					status[result.roundId].flights[result.flight].half++;
+					// Is the ballot done?
+					status[result.roundId].flights[result.flight].done++;
 					status[result.roundId].started = true;
-				} else if (result.judge_started) {
-					status[result.roundId].flights[result.flight].started++;
-					status[result.roundId].started = true;
+
 				} else {
-					status[result.roundId].flights[result.flight].nada++;
+
+					status[result.roundId].undone = true;
+
+					if (result.score_id) {
+						// Does the ballot have scores?
+						status[result.roundId].flights[result.flight].half++;
+						status[result.roundId].started = true;
+					} else if (result.judge_started) {
+						status[result.roundId].flights[result.flight].started++;
+						status[result.roundId].started = true;
+					} else {
+						status[result.roundId].flights[result.flight].nada++;
+					}
 				}
 			}
 		}
@@ -1228,6 +1235,39 @@ export const eventDashboard = {
 		return res.status(200).json(status);
 	},
 };
+
+eventDashboard.GET.apiDoc = {
+	summary: 'Event by event status for the tournament dashboard',
+	operationId: 'tournStatus',
+	parameters: [
+		{
+			in		  : 'path',
+			name		: 'tourn_id',
+			description : 'Tournament ID',
+			required	: false,
+			schema	  : {
+				type	: 'integer',
+				minimum : 1,
+			},
+		},
+	],
+	responses: {
+		200: {
+			description: 'Event Current Status Data',
+			content: {
+				'*/*': {
+					schema: {
+						type: 'object',
+						items: { $ref: '#/components/schemas/Event' },
+					},
+				},
+			},
+		},
+		default: { $ref: '#/components/responses/ErrorResponse' },
+	},
+	tags: ['tourn/tab'],
+};
+
 
 attendance.GET.apiDoc = {
 	summary: 'Room attedance and start status of a round or timeslot',
