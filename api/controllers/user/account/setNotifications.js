@@ -86,6 +86,34 @@ export const disablePushNotifications = {
 			message : 'You are unsubscribed to push notifications.  SMS texting is re-enabled if you had it set up before',
 		});
 	},
+
+	DELETE: async (req, res) => {
+
+		const db = req.db;
+
+		const session = req.session;
+		const push_notify = JSON.parse(req.session.push_notify);
+
+		if (req.session?.id) {
+			await db.session.update({ push_notify: null }, {
+				where: {
+					id: req.session.id,
+				},
+			});
+
+			res.status(200).json({
+				error   : false,
+				message : `Invalid subscription ${push_notify.id} removed from session ${req.session.id}`,
+			});
+
+		} else {
+
+			res.status(200).json({
+				error   : true,
+				message : `No current session found`
+			});
+		}
+	},
 };
 
 export default enablePushNotifications;
