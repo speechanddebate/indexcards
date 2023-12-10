@@ -103,7 +103,7 @@ export const disablePushNotifications = {
 
 			res.status(200).json({
 				error   : false,
-				message : `Invalid subscription ${push_notify.id} removed from session ${req.session.id}`,
+				message : `Invalid subscription ${push_notify?.id} removed from session ${req.session.id}`,
 			});
 
 		} else {
