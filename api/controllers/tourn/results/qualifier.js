@@ -257,6 +257,7 @@ const saveEventResult = async (db, eventId) => {
 				for (const entry of entryByRank[rule.placement]) {
 					entryPoints[entry] = rule.points;
 					entryPlace[entry] = `Placed ${rule.placement}`;
+					entryPlace[entry] = entryPlace[entry].substring(0, 15);
 				}
 			}
 
@@ -271,6 +272,7 @@ const saveEventResult = async (db, eventId) => {
 						if (entry && !entryPoints[entry]) {
 							entryPoints[entry] = rule.points;
 							entryPlace[entry] = `In ${targetRound.label ? targetRound.label : `round ${targetRound.name}`} `;
+							entryPlace[entry] = entryPlace[entry].substring(0, 15);
 						}
 					}
 				}
@@ -310,6 +312,7 @@ const saveEventResult = async (db, eventId) => {
 						result_set : newResultSet.id,
 						rank       : entryPoints[entry],
 						place      : entryPlace[entry],
+						entry,
 						student
 					});
 				}
