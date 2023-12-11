@@ -91,10 +91,10 @@ export const disablePushNotifications = {
 
 		const db = req.db;
 
-		const session = req.session;
-		const push_notify = JSON.parse(req.session.push_notify);
-
 		if (req.session?.id) {
+
+			const push_notify = JSON.parse(req.session.push_notify);
+
 			await db.session.update({ push_notify: null }, {
 				where: {
 					id: req.session.id,
