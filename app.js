@@ -73,11 +73,13 @@ app.use((req, res, next) => {
 //
 const corsOptions = {
 	origin : [
-		'http://old.dev.tabroom.com',
-		'http://old.staging.tabroom.com',
 		'https://www.tabroom.com',
+		'https://static.tabroom.com',
+		'https://old.staging.tabroom.com',
+		'https://new.staging.tabroom.com',
+		'https://tabweb1',
 	],
-	optionsSuccessStatus : 200,
+	optionsSuccessStatus : 204,
 	credentials          : true,
 };
 
