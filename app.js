@@ -75,6 +75,8 @@ const corsOptions = {
 	origin : [
 		'https://www.tabroom.com',
 		'https://static.tabroom.com',
+		'https://old.dev.tabroom.com',
+		'https://new.dev.tabroom.com',
 		'https://old.staging.tabroom.com',
 		'https://new.staging.tabroom.com',
 		'https://tabweb1',
