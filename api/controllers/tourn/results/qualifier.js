@@ -389,7 +389,6 @@ const saveEventResult = async (db, eventId) => {
 				});
 			});
 
-
 		} else {
 
 			// Save the award points for entries
