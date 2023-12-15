@@ -182,11 +182,20 @@ const saveEventResult = async (db, eventId) => {
 			where result_set.event = :eventId
 				and result_set.label = 'Final Places'
 				and result_set.id = result.result_set
+				and exists (
+					select cc.id
+						from chapter_circuit cc, school, entry
+					where entry.id = result.entry
+						and entry.school = school.id
+						and school.chapter = cc.chapter
+						and cc.circuit = :circuitId
+				)
+			group by result.entry
 			order by result.rank
 		`;
 
 		const finalResults = await db.sequelize.query(finalResultQuery, {
-			replacements: { eventId },
+			replacements: { eventId, circuitId: event.circuit },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -212,11 +221,18 @@ const saveEventResult = async (db, eventId) => {
 				and ballot.panel = panel.id
 				and panel.round = round.id
 				and round.event = :eventId
+				and exists (
+					select cc.id
+						from chapter_circuit cc, school
+					where school.id = entry.school
+						and school.chapter = cc.chapter
+						and cc.circuit = :circuitId
+				)
 			group by entry.id
 		`;
 
 		const lastRound = await db.sequelize.query(lastRoundQuery, {
-			replacements: { eventId },
+			replacements: { eventId, circuitId: event.circuit },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -253,7 +269,7 @@ const saveEventResult = async (db, eventId) => {
 			const rule = qualRuleSet.rules[key];
 
 			// Award points for the final result placements and save
-			if (rule.placement > 0) {
+			if (rule.placement > 0 && entryByRank[rule.placement]) {
 				for (const entry of entryByRank[rule.placement]) {
 					entryPoints[entry] = rule.points;
 					entryPlace[entry] = `Placed ${rule.placement}`;
@@ -284,11 +300,15 @@ const saveEventResult = async (db, eventId) => {
 			const entryStudentsQuery = `
 				select
 					entry.id entry, student.id student
-				from entry, entry_student es, student, score
+				from entry, entry_student es, student, score, ballot
 				where entry.event = :eventId
 					and entry.id = es.entry
 					and es.student = student.id
 					and student.id = score.student
+					and score.tag = 'point'
+					and score.ballot = ballot.id
+					and ballot.entry = entry.id
+				group by student.id
 			`;
 
 			const entryStudent = await db.sequelize.query(entryStudentsQuery, {
@@ -296,26 +316,77 @@ const saveEventResult = async (db, eventId) => {
 				type: db.sequelize.QueryTypes.SELECT,
 			});
 
+			const thresholdUnmet = {};
+
+			if (eventRules.min_percent) {
+				const prelimsQuery = `
+					select count (distinct round.id) as prelimCount
+						from round
+					where round.event = :eventId
+						and round.type NOT IN ('elim', 'final', 'runoff')`;
+
+				const numPrelims = await db.sequelize.query(prelimsQuery, {
+					replacements: { eventId },
+					type: db.sequelize.QueryTypes.SELECT,
+				});
+
+				const roundCount = parseInt(numPrelims[0].prelimCount);
+				eventRules.min_percent = parseInt(eventRules.min_percent);
+				const threshold = Math.floor(roundCount * parseFloat((eventRules.min_percent / 100)));
+
+				const spokeCountQuery = `
+					select
+						student.id student, count(distinct panel.id) speechCount
+					from student, entry_student es, entry, score, ballot, panel, round
+					where entry.event = :eventId
+						and entry.id = ballot.entry
+						and entry.id = es.entry
+						and es.student = student.id
+						and student.id = score.student
+						and score.tag = 'point'
+						and score.ballot = ballot.id
+						and ballot.panel = panel.id
+						and panel.round = round.id
+						and round.type NOT IN ('elim', 'final', 'runoff')
+					group by student.id
+				`;
+
+				const spokeCounts = await db.sequelize.query(spokeCountQuery, {
+					replacements: { eventId },
+					type: db.sequelize.QueryTypes.SELECT,
+				});
+
+				for (const spoke of spokeCounts) {
+					if (spoke.speechCount < threshold) {
+						thresholdUnmet[spoke.student] = true;
+					}
+				}
+			}
+
 			const entryStudents = {};
 
 			for (const es of entryStudent) {
-				if (!entryStudents[es.entry]) {
-					entryStudents[es.entry] = [];
+
+				if (!thresholdUnmet[es.student]) {
+					if (!entryStudents[es.entry]) {
+						entryStudents[es.entry] = [];
+					}
+
+					entryStudents[es.entry].push(es.student);
 				}
-				entryStudents[es.entry].push(es.student);
 			}
 
 			// Save the award points for entries
 			Object.keys(entryPoints).forEach( async (entry) => {
-				for (const student of entryStudents[entry]) {
+				entryStudents[entry].forEach( async (student) => {
 					await db.result.create({
 						result_set : newResultSet.id,
 						rank       : entryPoints[entry],
 						place      : entryPlace[entry],
+						student,
 						entry,
-						student
 					});
-				}
+				});
 			});
 
 
