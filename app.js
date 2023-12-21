@@ -75,10 +75,10 @@ const corsOptions = {
 	origin : [
 		'https://www.tabroom.com',
 		'https://static.tabroom.com',
-		'https://old.dev.tabroom.com',
-		'https://new.dev.tabroom.com',
-		'https://old.staging.tabroom.com',
-		'https://new.staging.tabroom.com',
+		'http://old.dev.tabroom.com',
+		'http://new.dev.tabroom.com',
+		'http://old.staging.tabroom.com',
+		'http://new.staging.tabroom.com',
 		'https://tabweb1',
 	],
 	optionsSuccessStatus : 204,
@@ -145,7 +145,11 @@ app.all('/v1/tourn/:tourn_id/*', async (req, res, next) => {
 	} else if (req.body?.share_key) {
 		next();
 	} else {
-		return res.status(400).json({ message: 'You are not logged into Tabroom' });
+		console.log(req.body);
+		return res.status(400).json({
+			error: true,
+			message: 'You are not logged into Tabroom!  Gadzooks!'
+		});
 	}
 
 });

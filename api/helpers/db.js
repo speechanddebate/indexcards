@@ -163,6 +163,7 @@ db.chapterJudge.belongsTo(db.chapter, { as: 'Chapter',       foreignKey: 'chapte
 db.chapterJudge.belongsTo(db.person,  { as: 'Person',        foreignKey: 'person' });
 db.chapterJudge.belongsTo(db.person,  { as: 'PersonRequest', foreignKey: 'person_request' });
 
+db.district.belongsTo(db.region, { as: 'Region', foreignKey: 'region' });
 db.district.hasMany(db.chapter,    { as: 'Chapters',    foreignKey: 'district' });
 db.district.hasMany(db.permission, { as: 'Permissions', foreignKey: 'district' });
 
