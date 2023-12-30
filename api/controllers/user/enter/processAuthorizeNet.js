@@ -113,9 +113,9 @@ export const processAuthorizeNet = {
 		const ctrl = new APIControllers.CreateTransactionController(createRequest.getJSON());
 
 		// Defaults to sandbox
-		// if (process.env.NODE_ENV === 'production') {
-		// 	ctrl.setEnvironment(authorizenet.Constants.endpoint.production);
-		// }
+		if (process.env.NODE_ENV === 'production') {
+			ctrl.setEnvironment(authorizenet.Constants.endpoint.production);
+		}
 
 		try {
 			const result = await new Promise((resolve, reject) => {
