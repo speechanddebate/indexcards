@@ -9,7 +9,7 @@ export const systemStatus = {
 
 export const barfPlease = {
 	GET: async (req, res) => {
-		throw new Error('OMG we are not happy');
+		throw new Error('OMG, we are not happy, because an error has happened!');
 	},
 };
 
