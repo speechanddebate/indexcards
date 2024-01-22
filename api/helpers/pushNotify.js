@@ -87,17 +87,25 @@ export const pushNotify = async (inputData) => {
 			target_channel  : 'push',
 		};
 
-		axios.post(
-			'https://onesignal.com/api/v1/notifications',
-			notification,
-			{
-				headers : {
-					Authorization  : `Basic ${config.ONE_SIGNAL.appKey}`,
-					'Content-Type' : 'application/json',
-					Accept         : 'application/json',
+		try {
+			axios.post(
+				'https://onesignal.com/api/v1/notifications',
+				notification,
+				{
+					headers : {
+						Authorization  : `Basic ${config.ONE_SIGNAL.appKey}`,
+						'Content-Type' : 'application/json',
+						Accept         : 'application/json',
+					},
 				},
-			},
-		);
+			);
+		} catch (err) {
+			return {
+				error   : true,
+				message : `Push notification sent to ${targetIds ? targetIds.length : 0} recipients produced error ${err?.errno} ${err?.cause}`,
+				count   : targetIds.length,
+			};
+		}
 
 		return {
 			error   : false,
