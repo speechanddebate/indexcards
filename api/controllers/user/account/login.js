@@ -23,7 +23,115 @@ const login = {
 			return res.status(400).json({ error: 'Incorrect password' });
 		}
 
-		return res.status(200).json({ person_id: person.id, name: `${person.first} ${person.last}` });
+		// Check account reputation - default to untrusted
+		const response = {
+			person_id: person.id,
+			name: `${person.first} ${person.last}`,
+			trusted: false,
+		};
+
+		// Check if the account is banned, bail early if so
+		const isBannedQuery = await db.sequelize.query(`
+			SELECT COUNT(*) AS 'count'
+			FROM person_setting PS
+			WHERE PS.person = ?
+			AND PS.tag = 'banned'
+			AND PS.value = 1
+		`, { replacements: [req.query.person_id] });
+
+		if (!isBannedQuery
+			|| isBannedQuery.length === 0
+			|| isBannedQuery[0].length === 0
+			|| isBannedQuery[0][0].count > 0
+		) {
+			return res.status(200).json(response);
+		}
+
+		// Auto fail accounts who haven't logged in before 3 days ago
+		const isNewQuery = await db.sequelize.query(`
+			SELECT
+				CASE WHEN DATEDIFF(NOW(), S.created_at) < 3 THEN 1 ELSE 0 END AS 'is_new'
+			FROM session S
+			WHERE S.person = ?
+			ORDER BY S.created_at ASC
+			LIMIT 1
+		`, { replacements: [req.query.person_id] });
+
+		if (!isNewQuery
+			|| isNewQuery.length === 0
+			|| isNewQuery[0].length === 0
+			|| isNewQuery[0][0].is_new > 0
+		) {
+			return res.status(200).json(response);
+		}
+
+		// On a student roster for a school with at least one tournament entry at a real tourn
+		const onStudentRoster = await db.sequelize.query(`
+			SELECT COUNT(*) AS 'count'
+			FROM student S
+			INNER JOIN chapter C ON C.id = S.chapter
+			INNER JOIN school SC ON SC.chapter = C.id
+			INNER JOIN tourn T ON T.id = SC.tourn
+			INNER JOIN result_set RS ON RS.tourn = T.id
+			WHERE
+				S.person = ?
+				AND T.hidden = 0
+			GROUP BY S.person
+		`, { replacements: [req.query.person_id] });
+
+		if (onStudentRoster.length > 0
+			&& onStudentRoster[0].length > 0
+			&& onStudentRoster[0][0].count > 0
+		) {
+			response.trusted = true;
+			return res.status(200).json(response);
+		}
+
+		// On a judge roster for a school with at least one tournament entry at a real tourn
+		const onJudgeRoster = await db.sequelize.query(`
+			SELECT COUNT(*) AS 'count'
+			FROM chapter_judge CJ
+			INNER JOIN chapter C ON C.id = CJ.chapter
+			INNER JOIN school SC ON SC.chapter = C.id
+			INNER JOIN tourn T ON T.id = SC.tourn
+			INNER JOIN result_set RS ON RS.tourn = T.id
+			WHERE
+				CJ.person = ?
+				AND T.hidden = 0
+			GROUP BY CJ.person
+		`, { replacements: [req.query.person_id] });
+
+		if (onJudgeRoster.length > 0
+			&& onJudgeRoster[0].length > 0
+			&& onJudgeRoster[0][0].count > 0
+		) {
+			response.trusted = true;
+			return res.status(200).json(response);
+		}
+
+		// Is a coach for a school with at least one tournament entry at a real tourn
+		const isCoach = await db.sequelize.query(`
+			SELECT COUNT(*) AS 'count'
+			FROM permission P
+			INNER JOIN chapter C ON C.id = P.chapter
+			INNER JOIN school SC ON SC.chapter = C.id
+			INNER JOIN tourn T ON T.id = SC.tourn
+			INNER JOIN result_set RS ON RS.tourn = T.id
+			WHERE P.person = ?
+				AND P.tag = 'chapter'
+				AND T.hidden = 0
+			GROUP BY P.person
+		`, { replacements: [req.query.person_id] });
+
+		if (isCoach.length > 0
+			&& isCoach[0].length > 0
+			&& isCoach[0][0].count > 0
+		) {
+			response.trusted = true;
+			return res.status(200).json(response);
+		}
+
+		return res.status(200).json(response);
 	},
 };
 
