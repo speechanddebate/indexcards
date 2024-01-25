@@ -10,6 +10,8 @@ describe.skip('Authorize.net', () => {
 			tourn_name: 'Share Test',
 			school: 13811,
 			school_name: 'Hardy Test',
+			person_first: 'Test',
+			person_last: 'Test',
 			customerInformation: {
 				firstName: 'Test',
 				lastName: 'User',

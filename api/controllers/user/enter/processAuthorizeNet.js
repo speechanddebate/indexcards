@@ -24,7 +24,9 @@ export const processAuthorizeNet = {
 			return res.status(500).json({ message: 'Missing Authorize.net credentials for this tournament' });
 		}
 
-		const payerName = `${orderData.customerInformation?.firstName} ${orderData.customerInformation?.lastName}`;
+		const firstName = orderData.customerInformation?.firstName || orderData.person_first;
+		const lastName = orderData.customerInformation?.lastName || orderData.person_last;
+		const payerName = `${firstName} ${lastName}`;
 
 		const dataDescriptor = orderData.opaqueData?.dataDescriptor;
 		const dataValue = orderData.opaqueData?.dataValue;
