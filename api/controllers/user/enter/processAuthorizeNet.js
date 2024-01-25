@@ -35,9 +35,13 @@ export const processAuthorizeNet = {
 		// Set default transaction fees
 		if (typeof ccFeePercent === 'undefined') {
 			ccFeePercent = 0.04;
+		} else {
+			ccFeePercent = parseFloat(ccFeePercent);
 		}
 		if (typeof achFeePercent === 'undefined') {
 			achFeePercent = 0.01;
+		} else {
+			achFeePercent = parseFloat(achFeePercent);
 		}
 
 		if (!apiLogin || !transactionKey) {
