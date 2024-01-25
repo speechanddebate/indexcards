@@ -37,7 +37,7 @@ const login = {
 			WHERE PS.person = ?
 			AND PS.tag = 'banned'
 			AND PS.value = 1
-		`, { replacements: [req.query.person_id] });
+		`, { replacements: [person.id] });
 
 		if (!isBannedQuery
 			|| isBannedQuery.length === 0
@@ -55,7 +55,7 @@ const login = {
 			WHERE S.person = ?
 			ORDER BY S.created_at ASC
 			LIMIT 1
-		`, { replacements: [req.query.person_id] });
+		`, { replacements: [person.id] });
 
 		if (!isNewQuery
 			|| isNewQuery.length === 0
@@ -77,7 +77,7 @@ const login = {
 				S.person = ?
 				AND T.hidden = 0
 			GROUP BY S.person
-		`, { replacements: [req.query.person_id] });
+		`, { replacements: [person.id] });
 
 		if (onStudentRoster.length > 0
 			&& onStudentRoster[0].length > 0
@@ -99,7 +99,7 @@ const login = {
 				CJ.person = ?
 				AND T.hidden = 0
 			GROUP BY CJ.person
-		`, { replacements: [req.query.person_id] });
+		`, { replacements: [person.id] });
 
 		if (onJudgeRoster.length > 0
 			&& onJudgeRoster[0].length > 0
@@ -121,7 +121,7 @@ const login = {
 				AND P.tag = 'chapter'
 				AND T.hidden = 0
 			GROUP BY P.person
-		`, { replacements: [req.query.person_id] });
+		`, { replacements: [person.id] });
 
 		if (isCoach.length > 0
 			&& isCoach[0].length > 0
