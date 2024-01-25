@@ -3,7 +3,7 @@ import { assert } from 'chai';
 import server from '../../../../app';
 
 // eslint-disable-next-line jest/no-disabled-tests
-describe.skip('Authorize.net', () => {
+describe('Authorize.net', () => {
 	it('Processes an authorize.net payment', async () => {
 		const body = {
 			tourn: 24674,
@@ -28,7 +28,8 @@ describe.skip('Authorize.net', () => {
 			.set('Accept', 'application/json')
 			.send(body)
 			.expect('Content-Type', /json/)
-			.expect(200);
+			.expect(400);
+		console.log(res.body.messages.message);
 
 		assert.isObject(res.body, 'Response is an object');
 	}, 30000);

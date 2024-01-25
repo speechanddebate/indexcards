@@ -33,15 +33,15 @@ export const processAuthorizeNet = {
 		});
 
 		// Set default transaction fees
-		if (typeof ccFeePercent === 'undefined') {
+		if (typeof ccFeePercent === 'undefined' || typeof ccFeePercent.dataValues.value === 'undefined') {
 			ccFeePercent = 0.04;
 		} else {
-			ccFeePercent = parseFloat(ccFeePercent);
+			ccFeePercent = parseFloat(ccFeePercent.dataValues.value);
 		}
-		if (typeof achFeePercent === 'undefined') {
+		if (typeof achFeePercent === 'undefined' || typeof achFeePercent.dataValues.value === 'undefined') {
 			achFeePercent = 0.01;
 		} else {
-			achFeePercent = parseFloat(achFeePercent);
+			achFeePercent = parseFloat(achFeePercent.dataValues.value);
 		}
 
 		if (!apiLogin || !transactionKey) {
