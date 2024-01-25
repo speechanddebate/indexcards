@@ -38,7 +38,7 @@ const login = {
 				AND PS.tag = 'banned'
 				AND PS.value = 1
 		`, {
-			replacements: {personId: person.id},
+			replacements: { personId: person.id },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
