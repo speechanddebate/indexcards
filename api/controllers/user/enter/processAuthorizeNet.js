@@ -33,15 +33,15 @@ export const processAuthorizeNet = {
 		});
 
 		// Set default transaction fees
-		if (typeof ccFeePercent === 'undefined' || typeof ccFeePercent.dataValues.value === 'undefined') {
+		if (typeof ccFeePercent === 'undefined' || typeof ccFeePercent.dataValues?.value === 'undefined') {
 			ccFeePercent = 0.04;
 		} else {
-			ccFeePercent = parseFloat(ccFeePercent.dataValues.value);
+			ccFeePercent = parseFloat(ccFeePercent.dataValues?.value);
 		}
-		if (typeof achFeePercent === 'undefined' || typeof achFeePercent.dataValues.value === 'undefined') {
+		if (typeof achFeePercent === 'undefined' || typeof achFeePercent.dataValues?.value === 'undefined') {
 			achFeePercent = 0.01;
 		} else {
-			achFeePercent = parseFloat(achFeePercent.dataValues.value);
+			achFeePercent = parseFloat(achFeePercent.dataValues?.value);
 		}
 
 		if (!apiLogin || !transactionKey) {
@@ -84,8 +84,8 @@ export const processAuthorizeNet = {
 		const APIControllers = authorizenet.APIControllers;
 
 		const merchantAuthenticationType = new APIContracts.MerchantAuthenticationType();
-		merchantAuthenticationType.setName(apiLogin.dataValues.value);
-		merchantAuthenticationType.setTransactionKey(transactionKey.dataValues.value);
+		merchantAuthenticationType.setName(apiLogin.dataValues?.value);
+		merchantAuthenticationType.setTransactionKey(transactionKey.dataValues?.value);
 
 		const opaqueData = new APIContracts.OpaqueDataType();
 		opaqueData.setDataDescriptor(dataDescriptor);
