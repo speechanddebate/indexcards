@@ -19,6 +19,26 @@ export const processAuthorizeNet = {
 				tag  : 'authorizenet_transaction_key',
 			},
 		});
+		let ccFeePercent = await db.tournSetting.findOne({
+			where : {
+				tourn: orderData.tourn,
+				tag  : 'authorizenet_cc_fee',
+			},
+		});
+		let achFeePercent = await db.tournSetting.findOne({
+			where : {
+				tourn: orderData.tourn,
+				tag  : 'authorizenet_ach_fee',
+			},
+		});
+
+		// Set default transaction fees
+		if (typeof ccFeePercent === 'undefined') {
+			ccFeePercent = 0.04;
+		}
+		if (typeof achFeePercent === 'undefined') {
+			achFeePercent = 0.01;
+		}
 
 		if (!apiLogin || !transactionKey) {
 			return res.status(500).json({ message: 'Missing Authorize.net credentials for this tournament' });
@@ -42,7 +62,17 @@ export const processAuthorizeNet = {
 			return res.status(500).json({ message: '$10 minimum for online payments' });
 		}
 
-		const processing = orderData.base * 0.04;
+		let processing = 0;
+		if (typeof orderData.encryptedCardData !== 'undefined') {
+			processing = orderData.base * ccFeePercent;
+		} else if (typeof orderData.encryptedBankData !== 'undefined') {
+			processing = orderData.base * achFeePercent;
+		} else {
+			// Default to the CC processing fee for now, if something is weird
+			// we don't want to undercharge
+			processing = orderData.base * ccFeePercent;
+		}
+
 		let total = processing + orderData.base;
 		total = total.toFixed(2);
 
@@ -148,18 +178,20 @@ export const processAuthorizeNet = {
 									levied_at : new Date(),
 									levied_by : orderData.person_id,
 								};
-
-								const feeObject = {
-									reason    : `Online Payment Processing Fee`,
-									amount    : parseFloat(processing),
-									school    : orderData.school,
-									payment   : false,
-									levied_at : new Date(),
-									levied_by : orderData.person_id,
-								};
-
 								await db.fine.create(paymentObject);
-								await db.fine.create(feeObject);
+
+								if (processing > 0) {
+									const feeObject = {
+										reason    : `Online Payment Processing Fee`,
+										amount    : parseFloat(processing),
+										school    : orderData.school,
+										payment   : false,
+										levied_at : new Date(),
+										levied_by : orderData.person_id,
+									};
+									await db.fine.create(feeObject);
+								}
+
 								resolve(response);
 							} else {
 								debugLogger.info('Failed Transaction.');

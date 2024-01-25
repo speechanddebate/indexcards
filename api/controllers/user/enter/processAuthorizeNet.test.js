@@ -20,6 +20,7 @@ describe.skip('Authorize.net', () => {
 				dataDescriptor: 'COMMON.ACCEPT.INAPP.PAYMENT',
 				dataValue: 'eyJjb2RlIjoiNTBfMl8wNjAwMDUzQTIxMjNDNDU1NTZDNzA1MTE0NkZCNUVBM0E4NTM3OUY2RDRDNzk4MTZBMjNENjUxMzg2M0Y0RjNERkM4RTY4Q0UxN0QwMTNFODU2N0FFRTA5MjMxQjcxMEEzM0QyNzRBIiwidG9rZW4iOiI5NzAwNTg3MTA4MDM2Njc5ODA0NjAxIiwidiI6IjEuMSJ9',
 			},
+			encryptedCardData: {},
 			base: 10,
 		};
 		const res = await request(server)
