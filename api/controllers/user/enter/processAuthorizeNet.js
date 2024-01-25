@@ -98,8 +98,8 @@ export const processAuthorizeNet = {
 		orderDetails.setDescription(`${orderData.tourn_name} Registration Fees for ${orderData.school_name}`);
 
 		const billTo = new APIContracts.CustomerAddressType();
-		billTo.setFirstName(orderData.customerInformation?.firstName);
-		billTo.setLastName(orderData.customerInformation?.lastName);
+		billTo.setFirstName(firstName);
+		billTo.setLastName(lastName);
 
 		const lineItemId1 = new APIContracts.LineItemType();
 		lineItemId1.setItemId('1');
