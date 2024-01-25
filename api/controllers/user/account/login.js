@@ -25,19 +25,22 @@ const login = {
 
 		// Check account reputation - default to untrusted
 		const response = {
-			person_id: person.id,
-			name: `${person.first} ${person.last}`,
-			trusted: false,
+			person_id : person.id,
+			name      : `${person.first} ${person.last}`,
+			trusted   : false,
 		};
 
 		// Check if the account is banned, bail early if so
 		const isBannedQuery = await db.sequelize.query(`
 			SELECT COUNT(*) AS 'count'
-			FROM person_setting PS
-			WHERE PS.person = ?
-			AND PS.tag = 'banned'
-			AND PS.value = 1
-		`, { replacements: [person.id] });
+				FROM person_setting PS
+			WHERE PS.person = :personId
+				AND PS.tag = 'banned'
+				AND PS.value = 1
+		`, {
+			replacements: {personId: person.id},
+			type: db.sequelize.QueryTypes.SELECT,
+		});
 
 		if (!isBannedQuery
 			|| isBannedQuery.length === 0
@@ -52,10 +55,12 @@ const login = {
 			SELECT
 				CASE WHEN DATEDIFF(NOW(), S.created_at) < 3 THEN 1 ELSE 0 END AS 'is_new'
 			FROM session S
-			WHERE S.person = ?
+			WHERE S.person = :personId
 			ORDER BY S.created_at ASC
 			LIMIT 1
-		`, { replacements: [person.id] });
+		`, { replacements: { personId: person.id },
+			type: db.sequelize.QueryTypes.SELECT,
+		});
 
 		if (!isNewQuery
 			|| isNewQuery.length === 0
@@ -74,10 +79,12 @@ const login = {
 			INNER JOIN tourn T ON T.id = SC.tourn
 			INNER JOIN result_set RS ON RS.tourn = T.id
 			WHERE
-				S.person = ?
+				S.person = :personId
 				AND T.hidden = 0
 			GROUP BY S.person
-		`, { replacements: [person.id] });
+		`, { replacements: { personId: person.id },
+			type: db.sequelize.QueryTypes.SELECT,
+		});
 
 		if (onStudentRoster.length > 0
 			&& onStudentRoster[0].length > 0
@@ -96,10 +103,12 @@ const login = {
 			INNER JOIN tourn T ON T.id = SC.tourn
 			INNER JOIN result_set RS ON RS.tourn = T.id
 			WHERE
-				CJ.person = ?
+				CJ.person = :personId
 				AND T.hidden = 0
 			GROUP BY CJ.person
-		`, { replacements: [person.id] });
+		`, { replacements: { personId: person.id },
+			type: db.sequelize.QueryTypes.SELECT,
+		});
 
 		if (onJudgeRoster.length > 0
 			&& onJudgeRoster[0].length > 0
@@ -117,11 +126,13 @@ const login = {
 			INNER JOIN school SC ON SC.chapter = C.id
 			INNER JOIN tourn T ON T.id = SC.tourn
 			INNER JOIN result_set RS ON RS.tourn = T.id
-			WHERE P.person = ?
+			WHERE P.person = :personId
 				AND P.tag = 'chapter'
 				AND T.hidden = 0
 			GROUP BY P.person
-		`, { replacements: [person.id] });
+		`, { replacements: { personId: person.id },
+			type: db.sequelize.QueryTypes.SELECT,
+		});
 
 		if (isCoach.length > 0
 			&& isCoach[0].length > 0
