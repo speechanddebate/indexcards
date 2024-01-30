@@ -1,3 +1,6 @@
+import { emailBlast } from '../../../helpers/mail';
+import { debugLogger } from '../../../helpers/logger';
+
 export const acceptPayPalPayment = {
 
 	POST: async (req, res) => {
@@ -27,6 +30,27 @@ export const acceptPayPalPayment = {
 
 		await db.fine.create(paymentObject);
 		await db.fine.create(payPalObject);
+
+		try {
+			let message = `Thank you for your payment on Tabroom.com for ${orderData.tourn_name}\n`;
+			message += `Tournament: ${orderData.tourn_name}\n`;
+			message += `School: ${orderData.school_name}\n`;
+			message += `Amount: ${parseFloat(orderData.purchase_units[0]?.amount.value)}\n`;
+			message += `Payment Date: ${new Date().toLocaleString()}\n`;
+			message += `If you have any questions, please contact the tournament, not Tabroom.com.\n`;
+
+			const messageData = {
+				email: payerEmail,
+				to: payerEmail,
+				text    : message,
+				subject : `Tabroom.com payment receipt for ${orderData.tourn_name}`,
+			};
+			await emailBlast(messageData);
+			debugLogger.info(`Email receipt sent to ${payerEmail}`);
+		} catch (err) {
+			debugLogger.info(`Failed to send email receipt to ${payerEmail}: ${err}`);
+		}
+
 		res.status(200);
 	},
 };

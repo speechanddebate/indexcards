@@ -1,5 +1,6 @@
 import authorizenet from 'authorizenet';
 import { debugLogger } from '../../../helpers/logger';
+import { emailBlast } from '../../../helpers/mail';
 
 export const processAuthorizeNet = {
 	POST: async (req, res) => {
@@ -194,6 +195,27 @@ export const processAuthorizeNet = {
 										levied_by : orderData.person_id,
 									};
 									await db.fine.create(feeObject);
+								}
+
+								try {
+									let message = `Thank you for your payment on Tabroom.com for ${orderData.tourn_name}\n`;
+									message += `Tournament: ${orderData.tourn_name}\n`;
+									message += `School: ${orderData.school_name}\n`;
+									message += `Amount: $${total}\n`;
+									message += `Payment ID: ${transactionId}\n`;
+									message += `Payment Date: ${new Date().toLocaleString()}\n`;
+									message += `If you have any questions, please contact the tournament, not Tabroom.com.\n`;
+
+									const messageData = {
+										email: orderData.person_email,
+										to: orderData.person_email,
+										text    : message,
+										subject : `Tabroom.com payment receipt for ${orderData.tourn_name}`,
+									};
+									await emailBlast(messageData);
+									debugLogger.info(`Email receipt sent to ${orderData.person_email}`);
+								} catch (err) {
+									debugLogger.info(`Failed to send email receipt to ${orderData.person_email}: ${err}`);
 								}
 
 								resolve(response);
