@@ -44,8 +44,7 @@ const login = {
 
 		if (!isBannedQuery
 			|| isBannedQuery.length === 0
-			|| isBannedQuery[0].length === 0
-			|| isBannedQuery[0][0].count > 0
+			|| isBannedQuery[0].count > 0
 		) {
 			return res.status(200).json(response);
 		}
@@ -64,8 +63,7 @@ const login = {
 
 		if (!isNewQuery
 			|| isNewQuery.length === 0
-			|| isNewQuery[0].length === 0
-			|| isNewQuery[0][0].is_new > 0
+			|| isNewQuery[0].is_new > 0
 		) {
 			return res.status(200).json(response);
 		}
@@ -87,8 +85,7 @@ const login = {
 		});
 
 		if (onStudentRoster.length > 0
-			&& onStudentRoster[0].length > 0
-			&& onStudentRoster[0][0].count > 0
+			&& onStudentRoster[0].count > 0
 		) {
 			response.trusted = true;
 			return res.status(200).json(response);
@@ -111,8 +108,7 @@ const login = {
 		});
 
 		if (onJudgeRoster.length > 0
-			&& onJudgeRoster[0].length > 0
-			&& onJudgeRoster[0][0].count > 0
+			&& onJudgeRoster[0].count > 0
 		) {
 			response.trusted = true;
 			return res.status(200).json(response);
@@ -135,8 +131,7 @@ const login = {
 		});
 
 		if (isCoach.length > 0
-			&& isCoach[0].length > 0
-			&& isCoach[0][0].count > 0
+			&& isCoach[0].count > 0
 		) {
 			response.trusted = true;
 			return res.status(200).json(response);
