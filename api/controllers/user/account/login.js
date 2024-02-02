@@ -49,25 +49,6 @@ const login = {
 			return res.status(200).json(response);
 		}
 
-		// Auto fail accounts who haven't logged in before 3 days ago
-		const isNewQuery = await db.sequelize.query(`
-			SELECT
-				CASE WHEN DATEDIFF(NOW(), S.created_at) < 3 THEN 1 ELSE 0 END AS 'is_new'
-			FROM session S
-			WHERE S.person = :personId
-			ORDER BY S.created_at ASC
-			LIMIT 1
-		`, { replacements: { personId: person.id },
-			type: db.sequelize.QueryTypes.SELECT,
-		});
-
-		if (!isNewQuery
-			|| isNewQuery.length === 0
-			|| isNewQuery[0].is_new > 0
-		) {
-			return res.status(200).json(response);
-		}
-
 		// On a student roster for a school with at least one tournament entry at a real tourn
 		const onStudentRoster = await db.sequelize.query(`
 			SELECT COUNT(*) AS 'count'
