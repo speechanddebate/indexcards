@@ -29,7 +29,7 @@ import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger';
 const app = express();
 
 // Startup log message
-debugLogger.info('Initializing API...');
+debugLogger.info('Initializing Indexcards API...');
 
 // Enable Helmet security
 app.use(helmet());
