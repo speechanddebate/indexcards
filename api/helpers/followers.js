@@ -1,6 +1,7 @@
 import db from './db';
+import { errorLogger } from './logger';
 
-export const getFollowers = async (replacements) => {
+export const getFollowers = async (replacements, options = { recipients: 'all' }) => {
 
 	let whereLimit = '';
 	let fields = '';
@@ -16,6 +17,9 @@ export const getFollowers = async (replacements) => {
 	} else if (replacements.timeslotId) {
 		whereLimit = ` where panel.round = round.id and round.timeslot = :timeslotId `;
 		fields = ',round';
+		if (replacements.eventIds) {
+			whereLimit += `  and round.event IN (:eventIds) `;
+		}
 	} else {
 		return { error: true, message: `No round ID to blast sent.` };
 	}
@@ -48,11 +52,18 @@ export const getFollowers = async (replacements) => {
 		`;
 	}
 
+	if (options.limits?.event ) {
+		queryLimits += `
+			and round.event IN (:eventIds)
+		`;
+		replacements.eventIds = Object.keys(options.limits.event);
+	}
+
 	const persons = [];
 
 	if (replacements.recipients !== 'judges') {
 		const entryIds = await db.sequelize.query(`
-			select person.id
+			select person.id, person.email, person.no_email
 				from (person, entry, entry_student es, student, ballot, panel ${fields})
 			${whereLimit}
 				and panel.id = ballot.panel
@@ -73,7 +84,7 @@ export const getFollowers = async (replacements) => {
 	if (replacements.recipients !== 'entries') {
 
 		const judgeIds = await db.sequelize.query(`
-			select person.id
+			select person.id, person.email, person.no_email
 				from (person, judge, ballot, panel ${fields})
 			${whereLimit}
 				and ballot.panel = panel.id
@@ -87,13 +98,11 @@ export const getFollowers = async (replacements) => {
 		persons.push(...judgeIds);
 	}
 
-	if (!replacements.no_followers) {
+	if (!replacements.noFollowers && !replacements.no_followers) {
 
 		if (replacements.recipients !== 'entries') {
-
-			console.log('maybe thats the thing about yelling');
 			const judgeFollowers = await db.sequelize.query(`
-				select person.id
+				select person.id, person.email, person.no_email
 					from (person, follower, ballot, panel ${fields})
 				${whereLimit}
 					and ballot.panel = panel.id
@@ -109,9 +118,8 @@ export const getFollowers = async (replacements) => {
 		}
 
 		if (replacements.recipients !== 'judges') {
-
 			const entryFollowers = await db.sequelize.query(`
-				select person.id
+				select person.id, person.email, person.no_email
 					from (person, follower, entry, ballot, panel ${fields})
 				${whereLimit}
 					and ballot.panel = panel.id
@@ -127,6 +135,53 @@ export const getFollowers = async (replacements) => {
 
 			persons.push(...entryFollowers);
 		}
+	}
+
+	if (replacements.sectionFollowers) {
+		const sectionFollowerIds = await db.sequelize.query(`
+			select
+				ps.id, ps.value_text followers
+			from panel_setting ps
+			where ps.panel = :panelId
+				and ps.tag = 'share_followers'
+		`, {
+			replacements,
+			type: db.Sequelize.QueryTypes.SELECT,
+		});
+
+		let followerIds = '';
+
+		if (sectionFollowerIds[0].followers) {
+			try {
+				followerIds = JSON.parse(sectionFollowerIds[0].followers).join(',');
+			} catch (err) {
+				errorLogger.info(err);
+			}
+		}
+
+		const sectionFollowers = await db.sequelize.query(`
+			select person.id, person.email, person.no_email
+				from (person)
+			where person.id IN (:followerIds)
+				and person.no_email = 0
+		`, {
+			replacements : { followerIds },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+
+		persons.push(...sectionFollowers);
+	}
+
+	if (replacements.returnEmails) {
+		const personIds = {};
+		const unique = [];
+		for (const person of persons) {
+			if (!personIds[person.id]) {
+				personIds[person.id] = true;
+				unique.push(person.email);
+			}
+		}
+		return unique;
 	}
 
 	const personIds = [];
@@ -188,6 +243,13 @@ export const getPairingFollowers = async (replacements, options = { recipients: 
 		queryLimits += `
 			and (ballot.audit = 0 OR ballot.audit IS NULL)
 		`;
+	}
+
+	if (options.limits?.event ) {
+		queryLimits += `
+			and round.event IN (:eventIds)
+		`;
+		replacements.eventIds = Object.keys(options.limits.event);
 	}
 
 	const blastBy = {

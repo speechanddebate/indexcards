@@ -8,7 +8,7 @@ import { testAdminSession } from '../../../../tests/testFixtures';
 
 describe('Person Rounds', () => {
 	it('Returns rounds for a person', async () => {
-		const hash = crypto.createHash('sha256').update(config.CASELIST_KEY).digest('hex');
+		const hash = crypto.createHash('sha256').update(config.CASELIST.KEY).digest('hex');
 		const res = await request(server)
 			.get(`/v1/caselist/rounds?person_id=17145&caselist_key=${hash}`)
 			.set('Accept', 'application/json')
@@ -23,7 +23,7 @@ describe('Person Rounds', () => {
 		await db.sequelize.query(`
 			INSERT INTO caselist (slug, eventcode, person) VALUES ('/test', 103, 17145)
         `);
-		const hash = crypto.createHash('sha256').update(config.CASELIST_KEY).digest('hex');
+		const hash = crypto.createHash('sha256').update(config.CASELIST.KEY).digest('hex');
 		const res = await request(server)
 			.get(`/v1/caselist/rounds?slug=/test&caselist_key=${hash}`)
 			.set('Accept', 'application/json')

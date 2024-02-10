@@ -24,7 +24,7 @@ export const postPayment = {
 			return res.status(400).json({ message: 'Invalid request sent: no invoice ID' });
 		}
 
-		const hashDigest = Base64.stringify(hmacSHA512(postRequest.invoice_id, config.NSDA_API_KEY));
+		const hashDigest = Base64.stringify(hmacSHA512(postRequest.invoice_id, config.NSDA.KEY));
 
 		if (hashDigest !== postRequest.hash_key) {
 			return res.status(400).json({ message: `Permission key invalid` });
@@ -50,9 +50,9 @@ export const postPayment = {
 
 		const now = new Date();
 
-		tournCart.tabroom   = postRequest.items[config.NSDA_PRODUCT_CODES.tabroom];
-		tournCart.nc        = postRequest.items[config.NSDA_PRODUCT_CODES.campus];
-		tournCart.nco       = postRequest.items[config.NSDA_PRODUCT_CODES.campus_observers];
+		tournCart.tabroom   = postRequest.items[config.NSDA.PRODUCT_CODES.tabroom];
+		tournCart.nc        = postRequest.items[config.NSDA.PRODUCT_CODES.campus];
+		tournCart.nco       = postRequest.items[config.NSDA.PRODUCT_CODES.campus_observers];
 		tournCart.paid      = 1;
 		tournCart.paid_at   = now;
 

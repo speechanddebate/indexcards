@@ -1,13 +1,7 @@
-import crypto from 'crypto';
-import config from '../../../../config/config';
 
 const getPersonChapters = {
 	GET: async (req, res) => {
 		const db = req.db;
-		const hash = crypto.createHash('sha256').update(config.CASELIST_KEY).digest('hex');
-		if (req.query.caselist_key !== hash) {
-			return res.status(401).json({ message: 'Invalid caselist key' });
-		}
 		const student = await db.sequelize.query(`
 			SELECT DISTINCT C.id, C.name, C.state
 			FROM chapter C

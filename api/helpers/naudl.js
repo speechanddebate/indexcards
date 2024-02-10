@@ -1,5 +1,5 @@
 import axios from 'axios';
-import config from '../../config/config';
+import config from '../../config/config.js';
 
 export const getSalesforceStudents = async (naudlChapter) => {
 	const authData = await authSalesforce();

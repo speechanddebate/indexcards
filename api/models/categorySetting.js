@@ -1,6 +1,5 @@
 const categorySetting = (sequelize, DataTypes) => {
 	return sequelize.define('categorySetting', {
-		tableName: 'category_setting',
 		tag: {
 			type: DataTypes.STRING(32),
 			allowNull: false,
@@ -17,6 +16,8 @@ const categorySetting = (sequelize, DataTypes) => {
 			type: DataTypes.DATE,
 			allowNull: true,
 		},
+	},{
+		tableName: 'category_setting',
 	});
 };
 
