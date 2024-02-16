@@ -91,7 +91,6 @@ export const getFollowers = async (replacements) => {
 
 		if (replacements.recipients !== 'entries') {
 
-			console.log('maybe thats the thing about yelling');
 			const judgeFollowers = await db.sequelize.query(`
 				select person.id
 					from (person, follower, ballot, panel ${fields})
@@ -389,16 +388,11 @@ export const getPairingFollowers = async (replacements, options = { recipients: 
 
 export const getJPoolJudges = async (replacements, options = { recipients: 'all' }) => {
 
-	const blastBy = {
-		entries  : {},
-		judges  : {},
-		schools : {},
-	};
+	const judges = {};
 
 	const judgePeopleQuery = `
 		select
-			judge.first, judge.last,
-			person.id, person.email, person.phone, person.provider, judge.id judge, judge.school school
+			person.id, judge.id judgeId, judge.first, judge.last
 		from (person, judge, jpool_judge jpj, jpool)
 		where jpool.id = :jpoolId
 			and jpool.id = jpj.jpool
@@ -412,33 +406,24 @@ export const getJPoolJudges = async (replacements, options = { recipients: 'all'
 		type: db.sequelize.QueryTypes.SELECT,
 	});
 
-	rawJudgePeople.forEach( (person) => {
-		if (!person.judge) {
+	for await (const person of rawJudgePeople) {
+		if (!person.judgeId) {
 			return;
 		}
 
-		if (!blastBy.judges[person.judge]) {
-			blastBy.judges[person.judge] = {
-				phone : [],
-				email : [],
-				web   : [],
-				name  : `${person.first} ${person.last}`,
+		if (!judges[person.judgeId]) {
+			judges[person.judgeId] = {
+				first      : person.first,
+				last       : person.last,
+				recipients : [person.id],
 			};
 		}
-
-		if (person.provider && person.phone) {
-			blastBy.judges[person.judge].phone.push(`${person.phone}@${person.provider}`);
-		}
-
-		blastBy.judges[person.judge].email.push(person.email);
-	});
+	}
 
 	if (!options.no_followers) {
-
 		const judgeFollowersQuery = `
 			select
-				judge.first, judge.last,
-				person.id, person.email, person.phone, person.provider, judge.id judge
+				person.id, judge.id judgeId, judge.first, judge.last
 			from (person, judge, jpool_judge jpj, jpool, follower)
 			where jpool.id = :jpoolId
 				and jpool.id        = jpj.jpool
@@ -453,37 +438,22 @@ export const getJPoolJudges = async (replacements, options = { recipients: 'all'
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
-		rawJudgeFollowers.forEach( (person) => {
-
-			if (!person.judge) {
+		for await (const person of rawJudgeFollowers) {
+			if (!person.judgeId) {
 				return;
 			}
-			if (!blastBy.judges[person.judge]) {
-				blastBy.judges[person.judge] = {
-					phone : [],
-					email : [],
-					name  : `${person.first} ${person.last}`,
-				};
+
+			if (!judges[person.judgeId]) {
+				judges[person.judgeId].first = person.first;
+				judges[person.judgeId].last = person.last;
+				judges[person.judgeId].recipients = [];
 			}
 
-			if (person.phone && person.provider) {
-				blastBy.judges[person.judge].phone.push(`${person.phone}@${person.provider}`);
-			}
-
-			blastBy.judges[person.judge].email.push(`${person.email}`);
-		});
+			judges[person.judgeId].recipients.push(person.id);
+		}
 	}
 
-	const blastAll = {
-		phone      : [],
-		email      : [],
-		only       : { ...blastBy },
-		recipients : options.recipients,
-		error      : false,
-	};
-
-	return blastAll;
-
+	return judges;
 };
 
 export const getTimeslotJudges = async (replacements, options = { recipients: 'all' }) => {

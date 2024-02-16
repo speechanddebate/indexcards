@@ -1,5 +1,4 @@
-import { getFollowers, getJPoolJudges, getTimeslotJudges } from '../../../../helpers/followers';
-import { emailBlast, phoneBlast } from '../../../../helpers/mail.js';
+import { getFollowers, getJPoolJudges } from '../../../../helpers/followers';
 import { sectionCheck, jpoolCheck, timeslotCheck, roundCheck } from '../../../../helpers/auth.js';
 import { errorLogger } from '../../../../helpers/logger';
 import notify from '../../../../helpers/pushNotify';
@@ -164,8 +163,6 @@ export const messageTimeslot = {
 	},
 };
 
-// These two still require conversion to the new interface with push notifications.
-
 export const messageJPool = {
 
 	POST: async (req, res) => {
@@ -186,37 +183,40 @@ export const messageJPool = {
 
 		const jpool = await req.db.summon(req.db.jpool, req.params.jpoolId);
 		const tourn = await req.db.summon(req.db.tourn, req.params.tournId);
+
+		if (poolJudges === undefined || poolJudges.length < 1) {
+			return res.status(200).json({
+				error   : true,
+				message : 'No recipients found for message',
+			});
+		}
+
 		let recipients = 0;
-		let errors = '';
 
-		Object.keys(poolJudges?.only?.judge).forEach( async (judgeId) => {
+		for await (const judgeId of Object.keys(poolJudges)) {
 
-			const judge = poolJudges.only.judge[judgeId];
-			const messageData = {
-				text    : '',
-				html    : '',
-				subject : `${judge.name} judge pool ${jpool.name}`,
-				...judge,
-			};
+			const judge = poolJudges[judgeId];
+
+			if (judge.recipients.length < 1) {
+				return;
+			}
+
+			let from = '';
 
 			if (tourn.webname) {
-				messageData.from = `${tourn.name} <${tourn.webname}@www.tabroom.com>`;
+				from = `${tourn.name} <${tourn.webname}@www.tabroom.com>`;
 			}
 
-			messageData.text = `\nJudge ${judge.name}\nPool ${jpool.name}\n${req.body.message}`;
-			messageData.html = `<p style='padding-top: 4px;'>Pool: ${jpool.name}</p>`;
-			messageData.html += `<p style='padding-top: 4px;'>Judge: ${judge.name}</p>`;
-			messageData.html += `<p style='padding-top: 4px;'>${req.body.message}</p>`;
+			const text = `\nJudge ${judge.name}\nPool ${jpool.name}\n${req.body.message}`;
+			const notifyResponse = await notify({
+				ids     : judge.recipients,
+				subject : `${judge.first} ${judge.last} : Judge Pool ${jpool.name}`,
+				text,
+				from,
+			});
 
-			try {
-				const emailResponse = await emailBlast(messageData);
-				const phoneResponse = await phoneBlast(messageData);
-				recipients += emailResponse ? emailResponse.count : 0;
-				recipients += phoneResponse ? phoneResponse.count : 0;
-			} catch (err) {
-				errors += ` ${err}`;
-			}
-		});
+			recipients += notifyResponse?.email?.count || 0;
+		}
 
 		const jpoolRoundQuery = `
 			select distinct round.id
@@ -240,18 +240,10 @@ export const messageJPool = {
 			});
 		});
 
-		if (errors) {
-			res.status(200).json({
-				error   : true,
-				message : `Message sent to ${recipients} recipients but with errors ${errors}`,
-			});
-
-		} else {
-			res.status(200).json({
-				error   : false,
-				message : `Message sent to ${recipients} recipients`,
-			});
-		}
+		return res.status(200).json({
+			error   : false,
+			message : `Message sent to ${recipients} recipients`,
+		});
 	},
 };
 
@@ -288,7 +280,7 @@ export const messageFree = {
 
 		const allJudgesQuery = `
 			select
-				judge.id, judge.first, judge.last
+				judge.id, judge.first, judge.last, judge.person
 			from judge, jpool_judge jpj, jpool_round jpr, round
 
 			where round.timeslot = :timeslotId
@@ -353,38 +345,73 @@ export const messageFree = {
 			delete allJudges[judging.id];
 		}
 
+		// Now get the followers
+		const allJudgeFollowersQuery = `
+			select
+				judge.id judgeId, follower.person
+			from judge, jpool_judge jpj, jpool_round jpr, round, follower, person
+			where round.timeslot    = :timeslotId
+				and round.site      = :siteId
+				and round.id        = jpr.round
+				and jpr.jpool       = jpj.jpool
+				and jpj.judge       = judge.id
+				and judge.active    = 1
+				and follower.judge  = judge.id
+				and follower.person = person.id
+				and person.no_email = 0
+		`;
+
+		const allRawFollowers = await req.db.sequelize.query(allJudgeFollowersQuery, {
+			replacements: { ...req.body },
+			type: req.db.sequelize.QueryTypes.SELECT,
+		});
+
+		for await (const follower of allRawFollowers) {
+			if (allJudges[follower.judgeId]) {
+				if (!allJudges[follower.judgeId].recipients) {
+					allJudges[follower.judgeId].recipients = [allJudges[follower.judgeId].person];
+				}
+				allJudges[follower.judgeId].recipients.push(follower.person);
+			}
+		}
+
 		// Send Individualized (NAME!) blasts to the judges who are neither
-		// active nor on standby. The name is included because otherwise judges
+		// judging nor on standby. The name is included because otherwise judges
 		// following other judges from their school will claim they were told
 		// they were free when nope, NOPE, NOOOOOOPE.
 
-		const judgeBlasts = await getTimeslotJudges({
-			timeslotId : req.body.timeslotId,
-			siteId     : req.body.siteId,
-		});
-
 		let recipients = 0;
-		let errors = '';
+		const timeslot = await req.db.summon(req.db.timeslot, req.params.timeslotId);
+		const tourn = await req.db.summon(req.db.tourn, req.params.tournId);
 
 		for await (const judgeId of Object.keys(allJudges)) {
 
 			const judge = allJudges[judgeId];
-			const messageData = { ...judgeBlasts.only.judge[judgeId] };
 
-			messageData.subject = `Judge ${judge.first} ${judge.last} Released`;
-			messageData.text = `\n\nJudge: ${judge.first} ${judge.last}\n`;
-			messageData.text += `${req.body.message}`;
-			messageData.html = `<p style='padding-top: 8px;'>JUDGE: ${judge.first} ${judge.last}</p>`;
-			messageData.html += `<p style='padding-top: 4px;'>${req.body.message}</p>`;
-
-			try {
-				const emailResponse = await emailBlast(messageData);
-				const phoneResponse = await phoneBlast(messageData);
-				recipients += emailResponse ? emailResponse.count : 0;
-				recipients += phoneResponse ? phoneResponse.count : 0;
-			} catch (err) {
-				errors += ` ${err}`;
+			if (!judge.recipients) {
+				judge.recipients = [judge.person];
 			}
+
+			if (judge.recipients.length < 1) {
+				return;
+			}
+
+			let from = '';
+
+			if (tourn.webname) {
+				from = `${tourn.name} <${tourn.webname}@www.tabroom.com>`;
+			}
+
+			const text = `\nJudge ${judge.first} ${judge.last} \nTimeslot ${timeslot.name}\n${req.body.message}`;
+
+			const notifyResponse = await notify({
+				ids     : judge.recipients,
+				subject : `${judge.first} ${judge.last} : Timeslot ${timeslot.name}`,
+				text,
+				from,
+			});
+
+			recipients += notifyResponse?.email?.count || 0;
 		}
 
 		const rounds = await req.db.round.findAll({
@@ -404,16 +431,9 @@ export const messageFree = {
 			});
 		});
 
-		if (errors) {
-			res.status(200).json({
-				error   : true,
-				message : `Message sent to ${recipients} recipients with errors ${errors}`,
-			});
-		} else {
-			res.status(200).json({
-				error   : false,
-				message : `Message sent to ${recipients} free recipients`,
-			});
-		}
+		return res.status(200).json({
+			error   : false,
+			message : `Message sent to ${recipients} free recipients`,
+		});
 	},
 };

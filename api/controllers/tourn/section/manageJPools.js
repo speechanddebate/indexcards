@@ -115,10 +115,10 @@ export const populateStandby = {
 				chosen[picked.id] = picked;
 
 				for (const judge of rawJudges) {
-					if (judge.school > 0 && judge.school === picked.school) {
+					if (judge.school === picked.school) {
 						judge.score += 5000;
 					}
-					if (judge.region > 0 && judge.region === picked.region) {
+					if (judge.region === picked.region) {
 						judge.score += 1000;
 					}
 				}
