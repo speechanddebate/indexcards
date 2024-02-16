@@ -1,4 +1,4 @@
-import { Sequelize, DataTypes } from 'sequelize';
+import { Sequelize } from 'sequelize';
 import config from '../../config/config.js';
 
 // Tabroom often does not use the ORM fully but instead just takes advantage of
@@ -16,9 +16,9 @@ const sequelize = new Sequelize(
 
 // Initialize the data objects.
 
-const db = {
+export const db = {
 	sequelize,
-	Sequelize
+	Sequelize,
 };
 
 export default db;

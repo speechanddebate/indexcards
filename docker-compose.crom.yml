@@ -1,0 +1,17 @@
+version: '3'
+services:
+  indexcards-cron:
+    container_name: indexcards-cron
+    image: indexcards-cron:latest
+    restart: always
+    network_mode: "host"
+    environment:
+        - PORT=3456
+        - NODE_ENV=staging
+    volumes:
+        - /etc/tabroom/indexcards.config.js:/indexcards/config/config.js:ro
+        - /var/log/indexcards:/var/log/indexcards:rw
+    cpus: 1
+    mem_limit: 4gb
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
