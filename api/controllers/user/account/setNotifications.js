@@ -74,6 +74,13 @@ export const disablePushNotifications = {
 	GET: async (req, res) => {
 		const db = req.db;
 
+		if (!req.session || !req.session?.person) {
+			res.status(200).json({
+				error   : true,
+				message : 'You are not currently logged into Tabroom',
+			});
+		}
+
 		await db.personSetting.destroy({
 			where: {
 				person : req.session.person,
