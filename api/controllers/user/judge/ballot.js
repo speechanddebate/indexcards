@@ -1,6 +1,68 @@
 import { checkJudgePerson } from '../../../helpers/auth';
 import { errorLogger } from '../../../helpers/logger';
 
+export const checkBallotAccess = {
+
+	POST: async (req, res) => {
+
+		const db = req.db;
+		const judgeId = parseInt(req.params.judgeId);
+		const sectionId = parseInt(req.params.sectionId);
+
+		const access = await db.sequelize.query(`
+			select
+				ballot.id, ballot.audit, judge.person
+				from ballot, judge
+			where ballot.judge = :judgeId
+				and ballot.panel = :sectionId
+				and ballot.judge = judge.id
+		`, {
+			replacements: {
+				sectionId,
+				judgeId,
+			},
+			type : db.Sequelize.QueryTypes.SELECT,
+		});
+
+		if (access && access.length > 0) {
+
+			let ok = false;
+			access.forEach( (ballot) => {
+				if (ballot.person !== req.session.person && !req.session.site_admin) {
+					return res.status(200).json({
+						error   : false,
+						message : `Your Tabroom account is not linked to that judge!`,
+						refresh : true,
+					});
+				}
+
+				if (!ballot.audit) {
+					ok = true;
+				}
+			});
+
+			if (ok) {
+				return res.status(200).json({
+					refresh: false,
+				});
+			}
+
+			return res.status(200).json({
+				error   : false,
+				message : `Your ballot has already been marked confirmed.`,
+				refresh : true,
+			});
+
+		}
+
+		return res.status(200).json({
+			error   : false,
+			message : `You no longer have access to this ballot.  Check on Tabroom or with tournament staff to see whether you have been reassigned.`,
+			refresh : true,
+		});
+	},
+};
+
 export const saveRubric = {
 
 	POST: async (req, res) => {
