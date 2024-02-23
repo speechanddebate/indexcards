@@ -28,7 +28,9 @@ export const checkBallotAccess = {
 
 			let ok = false;
 			access.forEach( (ballot) => {
-				if (ballot.person !== req.session.person && !req.session.site_admin) {
+				if (!req.session?.person
+					|| (ballot.person !== req.session.person && !req.session.site_admin)
+				) {
 					return res.status(200).json({
 						error   : false,
 						message : `Your Tabroom account is not linked to that judge!`,
