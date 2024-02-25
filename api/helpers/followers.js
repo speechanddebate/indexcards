@@ -101,10 +101,6 @@ export const getFollowers = async (replacements, options = { recipients: 'all' }
 	if (!replacements.noFollowers && !replacements.no_followers) {
 
 		if (replacements.recipients !== 'entries') {
-<<<<<<< HEAD
-=======
-
->>>>>>> a0d5eb248d2ef71275eaa66beb88958c97ab8071
 			const judgeFollowers = await db.sequelize.query(`
 				select person.id, person.email, person.no_email
 					from (person, follower, ballot, panel ${fields})

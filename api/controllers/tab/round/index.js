@@ -205,9 +205,9 @@ export const roundDecisionStatus = {
 				}
 
 				if (!round.panels[ballot.panel]) {
-					round.panels[ballot.panel] = 10;
+					round.panels[ballot.panel] = 1000;
 				} else {
-					round.panels[ballot.panel] += 10;
+					round.panels[ballot.panel] += 1000;
 				}
 
 				if (ballot.winloss) {
@@ -235,19 +235,18 @@ export const roundDecisionStatus = {
 					judge.class = 'greentext semibold';
 				} else if (ballot.chair) {
 					judge.class = 'fa fa-sm fa-star greentext';
-					judge.text = '-';
 				}
 			} else if (ballot.pbye) {
-				round.panels[ballot.panel] = 100;
+				round.panels[ballot.panel] += 1000;
 				judge.text = 'BYE';
 			} else if (ballot.winloss || ballot.rank || ballot.point || ballot.rubric ) {
 				round.out[ballot.flight][ballot.judge] = true;
-				round.panels[ballot.panel] = 100;
+				round.panels[ballot.panel] += 100;
 				judge.text = '&frac12;';
 				judge.class = 'redtext';
 			} else if (ballot.startTime) {
 				round.out[ballot.flight][ballot.judge] = true;
-				round.panels[ballot.panel] = 100;
+				round.panels[ballot.panel] += 10;
 				const started = new Date(ballot.startTime);
 				judge.text = `${started.getUTCHours()}:${addZero(started.getUTCMinutes())}`;
 			} else {
