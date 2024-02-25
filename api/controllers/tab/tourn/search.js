@@ -9,14 +9,14 @@ export const searchAttendees = {
 		const db      = req.db;
 
 		const replacements = {
-			tournId: req.params.tourn_id,
+			tournId: req.params.tournId,
 			searchString: req.params.searchString,
 			likeString: `${req.params.searchString}%`,
 		};
 
 		const entries = await db.sequelize.query(`
-			select 
-				student.id, student.first, student.last, 
+			select
+				student.id, student.first, student.last,
 				entry.id entry, entry.code, entry.name, event.abbr, school.name schoolName, school.id schoolId, 'entry' as tag
 			from (entry, event, entry_student es, student)
 				left join school on school.id = entry.school
@@ -33,7 +33,7 @@ export const searchAttendees = {
 		});
 
 		const judges = await db.sequelize.query(`
-			select 
+			select
 				judge.id, judge.code, judge.first, judge.last, category.abbr, school.name schoolName, school.id schoolId, 'judge' as tag
 			from (judge, category)
 				left join school on school.id = judge.school
@@ -46,7 +46,7 @@ export const searchAttendees = {
 		});
 
 		const schools = await db.sequelize.query(`
-			select 
+			select
 				school.id, school.code, school.name, count(distinct entry.id) as entries, count(distinct judge.id) as judges, 'school' as tag
 			from school
 				left join entry on entry.school = school.id and entry.unconfirmed = 0

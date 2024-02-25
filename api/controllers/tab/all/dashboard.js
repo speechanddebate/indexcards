@@ -357,8 +357,8 @@ export const tournAttendance = {
 			const now = Date();
 			const db = req.db;
 
-			const targetType = req.body.target_type;
-			const targetId = req.body.target_id;
+			const targetType = req.body.targetType;
+			const targetId = req.body.targetId;
 			let target = '';
 
 			if (targetType === 'student') {
@@ -374,7 +374,7 @@ export const tournAttendance = {
 			if (!target) {
 				return res.status(201).json({
 					error   : true,
-					message : `No person to mark present for ID ${target} ${targetType} ${req.body.target_id}`,
+					message : `No person to mark present for ID ${target} ${targetType} ${req.body.targetId}`,
 				});
 			}
 

@@ -435,7 +435,7 @@ changeAccess.POST.apiDoc = {
 	parameters: [
 		{
 			in          : 'parameters',
-			name        : 'target_id',
+			name        : 'personId',
 			description : 'Person ID',
 			required    : true,
 			schema      : {

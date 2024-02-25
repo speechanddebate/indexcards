@@ -5,7 +5,7 @@ export const backupTourn = {
 	GET: async (req, res) => {
 		const db = req.db;
 
-		const tournShell  = await db.tourn.findByPk(req.params.tourn_id);
+		const tournShell  = await db.tourn.findByPk(req.params.tournId);
 		const tourn = tournShell.dataValues;
 
 		tourn.backup_created = new Date();
@@ -34,7 +34,7 @@ export const backupTourn = {
 				and tc.circuit = circuit.id
 			order by circuit.abbr
 		`, {
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		}), 'id');
 
@@ -48,7 +48,7 @@ export const backupTourn = {
 			group by tiebreak.id
 			order by protocol.id, tiebreak.name
 		`,{
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -75,7 +75,7 @@ export const backupTourn = {
 			where protocol.tourn = :tournId
 				and ps.protocol = protocol.id
 		`,{
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -90,7 +90,7 @@ export const backupTourn = {
 				and rpool.id = rpool_round.rpool
 			group by rpool.id
 		`, {
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -111,7 +111,7 @@ export const backupTourn = {
 			group by room.id
 				order by site.id, room.name
 		`, {
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -141,7 +141,7 @@ export const backupTourn = {
 			where result_key.result_set = result_set.id
 				and result_set.tourn = :tournId
 		`, {
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -162,7 +162,7 @@ export const backupTourn = {
 			where result.result_set = result_set.id
 				and result_set.tourn = :tournId
 		`, {
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -183,7 +183,7 @@ export const backupTourn = {
 				and result_set.tourn = :tournId
 				and result.id = result_value.result
 		`, {
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -208,7 +208,7 @@ export const backupTourn = {
 			where school.tourn = :tournId
 				and ps.school = school.id
 		`,{
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -229,7 +229,7 @@ export const backupTourn = {
 				and student.chapter = school.chapter
 				and school.tourn = event.tourn
 		`,{
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -256,7 +256,7 @@ export const backupTourn = {
 			where school.tourn = :tournId
 				and school.id = entry.school
 		`,{
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -281,7 +281,7 @@ export const backupTourn = {
 				and entry.id = es.entry
 			group by entry.id
 		`,{
-			replacements: { tournId: req.params.tourn_id },
+			replacements: { tournId: req.params.tournId },
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
@@ -317,12 +317,12 @@ export const restoreTourn = {
 
 		const tournData = req.body;
 
-		if (!tournData.tourn_id) {
-			tournData.tourn_id = req.params.tourn_id;
+		if (!tournData.tournId) {
+			tournData.tournId = req.params.tournId;
 		}
 
-		if (!tournData.tourn_id) {
-			tournData.tourn_id = req.session.tourn_id;
+		if (!tournData.tournId) {
+			tournData.tournId = req.session.tourn;
 		}
 
 		// So since you haven't actually written this yet, how about you
