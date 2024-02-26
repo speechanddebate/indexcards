@@ -119,7 +119,8 @@ export const scheduleAutoFlip = async (roundId, req) => {
 	});
 
 	if (roundData) {
-		roundData.forEach( async (round) => {
+
+		for await (const round of roundData) {
 
 			if (!round.no_side_constraints
 				&& ( round.type !== 'elim'
@@ -144,20 +145,23 @@ export const scheduleAutoFlip = async (roundId, req) => {
 			}
 
 			if (round.flip_before_start) {
-				flights.forEach( (tick) => {
+
+				for (const tick of flights) {
 					const flight = tick + 1;
 					flipAt[flight] = moment(round.roundstart)
 						.add( (parseInt(tick * round.flight_offset) - parseInt(round.flip_before_start)), 'minutes');
-				});
+				}
+
 			} else if (round.flip_autopublish) {
-				flights.forEach( (tick) => {
+
+				for (const tick of flights) {
 					const flight = tick + 1;
 					flipAt[flight] = moment()
 						.add(parseInt((tick * round.flight_offset) + parseInt(round.flip_autopublish)), 'minutes');
-				});
+				}
 			}
 
-			flights.forEach( async (tick) => {
+			for (const tick of flights) {
 				const flight = tick + 1;
 
 				if (round.flip_split_flights) {
@@ -175,8 +179,8 @@ export const scheduleAutoFlip = async (roundId, req) => {
 						created_at : Date(),
 					});
 				}
-			});
-		});
+			}
+		}
 	}
 };
 
@@ -241,14 +245,17 @@ export const blastRoundPairing = {
 			blastData.append = req.body.append;
 		}
 
-		const browserResponse = sendPairingBlast(followers, blastData, req, res);
+		const browserResponse = await sendPairingBlast(followers, blastData, req, res);
 
 		if (req.params.timeslotId) {
 			return browserResponse;
 		}
 
-		res.status(200).json(browserResponse.message);
+		if (res.status) {
+			return res.status(200).json(browserResponse.message);
+		}
 
+		return browserResponse.message;
 	},
 };
 

@@ -2,6 +2,7 @@ import moment from 'moment-timezone';
 import { ordinalize } from '@speechanddebate/nsda-js-utils';
 import { notify } from './blast.js';
 import { sidelocks } from './round.js';
+import changeLogModel from '../models/changeLog.js';
 
 // Functions related to creating pairing blasts for each section.
 // formatBlast pulls the sql paramters from the blastSection/Round/Timeslot
@@ -144,34 +145,34 @@ export const formatPairingBlast = async (queryData, req) => {
 
 	const roundData = await processRounds(rawRoundData);
 
-	rawEntries.forEach( (row) => {
-		const section = roundData[row.roundid].sections[row.sectionid];
+	for await (const entry of rawEntries) {
+		const section = roundData[entry.roundid].sections[entry.sectionid];
 		section.entries.push({
-			id         : row.id,
-			code       : row.code,
-			name       : row.name,
-			school     : row.schoolid,
-			schoolName : row.schoolname,
-			side       : row.side,
-			speaker    : row.speakerorder,
-			pronoun    : row.pronoun,
+			id         : entry.id,
+			code       : entry.code,
+			name       : entry.name,
+			school     : entry.schoolid,
+			schoolName : entry.schoolname,
+			side       : entry.side,
+			speaker    : entry.speakerorder,
+			pronoun    : entry.pronoun,
 		});
-	});
+	}
 
-	rawJudges.forEach( (row) => {
-		const section = roundData[row.roundid].sections[row.sectionid];
+	for await (const judge of rawJudges) {
+		const section = roundData[judge.roundid].sections[judge.sectionid];
 		section.judges.push({
-			id         : row.id,
-			code       : row.code,
-			first      : row.first,
-			middle     : row.middle,
-			last       : row.last,
-			school     : row.schoolid,
-			schoolName : row.schoolname,
-			chair      : row.chair,
-			pronoun    : row.pronoun,
+			id         : judge.id,
+			code       : judge.code,
+			first      : judge.first,
+			middle     : judge.middle,
+			last       : judge.last,
+			school     : judge.schoolid,
+			schoolName : judge.schoolname,
+			chair      : judge.chair,
+			pronoun    : judge.pronoun,
 		});
-	});
+	}
 
 	// Now format round and section messages for each recipient.
 
@@ -190,7 +191,7 @@ export const formatPairingBlast = async (queryData, req) => {
 		schoolJudges  : {},
 	};
 
-	Object.keys(roundData).forEach( (roundId) => {
+	for await (const roundId of Object.keys(roundData)) {
 
 		const round = roundData[roundId];
 		const roundMessage = { };
@@ -203,8 +204,10 @@ export const formatPairingBlast = async (queryData, req) => {
 
 		let counter = 1;
 
-		sectionFlights.forEach( (flight) => {
-			Object.keys(round.flightSections[flight]).forEach( (sectionId) => {
+		for await ( const flight of sectionFlights) {
+
+			for await (const sectionId of Object.keys(round.flightSections[flight])) {
+
 				const section = round.sections[sectionId];
 
 				const sectionMessage = {
@@ -253,7 +256,7 @@ export const formatPairingBlast = async (queryData, req) => {
 
 					let firstJudge = 0;
 
-					section.judges.forEach( (judge) => {
+					for await (const judge of section.judges) {
 
 						judge.role = judgeRole(judge, round) || '';
 
@@ -275,7 +278,7 @@ export const formatPairingBlast = async (queryData, req) => {
 						}
 						sectionMessage.judgeText += `\n`;
 						sectionMessage.judgeHTML += `</p>`;
-					});
+					}
 				}
 
 				sectionMessage.entryText = `\nEntries\n`;
@@ -298,7 +301,8 @@ export const formatPairingBlast = async (queryData, req) => {
 
 				let notFirstEntry = 0;
 
-				section.entries.forEach( (entry) => {
+				for await (const entry of section.entries) {
+
 					entry.position = positionString(entry, round, section);
 
 					if (entry.position === 'FLIP' && notFirstEntry++ < 1) {
@@ -319,11 +323,12 @@ export const formatPairingBlast = async (queryData, req) => {
 					if (round.eventType === 'congress') {
 						delete sectionMessage.entryText;
 					} else if (round.eventType === 'debate' || round.eventType === 'wsdc') {
-						section.entries.forEach( (other) => {
+
+						for await (const other of section.entries) {
 							if (entry.id !== other.id) {
 								entry.opponent = other.code;
 							}
-						});
+						}
 						if (sectionMessage.judgeEntrySingle) {
 							sectionMessage.judgeEntrySingle += ' vs. ';
 							sectionMessage.judgeEntrySingle += `${entry.position === 'FLIP' ? '' : entry.position} ${entry.code} `;
@@ -333,13 +338,12 @@ export const formatPairingBlast = async (queryData, req) => {
 					} else if (round.eventType === 'wudc') {
 						sectionMessage.entrySingle += `${entry.position} ${entry.code} `;
 					}
-				});
+				}
 
 				// And now that we have the standard texts, we can assemble the
 				// notifications for the actual entries
 
-				section.entries.forEach( (entry) => {
-
+				for await (const entry of section.entries) {
 					// Myself
 					if (!blastData.entries[entry.id]) {
 						blastData.entries[entry.id] = {
@@ -413,9 +417,10 @@ export const formatPairingBlast = async (queryData, req) => {
 						schoolMessage.text +=  sectionMessage.single;
 						schoolMessage.text += '\n';
 					}
-				});
+				}
 
-				section.judges.forEach( (judge) => {
+				for await (const judge of section.judges) {
+
 					// Myself
 					if (!blastData.judges[judge.id]) {
 						blastData.judges[judge.id] = {
@@ -441,8 +446,8 @@ export const formatPairingBlast = async (queryData, req) => {
 
 					if (round.eventType === 'mock_trial') {
 						let firstJudge = 0;
-						section.judges.forEach( (other) => {
 
+						for await (const other of section.judges) {
 							if (firstJudge++ > 0) {
 								judgeMessage.text += ', ';
 							}
@@ -455,7 +460,7 @@ export const formatPairingBlast = async (queryData, req) => {
 								judgeMessage.text += `(${judge.pronoun})`;
 								judgeMessage.html += `<p style='font-style: italic; font-size: 90%; padding-left: 8pt;'>${judge.pronoun}</p>`;
 							}
-						});
+						}
 
 						judgeMessage.text += `\n`;
 						judgeMessage.html += `</p>`;
@@ -497,11 +502,11 @@ export const formatPairingBlast = async (queryData, req) => {
 						schoolMessage.text += `${sectionMessage.single} `;
 						schoolMessage.text += '\n';
 					}
-				});
-			});
-		});
+				}
+			}
+		}
 
-		Object.keys(blastData.schools).forEach( (schoolId) => {
+		for await (const schoolId of Object.keys(blastData.schools)) {
 			blastData.schools[schoolId].text += `\n${round.eventAbbr} ${round.name} Start ${round.shortstart[1]}\n\n`;
 			if (blastData.schoolEntries?.[schoolId]) {
 				blastData.schools[schoolId].text += `ENTRIES\n${blastData.schoolEntries[schoolId].text}`;
@@ -509,12 +514,12 @@ export const formatPairingBlast = async (queryData, req) => {
 			if (blastData.schoolJudges?.[schoolId]) {
 				blastData.schools[schoolId].text += `JUDGES\n${blastData.schoolJudges[schoolId].text}`;
 			}
-		});
+		}
 
 		delete blastData.schoolJudges;
 		delete blastData.schoolEntries;
 		blastData.rounds.push(round);
-	});
+	}
 
 	return blastData;
 };
@@ -528,12 +533,13 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 		message : '',
 	};
 
-	for await (const entryId of Object.keys(blastData.entries)) {
-		if (followers.entries[entryId]) {
+	for await (const judgeId of Object.keys(blastData.judges)) {
+
+		if (followers.judges[judgeId]) {
 			const notifyResponse = await notify({
-				ids    : followers.entries[entryId],
+				ids    : followers.judges[judgeId],
 				append : blastData.append,
-				...blastData.entries[entryId],
+				...blastData.judges[judgeId],
 			});
 
 			blastResponse.email += notifyResponse.email.count;
@@ -546,12 +552,13 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 		}
 	}
 
-	for await (const judgeId of Object.keys(blastData.judges)) {
-		if (followers.judges[judgeId]) {
+	for await (const entryId of Object.keys(blastData.entries)) {
+
+		if (followers.entries[entryId]) {
 			const notifyResponse = await notify({
-				ids    : followers.judges[judgeId],
+				ids    : followers.entries[entryId],
 				append : blastData.append,
-				...blastData.judges[judgeId],
+				...blastData.entries[entryId],
 			});
 
 			blastResponse.email += notifyResponse.email.count;
@@ -594,25 +601,27 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 
 	} else {
 
+		const changeLog = changeLogModel(req.db.sequelize, req.db.Sequelize.DataTypes);
+
 		if (req.params.sectionId) {
-			await req.db.changeLog.create({
+			await changeLog.create({
 				tag         : 'blast',
 				description : `Pairing sent to section. Message: ${req.body.message}`,
 				person      : blastData.sender || req.session?.person?.id,
 				count       : (blastResponse.web + blastResponse.email) || 0,
 				panel       : req.params.sectionId,
 			});
-		} else {
 
-			blastData.rounds.forEach( async (round) => {
-				await req.db.changeLog.create({
+		} else {
+			for (const round of blastData.rounds) {
+				await changeLog.create({
 					tag         : 'blast',
 					description : `Round pairings blasted. Message: ${req.body.message}`,
 					person      : blastData.sender || req.session?.person?.id,
 					count       : (blastResponse.web + blastResponse.email) || 0,
 					round       : round.id,
 				});
-			});
+			}
 		}
 
 		const browserResponse = {
@@ -630,20 +639,20 @@ const processRounds = async (rawRounds) => {
 
 	const roundData  = { };
 
-	rawRounds.forEach( (row) => {
+	for await (const rawRound of rawRounds) {
 
-		if (!roundData[row.roundid]) {
+		if (!roundData[rawRound.roundid]) {
 
 			const round = {
-				id             : row.roundid,
-				name           : row.roundlabel ? row.roundlabel : `Round ${row.roundname}`,
-				number         : row.roundname,
-				type           : row.roundtype,
-				flights        : row.roundflights,
-				eventId        : row.eventid,
-				eventName      : row.eventname,
-				eventAbbr      : row.eventabbr,
-				eventType      : row.eventtype,
+				id             : rawRound.roundid,
+				name           : rawRound.roundlabel ? rawRound.roundlabel : `Round ${rawRound.roundname}`,
+				number         : rawRound.roundname,
+				type           : rawRound.roundtype,
+				flights        : rawRound.roundflights,
+				eventId        : rawRound.eventid,
+				eventName      : rawRound.eventname,
+				eventAbbr      : rawRound.eventabbr,
+				eventType      : rawRound.eventtype,
 				flip           : false,
 				start          : {},
 				shortstart     : {},
@@ -655,23 +664,25 @@ const processRounds = async (rawRounds) => {
 				sidelocks      : {},
 			};
 
-			['include_room_notes',
+			const settingTags = ['include_room_notes',
 				'use_normal_rooms',
 				'anonymous_public',
 				'online_mode',
 				'event_online_hybrid',
 				'aff_label',
 				'neg_label',
-			].forEach( (key) => {
-				if (row[key]) {
-					round.settings[key] = row[key];
+			];
+
+			for (const key of settingTags) {
+				if (rawRound[key]) {
+					round.settings[key] = rawRound[key];
 				}
-			});
+			}
 
 			if (round.eventType === 'debate' || round.eventType === 'wsdc') {
-				if (row.sidelock_elims) {
+				if (rawRound.sidelock_elims) {
 					round.flip = false;
-				} else if (row.no_side_constraints) {
+				} else if (rawRound.no_side_constraints) {
 					round.flip = true;
 				} else if (round.type === 'elim' || round.type === 'final' || round.type === 'runoff') {
 					const locks = sidelocks(round.id);
@@ -685,50 +696,50 @@ const processRounds = async (rawRounds) => {
 			// something like this monstrosity. 'Twas foreach (1 ... n) {}.
 			// Progress! Sigh.
 
-			[...Array(round.flights).keys()].forEach( (tick) => {
+			for (const tick of [...Array(round.flights).keys()]) {
 				const flight = tick + 1;
 				round.start[flight] = '';
 				round.shortstart[flight] = '';
 
 				round.start[flight] =
-					moment(row.roundstart)
-						.add(parseInt(tick * row.flight_offset), 'minutes')
-						.tz(row.tz)
+					moment(rawRound.roundstart)
+						.add(parseInt(tick * rawRound.flight_offset), 'minutes')
+						.tz(rawRound.tz)
 						.format('h:mm z');
 
 				round.shortstart[flight] =
-					moment(row.roundstart)
-						.add(parseInt(tick * row.flight_offset), 'minutes')
-						.tz(row.tz)
+					moment(rawRound.roundstart)
+						.add(parseInt(tick * rawRound.flight_offset), 'minutes')
+						.tz(rawRound.tz)
 						.format('h:mm');
 
-				if (round.flip && row.flip_split_flights && row.flip_at) {
+				if (round.flip && rawRound.flip_split_flights && rawRound.flip_at) {
 					round.flipAt[flight] =
-						moment(row.flip_at)
-							.add(parseInt(tick * row.flight_offset), 'minutes')
-							.tz(row.tz)
+						moment(rawRound.flip_at)
+							.add(parseInt(tick * rawRound.flight_offset), 'minutes')
+							.tz(rawRound.tz)
 							.format('h:mm');
-				} else if (round.flip && row.flip_at) {
+				} else if (round.flip && rawRound.flip_at) {
 					round.flipAt[flight] =
-						moment(row.flip_at)
-							.tz(row.tz)
+						moment(rawRound.flip_at)
+							.tz(rawRound.tz)
 							.format('h:mm');
 				}
-			});
+			}
 
-			roundData[row.roundid] = round;
+			roundData[rawRound.roundid] = round;
 		}
 
-		const round = roundData[row.roundid];
+		const round = roundData[rawRound.roundid];
 
 		// Now append the section data
 
 		const section = {
-			id      : row.sectionid,
-			letter  : row.letter,
-			flight  : row.flight,
-			bye     : row.sbye,
-			start   : round.start[row.flight ? row.flight : 1],
+			id      : rawRound.sectionid,
+			letter  : rawRound.letter,
+			flight  : rawRound.flight,
+			bye     : rawRound.sbye,
+			start   : round.start[rawRound.flight ? rawRound.flight : 1],
 			online  : false,
 			room    : '',
 			map     : '',
@@ -737,24 +748,24 @@ const processRounds = async (rawRounds) => {
 			judges  : [],
 		};
 
-		if (row.sbye) {
+		if (rawRound.sbye) {
 			section.room = 'BYE';
 		} else if (!round.settings.online_mode || round.settings.online_mode === 'none') {
-			section.room = row.roomname ? row.roomname : 'NONE : ASK TAB';
-			section.map  = row.roomurl;
+			section.room = rawRound.roomname ? rawRound.roomname : 'NONE : ASK TAB';
+			section.map  = rawRound.roomurl;
 		} else {
 
 			if (round.settings.online_mode === 'async') {
 				section.room = 'ASYNC';
 
 			} else if (round.settings.event_online_hybrid) {
-				section.hybrid = row.online_hybrid;
-				section.room = row.roomname ? row.roomname : 'NONE';
-				section.url  = row.roomurl;
+				section.hybrid = rawRound.online_hybrid;
+				section.room = rawRound.roomname ? rawRound.roomname : 'NONE';
+				section.url  = rawRound.roomurl;
 
 			} else if (round.settings.online_mode === 'sync' || round.settings.use_normal_rooms) {
-				section.room   = row.roomname ? row.roomname : 'NONE: ASK TAB';
-				section.url    = row.roomurl;
+				section.room   = rawRound.roomname ? rawRound.roomname : 'NONE: ASK TAB';
+				section.url    = rawRound.roomurl;
 
 			} else if (round.settings.online_mode === 'nsda_campus'
 				|| round.settings.online_mode === 'nsda_campus_observers'
@@ -762,24 +773,23 @@ const processRounds = async (rawRounds) => {
 				|| round.settings.online_mode === 'public_jitsi'
 				|| round.settings.online_mode === 'public_jitsi_observers'
 			) {
-				section.room   = `NSDA Campus Section ${row.letter}`;
+				section.room   = `NSDA Campus Section ${rawRound.letter}`;
 			} else {
-				section.room = row.roomname ? row.roomname : 'ONLINE SETTINGS ARE REALLY GOOFY. ASK TAB';
+				section.room = rawRound.roomname ? rawRound.roomname : 'ONLINE SETTINGS ARE REALLY GOOFY. ASK TAB';
 			}
 		}
 
-		if (round.settings.include_room_notes && row.roomnotes) {
-			section.roomnotes = row.roomnotes;
+		if (round.settings.include_room_notes && rawRound.roomnotes) {
+			section.roomnotes = rawRound.roomnotes;
 		}
 
-		if (!round.flightSections[row.flight]) {
-			round.flightSections[row.flight] = {};
+		if (!round.flightSections[rawRound.flight]) {
+			round.flightSections[rawRound.flight] = {};
 		}
 
-		round.flightSections[row.flight][row.sectionid] = section;
-		round.sections[row.sectionid] = section;
-
-	});
+		round.flightSections[rawRound.flight][rawRound.sectionid] = section;
+		round.sections[rawRound.sectionid] = section;
+	}
 
 	return roundData;
 };

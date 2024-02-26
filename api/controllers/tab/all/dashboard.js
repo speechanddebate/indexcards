@@ -77,7 +77,7 @@ export const tournAttendance = {
 		const attendanceResults = await db.sequelize.query(`
 			select
 				cl.panel panel, cl.tag tag, cl.description description,
-					CONVERT_TZ(cl.timestamp, '+00:00', tourn.tz) timestamp,
+					cl.timestamp timestamp,
 				person.id person,
 				tourn.tz tz
 
@@ -116,7 +116,7 @@ export const tournAttendance = {
 		const unlinkedAttendanceResults = await db.sequelize.query(`
 			select
 				cl.panel panel, cl.tag tag, cl.description description,
-					CONVERT_TZ(cl.timestamp, '+00:00', tourn.tz) timestamp,
+					cl.timestamp timestamp,
 				cl.student student, cl.judge judge,
 				tourn.tz tz
 
@@ -156,7 +156,7 @@ export const tournAttendance = {
 		const entryAttendanceResults = await db.sequelize.query(`
 			select
 				cl.panel panel, cl.tag tag, cl.description description,
-					CONVERT_TZ(cl.timestamp, '+00:00', tourn.tz) timestamp,
+					cl.timestamp timestamp,
 				cl.entry entry, tourn.tz tz
 
 			from panel, campus_log cl, tourn, round, ballot, entry
@@ -178,8 +178,9 @@ export const tournAttendance = {
 		const startsResults = await db.sequelize.query(`
 			select
 				judge.person person, panel.id panel, panel.timestamp timestamp,
-				CONVERT_TZ(ballot.judge_started, '+00:00', tourn.tz) startTime,
+				ballot.judge_started startTime,
 				ballot.audit audited,
+				ballot.timestamp lastChange,
 				cl.tag,
 				started_by.first startFirst, started_by.last startLast,
 				judge.first judgeFirst, judge.last judgeLast,
@@ -202,14 +203,16 @@ export const tournAttendance = {
 				and ballot.entry = entry.id
 				and entry.active = 1
 			group by panel.id, judge.id
+			order by ballot.timestamp
 		`, { replacements, type });
 
 		// Pull an array of all the ballots that have been audited fully.
 		const confirmedResults = await db.sequelize.query(`
 			select
 				panel.id panel, panel.bye bye,
-				CONVERT_TZ(confirmed_started.timestamp, '+00:00', tourn.tz) confirmedAt,
+					confirmed_started.timestamp confirmedAt,
 				CONCAT(confirmed_by.first,' ',confirmed_by.last) confirmedBy,
+					panel.timestamp lastChange,
 				tourn.tz tz
 
 			from (panel, round, event, tourn)
@@ -300,7 +303,7 @@ export const tournAttendance = {
 			};
 		});
 
-		startsResults.forEach( start => {
+		startsResults.forEach( async (start) => {
 
 			if (status.person[start.person] === undefined) {
 				status.person[start.person] = {};
@@ -332,6 +335,7 @@ export const tournAttendance = {
 
 			if (start.audited) {
 				myPanel.audited = true;
+				myPanel.lastChange = showDateTime(start.lastChange, { tz: start.tz, format: 'daytime' });
 			}
 		});
 
@@ -351,6 +355,8 @@ export const tournAttendance = {
 			res.status(200).json({ error: true, message: 'You do not have access to that tournament' });
 			return;
 		}
+
+		console.log(req.body);
 
 		try {
 
@@ -374,7 +380,7 @@ export const tournAttendance = {
 			if (!target) {
 				return res.status(201).json({
 					error   : true,
-					message : `No person to mark present for ID ${target} ${targetType} ${req.body.target_id}`,
+					message : `No person to mark present for ID ${target} ${targetType} ${req.body.targetId}`,
 				});
 			}
 

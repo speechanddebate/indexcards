@@ -92,7 +92,7 @@ describe.skip('Status Board', () => {
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
 			.send({
-				target_id     : 16,   	// person who was absent now present
+				targetId      : 16,   	// person who was absent now present
 				related_thing : 27, 	// panel ID
 				property_name : 0,
 			})
@@ -105,7 +105,7 @@ describe.skip('Status Board', () => {
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
 			.send({
-				target_id     : 15,   	// person who was absent now present
+				targetId      : 15,   	// person who was absent now present
 				related_thing : 37, 	// panel ID
 				property_name : 1,
 			})
@@ -118,7 +118,7 @@ describe.skip('Status Board', () => {
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
 			.send({
-				target_id     : 10,   	// person who was absent now present
+				targetId      : 10,   	// person who was absent now present
 				related_thing : 37, 	// panel ID
 				setting_name  : 'judge_started',
 				another_thing : 355,	// why yes I do hate this little library I cobbled together

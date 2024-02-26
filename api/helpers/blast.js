@@ -25,12 +25,12 @@ export const notify = async (inputData) => {
 		email : {},
 	};
 
-	if (!inputData.noWeb) {
-		pushReply.web = await webBlast(inputData);
-	}
-
 	if (!inputData.noEmail) {
 		pushReply.email = await emailNotify(inputData);
+	}
+
+	if (!inputData.noWeb) {
+		pushReply.web = await webBlast(inputData);
 	}
 
 	const reply = {
@@ -70,7 +70,15 @@ export const webBlast = async (inputData) => {
 		type: db.sequelize.QueryTypes.SELECT,
 	});
 
-	const targetPromise = recipients.map( async (person) => {
+	if (recipients.length < 1) {
+		return {
+			error   : false,
+			message : `No recipients found for the push notification`,
+			count   : 0,
+		};
+	}
+
+	const targetPromise = recipients.map( (person) => {
 		if (person.id === 1) {
 			// it won't let you use 1 or 0 as user IDs which REALLY PISSED
 			// PALMER (UID = 1) OFF THAT I HAD TO WRITE A JANKY CODE EXCEPTION

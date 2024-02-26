@@ -719,15 +719,14 @@ db.person.hasMany(db.personSetting     , { as: 'Settings' , foreignKey : 'person
 db.rpool.hasMany(db.rpoolSetting       , { as: 'Settings' , foreignKey : 'rpool' });
 db.student.hasMany(db.studentSetting   , { as: 'Settings' , foreignKey : 'student' });
 
-// a standard getter for Tabroom objects that have settings because Palmer is
-// teh lazy
+// a standard getter for Tabroom objects that have settings because Palmer is teh lazy
 
 db.summon = async (dbTable, objectId) => {
 
 	const options = {};
 
 	// automatically include settings if the model has them.
-	if (dbTable.associations.Settings) {
+	if (dbTable?.associations?.Settings) {
 		options.include = 'Settings';
 	}
 
@@ -749,7 +748,6 @@ db.summon = async (dbTable, objectId) => {
 	}
 
 	const dbData = dbObject.get({ plain: true });
-
 	dbData.table = dbTable.name;
 
 	if (dbData.Settings) {
@@ -768,10 +766,7 @@ db.summon = async (dbTable, objectId) => {
 						try {
 							jsonOutput = JSON.parse(item.value_text);
 						} catch (err) {
-							console.log(`I do not care about ${err} here so back off, stackoverflow`);
-							console.log(`Text causing the error`);
-							console.log(item.tag);
-							console.log(item.value_text);
+							errorLogger.info(item.tag);
 						}
 						if (jsonOutput) {
 							dbData.settings[item.tag] = jsonOutput;

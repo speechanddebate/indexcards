@@ -1,6 +1,4 @@
 import db from '../helpers/litedb.js';
-import Round from '../models/round.js';
-import { errorLogger } from '../helpers/logger.js';
 import { shareRooms } from  '../controllers/tab/round/share.js';
 import { scheduleFlips } from  '../controllers/tab/round/flips.js';
 import { invalidateCache } from '../helpers/round.js';
@@ -30,24 +28,38 @@ const autoBlastRounds = async () => {
 		type: db.Sequelize.QueryTypes.DELETE,
 	});
 
-	pendingQueues.forEach( async (queue) => {
+	for await (const queue of pendingQueues) {
 
-		let round = {};
+		const rounds = await db.sequelize.query(`
+			select
+				round.id, round.name, round.label, round.published
+			from round
+			where round.id = :roundId
+		`, {
+			replacements: {
+				roundId: queue.round,
+			},
+			type: db.Sequelize.QueryTypes.SELECT,
+		});
 
-		try {
-			round = await Round.findOne(queue.round);
-		} catch (err) {
-			errorLogger.info(`Queue invocation failed to find round ${queue.round}`);
-			errorLogger.info(queue);
+		if (rounds.length < 1) {
 			return;
 		}
+
+		const round = rounds.shift();
 
 		// Set the round to publish and process the various dependencies thereof.
 		if (queue.tag !== 'blast') {
 
 			if (round.published !== 1) {
-				round.published = 1;
-				round.save();
+				await db.sequelize.query(`
+					update round set published = 1 where round.id = :roundId
+				`, {
+					replacements: {
+						roundId: queue.round,
+					},
+					type: db.Sequelize.QueryTypes.UPDATE,
+				});
 			}
 
 			// Docshare rooms
@@ -57,7 +69,9 @@ const autoBlastRounds = async () => {
 			await scheduleFlips(round.id);
 
 			// Invalidate Caches
-			await invalidateCache(round.tournId, round.id);
+			if (process.env.NODE_ENV === 'production') {
+				await invalidateCache(round.tournId, round.id);
+			}
 		}
 
 		if (queue.tag !== 'publish') {
@@ -78,7 +92,7 @@ const autoBlastRounds = async () => {
 			const res = {};
 			await blastRoundPairing.POST(req, res);
 		}
-	});
+	}
 };
 
 await autoBlastRounds();
