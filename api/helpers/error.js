@@ -34,7 +34,7 @@ const errorHandler = async (err, req, res, next) => {
 	// Production bugs should find their way to Palmer
 	const env = process.env.NODE_ENV || 'development';
 
-	if (env === 'production') {
+	if (process.env.NODE_ENV === 'production' || config.MAIL_SERVER === 'mail.in.speechanddebate.org') {
 
 		const messageData = {
 			from    : 'error-handler@tabroom.com',

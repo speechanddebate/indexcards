@@ -98,7 +98,7 @@ export const emailBlast = async (inputData) => {
 
 	let result = {};
 
-	if (process.env.NODE_ENV === 'production') {
+	if (process.env.NODE_ENV === 'production' || config.MAIL_SERVER === 'mail.in.speechanddebate.org') {
 		try {
 			result = transporter.sendMail(messageData);
 		} catch (err) {
@@ -173,7 +173,7 @@ export const adminBlast = async (inputData) => {
 
 	if (messageData.email) {
 		messageData.to = messageData.email;
-		if (process.env.NODE_ENV === 'production') {
+		if (process.env.NODE_ENV === 'production' || config.MAIL_SERVER === 'mail.in.speechanddebate.org') {
 			result = await transporter.sendMail(messageData);
 		} else {
 			debugLogger.info(`Local: Admin email not sending from ${messageData.from} to ${messageData.bcc}`);
