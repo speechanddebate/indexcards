@@ -19,7 +19,9 @@ export const changeAccess = {
 			return;
 		}
 
-		if (req.perms.tag !== 'owner' && req.perms.tag !== 'tabber') {
+		if (req.session.perms.tourn[targetCategory.tourn] !== 'owner'
+			&& req.session.perms.tourn[targetCategory.tourn] !== 'tabber'
+		) {
 			res.status(401).json(`You do not have access to change permissions in ${targetCategory.abbr}`);
 			return;
 		}
@@ -79,7 +81,9 @@ export const changeAccess = {
 		const targetCategory = await req.db.summon(db.category, req.params.categoryId);
 		const targetPerson = await req.db.summon(db.person, req.params.personId);
 
-		if (req.perms.tag !== 'owner' && req.perms.tag !== 'tabber') {
+		if (req.session.perms.tourn[targetCategory.tourn] !== 'owner'
+			&& req.session.perms.tourn[targetCategory.tourn] !== 'tabber'
+		) {
 			res.status(401).json(`You do not have access to change permissions in ${targetCategory.abbr}`);
 			return;
 		}

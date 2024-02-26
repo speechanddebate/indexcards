@@ -41,14 +41,4 @@ export const updateTimeslot = {
 	},
 };
 
-export const timeslotPerms = {
-	GET: async (req, res) => {
-		res.status(200).json({
-			perms    : req.perms,
-			timeslot : req.timeslot,
-			events   : req.events,
-		});
-	},
-};
-
 export default updateTimeslot;

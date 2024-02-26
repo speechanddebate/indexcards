@@ -38,11 +38,3 @@ export const updateTourn = {
 	},
 };
 
-export const tournPerms = {
-	GET: async (req, res) => {
-		res.status(200).json({
-			perms  : req.perms,
-			tourn  : req.tourn,
-		});
-	},
-};

@@ -40,15 +40,6 @@ export const updateJPool = {
 	},
 };
 
-export const jpoolPerms = {
-	GET: async (req, res) => {
-		res.status(200).json({
-			perms  : req.perms,
-			jpool  : req.jpool,
-		});
-	},
-};
-
 // CRUD for the judges in the jpool.  Almost entirely consists of removing
 // or creating jpool_judge relationships.
 

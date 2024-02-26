@@ -40,15 +40,6 @@ export const updateRound = {
 	},
 };
 
-export const roundPerms = {
-	GET: async (req, res) => {
-		res.status(200).json({
-			perms  : req.perms,
-			round  : req.round,
-		});
-	},
-};
-
 export const sideCounts = {
 	GET: async (req, res) => {
 

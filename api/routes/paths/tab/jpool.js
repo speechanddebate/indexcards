@@ -1,5 +1,5 @@
 // JPool is a direct descendant of Category and therefore the auth framework will automatically verify
-// Category and Tourn level permssions for it.
+// Category and Tourn level permissions for it.
 import {
 	updateJPool,
 	updateJPoolJudge,

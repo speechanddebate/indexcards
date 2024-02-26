@@ -38,11 +38,3 @@ export const updateCategory = {
 	},
 };
 
-export const categoryPerms = {
-	GET: async (req, res) => {
-		res.status(200).json({
-			perms  : req.perms,
-			category  : req.category,
-		});
-	},
-};

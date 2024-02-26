@@ -38,11 +38,3 @@ export const updateEvent = {
 	},
 };
 
-export const eventPerms = {
-	GET: async (req, res) => {
-		res.status(200).json({
-			perms  : req.perms,
-			event  : req.event,
-		});
-	},
-};

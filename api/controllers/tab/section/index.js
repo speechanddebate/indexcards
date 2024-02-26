@@ -41,13 +41,4 @@ export const updateSection = {
 	},
 };
 
-export const sectionPerms = {
-	GET: async (req, res) => {
-		res.status(200).json({
-			perms   : req.perms,
-			section : req.section,
-		});
-	},
-};
-
 export default updateSection;

@@ -212,7 +212,7 @@ app.all(localRoutes, async (req, res, next) => {
 		const response = await localAuth(req, res);
 		if (typeof answer === 'object') {
 			req[req.params.localType] = response.local;
-			req.perms = response.perms;
+			req.session.perms = { ...req.session.perms, ...response.perms };
 			next();
 		}
 	} else {
