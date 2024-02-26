@@ -335,7 +335,7 @@ export const tournAttendance = {
 
 			if (start.audited) {
 				myPanel.audited = true;
-				myPanel.lastChange = showDateTime(start.lastChange, {tz: start.tz, format: 'daytime' });
+				myPanel.lastChange = showDateTime(start.lastChange, { tz: start.tz, format: 'daytime' });
 			}
 		});
 

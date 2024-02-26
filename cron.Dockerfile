@@ -18,6 +18,5 @@ RUN chmod -R 0755 /indexcards/api/auto
 
 RUN cp /indexcards/api/auto/crontab /etc/cron.d/indexcards.crontab
 RUN crontab /etc/cron.d/indexcards.crontab
-# RUN crontab /etc/cron.d/test.crontab
 
 CMD cron -f

@@ -25,7 +25,6 @@ export const scheduleFlips = async (roundId) => {
 				flip_before_start.value beforeStart,
 				flip_split_flights.value splitFlights,
 				flight_offset.value flightOffset,
-				flip_published.value published,
 				no_side_constraints.value nsc,
 				sidelock_elims.value sidelockElims,
 				tourn.tz
@@ -51,10 +50,6 @@ export const scheduleFlips = async (roundId) => {
 				left join event_setting flip_split_flights
 					on flip_split_flights.event = event.id
 					and flip_split_flights.tag = 'flip_split_flights'
-
-				left join round_setting flip_published
-					on flip_published.round = round.id
-					and flip_published.tag = 'flip_published'
 
 				left join event_setting no_side_constraints
 					on no_side_constraints.event = event.id

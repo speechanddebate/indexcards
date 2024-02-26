@@ -1,5 +1,5 @@
-import db from './db';
-import { errorLogger } from './logger';
+import db from './litedb.js';
+import { errorLogger } from './logger.js';
 
 export const getFollowers = async (replacements, options = { recipients: 'all' }) => {
 
@@ -286,7 +286,6 @@ export const getPairingFollowers = async (replacements, options = { recipients: 
 			if (!blastBy.entries[person.entry]) {
 				blastBy.entries[person.entry] = [];
 			}
-
 			blastBy.entries[person.entry].push(`${person.id}`);
 		}
 	}
@@ -547,7 +546,7 @@ export const getTimeslotJudges = async (replacements, options = { recipients: 'a
 		type: db.sequelize.QueryTypes.SELECT,
 	});
 
-	rawJudgePeople.forEach( (person) => {
+	for await (const person of rawJudgePeople) {
 		if (!person.judge) {
 			return;
 		}
@@ -564,7 +563,7 @@ export const getTimeslotJudges = async (replacements, options = { recipients: 'a
 		}
 
 		blastBy.judges[person.judge].email.push(person.email);
-	});
+	}
 
 	if (!options.no_followers) {
 
@@ -589,8 +588,7 @@ export const getTimeslotJudges = async (replacements, options = { recipients: 'a
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
-		rawJudgeFollowers.forEach( (person) => {
-
+		for await (const person of rawJudgeFollowers) {
 			if (!person.judge) {
 				return;
 			}
@@ -606,7 +604,7 @@ export const getTimeslotJudges = async (replacements, options = { recipients: 'a
 			}
 
 			blastBy.judges[person.judge].email.push(`${person.email}`);
-		});
+		}
 	}
 
 	const blastAll = {

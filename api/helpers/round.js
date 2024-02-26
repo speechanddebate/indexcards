@@ -1,13 +1,15 @@
 // Common helper functions that attach to rounds & schematics
 import { fetch } from '@speechanddebate/nsda-js-utils';
-import db from './db';
-import objectify from './objectify';
+import db from './litedb.js';
+import objectify from './objectify.js';
+import Panel from '../models/panel.js';
+import Ballot from '../models/ballot.js';
 
 // Takes a created round object with sections and writes it into the database
 
 export const writeRound = async (round) => {
 
-	await db.panel.destroy({ where: { round: round.id } });
+	await Panel.destroy({ where: { round: round.id } });
 	let letter = 1;
 
 	if (round.type === 'debate') {
@@ -19,14 +21,14 @@ export const writeRound = async (round) => {
 
 			if (section.b) {
 
-				const panel = await db.panel.create({
+				const panel = await Panel.create({
 					round   : round.id,
 					letter,
 					flight  : 1,
 					bye     : 1,
 				});
 
-				const ballot = await db.ballot.create({
+				const ballot = await Ballot.create({
 					panel : panel.id,
 					side  : 1,
 					entry : section.b,
@@ -38,20 +40,20 @@ export const writeRound = async (round) => {
 
 			} else if (section.a && section.n) {
 
-				const panel = await db.panel.create({
+				const panel = await Panel.create({
 					round   : round.id,
 					letter,
 					flight  : 1,
 				});
 
-				const aff = await db.ballot.create({
+				const aff = await Ballot.create({
 					panel : panel.id,
 					side  : 1,
 					entry : section.a,
 					judge,
 				});
 
-				const neg = await db.ballot.create({
+				const neg = await Ballot.create({
 					panel : panel.id,
 					side  : 2,
 					entry : section.n,
@@ -69,14 +71,14 @@ export const writeRound = async (round) => {
 
 		round.sections.forEach( async (section) => {
 			if (section.length === 1) {
-				const panel = await db.panel.create({
+				const panel = await Panel.create({
 					round   : round.id,
 					letter,
 					flight  : 1,
 					bye     : 1,
 				});
 
-				const ballot = await db.ballot.create({
+				const ballot = await Ballot.create({
 					panel : panel.id,
 					side  : 1,
 					entry : section.b,
@@ -88,7 +90,7 @@ export const writeRound = async (round) => {
 
 			} else {
 
-				const panel = await db.panel.create({
+				const panel = await Panel.create({
 					round   : round.id,
 					letter,
 					flight  : 1,
@@ -98,7 +100,7 @@ export const writeRound = async (round) => {
 				panel.ballots = [];
 
 				section.forEach( async (entry) => {
-					const ballot = await db.ballot.create({
+					const ballot = await Ballot.create({
 						panel : panel.id,
 						side,
 						entry,
@@ -115,7 +117,7 @@ export const writeRound = async (round) => {
 
 		round.sections.forEach( async (section) => {
 
-			const panel = await db.panel.create({
+			const panel = await Panel.create({
 				round   : round.id,
 				letter,
 				flight  : 1,
@@ -125,7 +127,7 @@ export const writeRound = async (round) => {
 			panel.ballots = [];
 
 			section.forEach( async (entry) => {
-				const ballot = await db.ballot.create({
+				const ballot = await Ballot.create({
 					panel : panel.id,
 					speakerorder,
 					entry,
@@ -285,7 +287,16 @@ export const invalidateCache = (tournId, roundId) => {
 	// This will just run asynchronously which is fine since I don't actually care about the output here.
 	for (let server = 1; server < 17; server++) {
 		const serverName = `tabweb${server}`;
-		fetch(`${serverName}:8001${urlPath}`);
+		try {
+			fetch(
+				`http://${serverName}:8001${urlPath}`,
+				{
+					Method: 'GET',
+				}
+			);
+		} catch (err) {
+			console.log(err);
+		}
 	}
 };
 
