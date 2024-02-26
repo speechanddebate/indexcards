@@ -118,7 +118,7 @@ export const webBlast = async (inputData) => {
 			target_channel  : 'push',
 		};
 
-		axios.post(
+		await axios.post(
 			'https://onesignal.com/api/v1/notifications',
 			notification,
 			{
