@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import request from 'supertest';
 import { assert } from 'chai';
 import config from '../../../../config/config';
@@ -7,9 +6,8 @@ import { testAdminSession } from '../../../../tests/testFixtures';
 
 describe('Person History', () => {
 	it('Returns history for a person', async () => {
-		const hash = crypto.createHash('sha256').update(config.NSDA_INBOUND_KEY).digest('hex');
 		const res = await request(server)
-			.get(`/v1/nsda/history?person_id=10288905&nsda_key=${hash}`)
+			.get(`/v1/ext/nsda/history?person_id=10288905`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
 			.expect('Content-Type', /json/)
@@ -23,9 +21,8 @@ describe('Person History', () => {
 	}, 30000);
 
 	it('Errors on a missing person id', async () => {
-		const hash = crypto.createHash('sha256').update(config.NSDA_INBOUND_KEY).digest('hex');
 		await request(server)
-			.get(`/v1/nsda/history?person_id=999999999&nsda_key=${hash}`)
+			.get(`/v1/ext/nsda/history?person_id=999999999`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
 			.expect('Content-Type', /json/)
