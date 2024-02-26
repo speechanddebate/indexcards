@@ -517,11 +517,14 @@ export const tournPerms = async (tournId, personId) => {
 		tourn    : {},
 		event    : {},
 		category : {},
+		contact  : {}
 	};
 
 	for await (const newPerm of permissions) {
 
-		if (newPerm.event) {
+		if (newPerm.tag === 'contact') {
+			perms.contact[tournid] = true;
+		} else if (newPerm.event) {
 			perms.event[newPerm.event] = newPerm.tag;
 		} else if (newPerm.category) {
 			perms.category[newPerm.category] = newPerm.tag;
