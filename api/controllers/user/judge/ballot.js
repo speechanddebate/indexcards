@@ -27,7 +27,8 @@ export const checkBallotAccess = {
 		if (access && access.length > 0) {
 
 			let ok = false;
-			access.forEach( (ballot) => {
+
+			for (const ballot of access) {
 				if (!req.session?.person
 					|| (ballot.person !== req.session.person && !req.session.site_admin)
 				) {
@@ -41,7 +42,7 @@ export const checkBallotAccess = {
 				if (!ballot.audit) {
 					ok = true;
 				}
-			});
+			}
 
 			if (ok) {
 				return res.status(200).json({
