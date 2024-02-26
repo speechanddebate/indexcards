@@ -266,18 +266,19 @@ export const formatPairingBlast = async (queryData, req) => {
 							sectionMessage.judgeHTML += `<p> ${judge.role} ${judge.code} `;
 						} else {
 							sectionMessage.judgeText += `${judge.role} ${judge.first} ${judge.last}`;
+							sectionMessage.judgeText += `${judge.role} ${judge.first} ${judge.middle ? `${judge.middle} ` : ''}${judge.last}`;
 							if (firstJudge++ > 0) {
 								sectionMessage.judgeSingle += ', ';
 							}
 							sectionMessage.judgeSingle += `${judge.role} ${judge.first} ${judge.last}`;
-							sectionMessage.judgeHTML += `<p> ${judge.role} ${judge.first} ${judge.middle ? `${judge.middle} ` : ''}${judge.last}`;
+							sectionMessage.judgeHTML += `<p>${judge.role} ${judge.first} ${judge.middle ? `${judge.middle} ` : ''}${judge.last}</p>`;
 							if (judge.pronoun) {
 								sectionMessage.judgeText += ` (${judge.pronoun})`;
 								sectionMessage.judgeHTML += `<p style='font-style: italic; font-size: 90%; padding-left: 8pt;'>${judge.pronoun}</p>`;
 							}
 						}
 						sectionMessage.judgeText += `\n`;
-						sectionMessage.judgeHTML += `</p>`;
+						sectionMessage.judgeHTML += `<p></p>`;
 					}
 				}
 
@@ -453,8 +454,8 @@ export const formatPairingBlast = async (queryData, req) => {
 							}
 
 							other.role = `${judgeRole(other, round)} `;
-							judgeMessage.text += `${other.role}${other.first} ${other.last} `;
-							judgeMessage.html += `<p> ${other.role}${other.first} ${other.middle ? `${other.middle} ` : ''}${other.last} `;
+							judgeMessage.text += `${other.role}${other.first}${other.middle ? ` ${other.middle}` : '' } ${other.last}`;
+							judgeMessage.html += `<p>${other.role}${other.first} ${other.middle ? `${other.middle} ` : ''}${other.last}</p>`;
 
 							if (other.pronoun && !round.settings.anonymous_public) {
 								judgeMessage.text += `(${judge.pronoun})`;
