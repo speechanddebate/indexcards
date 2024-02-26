@@ -118,7 +118,7 @@ export const webBlast = async (inputData) => {
 			target_channel  : 'push',
 		};
 
-		axios.post(
+		await axios.post(
 			'https://onesignal.com/api/v1/notifications',
 			notification,
 			{
@@ -176,7 +176,7 @@ export const emailNotify = async (inputData) => {
 	inputData.email = await Promise.all(emailPromise);
 
 	if (inputData.email && inputData.email.length > 0) {
-		emailBlast(inputData);
+		await emailBlast(inputData);
 		return {
 			error   : false,
 			message : `Message emailed to ${inputData.email.length} recipients `,

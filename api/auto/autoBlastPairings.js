@@ -32,9 +32,11 @@ const autoBlastRounds = async () => {
 
 		const rounds = await db.sequelize.query(`
 			select
-				round.id, round.name, round.label, round.published
-			from round
+				round.id, round.name, round.label, round.published,
+				event.tourn tournId
+			from round, event
 			where round.id = :roundId
+			and round.event = event.id
 		`, {
 			replacements: {
 				roundId: queue.round,
@@ -56,11 +58,13 @@ const autoBlastRounds = async () => {
 					update round set published = 1 where round.id = :roundId
 				`, {
 					replacements: {
-						roundId: queue.round,
+						roundId: round.id,
 					},
 					type: db.Sequelize.QueryTypes.UPDATE,
 				});
 			}
+
+			console.log(`round ${round.id} has been marked published`);
 
 			// Docshare rooms
 			await shareRooms(round.id);
@@ -75,6 +79,10 @@ const autoBlastRounds = async () => {
 		}
 
 		if (queue.tag !== 'publish') {
+
+			console.log(`Blasting and here we go with round`);
+			console.log(round);
+
 			// Blast the round! BLAST IT!
 
 			const req = {

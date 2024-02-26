@@ -100,7 +100,7 @@ export const emailBlast = async (inputData) => {
 
 	if (process.env.NODE_ENV === 'production' || config.MAIL_SERVER === 'mail.in.speechanddebate.org') {
 		try {
-			result = transporter.sendMail(messageData);
+			result = await transporter.sendMail(messageData);
 		} catch (err) {
 			return new Error(`Failed to send mail: ${err.message}`);
 		}
@@ -181,8 +181,6 @@ export const adminBlast = async (inputData) => {
 			debugLogger.info(`Text ${messageData.text}`);
 			debugLogger.info(`HTML ${messageData.html}`);
 		}
-
-		console.log(`Message Data recipient should be ${messageData.to}`);
 	}
 
 	return {
