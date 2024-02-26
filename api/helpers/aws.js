@@ -7,7 +7,7 @@ import {
 import config from '../../config/config';
 import { errorLogger } from './logger';
 
-const client = new S3Client(config.AWS_CREDENTIALS);
+const client = new S3Client(config.AWS);
 
 const s3Client = {
 
@@ -15,7 +15,7 @@ const s3Client = {
 
 	rm: async (filepath) => {
 		const rmCommand = new DeleteObjectCommand({
-			Bucket     : config.AWS_CREDENTIALS.Bucket,
+			Bucket     : config.AWS.Bucket,
 			Key        : filepath,
 		});
 
@@ -35,8 +35,8 @@ const s3Client = {
 	cp: async (filepath, dest) => {
 
 		const cpCommand = new CopyObjectCommand({
-			CopySource : `${config.AWS_CREDENTIALS.Bucket}/${filepath}`,
-			Bucket     : config.AWS_CREDENTIALS.Bucket,
+			CopySource : `${config.AWS.Bucket}/${filepath}`,
+			Bucket     : config.AWS.Bucket,
 			Key        : dest,
 		});
 
@@ -53,16 +53,16 @@ const s3Client = {
 
 	mv: async (filepath, dest) => {
 
-		console.log(config.AWS_CREDENTIALS.Bucket);
+		console.log(config.AWS.Bucket);
 
 		const cpCommand = new CopyObjectCommand({
-			CopySource : `${config.AWS_CREDENTIALS.Bucket}/${filepath}`,
-			Bucket     : config.AWS_CREDENTIALS.Bucket,
+			CopySource : `${config.AWS.Bucket}/${filepath}`,
+			Bucket     : config.AWS.Bucket,
 			Key        : dest,
 		});
 
 		const rmCommand = new DeleteObjectCommand({
-			Bucket     : config.AWS_CREDENTIALS.Bucket,
+			Bucket     : config.AWS.Bucket,
 			Key        : filepath,
 		});
 
@@ -89,7 +89,7 @@ const s3Client = {
 
 	get : async (filepath) => {
 		const getCommand = new GetObjectCommand({
-			Bucket : config.AWS_CREDENTIALS.Bucket,
+			Bucket : config.AWS.Bucket,
 			Key    : filepath,
 		});
 
@@ -106,7 +106,7 @@ const s3Client = {
 
 	put : async (filepath, data) => {
 		const putCommand = new PutObjectCommand({
-			Bucket : config.AWS_CREDENTIALS.Bucket,
+			Bucket : config.AWS.Bucket,
 			Key    : filepath,
 			Body   : data,
 		});

@@ -71,7 +71,7 @@ export const saveRubric = {
 
 		const db = req.db;
 		const autoSave = req.body;
-		const judgeId = parseInt(req.params.judge_id);
+		const judgeId = parseInt(req.params.judgeId);
 
 		// putting the judgeId into parameters and not the body because
 		// eventually I'll want to put these access checks up the chain

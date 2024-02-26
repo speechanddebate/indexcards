@@ -1,5 +1,5 @@
 import winston from 'winston';
-import config from '../../config/config';
+import config from '../../config/config.js';
 
 const logPath = config.LOG_PATH || '/tmp';
 

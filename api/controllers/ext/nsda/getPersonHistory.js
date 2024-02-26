@@ -4,7 +4,7 @@ import config from '../../../../config/config';
 export const getPersonHistory = {
 	GET: async (req, res) => {
 		const db = req.db;
-		const hash = crypto.createHash('sha256').update(config.NSDA_KEY).digest('hex');
+		const hash = crypto.createHash('sha256').update(config.NSDA_INBOUND_KEY).digest('hex');
 		if (req.query.nsda_key !== hash) {
 			return res.status(401).json({ message: 'Invalid NSDA key' });
 		}

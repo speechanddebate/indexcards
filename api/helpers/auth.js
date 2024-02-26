@@ -1,11 +1,12 @@
 // Parse the Tabroom cookies and determine whether there's an active session
 // import { b64_sha512crypt as crypt } from 'sha512crypt-node';\
-
+import basic from 'basic-auth';
 import { errorLogger } from './logger.js';
 import getSettings from './settings.js';
+import db from './db.js';
+import { config } from '../../config/config.js';
 
 export const auth = async (req) => {
-	const db = req.db;
 
 	if (req.session && req.session.id) {
 		return req.session;
@@ -103,117 +104,526 @@ export const auth = async (req) => {
 					{ skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] },
 				);
 			}
-
 			return session;
 		}
 	}
 };
 
-// Parse the Tabroom cookies and determine whether there's an active session
+export const keyAuth = async (req, res) => {
 
-export const tournAuth = async function(req) {
-
-	const tournId = parseInt(req.params.tourn_id);
-	const session = req.session;
-
-	if (session == null || Object.entries(session).length === 0) {
-		return session;
+	if (!req.headers.authorization) {
+		res.status(401).json('No valid Authorization header found. Access denied.');
+		return;
 	}
 
-	if (typeof (tournId) === 'undefined') {
-		return session;
+	// Legacy support for the Hardy Hacky Keys
+	if (config.LEGACY_KEYS?.[req.params?.area?.toUpperCase()]?.KEY) {
+		console.log(`Checking request against legacy keys`);
+		const hash = crypto.createHash('sha256').update(config[req.params.area.toUpperCase()].KEY).digest('hex');
+		const keyTag = `${req.params.area}_key`;
+
+		if (
+			req.query?.[keyTag] === hash
+			|| req.body?.[keyTag] === hash
+		) {
+			const person = db.summon(db.Person, 3);
+			req.session = { person };
+			return req.session;
+		}
 	}
 
-	// You have already demanded this of me, foul knave!  Begone!
-	if (req.session[tournId]) {
-		return session;
-	}
+	const authHeader = basic(req);
+	const personId = parseInt(authHeader.name);
+	const key = authHeader.pass;
 
-	session[tournId] = {};
-
-	// You are verily a Deity, a god amongst us humble mortals.  Pass, and be
-	// welcomed, unless we have to specially check what your perms are for
-	// display or contact purposes (this skip_admin flag)
-
-	if (req.session.site_admin) {
-		session[tournId].level = 'owner';
-		session[tournId].menu  = 'all';
-		return session;
-	}
-
-	// Dost thou hath the keys to this gate?
-
-	const result = await req.db.permission.findAll({
-		where: { tourn: tournId, person: req.session.person },
+	const persons = await db.sequelize.query(`
+		select * from person where id = :personId
+		and exists (
+			select ps.id from person_setting ps
+			where ps.person = person.id
+			and ps.value = :key
+		)
+	`, {
+		replacements: { personId, key },
+		type: db.sequelize.QueryTypes.SELECT,
 	});
 
-	if (result.count < 1) {
+	if (persons.length < 1) {
+		res.status(401).json('No valid Authorization header found. Access denied.');
+		return;
+	}
 
-		delete session[tournId];
+	const person = persons.shift();
+
+	if (!person && !person.id) {
+		res.status(401).json('No valid Authorization header found. Access denied.');
+		return;
+	}
+
+	person.settings = await getSettings(
+		'person',
+		person.id,
+		{ skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] },
+	);
+
+	// The area determines whether the user has access to external API functions
+	// in question; which has to be granted by a site admin.  So the caselist functions
+	// require a user with an API key who also has a person_setting named api_auth_caselist.
+
+	// Unless the area is a tournament related one, in which case the person just needs
+	// top level access to the tournament.
+
+	if (req.params.area === 'tourn' && req.params.tournId) {
+
+		const perms = await tournPerms(req.params.tournId, req.session.person);
+		if ( perms.tourn[req.params.tournId] === 'owner'
+			|| perms.tourn[req.params.tournId] === 'tabber'
+		) {
+			req.session.person = person;
+			req.session.perms = perms;
+
+			return req.session;
+		}
 
 	} else {
 
-		result.forEach(perm => {
+		// Check the requested area parameter to determine whether the user has access
+		const authTag = `api_auth_${req.params.area}`;
 
-			let current = '';
-			if (session[tournId]) {
-				current = session[tournId].level;
-			}
-
-			if (perm.tag === 'contact') {
-				session[tournId].contact = true;
-			} else if (
-
-				perm.tag === 'owner'
-				|| current === 'owner'
-			) {
-
-				// Nothing should override if I'm the owner already, so let's
-				// just skip the rest and clear the flags
-				session[tournId].level = 'owner';
-				session[tournId].menu = 'all';
-				delete session[tournId].events;
-
-			} else if (
-				perm.tag === 'tabber'
-				|| current === 'tabber'
-			) {
-				session[tournId].level = 'tabber';
-				session[tournId].menu  = 'all';
-				delete session[tournId].events;
-
-			} else if (
-				perm.tag === 'by_event'
-				|| current === 'by_event'
-			) {
-				session[tournId].level  = 'by_event';
-				session[tournId].menu   = 'events';
-
-			} else if (
-				perm.tag === 'checker'
-			) {
-				session[tournId].level  = 'checker';
-				session[tournId].menu   = 'none';
-			}
-
-			session[tournId].events = {};
-
-			if (perm.details && (perm.tag === 'checker' || perm.tag === 'by_event')) {
-
-				if (typeof perm.details === 'object') {
-					session[tournId].events = perm.details;
-				} else {
-					try {
-						session[tournId].events = JSON.parse(perm.details);
-					} catch (err) {
-						errorLogger.info(err);
-					}
-				}
-			}
-		});
+		if (authTag && person.settings?.[authTag]) {
+			req.session = { person };
+			return req.session;
+		}
+		return res.status(400).json(`No user with a valid API key found for area ${authTag}`);
 	}
 
-	return session;
+	return false;
+};
+
+export const tabAuth = async (req) => {
+
+	if (!req.session || !req.session.person) {
+		return;
+	}
+
+	if (!req.session.perms || !req.session.perms?.tourn) {
+		req.session.perms = {
+			tourn    : {},
+			event    : {},
+			category : {},
+		};
+	}
+
+	// User request must have access to the tournament.  Figure out how!
+	const tournId = req.params.tournId;
+	const typeId  = req.params.typeId;
+	const subType = req.params.subType;
+
+	let tourn = {};
+
+	try {
+		tourn = await db.summon(db.tourn, tournId);
+	} catch (err) {
+		return;
+	}
+
+	let perms = {};
+
+	if (req.session.site_admin) {
+		req.session.perms.tourn[tournId] = 'owner';
+		req.session.tourn = tourn;
+		perms = req.session.perms;
+	} else {
+
+		perms = await tournPerms(tournId, req.session.person);
+
+		if (!perms || !perms.tourn[tournId]) {
+			return req.session;
+		}
+
+		req.session.tourn = tourn;
+		req.session.perms.tourn[tournId] = perms.tourn[tournId];
+	}
+
+	Object.keys(perms.event).forEach( eventId => {
+		req.session.perms.event[eventId] = perms.event[eventId];
+	});
+
+	Object.keys(perms.category).forEach( categoryId => {
+		req.session.perms.category[categoryId] = perms.category[categoryId];
+	});
+
+	// Top level tournament access.  Things for checkers etc will go under /all,
+	// where fine grained permissions are managed locally.
+
+	if (!subType) {
+		if (perms.tourn[tournId] === 'owner' || perms.tourn[tournId] === 'tabber') {
+			return req.session;
+		}
+		delete req.session.tourn;
+		delete req.session.perms;
+		return req.session;
+	}
+
+	if (subType === 'all') {
+		return req.session;
+	}
+
+	// If it's a section, then I check up the chain for a round, event and tourn that
+	// matches the parent.
+
+	if (subType === 'section') {
+		const outputs = await db.sequelize.query(`
+			select
+				${subType}.*,
+				round.id round,
+				event.category category,
+				event.tourn tourn
+			from ${subType}, round, event
+			where ${subType}.id = :typeId
+				and ${subType}.round = round.id
+				and round.event = event.id
+				and event.tourn = :tournId
+		`, {
+			replacements: {
+				typeId,
+				tournId,
+			},
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		if (!outputs || !outputs.length > 0) {
+			delete req.session.tourn;
+			delete req.session.perms;
+			return req.session;
+		}
+
+		const output = outputs.shift();
+
+		if (
+			perms.tourn[tournId] === 'owner'
+			|| perms.tourn[tournId] === 'tabber'
+			|| req.session.perms.events?.[output.event].tag === 'tabber'
+			|| req.session.perms.categories?.[output.category].tag === 'tabber'
+		) {
+			req.session[subType] = output;
+			return req.session;
+		}
+		delete req.session.tourn;
+		delete req.session.perms;
+		return req.session;
+	}
+
+	// If we're in a timeslot and you have non tournament level permissions, filter only
+	// those timeslots which have rounds for the events that you are allowed access.
+
+	if (subType === 'timeslot') {
+
+		let queryLimiter = '';
+
+		const replacements = {
+			eventIds   : [],
+			timeslotId : req.params.typeId,
+			tournId    : req.params.tournId,
+		};
+
+		if (perms.tourn[tournId] !== 'owner' && perms.tourn[tournId] !== 'tabber') {
+
+			if (req.session.perms?.event) {
+				for (const eventId of Object.keys(req.session.perms.event)) {
+					if (req.session.perms.event[eventId] === 'tabber') {
+						replacements.eventIds.push(eventId);
+					}
+				}
+
+				queryLimiter = `
+					and exists (
+						select round.id
+							from round
+						where round.timeslot = timeslot.id
+							and round.event IN (:eventIds)
+					)
+				`;
+			}
+		}
+
+		const outputs = await db.sequelize.query(`
+			select
+				${subType}.*,
+				GROUP_CONCAT(event.id) as events
+			from ${subType}, round, event
+			where ${subType}.id = :timeslotId
+				and ${subType}.id = round.${subType}
+				and round.event = event.id
+				and event.tourn = :tournId
+				${queryLimiter}
+			group by ${subType}.id
+		`, {
+			replacements,
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		if (!outputs || !outputs.length > 0) {
+			delete req.session.tourn;
+			delete req.session.perms;
+			return req.session;
+		}
+
+		const output = outputs.shift();
+		req.session[subType] = output;
+		if (output.events) {
+			req.session.event = output.events.split(',');
+		}
+
+		return req.session;
+	}
+
+	// If the data table's parent is an Event, it can go here and be reachable by an
+	// event level permission.
+
+	if (subType === 'round' || subType === 'entry') {
+		const outputs = await db.sequelize.query(`
+			select
+				${subType}.*,
+				event.category category,
+				event.tourn tourn
+			from ${subType}, event
+			where ${subType}.id = :typeId
+				and ${subType}.event = event.id
+				and event.tourn = :tournId
+		`, {
+			replacements: {
+				typeId,
+				tournId,
+			},
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		if (!outputs || !outputs.length > 0) {
+			delete req.session.tourn;
+			delete req.session.perms;
+			return req.session;
+		}
+
+		const output = outputs.shift();
+
+		if (
+			perms.tourn[tournId] === 'owner'
+			|| perms.tourn[tournId] === 'tabber'
+			|| perms.tourn[tournId] === 'checker'
+			|| req.session.perms.event?.[output.event]
+			|| req.session.perms.category?.[output.category]
+		) {
+			req.session[subType] = output;
+			return req.session;
+		}
+
+		delete req.session.tourn;
+		delete req.session.perms;
+		return req.session;
+	}
+
+	// If the data table's parent is a Category, it can go here and be reachable by an
+	// category level permission.
+
+	if (subType === 'event' || subType === 'judge' || subType === 'jpool') {
+
+		const outputs = await db.sequelize.query(`
+			select
+				${subType}.*,
+				category.tourn tournId
+			from ${subType}, category
+			where ${subType}.id = :typeId
+				and ${subType}.category = category.id
+				and category.tourn = :tournId
+		`, {
+			replacements: {
+				typeId,
+				tournId,
+			},
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		if (!outputs || !outputs.length > 0) {
+			delete req.session.tourn;
+			delete req.session.perms;
+			return req.session;
+		}
+
+		const output = outputs.shift();
+
+		if (
+			perms.tourn[tournId] === 'owner'
+			|| perms.tourn[tournId] === 'tabber'
+			|| (subType === 'event' && req.session.perms.event?.[typeId].tag === 'tabber')
+			|| req.session.perms.categories?.[output.category].tag === 'tabber'
+		) {
+			req.session[subType] = output;
+			return req.session;
+		}
+
+		delete req.session.tourn;
+		delete req.session.perms;
+		return req.session;
+	}
+
+	if (subType === 'category') {
+		const category = await db.summon(db.category, typeId);
+		if (category.tourn !== req.session.tourn.id) {
+			delete req.session.tourn;
+			delete req.session.perms;
+			return req.session;
+		}
+
+		if (
+			perms.tourn[tournId] === 'owner'
+			|| perms.tourn[tournId] === 'tabber'
+			|| req.session.perms.categories?.[typeId].tag === 'tabber'
+		) {
+			req.session.category = category;
+			return req.session;
+		}
+		delete req.session.tourn;
+		delete req.session.perms;
+		return req.session;
+	}
+
+	if ( perms.tourn[tournId] === 'owner' || perms.tourn[tournId] === 'tabber') {
+		return req.session;
+	}
+};
+
+export const tournPerms = async (tournId, personId) => {
+
+	const permissions = await db.sequelize.query(`
+		select permission.id, permission.event, permission.category, permission.tag
+			from permission
+		where person = :personId
+			and tourn = :tournId
+			order by tag
+	`, {
+		replacements: {
+			tournId,
+			personId,
+		},
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	if (permissions.length < 1) {
+		return;
+	}
+
+	const perms = {
+		tourn    : {},
+		event    : {},
+		category : {},
+	};
+
+	for await (const newPerm of permissions) {
+
+		if (newPerm.event) {
+			perms.event[newPerm.event] = newPerm.tag;
+		} else if (newPerm.category) {
+			perms.category[newPerm.category] = newPerm.tag;
+		} else if (
+			(newPerm.tag === 'owner')
+			|| (newPerm.tag === 'tabber'
+					&& perms.tourn[tournId] !== 'owner')
+			|| (newPerm.tag === 'checker'
+					&& perms.tourn[tournId] !== 'owner'
+					&& perms.tourn[tournId] !== 'tabber')
+		) {
+			perms.tourn[tournId] = newPerm.tag;
+		}
+	}
+
+	if (!perms.tourn[tournId] && permissions.length > 0) {
+		perms.tourn[tournId] = 'limited';
+	}
+
+	return perms;
+};
+
+export const coachAuth = async (req, res) => {
+
+	const chapterId = req.params.chapterId;
+	let chapterAccess = false;
+
+	if (req.session.site_admin) {
+		chapterAccess = true;
+	} else {
+
+		const perms = await db.sequelize.query(`
+			select perm.id
+			from permission perm
+			where perm.person = :personId
+				and perm.tag = 'chapter'
+				and perm.chapter = :chapterId
+		`, {
+			replacements: {
+				chapterId,
+				personId: req.session.person,
+			},
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		if (perms && perms[0].id) {
+			chapterAccess = true;
+		}
+	}
+
+	if (chapterAccess) {
+		return db.summon(db.chapter, chapterId);
+	}
+
+	res.status(401).json('You have no access permissions to that institution');
+};
+
+export const localAuth = async (req, res) => {
+
+	// This one's a bit more of a pain because it handles several
+	// different types of request
+
+	const localType = req.params.localType;
+	const localId = req.params.localId;
+
+	if (
+		localType === 'circuit'
+		|| localType === 'chapter'
+		|| localType === 'diocese'
+		|| localType === 'district'
+	) {
+
+		const permissions = await db.sequelize.query(`
+			select perm.id, perm.tag
+				from permission perm
+			where perm.person = :personId
+				and perm.${localType} = :localId
+		`, {
+			replacements : {
+				localId,
+				personId: req.session.person,
+			},
+			type: db.sequelize.queryTypes.SELECT,
+		});
+
+		if (permissions && permissions[0]?.tag) {
+			const local = await db.summon(db[localType], localId);
+			return { local, perms: permissions[0].tag };
+		}
+	}
+
+	res.status(401).json(`You have no access permissions to that ${localType}`);
+};
+
+export const hostAuth = async (req, res) => {
+
+	// Request must originate from the local cron authorized hosts.
+	// otherwise, in theory someone could try to DDOS us or something here
+	if (req.config.CRON_HOSTS.includes(req.ip)) {
+		return true;
+	}
+	res.status(401).json(`Host ${req.ip} is not allowed to access automatic functions`);
 };
 
 export const checkJudgePerson = async (req, judgeId) => {
@@ -226,7 +636,7 @@ export const checkJudgePerson = async (req, judgeId) => {
 		return true;
 	}
 
-	const judge = await req.db.summon(req.db.judge, judgeId);
+	const judge = await db.summon(db.judge, judgeId);
 
 	if (judge.person === req.session.person) {
 		return true;
@@ -237,22 +647,68 @@ export const checkJudgePerson = async (req, judgeId) => {
 
 export const checkPerms = async (req, res, query, replacements) => {
 
-	if (req.session.site_admin) {
+	if (!req.session) {
+		res.status(401).json('You must be logged in to access that function');
+		return;
+	}
+
+	if (req.session?.site_admin) {
 		return true;
 	}
 
-	const [permsData] = await req.db.sequelize.query(query, {
+	const [permsData] = await db.sequelize.query(query, {
 		replacements,
-		type: req.db.sequelize.QueryTypes.SELECT,
+		type: db.sequelize.QueryTypes.SELECT,
 	});
 
 	if (!permsData) {
-		return false;
+		res.status(401).json('Data about that tournament element was not found');
+		return;
+	}
+
+	const permissions = await db.sequelize.query(`
+		select permission.*
+			from permission
+		where permission.person = :personId
+			and permission.tourn = :tournId
+	`, {
+		replacements: {
+			personId: req.session.person,
+			tournId: permsData.tourn,
+		},
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	if (!permissions) {
+		res.status(401).json('You have no access permissions to tab that tournament');
+		return;
+	}
+
+	const perms = {};
+
+	for await (const perm of permissions) {
+		if (perms.details) {
+			perms[perm.tag] = JSON.parse(perms.details);
+		} else {
+			perms[perm.tag] = true;
+		}
+	}
+
+	if (perms.owner) {
+		return true;
+	}
+
+	if (permsData.ownerAccess) {
+		res.status(401).json('Only tournament owners may access that function');
+		return;
+	}
+
+	if (perms.tabber) {
+		return true;
 	}
 
 	if (permsData.site && permsData.timeslot) {
-
-		const okEvents = await req.db.sequelize.query(`
+		const okEvents = await db.sequelize.query(`
 			select
 				distinct round(event) id
 			from round
@@ -263,24 +719,16 @@ export const checkPerms = async (req, res, query, replacements) => {
 				timeslotId : permsData.timeslot,
 				siteId     : permsData.site,
 			},
-			type: req.db.sequelize.QueryTypes.SELECT,
+			type: db.sequelize.QueryTypes.SELECT,
 		});
 
 		// eslint-disable-next-line no-restricted-syntax
 		for await (const event of okEvents) {
-			if (!permsData.events) {
-				permsData.events = [];
+			if (!permsData.event) {
+				permsData.event = {};
 			}
-			permsData.events.push(event.id);
+			permsData.event[event.id] = 'checker';
 		}
-	}
-
-	if (permsData.tourn !== parseInt(req.params.tourn_id)) {
-		errorLogger.info({
-			error     : true,
-			message   : `You have a mismatch between the tournament element tourn ${permsData.tourn} and its parent tournament ${req.params.tourn_id}`,
-		});
-		return false;
 	}
 
 	if (req.session[permsData.tourn]) {
@@ -307,7 +755,7 @@ export const checkPerms = async (req, res, query, replacements) => {
 
 			if (
 				(req.threshold === 'tabber' || req.threshold === 'admin')
-				&& req.session[permsData.tourn].events[permsData.event] === 'tabber'
+				&& req.session[permsData.tourn].event[permsData.event] === 'tabber'
 			) {
 				return true;
 			}
@@ -444,7 +892,8 @@ export const timeslotCheck = async (req, res, timeslotId) => {
 
 export const jpoolCheck = async (req, res, jpoolId) => {
 	const jpoolQuery = `
-		select category.tourn, jpool.id jpool, round.event event, st.value timeslot, jpool.site
+		select category.tourn, jpool.id jpool, round.event event,
+			st.value timeslot, jpool.site
 			from (jpool, category)
 				left join jpool_round jpr on jpr.jpool = jpool.id
 				left join round on round.id = jpr.round

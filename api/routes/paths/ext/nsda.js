@@ -6,8 +6,8 @@ import { postPayment } from '../../../controllers/ext/nsda/payment';
 import { syncNatsAppearances } from '../../../controllers/ext/nsda/natsAppearances';
 
 export default [
-	{ path : '/nsda/history'            , module : getPersonHistory },
-	{ path : '/nsda/payment'            , module : postPayment },
-	{ path : '/nsda/payment/{tourn_id}' , module : postPayment },
-	{ path : '/nsda/nats-appearances'   , module : syncNatsAppearances },
+	{ path : '/ext/nsda/history'                  , module : getPersonHistory }    ,
+	{ path : '/ext/nsda/payment'                  , module : postPayment }         ,
+	{ path : '/ext/nsda/payment/tourn/{tourn_id}' , module : postPayment }         ,
+	{ path : '/ext/nsda/nats/appearances'         , module : syncNatsAppearances } ,
 ];

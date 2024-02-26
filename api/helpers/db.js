@@ -1,9 +1,9 @@
 import { Sequelize, DataTypes } from 'sequelize';
 import fs from 'fs';
 import { join } from 'path';
-import { errorLogger, debugLogger } from './logger';
+import { errorLogger, debugLogger } from './logger.js';
 
-import config from '../../config/config';
+import config from '../../config/config.js';
 
 const sequelize = new Sequelize(
 	config.DB_DATABASE,
@@ -12,10 +12,12 @@ const sequelize = new Sequelize(
 	config.sequelizeOptions
 );
 
-// By default Sequelize wants you to try...catch every single database query
+// By default Sequelize wants you to try...catch every single database call
 // for Reasons?  Otherwise all your database errors just go unprinted and you
 // get a random unfathomable 500 error.  Yeah, because that's great.  This will
-// try/catch every query so I don't have to deal.
+// try/catch every query so I don't have to deal with that nonsense,
+// and will get errors logged for free.
+
 const errorsPlease = ['findAll', 'findOne', 'save', 'create', 'findByPk'];
 
 const dbError = (err) => {
@@ -113,9 +115,9 @@ db.circuit.belongsToMany(db.chapter, { as: 'Chapters', foreignKey: 'circuit', th
 db.circuit.hasMany(db.file       , { as: 'Files'       , foreignKey: 'circuit' });
 db.circuit.hasMany(db.permission , { as: 'Permissions' , foreignKey: 'circuit' });
 
-db.contact.belongsTo(db.school , { as: 'School'  , foreignKey: 'school'});
-db.contact.belongsTo(db.person , { as: 'Person'  , foreignKey: 'person'});
-db.contact.belongsTo(db.person , { as: 'Creator' , foreignKey: 'created_by'});
+db.contact.belongsTo(db.school , { as: 'School'  , foreignKey: 'school' });
+db.contact.belongsTo(db.person , { as: 'Person'  , foreignKey: 'person' });
+db.contact.belongsTo(db.person , { as: 'Creator' , foreignKey: 'created_by' });
 
 db.site.belongsTo(db.person,  { as: 'Host',    foreignKey: 'host' });
 db.site.belongsTo(db.circuit, { as: 'Circuit', foreignKey: 'circuit' });
@@ -280,10 +282,10 @@ db.event.belongsTo(db.category,      { as: 'Category',     foreignKey: 'category
 db.event.belongsTo(db.pattern,       { as: 'Pattern',      foreignKey: 'pattern' });
 db.event.belongsTo(db.ratingSubset,  { as: 'RatingSubset', foreignKey: 'rating_subset' });
 
-db.event.hasMany(db.file,      { as: 'Files',      foreignKey: 'event' });
-db.event.hasMany(db.entry,     { as: 'Entries',    foreignKey: 'event' });
-db.event.hasMany(db.round,     { as: 'Rounds',     foreignKey: 'event' });
-db.event.hasMany(db.changeLog, { as: 'ChangeLogs', foreignKey: 'event' });
+db.event.hasMany(db.file       , { as: 'Files'       , foreignKey: 'event' });
+db.event.hasMany(db.entry      , { as: 'Entries'     , foreignKey: 'event' });
+db.event.hasMany(db.round      , { as: 'Rounds'      , foreignKey: 'event' });
+db.event.hasMany(db.changeLog  , { as: 'ChangeLogs'  , foreignKey: 'event' });
 
 db.event.belongsToMany(db.sweepProtocol, { through: 'sweep_events' });
 
@@ -331,7 +333,7 @@ db.school.belongsTo(db.tourn    , { as: 'Tourn'   , foreignKey: 'tourn' });
 db.school.belongsTo(db.chapter  , { as: 'Chapter' , foreignKey: 'chapter' });
 db.school.belongsTo(db.region   , { as: 'Region'  , foreignKey: 'region' });
 db.school.belongsTo(db.district , { as: 'District', foreignKey: 'district' });
-db.school.belongsToMany(db.person, { as: 'Contacts', foreignKey: 'school', through: 'contact'});
+db.school.belongsToMany(db.person, { as: 'Contacts', foreignKey: 'school', through: 'contact' });
 
 db.fine.belongsTo(db.person  , { as: 'LeviedBy'  , foreignKey: 'levied_by' });
 db.fine.belongsTo(db.person  , { as: 'DeletedBy' , foreignKey: 'deleted_by' });
@@ -616,13 +618,15 @@ db.conflict.belongsTo(db.person,  { as: 'AddedBy'    , foreignKey: 'added_by' })
 
 // Permissions
 
-db.permission.belongsTo(db.person,   { as: 'Person',   foreignKey: 'person' });
-db.permission.belongsTo(db.district, { as: 'District', foreignKey: 'district' });
-db.permission.belongsTo(db.tourn,    { as: 'Tourn',    foreignKey: 'tourn' });
-db.permission.belongsTo(db.region,   { as: 'Region',   foreignKey: 'region' });
-db.permission.belongsTo(db.chapter,  { as: 'Chapter',  foreignKey: 'chapter' });
-db.permission.belongsTo(db.circuit,  { as: 'Circuit',  foreignKey: 'circuit' });
-db.permission.belongsTo(db.category, { as: 'Category', foreignKey: 'category' });
+db.permission.belongsTo(db.person   , { as: 'Person'   , foreignKey: 'person' });
+db.permission.belongsTo(db.person   , { as: 'Creator'  , foreignKey: 'created_by' });
+db.permission.belongsTo(db.district , { as: 'District' , foreignKey: 'district' });
+db.permission.belongsTo(db.tourn    , { as: 'Tourn'    , foreignKey: 'tourn' });
+db.permission.belongsTo(db.region   , { as: 'Region'   , foreignKey: 'region' });
+db.permission.belongsTo(db.chapter  , { as: 'Chapter'  , foreignKey: 'chapter' });
+db.permission.belongsTo(db.circuit  , { as: 'Circuit'  , foreignKey: 'circuit' });
+db.permission.belongsTo(db.category , { as: 'Category' , foreignKey: 'category' });
+db.permission.belongsTo(db.event    , { as: 'Event'    , foreignKey: 'event' });
 
 // Sweepstakes.  Their very own special world.  That I hate.
 db.sweepProtocol.belongsToMany(db.sweepProtocol,
@@ -745,6 +749,7 @@ db.summon = async (dbTable, objectId) => {
 	}
 
 	const dbData = dbObject.get({ plain: true });
+
 	dbData.table = dbTable.name;
 
 	if (dbData.Settings) {
@@ -758,8 +763,19 @@ db.summon = async (dbTable, objectId) => {
 						dbData.settings[item.tag] = item.value_date;
 					}
 				} else if (item.value === 'json') {
-					if (item.value_text !== null) {
-						dbData.settings[item.tag] = JSON.parse(item.value_text);
+					if (item.value_text) {
+						let jsonOutput;
+						try {
+							jsonOutput = JSON.parse(item.value_text);
+						} catch (err) {
+							console.log(`I do not care about ${err} here so back off, stackoverflow`);
+							console.log(`Text causing the error`);
+							console.log(item.tag);
+							console.log(item.value_text);
+						}
+						if (jsonOutput) {
+							dbData.settings[item.tag] = jsonOutput;
+						}
 					}
 				} else if (item.value === 'text') {
 					if (item.value_text !== null) {

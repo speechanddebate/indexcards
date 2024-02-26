@@ -6,7 +6,7 @@ import { testAdminSession } from '../../../../tests/testFixtures';
 
 describe('Caselist Link', () => {
 	it('Creates a caselist link', async () => {
-		const hash = crypto.createHash('sha256').update(config.CASELIST_KEY).digest('hex');
+		const hash = crypto.createHash('sha256').update(config.CASELIST.KEY).digest('hex');
 		await request(server)
 			.post(`/v1/caselist/link`)
 			.set('Accept', 'application/json')

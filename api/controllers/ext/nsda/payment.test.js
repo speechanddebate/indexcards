@@ -16,24 +16,25 @@ describe('Payment Gateway', () => {
 		adminSession = await db.session.findByPk(testAdminSession.id);
 		testTourn = await db.summon(db.tourn, 1);
 		await db.setting(testTourn, 'store_carts', { json: testStoreCartSetting });
+		// NEED to define a test user here with a test API key for the below auth
 	});
 
 	it('Posts a payment into a tournament', async () => {
 
-		const hashDigest = Base64.stringify(hmacSHA512('1234567890abcdef-1', config.NSDA_API_KEY));
+		const hashDigest = Base64.stringify(`1:testAPIKEY`);
 
 		await request(server)
-			.post(`/v1/nsda/payment`)
+			.post(`/v1/ext/nsda/payment`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${adminSession.userkey}`])
+			.set('Authorization', `Basic ${hashDigest}`)
 			.send({
 				tourn_id   : 1,
 				invoice_id : '1234567890abcdef-1',
 				hash_key   : hashDigest,
 				items      : {
-					[config.NSDA_PRODUCT_CODES.tabroom] : 10,
-					[config.NSDA_PRODUCT_CODES.nc] : 20,
-					[config.NSDA_PRODUCT_CODES.nco] : 30,
+					[config.NSDA.PRODUCT_CODES.tabroom] : 10,
+					[config.NSDA.PRODUCT_CODES.nc] : 20,
+					[config.NSDA.PRODUCT_CODES.nco] : 30,
 				},
 			})
 			.expect('Content-Type', /json/)

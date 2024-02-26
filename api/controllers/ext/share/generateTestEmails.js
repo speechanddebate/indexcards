@@ -1,7 +1,7 @@
 // node --experimental-specifier-resolution=node -e 'import("./api/controllers/ext/share/generateTestEmails").then(m => m.init())' 10
 import fs from 'fs';
 import { randomPhrase } from '@speechanddebate/nsda-js-utils';
-import sendMail, { transporter } from './mail';
+import { emailBlast } from '../../../helpers/mail.js';
 import { debugLogger } from '../../../helpers/logger';
 
 const generateTestEmails = async (numberOfEmails = parseInt(process.argv[1]) || 10) => {
@@ -13,25 +13,24 @@ const generateTestEmails = async (numberOfEmails = parseInt(process.argv[1]) || 
 	try {
 		for (let i = 0; i < numberOfEmails; i++) {
 			const phrase = randomPhrase();
-			// eslint-disable-next-line no-await-in-loop
-			promises.push(
-				sendMail(
-					`${phrase}@share.tabroom.com`,
-					`${phrase}@share.tabroom.com`,
-					`Test email ${phrase}`,
-					`Test email ${phrase}`,
-					null,
-					[{ filename: 'Test.docx', file: base64 }],
-				)
-			);
+
+			const messageData = {
+				to      : `${phrase}@share.tabroom.com`,
+				from    : `${phrase}@share.tabroom.com`,
+				subject : `Test email ${phrase}`,
+				text    : `Test email ${phrase}`,
+				emails  : null,
+				attachments: [{ filename: 'Test.docx', file: base64 }],
+			};
+
+			const info = emailBlast(messageData);
+			promises.push(info.result);
 		}
 	} catch (err) {
 		debugLogger.error(err);
 	}
 
 	await Promise.all(promises);
-
-	transporter.close();
 	return true;
 };
 

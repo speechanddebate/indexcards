@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import config from '../../config/config';
 import db from './db';
-import { auth, tournAuth } from './auth';
+import { auth, tabAuth } from './auth';
 import userData from '../../tests/testFixtures';
 
 describe('Authentication Functions', () => {
@@ -47,7 +47,7 @@ describe('Authentication Functions', () => {
 			db,
 			config,
 			params: {
-				tourn_id : testTourn,
+				tournId : testTourn,
 			},
 			cookies : {
 				[config.COOKIE_NAME]: userData.testUserSession.userkey,
@@ -55,11 +55,12 @@ describe('Authentication Functions', () => {
 		};
 
 		req.session = await auth(req);
-		req.session = await tournAuth(req);
+		req.session = await tabAuth(req);
 
 		assert.typeOf(req.session, 'object');
-		assert.equal(req.session[testTourn].level, 'tabber');
-		assert.equal(req.session[testTourn].menu, 'all');
+		assert.typeOf(req.session.perms, 'object');
+		assert.typeOf(req.session.tourn, 'object');
+		assert.equal(req.session.perms.tourn[testTourn], 'tabber');
 	});
 
 	it('Denies user access to a tournament it is not admin for', async () => {
@@ -70,7 +71,7 @@ describe('Authentication Functions', () => {
 			db,
 			config,
 			params: {
-				tourn_id : testNotTourn,
+				tournId : testNotTourn,
 			},
 			cookies : {
 				[config.COOKIE_NAME]: userData.testUserSession.userkey,
@@ -78,10 +79,10 @@ describe('Authentication Functions', () => {
 		};
 
 		req.session = await auth(req);
-		req.session = await tournAuth(req);
+		req.session = await tabAuth(req);
 
 		assert.typeOf(req.session, 'object');
-		assert.isEmpty(req.session[testNotTourn]);
+		assert.isEmpty(req.session?.perms?.tourn);
 	});
 
 	it('Finds a session for an GLP Admin user', async () => {
@@ -109,7 +110,7 @@ describe('Authentication Functions', () => {
 			db,
 			config,
 			params: {
-				tourn_id : testNotTourn,
+				tournId : testNotTourn,
 			},
 			cookies : {
 				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
@@ -117,11 +118,10 @@ describe('Authentication Functions', () => {
 		};
 
 		req.session = await auth(req);
-		req.session = await tournAuth(req);
+		req.session = await tabAuth(req);
 
 		assert.typeOf(req.session, 'object');
-		assert.equal(req.session[testNotTourn].level, 'owner');
-		assert.equal(req.session[testNotTourn].menu, 'all');
+		assert.equal(req.session.perms.tourn[testNotTourn], 'owner');
 	});
 
 });

@@ -7,11 +7,11 @@ import { searchTourns, searchCircuitTourns } from '../../../controllers/public/s
 import { getAds } from '../../../controllers/public/ads';
 
 export default [
-	{ path: '/invite/{webname}'                                     , module : getInvite }           ,
-	{ path: '/invite/tourn/{tourn_id}'                              , module : getInvite }           ,
-	{ path: '/invite/round/{round_id}'                              , module : getRounds }           ,
-	{ path: '/invite/upcoming'                                      , module : futureTourns }        ,
-	{ path: '/invite/upcoming/:circuit'                             , module : futureTourns }        ,
+	{ path: '/public/invite/{webname}'                              , module : getInvite }           ,
+	{ path: '/public/invite/tourn/{tourn_id}'                       , module : getInvite }           ,
+	{ path: '/public/invite/round/{round_id}'                       , module : getRounds }           ,
+	{ path: '/public/invite/upcoming'                               , module : futureTourns }        ,
+	{ path: '/public/invite/upcoming/:circuit'                      , module : futureTourns }        ,
 	{ path: '/public/search/:time/:searchString/circuit/:circuitId' , module : searchCircuitTourns } ,
 	{ path: '/public/search/:time/:searchString'                    , module : searchTourns }        ,
 	{ path: '/public/ads'                                           , module : getAds }              ,

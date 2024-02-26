@@ -1,6 +1,7 @@
-import db from './db';
+import db from './litedb.js';
+import { errorLogger } from './logger.js';
 
-export const getFollowers = async (replacements) => {
+export const getFollowers = async (replacements, options = { recipients: 'all' }) => {
 
 	let whereLimit = '';
 	let fields = '';
@@ -16,6 +17,9 @@ export const getFollowers = async (replacements) => {
 	} else if (replacements.timeslotId) {
 		whereLimit = ` where panel.round = round.id and round.timeslot = :timeslotId `;
 		fields = ',round';
+		if (replacements.eventIds) {
+			whereLimit += `  and round.event IN (:eventIds) `;
+		}
 	} else {
 		return { error: true, message: `No round ID to blast sent.` };
 	}
@@ -48,11 +52,18 @@ export const getFollowers = async (replacements) => {
 		`;
 	}
 
+	if (options.limits?.event ) {
+		queryLimits += `
+			and round.event IN (:eventIds)
+		`;
+		replacements.eventIds = Object.keys(options.limits.event);
+	}
+
 	const persons = [];
 
 	if (replacements.recipients !== 'judges') {
 		const entryIds = await db.sequelize.query(`
-			select person.id
+			select person.id, person.email, person.no_email
 				from (person, entry, entry_student es, student, ballot, panel ${fields})
 			${whereLimit}
 				and panel.id = ballot.panel
@@ -73,7 +84,7 @@ export const getFollowers = async (replacements) => {
 	if (replacements.recipients !== 'entries') {
 
 		const judgeIds = await db.sequelize.query(`
-			select person.id
+			select person.id, person.email, person.no_email
 				from (person, judge, ballot, panel ${fields})
 			${whereLimit}
 				and ballot.panel = panel.id
@@ -87,12 +98,11 @@ export const getFollowers = async (replacements) => {
 		persons.push(...judgeIds);
 	}
 
-	if (!replacements.no_followers) {
+	if (!replacements.noFollowers && !replacements.no_followers) {
 
 		if (replacements.recipients !== 'entries') {
-
 			const judgeFollowers = await db.sequelize.query(`
-				select person.id
+				select person.id, person.email, person.no_email
 					from (person, follower, ballot, panel ${fields})
 				${whereLimit}
 					and ballot.panel = panel.id
@@ -108,9 +118,8 @@ export const getFollowers = async (replacements) => {
 		}
 
 		if (replacements.recipients !== 'judges') {
-
 			const entryFollowers = await db.sequelize.query(`
-				select person.id
+				select person.id, person.email, person.no_email
 					from (person, follower, entry, ballot, panel ${fields})
 				${whereLimit}
 					and ballot.panel = panel.id
@@ -126,6 +135,53 @@ export const getFollowers = async (replacements) => {
 
 			persons.push(...entryFollowers);
 		}
+	}
+
+	if (replacements.sectionFollowers) {
+		const sectionFollowerIds = await db.sequelize.query(`
+			select
+				ps.id, ps.value_text followers
+			from panel_setting ps
+			where ps.panel = :panelId
+				and ps.tag = 'share_followers'
+		`, {
+			replacements,
+			type: db.Sequelize.QueryTypes.SELECT,
+		});
+
+		let followerIds = '';
+
+		if (sectionFollowerIds[0].followers) {
+			try {
+				followerIds = JSON.parse(sectionFollowerIds[0].followers).join(',');
+			} catch (err) {
+				errorLogger.info(err);
+			}
+		}
+
+		const sectionFollowers = await db.sequelize.query(`
+			select person.id, person.email, person.no_email
+				from (person)
+			where person.id IN (:followerIds)
+				and person.no_email = 0
+		`, {
+			replacements : { followerIds },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+
+		persons.push(...sectionFollowers);
+	}
+
+	if (replacements.returnEmails) {
+		const personIds = {};
+		const unique = [];
+		for (const person of persons) {
+			if (!personIds[person.id]) {
+				personIds[person.id] = true;
+				unique.push(person.email);
+			}
+		}
+		return unique;
 	}
 
 	const personIds = [];
@@ -189,6 +245,13 @@ export const getPairingFollowers = async (replacements, options = { recipients: 
 		`;
 	}
 
+	if (options.limits?.event ) {
+		queryLimits += `
+			and round.event IN (:eventIds)
+		`;
+		replacements.eventIds = Object.keys(options.limits.event);
+	}
+
 	const blastBy = {
 		entries : {},
 		judges  : {},
@@ -223,7 +286,6 @@ export const getPairingFollowers = async (replacements, options = { recipients: 
 			if (!blastBy.entries[person.entry]) {
 				blastBy.entries[person.entry] = [];
 			}
-
 			blastBy.entries[person.entry].push(`${person.id}`);
 		}
 	}
@@ -484,7 +546,7 @@ export const getTimeslotJudges = async (replacements, options = { recipients: 'a
 		type: db.sequelize.QueryTypes.SELECT,
 	});
 
-	rawJudgePeople.forEach( (person) => {
+	for await (const person of rawJudgePeople) {
 		if (!person.judge) {
 			return;
 		}
@@ -501,7 +563,7 @@ export const getTimeslotJudges = async (replacements, options = { recipients: 'a
 		}
 
 		blastBy.judges[person.judge].email.push(person.email);
-	});
+	}
 
 	if (!options.no_followers) {
 
@@ -526,8 +588,7 @@ export const getTimeslotJudges = async (replacements, options = { recipients: 'a
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
-		rawJudgeFollowers.forEach( (person) => {
-
+		for await (const person of rawJudgeFollowers) {
 			if (!person.judge) {
 				return;
 			}
@@ -543,7 +604,7 @@ export const getTimeslotJudges = async (replacements, options = { recipients: 'a
 			}
 
 			blastBy.judges[person.judge].email.push(`${person.email}`);
-		});
+		}
 	}
 
 	const blastAll = {

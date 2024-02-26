@@ -3,6 +3,10 @@ import { errorLogger } from './logger';
 
 export const getSettings = async (model, id, options = {} ) => {
 
+	if (!id) {
+		return;
+	}
+
 	const replacements = { id };
 
 	let queryLimits = '';

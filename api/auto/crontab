@@ -1,0 +1,7 @@
+# Automatic publication of round results
+* * * * * /usr/bin/node /www/indexcards/api/auto/publishResults.js
+* * * * * /usr/bin/node /www/indexcards/api/auto/autoBlastPairings.js
+
+# NAUDL post to Salesforce
+15 3 * * * /usr/bin/node /www/indexcards/api/auto/naudl/chapters.js
+25 3 * * * /usr/bin/node /www/indexcards/api/auto/naudl/students.js
