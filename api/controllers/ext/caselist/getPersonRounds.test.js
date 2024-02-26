@@ -1,4 +1,3 @@
-import crypto from 'crypto';
 import request from 'supertest';
 import { assert } from 'chai';
 import config from '../../../../config/config';
@@ -8,9 +7,8 @@ import { testAdminSession } from '../../../../tests/testFixtures';
 
 describe('Person Rounds', () => {
 	it('Returns rounds for a person', async () => {
-		const hash = crypto.createHash('sha256').update(config.CASELIST.KEY).digest('hex');
 		const res = await request(server)
-			.get(`/v1/caselist/rounds?person_id=17145&caselist_key=${hash}`)
+			.get(`/v1/ext/caselist/rounds?person_id=17145`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
 			.expect('Content-Type', /json/)
@@ -23,9 +21,8 @@ describe('Person Rounds', () => {
 		await db.sequelize.query(`
 			INSERT INTO caselist (slug, eventcode, person) VALUES ('/test', 103, 17145)
         `);
-		const hash = crypto.createHash('sha256').update(config.CASELIST.KEY).digest('hex');
 		const res = await request(server)
-			.get(`/v1/caselist/rounds?slug=/test&caselist_key=${hash}`)
+			.get(`/v1/ext/caselist/rounds?slug=/test`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
 			.expect('Content-Type', /json/)

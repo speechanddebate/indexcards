@@ -1,4 +1,3 @@
-
 const getPersonStudents = {
 	GET: async (req, res) => {
 		const db = req.db;
@@ -47,15 +46,6 @@ getPersonStudents.GET.apiDoc = {
 			schema      : {
 				type    : 'integer',
 				minimum : 1,
-			},
-		},
-		{
-			in          : 'query',
-			name        : 'caselist_key',
-			description : 'Key for caselist API access',
-			required    : true,
-			schema      : {
-				type    : 'string',
 			},
 		},
 	],
