@@ -145,15 +145,6 @@ getPersonRounds.GET.apiDoc = {
 				type    : 'boolean',
 			},
 		},
-		{
-			in          : 'query',
-			name        : 'caselist_key',
-			description : 'Key for caselist API access',
-			required    : true,
-			schema      : {
-				type    : 'string',
-			},
-		},
 	],
 	responses: {
 		200: {
