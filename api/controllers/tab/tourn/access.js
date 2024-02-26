@@ -179,7 +179,7 @@ export const changeAccess = {
 			return;
 		}
 
-		if ( !target.mustBe.includes(req.perms.tag)) {
+		if ( !req.perms?.tag || !target.mustBe.includes(req.perms?.tag)) {
 			res.status(401).json('You do not have sufficient access to grant that level of permissions');
 			return;
 		}
