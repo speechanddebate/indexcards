@@ -56,7 +56,7 @@ export const changeAccess = {
 				if (
 					perm.Event
 					|| perm.Category
-					|| (perm.tag === 'owner' && req.perms.tag !== 'owner')
+					|| (perm.tag === 'owner' && req.session.perms.tourn[req.params.tournId] !== 'owner')
 				) {
 					return;
 				}
@@ -86,8 +86,8 @@ export const changeAccess = {
 			// Only a contact or owner may adjust who is a contact
 
 			if (
-				req.perms.tag !== 'owner'
-				&& !(targetPerson.id === req.session.person && req.perms.contact)
+				req.session.perms.tourn[req.params.tournId] !== 'owner'
+				&& !(targetPerson.id === req.session.person && req.session.perms.contact[req.params.tournId])
 			) {
 				res.status(401).json('Only tournament owners may adjust tournament contacts other than themselves');
 				return;
@@ -179,7 +179,7 @@ export const changeAccess = {
 			return;
 		}
 
-		if ( !req.perms?.tag || !target.mustBe.includes(req.perms?.tag)) {
+		if ( !req.session.perms.tourn[req.params.tournId] || !target.mustBe.includes(req.session.perms.tourn[req.params.tournId])) {
 			res.status(401).json('You do not have sufficient access to grant that level of permissions');
 			return;
 		}
@@ -264,7 +264,7 @@ export const changeAccess = {
 
 			if (
 				perm.tag === 'owner'
-				&& req.perms.tag !== 'owner'
+				&& req.session.perms.tourn[req.params.tournId] !== 'owner'
 			) {
 				res.status(401).json('Only an owner-level account may delete another owner account!');
 				return;
