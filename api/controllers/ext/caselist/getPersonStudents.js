@@ -12,20 +12,19 @@ const getPersonStudents = {
                 S.last,
                 CONCAT(S.first, ' ', S.last) AS 'name'
             FROM student S
-
-            INNER JOIN student S2 ON S2.chapter = S.chapter AND S2.id <> S.id
-            INNER JOIN entry_student ES ON ES.student = S2.id
+			INNER JOIN chapter C ON C.id = S.chapter
+            INNER JOIN entry_student ES ON ES.student = S.id
             INNER JOIN entry E ON E.id = ES.entry
             INNER JOIN tourn T ON T.id = E.tourn
-
-            INNER JOIN school SC ON SC.chapter = S2.chapter
-            INNER JOIN tourn T2 ON T2.id = SC.tourn
-            WHERE S2.person = ?
+			WHERE
+				C.id IN (
+					SELECT DISTINCT chapter FROM student S2 WHERE S2.retired = 0 AND S2.person = ?
+					UNION ALL SELECT DISTINCT chapter FROM chapter_judge CJ WHERE CJ.retired = 0 AND CJ.person = ?
+					GROUP BY chapter
+				)
                 AND S.retired = 0
                 AND T.hidden <> 1
                 AND T.start >= CURRENT_TIMESTAMP
-                AND T2.hidden <> 1
-                AND T2.start >= CURRENT_TIMESTAMP
             GROUP BY S.last, S.first
             ORDER BY S.last, S.first
         `, { replacements: [req.query.person_id] });
