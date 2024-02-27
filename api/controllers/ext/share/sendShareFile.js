@@ -4,75 +4,71 @@ import { emailBlast } from '../../../helpers/mail.js';
 const sendShareFile = {
 	POST: async (req, res) => {
 
-		// If passphrase section ID and a file are provided, just forward the file to the section
-		if (!req.body.sectionId
-			|| req.body.files
-			|| req.body.files.length < 1
-		) {
-			return res.status(400).json({
-				message: 'Incorrect parameters for sending a share doc sent',
-			});
-		}
-
-		const email = await getFollowers({
-			sectionId        : req.body.sectionId,
-			noFollowers      : true,
-			sectionFollowers : true,
-			returnEmails     : true,
-		});
-
-		if (!email || email.length < 1) {
-			return res.status(400).json({
-				message: 'No emails found for the round, nothing to send',
-			});
-		}
-
-		const sections = req.db.sequelize.query(`
-			select round.id, round.name roundName, round.label roundLabel,
+		const sections = await req.db.sequelize.query(`
+			select
+				panel.id sectionId, panel.letter sectionLetter,
+				round.id roundId, round.name roundName, round.label roundLabel,
 				tourn.id tournId, tourn.name tournName,
 				room.name room, share.value phrase
-				from (round, event, tourn, panel)
+				from (round, event, tourn, panel, panel_setting share)
 					left join room on room.id = panel.room
-					left join panel_setting share on share.panel = panel.id and share.tag = 'share'
-			where panel.id = :sectionId
+			where share.value IN (:roomNames)
+				and share.tag = 'share'
+				and share.panel = panel.id
 				and panel.round = round.id
 				and round.event = event.id
 				and event.tourn = tourn.id
+				and tourn.start < NOW()
+				and tourn.end > NOW()
 		`, {
-			replacements: { sectionId: req.body.sectionId },
+			replacements: { roomNames: req.body.panels },
 			type: req.db.Sequelize.QueryTypes.SELECT,
 		});
 
 		if (!sections || sections.length < 1) {
-			res.status(400).json(`No section found for ID ${req.params.sectionId}`);
+			res.status(400).json(`No section found for codenames ${req.params.sectionId}`);
 		}
 
-		const section = sections.shift();
+		for (const section of sections) {
 
-		let messageText = `Share speech documents for this round (10mb limit, docs only) by replying to`;
-		messageText += ` this email with a file attachment, or going to https://share.tabroom.com/${section.phrase} \n`;
+			const email = await getFollowers({
+				sectionId        : section.sectionId,
+				noFollowers      : true,
+				sectionFollowers : true,
+				returnEmails     : true,
+			});
 
-		let messageHTML = `<p>Share speech documents for this round (10mb limit, docs only) by replying to`;
-		messageHTML += ` this email with a file attachment, or going to `;
-		messageHTML += `<a href="https://share.tabroom.com/${section.phrase}">https://share.tabroom.com/${section.phrase}</a></p>`;
+			if (!email || email.length < 1) {
+				return res.status(400).json({
+					message: 'No emails found for the round, nothing to send',
+				});
+			}
 
-		const messageData = {
-			to      : `${section.phrase}@share.tabroom.com`,
-			subject : `${section.tournName} ${section.roundLabel || `Round ${section.roundName}`} (${section.phrase}) - Speech Documents`,
-			text    : messageText,
-			html    : messageHTML,
-			share   : true,
-			email,
-			attachments : req.body.files || [],
-		};
+			let messageText = `Share speech documents for this round (10mb limit, docs only) by replying to`;
+			messageText += ` this email with a file attachment, or going to https://share.tabroom.com/${section.phrase} \n`;
 
-		let counter = 0;
-		const emailPromises = [];
+			let messageHTML = `<p>Share speech documents for this round (10mb limit, docs only) by replying to`;
+			messageHTML += ` this email with a file attachment, or going to `;
+			messageHTML += `<a href="https://share.tabroom.com/${section.phrase}">https://share.tabroom.com/${section.phrase}</a></p>`;
 
-		if (messageData.email.length > 0) {
-			const dispatch = emailBlast(messageData);
-			counter += email.length;
-			emailPromises.push(dispatch.result);
+			const messageData = {
+				to      : `${section.phrase}@share.tabroom.com`,
+				subject : `${section.tournName} ${section.roundLabel || `Round ${section.roundName}`} (${section.phrase}) - Speech Documents`,
+				text    : messageText,
+				html    : messageHTML,
+				share   : true,
+				email,
+				attachments : req.body.files || [],
+			};
+
+			let counter = 0;
+			const emailPromises = [];
+
+			if (messageData.email.length > 0) {
+				const dispatch = emailBlast(messageData);
+				counter += email.length;
+				emailPromises.push(dispatch.result);
+			}
 		}
 
 		await Promise.all(emailPromises);
