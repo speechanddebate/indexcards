@@ -138,11 +138,17 @@ export const getFollowers = async (replacements, options = { recipients: 'all' }
 	}
 
 	if (replacements.sectionFollowers) {
+		if (replacements.sectionId) {
+			whereLimit = ` where ps.panel = :sectionId `;
+		} else if (replacements.panelId) {
+			whereLimit = ` where ps.panel = :panelId `;
+		}
+
 		const sectionFollowerIds = await db.sequelize.query(`
 			select
 				ps.id, ps.value_text followers
 			from panel_setting ps
-			where ps.panel = :panelId
+			${whereLimit}
 				and ps.tag = 'share_followers'
 		`, {
 			replacements,
