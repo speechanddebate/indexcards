@@ -109,6 +109,7 @@ export const emailBlast = async (inputData) => {
 		debugLogger.info(`Subject ${messageData.subject}`);
 		debugLogger.info(`Text ${messageData.text}`);
 		debugLogger.info(`HTML ${messageData.html}`);
+		debugLogger.info(`From ${messageData.from}`);
 	}
 
 	return {
@@ -180,6 +181,7 @@ export const adminBlast = async (inputData) => {
 			debugLogger.info(`Subject ${messageData.subject}`);
 			debugLogger.info(`Text ${messageData.text}`);
 			debugLogger.info(`HTML ${messageData.html}`);
+			debugLogger.info(`From ${messageData.from}`);
 		}
 	}
 

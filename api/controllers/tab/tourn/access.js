@@ -52,17 +52,20 @@ export const changeAccess = {
 
 			let description = '';
 
-			currentPerms.forEach( async (perm) => {
-				if (
-					perm.Event
-					|| perm.Category
-					|| (perm.tag === 'owner' && req.session.perms.tourn[req.params.tournId] !== 'owner')
-				) {
-					return;
+			for (const perm of currentPerms) {
+
+				if (perm.tag !== 'contact') {
+					if (
+						perm.Event
+						|| perm.Category
+						|| (perm.tag === 'owner' && req.session.perms.tourn[req.params.tournId] !== 'owner')
+					) {
+						return;
+					}
+					description += `${perm.tag} level tournament permissions removed from ${targetPerson.email}`;
+					await perm.destroy();
 				}
-				description += `${perm.tag} level tournament permissions removed from ${targetPerson.email}`;
-				await perm.destroy();
-			});
+			}
 
 			if (description) {
 				await db.changeLog.create({
@@ -197,11 +200,13 @@ export const changeAccess = {
 
 		let currentPerm = {};
 
-		currentPerms.forEach( perm => {
-			if (!perm.Event && !perm.Category) {
-				currentPerm = perm;
+		for (const perm of currentPerms) {
+			if (perm.tag !== 'contact') {
+				if (!perm.Event && !perm.Category) {
+					currentPerm = perm;
+				}
 			}
-		});
+		}
 
 		if (currentPerm?.tag === tag) {
 			res.status(400).json(`User ${targetPerson.email} already has tournament wide ${tag} permissions`);

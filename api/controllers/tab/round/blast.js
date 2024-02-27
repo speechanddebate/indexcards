@@ -13,7 +13,7 @@ export const blastRoundMessage = {
 		}
 
 		const personIds = await getFollowers(req.body);
-		const tourn = req.db.summon(req.db.tourn, req.params.tournId);
+		const tourn = await req.db.summon(req.db.tourn, req.params.tournId);
 
 		const notifyResponse = await notify({
 			ids         : personIds,
@@ -248,7 +248,7 @@ export const blastRoundPairing = {
 			blastData.append = req.body.append;
 		}
 
-		const tourn = req.db.summon(req.db.tourn, req.params.tournId);
+		const tourn = await req.db.summon(req.db.tourn, req.params.tournId);
 		blastData.from = `${tourn.name} <${tourn.webname}\@www.tabroom.com>`;
 		blastData.fromAddress = `<${tourn.webname}\@www.tabroom.com>`;
 

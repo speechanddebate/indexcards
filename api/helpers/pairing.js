@@ -540,6 +540,7 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 			const notifyResponse = await notify({
 				ids    : followers.judges[judgeId],
 				append : blastData.append,
+				from   : blastData.from,
 				...blastData.judges[judgeId],
 			});
 
@@ -559,6 +560,7 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 			const notifyResponse = await notify({
 				ids    : followers.entries[entryId],
 				append : blastData.append,
+				from   : blastData.from,
 				...blastData.entries[entryId],
 			});
 
@@ -578,6 +580,7 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 			const notifyResponse = await notify({
 				ids    : followers.schools[schoolId],
 				append : blastData.append,
+				from   : blastData.from,
 				...blastData.schools[schoolId],
 			});
 
