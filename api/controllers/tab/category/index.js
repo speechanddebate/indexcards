@@ -38,3 +38,4 @@ export const updateCategory = {
 	},
 };
 
+export default updateCategory;

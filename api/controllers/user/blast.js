@@ -1,5 +1,4 @@
 import notify from '../../helpers/blast';
-import config from '../../../config/config';
 
 export const pushMessage = {
 

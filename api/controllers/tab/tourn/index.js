@@ -38,3 +38,4 @@ export const updateTourn = {
 	},
 };
 
+export default updateTourn;

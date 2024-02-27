@@ -9,7 +9,6 @@ export const categoryCheckin = {
 			return;
 		}
 
-		const tournId = req.params.tournId;
 		const categoryId = req.params.categoryId;
 
 		if (
@@ -45,7 +44,6 @@ export const eventCheckin = {
 			return;
 		}
 
-		const tournId = req.params.tournId;
 		const eventId = req.params.eventId;
 
 		if (
@@ -115,4 +113,3 @@ categoryCheckin.GET.apiDoc = {
 	},
 	tags: ['tab/all'],
 };
-

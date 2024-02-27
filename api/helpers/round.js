@@ -286,24 +286,26 @@ export const invalidateCache = async (tournId, roundId) => {
 
 	const urlPath = `/index/tourn/postings/round.mhtml?tourn_id=${tournId}&round_id=${roundId}&invalidate=1`;
 
-	// slow and a problem for another day
-	return;
-
 	// This will just run asynchronously which is fine since I don't actually care about the output here.
-	for (let server = 1; server < 17; server++) {
-		const serverName = `tabweb${server}`;
-		try {
-			await fetch(
-				`http://${serverName}:8001${urlPath}`,
-				{
-					Method: 'GET',
-				}
-			);
-		} catch (err) {
-			errorLogger.info(err);
+	const runAsync = async () => {
+		for (let server = 1; server < 17; server++) {
+			const serverName = `tabweb${server}`;
+			try {
+				// eslint-disable-next-line no-await-in-loop
+				await fetch(
+					`http://${serverName}:8001${urlPath}`,
+					{
+						Method: 'GET',
+					}
+				);
+			} catch (err) {
+				errorLogger.info(err);
+			}
 		}
-	}
+	};
 
+	// slow and a problem for another day
+	runAsync();
 	console.log(`Invalidated cache for ${roundId}`);
 };
 

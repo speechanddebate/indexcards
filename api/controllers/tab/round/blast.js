@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-escape */
 import moment from 'moment-timezone';
 import { getFollowers, getPairingFollowers } from '../../../helpers/followers.js';
 import { errorLogger } from '../../../helpers/logger.js';
@@ -168,6 +169,7 @@ export const scheduleAutoFlip = async (roundId, req) => {
 				const flight = tick + 1;
 
 				if (round.flip_split_flights) {
+					// eslint-disable-next-line no-await-in-loop
 					await req.db.autoqueue.create({
 						tag        : `flip_${flight}`,
 						round      : round.id,
@@ -175,6 +177,7 @@ export const scheduleAutoFlip = async (roundId, req) => {
 						created_at : Date(),
 					});
 				} else {
+					// eslint-disable-next-line no-await-in-loop
 					await req.db.autoqueue.create({
 						tag        : `flip`,
 						round      : round.id,

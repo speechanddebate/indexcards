@@ -1,19 +1,16 @@
 import { assert } from 'chai';
 import request from 'supertest';
-import hmacSHA512 from 'crypto-js/hmac-sha512';
 import Base64 from 'crypto-js/enc-base64';
 import config from '../../../../config/config';
 import db from '../../../helpers/db';
 import server from '../../../../app';
-import { testAdminSession, testStoreCartSetting }  from '../../../../tests/testFixtures';
+import { testStoreCartSetting }  from '../../../../tests/testFixtures';
 
 describe('Payment Gateway', () => {
 
-	let adminSession = {};
 	let testTourn = {};
 
 	beforeAll(async () => {
-		adminSession = await db.session.findByPk(testAdminSession.id);
 		testTourn = await db.summon(db.tourn, 1);
 		await db.setting(testTourn, 'store_carts', { json: testStoreCartSetting });
 		// NEED to define a test user here with a test API key for the below auth

@@ -100,7 +100,7 @@ export const disablePushNotifications = {
 
 		if (req.session?.id) {
 
-			const push_notify = JSON.parse(req.session.push_notify);
+			const pushNotify = JSON.parse(req.session.push_notify);
 
 			await db.session.update({ push_notify: null }, {
 				where: {
@@ -110,14 +110,14 @@ export const disablePushNotifications = {
 
 			res.status(200).json({
 				error   : false,
-				message : `Invalid subscription ${push_notify?.id} removed from session ${req.session.id}`,
+				message : `Invalid subscription ${pushNotify?.id} removed from session ${req.session.id}`,
 			});
 
 		} else {
 
 			res.status(200).json({
 				error   : true,
-				message : `No current session found`
+				message : `No current session found`,
 			});
 		}
 	},

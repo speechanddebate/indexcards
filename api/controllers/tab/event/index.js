@@ -38,3 +38,4 @@ export const updateEvent = {
 	},
 };
 
+export default updateEvent;

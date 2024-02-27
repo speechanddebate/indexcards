@@ -233,7 +233,6 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 	next();
 });
 
-
 app.all('/v1/glp/*', async (req, res, next) => {
 	req.session = await auth(req, res);
 	if (!req.session?.site_admin) {

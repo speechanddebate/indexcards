@@ -454,7 +454,7 @@ export const formatPairingBlast = async (queryData, req) => {
 							}
 
 							other.role = `${judgeRole(other, round)} `;
-							judgeMessage.text += `${other.role}${other.first}${other.middle ? ` ${other.middle}` : '' } ${other.last}`;
+							judgeMessage.text += `${other.role}${other.first}${other.middle ? ` ${other.middle}` : ''} ${other.last}`;
 							judgeMessage.html += `<p>${other.role}${other.first} ${other.middle ? `${other.middle} ` : ''}${other.last}</p>`;
 
 							if (other.pronoun && !round.settings.anonymous_public) {
@@ -618,6 +618,7 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 
 		} else {
 			for (const round of blastData.rounds) {
+				// eslint-disable-next-line no-await-in-loop
 				await changeLog.create({
 					tag         : 'blast',
 					description : `Round pairings blasted. Message: ${req.body.message}`,

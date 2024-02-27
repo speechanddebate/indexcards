@@ -517,7 +517,7 @@ export const tournPerms = async (tournId, personId) => {
 		tourn    : {},
 		event    : {},
 		category : {},
-		contact  : {}
+		contact  : {},
 	};
 
 	for await (const newPerm of permissions) {

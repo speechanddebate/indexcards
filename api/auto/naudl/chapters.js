@@ -1,8 +1,7 @@
-import { getAllSalesforceStudents, getOneSalesforceStudent, getSalesforceChapters, getSalesforceStudents, postSalesforceStudents } from '../../helpers/naudl.js';
+import { getSalesforceChapters } from '../../helpers/naudl.js';
 import db from '../../helpers/litedb.js';
 
 export const syncNAUDLChapters = async () => {
-
 	const naudlChapters = await getSalesforceChapters();
 
 	const tabroomChapters = await db.sequelize.query(`
@@ -37,23 +36,23 @@ export const syncNAUDLChapters = async () => {
 			chaptersToPost.push(chapter.id);
 		} else if (!chapter.naudlId) {
 
-			const setting = await db.sequelize.query(`
+			await db.sequelize.query(`
 				insert into chapter_setting
 					(chapter, tag, value)
 					VALUES (:chapterId, 'naudl_id', :naudlId )
 			`, {
 				replacements: {
 					chapterId: chapter.id,
-					naudlId: naudlById[chapter.id]
+					naudlId: naudlById[chapter.id],
 				},
-				type: db.Sequelize.QueryTypes.INSERT
+				type: db.Sequelize.QueryTypes.INSERT,
 			});
 
 			missing.push(`Setting saved for chapter ${chapter.id} with NAUDL ID ${naudlById[chapter.id]}`);
 
 		} else if (chapter.naudlId !== naudlById[chapter.id] ) {
 
-			const setting = await db.sequelize.query(`
+			await db.sequelize.query(`
 				update chapter_setting
 					set value = :naudlId
 					where chapter = :chapterId
@@ -61,9 +60,9 @@ export const syncNAUDLChapters = async () => {
 			`, {
 				replacements: {
 					chapterId: chapter.id,
-					naudlId: naudlById[chapter.id]
+					naudlId: naudlById[chapter.id],
 				},
-				type: db.Sequelize.QueryTypes.UPDATE
+				type: db.Sequelize.QueryTypes.UPDATE,
 			});
 
 			mismatches.push(`Setting mismatch: chapter ${chapter.id} set to new NAUDL ID ${naudlById[chapter.id]}`);
@@ -84,3 +83,4 @@ await syncNAUDLChapters();
 
 process.exit();
 
+export default syncNAUDLChapters;

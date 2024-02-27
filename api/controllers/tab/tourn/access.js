@@ -63,6 +63,7 @@ export const changeAccess = {
 						return;
 					}
 					description += `${perm.tag} level tournament permissions removed from ${targetPerson.email}`;
+					// eslint-disable-next-line no-await-in-loop
 					await perm.destroy();
 				}
 			}
@@ -90,7 +91,9 @@ export const changeAccess = {
 
 			if (
 				req.session.perms.tourn[req.params.tournId] !== 'owner'
-				&& !(targetPerson.id === req.session.person && req.session.perms.contact[req.params.tournId])
+				&& !(targetPerson.id === req.session.person
+					&& req.session.perms.contact[req.params.tournId]
+				)
 			) {
 				res.status(401).json('Only tournament owners may adjust tournament contacts other than themselves');
 				return;
@@ -182,7 +185,9 @@ export const changeAccess = {
 			return;
 		}
 
-		if ( !req.session.perms.tourn[req.params.tournId] || !target.mustBe.includes(req.session.perms.tourn[req.params.tournId])) {
+		if (!req.session.perms.tourn[req.params.tournId]
+			|| !target.mustBe.includes(req.session.perms.tourn[req.params.tournId])
+		) {
 			res.status(401).json('You do not have sufficient access to grant that level of permissions');
 			return;
 		}

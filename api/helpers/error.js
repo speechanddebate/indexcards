@@ -32,8 +32,6 @@ const errorHandler = async (err, req, res, next) => {
 	errorLogger.error(err, err.stack);
 
 	// Production bugs should find their way to Palmer
-	const env = process.env.NODE_ENV || 'development';
-
 	if (process.env.NODE_ENV === 'production' || config.MAIL_SERVER === 'mail.in.speechanddebate.org') {
 
 		const messageData = {
