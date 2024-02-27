@@ -27,7 +27,7 @@ const getPersonStudents = {
                 AND T.start >= CURRENT_TIMESTAMP
             GROUP BY S.last, S.first
             ORDER BY S.last, S.first
-        `, { replacements: [req.query.person_id] });
+        `, { replacements: [req.query.person_id, req.query.person_id] });
 
 		return res.status(200).json([...students[0]]);
 	},
