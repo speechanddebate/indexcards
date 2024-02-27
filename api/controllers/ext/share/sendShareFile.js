@@ -26,11 +26,15 @@ const sendShareFile = {
 		});
 
 		if (!sections || sections.length < 1) {
-			res.status(400).json(`No section found for codenames ${req.params.sectionId}`);
+			res.status(400).json(`No section found for codenames ${req.body.panels}`);
 		}
+
+		let counter = 0;
+		const emailPromises = [];
 
 		for (const section of sections) {
 
+			// eslint-disable-next-line no-await-in-loop
 			const email = await getFollowers({
 				sectionId        : section.sectionId,
 				noFollowers      : true,
@@ -60,9 +64,6 @@ const sendShareFile = {
 				email,
 				attachments : req.body.files || [],
 			};
-
-			let counter = 0;
-			const emailPromises = [];
 
 			if (messageData.email.length > 0) {
 				const dispatch = emailBlast(messageData);
