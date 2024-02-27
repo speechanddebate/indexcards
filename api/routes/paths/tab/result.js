@@ -6,5 +6,5 @@
 import { circuitQualifiers } from '../../../controllers/tab/result/qualifier.js';
 
 export default [
-	{ path : '/tab/{tourn_id}/result/postQualifiers' , module : circuitQualifiers } ,
+	{ path : '/tab/{tournId}/result/postQualifiers' , module : circuitQualifiers } ,
 ];
