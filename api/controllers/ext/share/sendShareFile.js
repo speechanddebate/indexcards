@@ -57,7 +57,7 @@ const sendShareFile = {
 
 			const messageData = {
 				to      : `noreply@share.tabroom.com`,
-				from    : `Tabroom Share <share@share.tabroom.com>`;
+				from    : `Tabroom Share <share@share.tabroom.com>`,
 				replyTo : `${section.phrase}@share.tabroom.com`,
 				subject : `${section.tournName} ${section.roundLabel || `Round ${section.roundName}`} (${section.phrase}) - Speech Documents`,
 				text    : messageText,
