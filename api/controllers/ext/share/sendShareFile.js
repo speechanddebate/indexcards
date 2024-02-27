@@ -4,6 +4,8 @@ import { emailBlast } from '../../../helpers/mail.js';
 const sendShareFile = {
 	POST: async (req, res) => {
 
+		const roomNames = req.body?.panels?.map((room) => room.toLowerCase());
+
 		const sections = await req.db.sequelize.query(`
 			select
 				panel.id sectionId, panel.letter sectionLetter,
@@ -12,7 +14,7 @@ const sendShareFile = {
 				room.name room, share.value phrase
 				from (round, event, tourn, panel, panel_setting share)
 					left join room on room.id = panel.room
-			where share.value IN (:roomNames)
+			where LOWER(share.value) IN (:roomNames)
 				and share.tag = 'share'
 				and share.panel = panel.id
 				and panel.round = round.id
@@ -21,7 +23,7 @@ const sendShareFile = {
 				and tourn.start < NOW()
 				and tourn.end > NOW()
 		`, {
-			replacements: { roomNames: req.body.panels },
+			replacements: { roomNames },
 			type: req.db.Sequelize.QueryTypes.SELECT,
 		});
 
