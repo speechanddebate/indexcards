@@ -26,7 +26,7 @@ const sendShareFile = {
 		});
 
 		if (!sections || sections.length < 1) {
-			res.status(400).json(`No section found for codenames ${req.body.panels}`);
+			return res.status(400).json(`No section found for codenames ${req.body.panels}`);
 		}
 
 		let counter = 0;
@@ -43,9 +43,7 @@ const sendShareFile = {
 			});
 
 			if (!email || email.length < 1) {
-				return res.status(400).json({
-					message: 'No emails found for the round, nothing to send',
-				});
+				return false;
 			}
 
 			let messageText = `Share speech documents for this round (10mb limit, docs only) by replying to`;
@@ -72,6 +70,10 @@ const sendShareFile = {
 			}
 		}
 
+		if (emailPromises.length < 1) {
+			return res.status(400).json('No emails found, nothing to send');
+		}
+
 		await Promise.all(emailPromises);
 		return res.status(201).json({ message: `Successfully sent speech doc emails to ${counter} recipients` });
 	},
@@ -83,8 +85,7 @@ sendShareFile.POST.apiDoc = {
 	requestBody: {
 		description : 'Initialize the doc chain room and emails',
 		required    : true,
-		content     : {
-		},
+		content: { '*/*': { schema: { $ref: '#/components/schemas/Share' } } },
 	},
 	responses: {
 		201: {
