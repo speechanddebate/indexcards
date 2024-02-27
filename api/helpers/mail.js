@@ -27,11 +27,8 @@ export const emailBlast = async (inputData) => {
 			},
 		});
 
-		messageData.replyTom = messageData.from;
-		messageData.from = `"Tabroom Share" <share@share.tabroom.com>`;
-		messageData.to   = 'noreply@share.tabroom.com';
-
 	} else {
+
 		transporter = nodemailer.createTransport({
 			host   : config.MAIL_SERVER,
 			port   : config.MAIL_PORT,
@@ -170,6 +167,7 @@ export const adminBlast = async (inputData) => {
 	}
 
 	messageData.from = messageData.from ? messageData.from : config.MAIL_FROM;
+
 	let result = {};
 
 	if (messageData.email) {

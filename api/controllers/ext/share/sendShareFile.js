@@ -56,7 +56,9 @@ const sendShareFile = {
 			messageHTML += `<a href="https://share.tabroom.com/${section.phrase}">https://share.tabroom.com/${section.phrase}</a></p>`;
 
 			const messageData = {
-				to      : `${section.phrase}@share.tabroom.com`,
+				to      : `noreply@share.tabroom.com`,
+				from    : `Tabroom Share <share@share.tabroom.com>`;
+				replyTo : `${section.phrase}@share.tabroom.com`,
 				subject : `${section.tournName} ${section.roundLabel || `Round ${section.roundName}`} (${section.phrase}) - Speech Documents`,
 				text    : messageText,
 				html    : messageHTML,
