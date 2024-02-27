@@ -13,6 +13,7 @@ export const blastSectionMessage = {
 		}
 
 		const section = await req.db.summon(req.db.section, req.params.sectionId);
+		const tourn = req.db.summon(req.db.tourn, req.params.tournId);
 
 		if (section.round !== req.params.roundId) {
 			res.status(401).json(`Section ID ${req.params.sectionId} does not belong to this round`);
@@ -25,8 +26,10 @@ export const blastSectionMessage = {
 		);
 
 		const notifyResponse = await notify({
-			ids  : personIds,
-			text : req.body.message,
+			ids         : personIds,
+			text        : req.body.message,
+			from        : `${tourn.name} <${tourn.webname}\@www.tabroom.com>`,
+			fromAddress : `<${tourn.webname}\@www.tabroom.com>`,
 		});
 
 		if (notifyResponse.error) {
@@ -68,6 +71,10 @@ export const blastSectionPairing = {
 		queryData.fields = '';
 
 		const blastData = await formatPairingBlast(queryData, req);
+		const tourn = req.db.summon(req.db.tourn, req.params.tournId);
+
+		blastData.from = `${tourn.name} <${tourn.webname}\@www.tabroom.com>`;
+		blastData.fromAddress = `<${tourn.webname}\@www.tabroom.com>`;
 
 		const followers = await getPairingFollowers(
 			queryData.replacements,
