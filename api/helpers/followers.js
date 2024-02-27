@@ -157,7 +157,7 @@ export const getFollowers = async (replacements, options = { recipients: 'all' }
 
 		let followerIds = '';
 
-		if (sectionFollowerIds[0].followers) {
+		if (sectionFollowerIds[0]?.followers) {
 			try {
 				followerIds = JSON.parse(sectionFollowerIds[0].followers).join(',');
 			} catch (err) {
