@@ -260,11 +260,10 @@ export const blastRoundPairing = {
 				where tourn.id = :tournId
 		`, {
 			replacements: { tournId: req.params.tournId },
-			type: req.db.Sequelize.DataTypes.SELECT,
+			type: req.db.sequelize.QueryTypes.SELECT,
 		});
 
 		const tourn = tourns.shift();
-		console.log(tourn);
 
 		blastData.from = `${tourn.name} <${tourn.webname}\@www.tabroom.com>`;
 		blastData.fromAddress = `<${tourn.webname}\@www.tabroom.com>`;

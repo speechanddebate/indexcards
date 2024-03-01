@@ -136,7 +136,7 @@ export const scheduleFlips = async (roundId) => {
 
 					await db.sequelize.query(`
 						insert into autoqueue (tag, round, active_at, created_at)
-							values (':tag', ':roundId', ':activeAt', now())
+							values (:tag, :roundId, :activeAt, now())
 					`, {
 						replacements: { tag: `flip_${flight}`, roundId, activeAt: startDate },
 						type: db.Sequelize.QueryTypes.INSERT
@@ -150,7 +150,7 @@ export const scheduleFlips = async (roundId) => {
 
 				await db.sequelize.query(`
 					insert into autoqueue (tag, round, active_at, created_at)
-						values (':tag', ':roundId', ':activeAt', now())
+						values (:tag, :roundId, :activeAt, now())
 				`, {
 					replacements: { tag: `flip`, roundId, activeAt: startDate },
 					type: db.Sequelize.QueryTypes.INSERT
