@@ -257,8 +257,8 @@ export const blastRoundPairing = {
 			from tourn
 				where tourn.id = :tournId
 		`, {
-			replacements: {tournId: req.params.tournId}
-			type: req.db.Sequelize.DataTypes.SELECT
+			replacements: {tournId: req.params.tournId},
+			type: req.db.Sequelize.DataTypes.SELECT,
 		});
 
 		const tourn = tourns.shift();
