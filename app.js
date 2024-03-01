@@ -149,7 +149,12 @@ app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], as
 	// /user/prefs/ID, check the perms against additional data
 
 	req.session = await auth(req, res);
-	next();
+
+	if (req.session) {
+		next();
+	} else {
+		return res.status(401).json('You are not logged in');
+	}
 });
 
 const tabRoutes = [
@@ -168,9 +173,9 @@ app.all(tabRoutes, async (req, res, next) => {
 	if (typeof req.session.perms !== 'object') {
 		res.status(401).json('You do not have access to that tournament area');
 		return;
+	} else {
+		next();
 	}
-
-	next();
 });
 
 const coachRoutes = [
@@ -216,7 +221,7 @@ app.all(localRoutes, async (req, res, next) => {
 			next();
 		}
 	} else {
-		res.status(401).json('You are not currently logged in to Tabroom');
+		return res.status(401).json('You are not currently logged in to Tabroom');
 	}
 });
 
@@ -230,15 +235,19 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 	// that guy is super shady and I need to keep a specific eye on him.
 
 	req.person = await keyAuth(req, res);
-	next();
+
+	if (req.person) {
+		next();
+	}
 });
 
 app.all('/v1/glp/*', async (req, res, next) => {
 	req.session = await auth(req, res);
 	if (!req.session?.site_admin) {
-		res.status(401).json('That function is accessible to Tabroom site administrators only');
+		return res.status(401).json('That function is accessible to Tabroom site administrators only');
+	} else {
+		next();
 	}
-	next();
 });
 
 const systemPaths = [

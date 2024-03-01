@@ -115,6 +115,11 @@ db.circuit.belongsToMany(db.chapter, { as: 'Chapters', foreignKey: 'circuit', th
 db.circuit.hasMany(db.file       , { as: 'Files'       , foreignKey: 'circuit' });
 db.circuit.hasMany(db.permission , { as: 'Permissions' , foreignKey: 'circuit' });
 
+db.coach.belongsTo(db.entry   , { as: 'Entry'   , foreignKey: 'entry' });
+db.coach.belongsTo(db.student , { as: 'Student' , foreignKey: 'student' });
+db.coach.belongsTo(db.person  , { as: 'Person'  , foreignKey: 'person' });
+db.coach.belongsTo(db.person  , { as: 'Creator' , foreignKey: 'created_by' });
+
 db.contact.belongsTo(db.school , { as: 'School'  , foreignKey: 'school' });
 db.contact.belongsTo(db.person , { as: 'Person'  , foreignKey: 'person' });
 db.contact.belongsTo(db.person , { as: 'Creator' , foreignKey: 'created_by' });

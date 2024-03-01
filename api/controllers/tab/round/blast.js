@@ -251,7 +251,17 @@ export const blastRoundPairing = {
 			blastData.append = req.body.append;
 		}
 
-		const tourn = await req.db.summon(req.db.tourn, req.params.tournId);
+		const tourns = await req.db.query(`
+			select
+				tourn.id, tourn.name, tourn.webname
+			from tourn
+				where tourn.id = :tournId
+		`, {
+			replacements: {tournId: req.params.tournId}
+			type: req.db.Sequelize.DataTypes.SELECT
+		});
+
+		const tourn = tourns.shift();
 		blastData.from = `${tourn.name} <${tourn.webname}\@www.tabroom.com>`;
 		blastData.fromAddress = `<${tourn.webname}\@www.tabroom.com>`;
 

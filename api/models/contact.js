@@ -1,9 +1,19 @@
 const contact = (sequelize, DataTypes) => {
 	return sequelize.define('contact', {
-		tag: {
-			type         : DataTypes.STRING(15),
+		official: {
+			type         : DataTypes.BOOLEAN,
 			allowNull    : false,
-			defaultValue : '',
+			defaultValue : '0',
+		},
+		onsite: {
+			type         : DataTypes.BOOLEAN,
+			allowNull    : false,
+			defaultValue : '0',
+		},
+		email: {
+			type         : DataTypes.BOOLEAN,
+			allowNull    : false,
+			defaultValue : '0',
 		},
 		created_at: {
 			type      : DataTypes.DATE,
