@@ -148,13 +148,14 @@ export const scheduleFlips = async (roundId) => {
 
 			} else {
 
-				await db.sequelize.query(`
+				const result = await db.sequelize.query(`
 					insert into autoqueue (tag, round, active_at, created_at)
 						values (:tag, :roundId, :activeAt, now())
 				`, {
 					replacements: { tag: `flip`, roundId, activeAt: startDate },
 					type: db.Sequelize.QueryTypes.INSERT
 				});
+
 			}
 		}
 	}
