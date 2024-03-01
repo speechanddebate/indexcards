@@ -1,6 +1,5 @@
 // Functions to handle the online coinflip
 import { db } from '../../../helpers/litedb.js';
-import Autoqueue from '../../../models/autoqueue.js';
 import { errorLogger } from '../../../helpers/logger.js';
 
 export const scheduleRoundFlips = {
@@ -134,24 +133,27 @@ export const scheduleFlips = async (roundId) => {
 			if (round.flighted > 1 && round.flightOffset && round.splitFlights) {
 
 				for (let flight = 1; flight < round.flighted; flight++) {
-					Autoqueue.create({
-						tag        : `flip_${flight}`,
-						round      : roundId,
-						active_at  : round.activeAt,
-						created_at : new Date(),
+
+					await db.sequelize.query(`
+						insert into autoqueue (tag, round, active_at, created_at)
+							values (':tag', ':roundId', ':activeAt', now())
+					`, {
+						replacements: { tag: `flip_${flight}`, roundId, activeAt: startDate },
+						type: db.Sequelize.QueryTypes.INSERT
 					});
 
 					// Add the offset to the start time for the next flight
-					startDate.setMinutes(startDate.getMinutes() - round.flightOffset);
+					startDate.setMinutes(startDate.getMinutes() + round.flightOffset);
 				}
 
 			} else {
 
-				await Autoqueue.create({
-					tag        : `flip`,
-					round      : roundId,
-					active_at  : round.activeAt,
-					created_at : new Date(),
+				await db.sequelize.query(`
+					insert into autoqueue (tag, round, active_at, created_at)
+						values (':tag', ':roundId', ':activeAt', now())
+				`, {
+					replacements: { tag: `flip`, roundId, activeAt: startDate },
+					type: db.Sequelize.QueryTypes.INSERT
 				});
 			}
 		}

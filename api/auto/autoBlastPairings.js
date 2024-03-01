@@ -80,9 +80,6 @@ const autoBlastRounds = async () => {
 
 		if (queue.tag !== 'publish') {
 
-			console.log(`Blasting and here we go with round`);
-			console.log(round);
-
 			// Blast the round! BLAST IT!
 
 			const req = {

@@ -264,6 +264,8 @@ export const blastRoundPairing = {
 		});
 
 		const tourn = tourns.shift();
+		console.log(tourn);
+
 		blastData.from = `${tourn.name} <${tourn.webname}\@www.tabroom.com>`;
 		blastData.fromAddress = `<${tourn.webname}\@www.tabroom.com>`;
 
