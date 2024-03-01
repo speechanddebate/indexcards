@@ -251,13 +251,15 @@ export const blastRoundPairing = {
 			blastData.append = req.body.append;
 		}
 
+		console.log(req.params);
+
 		const tourns = await req.db.sequelize.query(`
 			select
 				tourn.id, tourn.name, tourn.webname
 			from tourn
 				where tourn.id = :tournId
 		`, {
-			replacements: {tournId: req.params.tournId},
+			replacements: { tournId: req.params.tournId },
 			type: req.db.Sequelize.DataTypes.SELECT,
 		});
 
