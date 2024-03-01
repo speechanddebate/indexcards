@@ -93,6 +93,7 @@ const autoBlastRounds = async () => {
 				},
 				params: {
 					roundId: round.id,
+					tournId: round.tournId,
 				},
 				db,
 			};
