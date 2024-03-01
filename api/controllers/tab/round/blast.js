@@ -251,7 +251,7 @@ export const blastRoundPairing = {
 			blastData.append = req.body.append;
 		}
 
-		const tourns = await req.db.query(`
+		const tourns = await req.db.sequelize.query(`
 			select
 				tourn.id, tourn.name, tourn.webname
 			from tourn
