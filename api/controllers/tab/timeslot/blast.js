@@ -8,7 +8,6 @@ import { blastRoundPairing } from '../round/blast.js';
 // just have it cycle through the rounds because that actually makes sense.
 
 export const blastTimeslotMessage = {
-
 	POST: async (req, res) => {
 
 		if (!req.body.message) {
@@ -24,7 +23,6 @@ export const blastTimeslotMessage = {
 			req.session.perms.tourn[req.session.tourn.id] !== 'owner'
 			&& req.session.perms.tourn[req.session.tourn.id] !== 'tabber'
 		) {
-
 			if (req.session.perms.event) {
 				options.limits = { event: req.session.perms.event };
 			} else {
@@ -33,10 +31,13 @@ export const blastTimeslotMessage = {
 		}
 
 		const personIds = await getFollowers(req.body, options);
+		const tourn = await req.db.summon(req.db.tourn, req.params.tournId);
 
 		const notifyResponse = await notify({
-			ids  : personIds,
-			text : req.body.message,
+			from        : `${tourn.name} <${tourn.webname}@www.tabroom.com>` ,
+			fromAddress : `<${tourn.webname}@www.tabroom.com>`               ,
+			ids         : personIds                                           ,
+			text        : req.body.message                                    ,
 		});
 
 		if (notifyResponse.error) {
@@ -53,9 +54,10 @@ export const blastTimeslotMessage = {
 				whereTimeslot,
 			});
 
-			rounds.map( async (round) => {
+			const blastLogs = [];
 
-				const blastLog = await req.db.changeLog.create({
+			for (const round of rounds) {
+				const pushLog = await req.db.changeLog.create({
 					tag         : 'blast',
 					description : `${req.body.message} sent to whole timeslot. ${notifyResponse.push?.count || 0} recipients`,
 					person      : req.session.person,
@@ -63,16 +65,17 @@ export const blastTimeslotMessage = {
 					round       : round.id,
 				});
 
-				await req.db.changeLog.create({
+				blastLogs.push(pushLog);
+
+				const emailLog = await req.db.changeLog.create({
 					tag         : 'emails',
 					description : `${req.body.message} sent to whole timeslot. ${notifyResponse.email?.count || 0}`,
 					person      : req.session.person,
 					count       : notifyResponse.email?.count || 0,
 					round       : round.id,
 				});
-
-				return blastLog;
-			});
+				blastLogs.push(emailLog);
+			}
 
 			res.status(200).json({
 				...notifyResponse,
@@ -83,7 +86,7 @@ export const blastTimeslotMessage = {
 
 // Blast a whole timeslot's rounds with pairings
 export const blastTimeslotPairings = {
-	GET: async (req, res) => {
+	POST: async (req, res) => {
 
 		const replacements = {
 			eventIds   : req.events,
@@ -124,11 +127,19 @@ export const blastTimeslotPairings = {
 			email : 0,
 		};
 
-		for await (const roundId of rounds) {
-			req.params.roundId = roundId;
-			const response  = await blastRoundPairing.POST(req, res);
+		const responses = [];
+
+		for (const round of rounds) {
+			req.params.roundId = round.id;
+			const response =  blastRoundPairing.POST(req, res);
+			responses.push(response);
+		}
+
+		await Promise.all(responses);
+
+		for (const response of responses) {
 			totals.web += parseInt(response.web);
-			totals.email += parseInt(response.web);
+			totals.email += parseInt(response.email);
 		}
 
 		res.status(200).json(` Pairing blast sent to ${totals.web} web blast and ${totals.email} email recipients`);
@@ -197,7 +208,10 @@ export const messageFreeJudges = {
 			emails : 0 ,
 		};
 
-		for await (const judge of freeJudges) {
+		const tourn = await req.db.summon(req.db.tourn, req.params.tournId);
+		const promises = [];
+
+		for (const judge of freeJudges) {
 
 			totals.judges++;
 			const ids = [judge.person];
@@ -210,35 +224,44 @@ export const messageFreeJudges = {
 			let text = `\n\nJudge: ${judge.first} ${judge.last}\n`;
 			text += `${req.body.message}`;
 
-			const notifyResponse = await notify({
+			const promise = notify({
 				ids,
 				text,
 				subject,
+				from        : `${tourn.name} <${tourn.webname}@www.tabroom.com>` ,
+				fromAddress : `<${tourn.webname}@www.tabroom.com>`               ,
 			});
 
-			totals.web += notifyResponse.web;
-			totals.email += notifyResponse.email;
+			promises.push(promise);
 		}
 
-		try {
-			await req.db.rounds.findAll(
-				{ where: { timeslot:  req.body.timeslotId } }
-			).forEach( async round => {
-				await req.db.changeLog.create({
-					tag         : 'blast',
-					description : `${req.body.message} sent to ${totals.web + totals.email}
-						 judges ${totals.web} push and ${totals.email} emails`,
-					person      : req.session.person,
-					count       : totals.web + totals.emails,
-					round       : round.id,
-				});
+		await Promise.all(promises);
+		for (const promise of promises) {
+			totals.web += promise.web;
+			totals.email += promise.email;
+		}
+
+		const rounds = await req.db.rounds.findAll(
+			{ where: { timeslot:  req.body.timeslotId } }
+		);
+
+		const logs = [];
+
+		for (const round of rounds) {
+			const log = req.db.changeLog.create({
+				tag         : 'blast',
+				description : `${req.body.message} sent to ${totals.web + totals.email}
+					 judges ${totals.web} push and ${totals.email} emails`,
+				person      : req.session.person,
+				count       : totals.web + totals.emails,
+				round       : round.id,
 			});
 
-		} catch (err) {
-			errorLogger.info(err);
+			logs.push(log);
 		}
 
-		res.status(200).json(`Free Message sent to ${totals.web} push and ${totals.email}
+		await Promise.all(logs);
+		return res.status(200).json(`Free Message sent to ${totals.web} push and ${totals.email}
 			email recipients about ${totals.judges} judges`,
 		);
 	},
@@ -252,18 +275,13 @@ export const messageReleasedJudges = {
 	POST: async (req, res) => {
 
 		// Given a timeslot ID and site ID, the aim here is to individually
-		// message every judge who IS in the pools that the rounds tied to
-		// that timeslot pull from, but who is NOT either judging, or in a
-		// standby timeslot attached to this timeslot.  In other words, they
-		// are completely free to go and frolic or whatever.
-
-		// Yes I just used the world frolic.  Fight me.
+		// message every judge who IS in standby but who is not judging
 
 		if (!req.body.message) {
 			res.status(200).json({ error: true, message: 'No message to blast sent' });
 		}
 
-		const freeJudgesQuery = `
+		const releasedJudgesQuery = `
 			select
 				judge.id, judge.first, judge.last, judge.person,
 				GROUP_CONCAT(follower.person SEPARATOR ',') as followers
@@ -284,7 +302,7 @@ export const messageReleasedJudges = {
 						and panel.round = r2.id
 						and r2.timeslot = and round.timeslot
 				)
-				and not exists (
+				and exists (
 					select
 						jpjs.id
 					from jpool_judge jpjs, jpool_setting jps
@@ -295,7 +313,7 @@ export const messageReleasedJudges = {
 				)
 		`;
 
-		const freeJudges = await req.db.sequelize.query(freeJudgesQuery, {
+		const releasedJudges = await req.db.sequelize.query(releasedJudgesQuery, {
 			replacements: { ...req.body },
 			type: req.db.sequelize.QueryTypes.SELECT,
 		});
@@ -306,7 +324,9 @@ export const messageReleasedJudges = {
 			emails : 0 ,
 		};
 
-		for await (const judge of freeJudges) {
+		const promises = [];
+
+		for (const judge of releasedJudges) {
 
 			totals.judges++;
 			const ids = [judge.person];
@@ -319,35 +339,44 @@ export const messageReleasedJudges = {
 			let text = `\n\nJudge: ${judge.first} ${judge.last}\n`;
 			text += `${req.body.message}`;
 
-			const notifyResponse = await notify({
+			const notifyResponse = notify({
 				ids,
 				text,
 				subject,
 			});
 
-			totals.web += notifyResponse.web;
-			totals.email += notifyResponse.email;
+			promises.push(notifyResponse);
 		}
 
-		try {
-			await req.db.rounds.findAll(
-				{ where: { timeslot:  req.body.timeslotId } }
-			).forEach( async round => {
-				await req.db.changeLog.create({
-					tag         : 'blast',
-					description : `${req.body.message} sent to ${totals.web + totals.email}
-						 judges ${totals.web} push and ${totals.email} emails`,
-					person      : req.session.person,
-					count       : totals.web + totals.emails,
-					round       : round.id,
-				});
+		await Promise.all(promises);
+
+		for (const promise of promises) {
+			totals.web += promise.web;
+			totals.email += promise.email;
+		}
+
+		const rounds = await req.db.rounds.findAll(
+			{ where: { timeslot:  req.body.timeslotId } }
+		);
+
+		const logs = [];
+
+		for (const round of rounds) {
+			const log = req.db.changeLog.create({
+				tag         : 'blast',
+				description : `${req.body.message} sent to ${totals.web + totals.email}
+					 judges ${totals.web} push and ${totals.email} emails`,
+				person      : req.session.person,
+				count       : totals.web + totals.emails,
+				round       : round.id,
 			});
 
-		} catch (err) {
-			errorLogger.info(err);
+			logs.push(log);
 		}
 
-		res.status(200).json(`Free Message sent to ${totals.web} push and ${totals.email}
+		await Promise.all(logs);
+
+		return res.status(200).json(`Free Message sent to ${totals.web} push and ${totals.email}
 			email recipients about ${totals.judges} judges`,
 		);
 	},

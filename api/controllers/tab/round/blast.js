@@ -19,8 +19,8 @@ export const blastRoundMessage = {
 		const notifyResponse = await notify({
 			ids         : personIds,
 			text        : req.body.message,
-			from        : `${tourn.name} <${tourn.webname}\@www.tabroom.com>`,
-			fromAddress : `<${tourn.webname}\@www.tabroom.com>`,
+			from        : `${tourn.name} <${tourn.webname}@www.tabroom.com>`,
+			fromAddress : `<${tourn.webname}@www.tabroom.com>`,
 		});
 
 		if (notifyResponse.error) {
@@ -222,7 +222,8 @@ export const blastRoundPairing = {
 				person      : sender,
 				round       : req.params.roundId,
 			});
-			await scheduleAutoFlip(req.params.roundId, req, res);
+
+			await scheduleAutoFlip(req.params.roundId, req);
 		}
 
 		await req.db.sequelize.query(
@@ -251,8 +252,6 @@ export const blastRoundPairing = {
 			blastData.append = req.body.append;
 		}
 
-		console.log(req.params);
-
 		const tourns = await req.db.sequelize.query(`
 			select
 				tourn.id, tourn.name, tourn.webname
@@ -265,8 +264,8 @@ export const blastRoundPairing = {
 
 		const tourn = tourns.shift();
 
-		blastData.from = `${tourn.name} <${tourn.webname}\@www.tabroom.com>`;
-		blastData.fromAddress = `<${tourn.webname}\@www.tabroom.com>`;
+		blastData.from = `${tourn.name} <${tourn.webname}@www.tabroom.com>`;
+		blastData.fromAddress = `<${tourn.webname}@www.tabroom.com>`;
 
 		const browserResponse = await sendPairingBlast(followers, blastData, req, res);
 
