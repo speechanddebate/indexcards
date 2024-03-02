@@ -25,6 +25,9 @@ export const notify = async (inputData) => {
 		email : {},
 	};
 
+	console.log(`InputData is `);
+	console.log(inputData);
+
 	if (!inputData.noEmail) {
 		pushReply.email = await emailNotify(inputData);
 	}
@@ -39,6 +42,8 @@ export const notify = async (inputData) => {
 		email   : pushReply.email,
 		web     : pushReply.web,
 	};
+
+	console.log(reply);
 
 	return reply;
 };
