@@ -107,6 +107,7 @@ export const emailBlast = async (inputData) => {
 		debugLogger.info(`Text ${messageData.text}`);
 		debugLogger.info(`HTML ${messageData.html}`);
 		debugLogger.info(`From ${messageData.from}`);
+		debugLogger.info(`ReplyTo ${messageData.replyTo}`);
 	}
 
 	return {
