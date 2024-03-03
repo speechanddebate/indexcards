@@ -172,7 +172,6 @@ app.all(tabRoutes, async (req, res, next) => {
 
 	if (typeof req.session.perms !== 'object') {
 		res.status(401).json('You do not have access to that tournament area');
-		return;
 	} else {
 		next();
 	}
@@ -192,12 +191,14 @@ app.all(coachRoutes, async (req, res, next) => {
 	req.session = await auth(req, res);
 	if (req.session) {
 		const chapter = await coachAuth(req, res);
-		if (typeof answer === 'object') {
+		if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
 			req.chapter = chapter;
 			next();
+		} else {
+			return res.status(401).json(`You do not have access to that institution`);
 		}
 	} else {
-		res.status(401).json('You are not currently logged in to Tabroom');
+		return res.status(401).json('You are not currently logged in to Tabroom');
 	}
 });
 

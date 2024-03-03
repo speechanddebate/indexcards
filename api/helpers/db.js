@@ -338,7 +338,6 @@ db.school.belongsTo(db.tourn    , { as: 'Tourn'   , foreignKey: 'tourn' });
 db.school.belongsTo(db.chapter  , { as: 'Chapter' , foreignKey: 'chapter' });
 db.school.belongsTo(db.region   , { as: 'Region'  , foreignKey: 'region' });
 db.school.belongsTo(db.district , { as: 'District', foreignKey: 'district' });
-db.school.belongsToMany(db.person, { as: 'Contacts', foreignKey: 'school', through: 'contact' });
 
 db.fine.belongsTo(db.person  , { as: 'LeviedBy'  , foreignKey: 'levied_by' });
 db.fine.belongsTo(db.person  , { as: 'DeletedBy' , foreignKey: 'deleted_by' });

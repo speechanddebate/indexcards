@@ -2,47 +2,63 @@
 export const updateContact = {
 
 	GET: async (req, res) => {
-		const category = await req.db.summon(req.db.category, req.params.categoryId);
-		res.status(200).json(category);
+
+		res.status(200).json(req.params);
 	},
 
 	POST: async (req, res) => {
 
-		const contacts = await req.db.findAll({
-			where : { school : req.params.schoolId, person: req.params.personId },
+		const contacts = await req.db.contact.findAll({
+			where : {
+				school : parseInt(req.body.school),
+				person : parseInt(req.body.person),
+			},
 		});
 
 		if (!contacts) {
 			return res.status(200).json('No coach found');
 		}
 
-		const contact = contact.shift();
+		const contact = contacts.shift();
 
 		for (const dupe of contacts) {
 			await dupe.destroy();
 		}
 
-		contact[req.body.tag] = req.body.property_value;
+		contact[req.body.property_name] = req.body.property_value;
 		await contact.save();
 
-		if (contact[req.body.tag]) {
-			res.status(200).json(`Coach is now marked as ${req.body.tag}`);
+		if (contact[req.body.property_name]) {
+			res.status(200).json(`Coach is now marked as ${req.body.property_name}`);
 		} else {
-			res.status(200).json(`Coach is no longer marked as ${req.body.tag}`);
+			res.status(200).json(`Coach is no longer marked as ${req.body.property_name}`);
 		}
 	},
+};
 
-	DELETE: async (req, res) => {
+// I find it rather absurdly dumb that you can't post a body to a DELETE.  I mean,
+// what's the point of having these verbs if you're not going to be able to use them
+// half the time?
 
-		const contacts = await req.db.findAll({
-			where : { school : req.params.schoolId, person: req.params.personId },
+export const deleteContact = {
+
+	POST: async (req, res) => {
+
+		const contacts = await req.db.contact.findAll({
+			where : {
+				school : parseInt(req.body.school),
+				person : parseInt(req.body.person),
+			},
 		});
 
 		for (const contact of contacts) {
 			await contact.destroy();
 		}
 
-		res.status(200).json(`Coach removed from your roster`);
+		res.status(200).json({
+			message: `Coach removed for your roster`,
+			error: false,
+		});
 	},
 };
 

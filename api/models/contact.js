@@ -15,6 +15,11 @@ const contact = (sequelize, DataTypes) => {
 			allowNull    : false,
 			defaultValue : '0',
 		},
+		no_book: {
+			type         : DataTypes.BOOLEAN,
+			allowNull    : false,
+			defaultValue : '0',
+		},
 		created_at: {
 			type      : DataTypes.DATE,
 			allowNull : true,
