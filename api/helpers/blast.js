@@ -33,8 +33,14 @@ export const notify = async (inputData) => {
 		pushReply.web = await webBlast(inputData);
 	}
 
+	let error = false;
+
+	if (pushReply.web?.error || pushReply.email?.error) {
+		error = true;
+	}
+
 	const reply = {
-		error   : pushReply.web?.error || pushReply.email?.error,
+		error,
 		message : `${pushReply.web.message} and ${pushReply.email.message}`,
 		email   : pushReply.email,
 		web     : pushReply.web,
