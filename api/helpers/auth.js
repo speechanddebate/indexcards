@@ -217,7 +217,7 @@ export const tabAuth = async (req) => {
 	// User request must have access to the tournament.  Figure out how!
 	const tournId = req.params.tournId;
 	const typeId  = req.params.typeId;
-	const subType = req.params.subType;
+	let subType = req.params.subType;
 
 	let tourn = {};
 
@@ -273,6 +273,9 @@ export const tabAuth = async (req) => {
 	// matches the parent.
 
 	if (subType === 'section') {
+		if (subType === 'section') {
+			subType = 'panel';
+		}
 		const outputs = await db.sequelize.query(`
 			select
 				${subType}.*,

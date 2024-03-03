@@ -13,3 +13,4 @@ const coach = (sequelize, DataTypes) => {
 };
 
 export default coach;
+
