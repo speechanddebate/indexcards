@@ -27,21 +27,26 @@ export const checkBallotAccess = {
 		if (access && access.length > 0) {
 
 			let ok = false;
-			access.forEach( (ballot) => {
-				if (!req.session?.person
-					|| (ballot.person !== req.session.person && !req.session.site_admin)
-				) {
-					return res.status(200).json({
-						error   : false,
-						message : `Your Tabroom account is not linked to that judge!`,
-						refresh : true,
-					});
-				}
+			let stop = 0;
 
-				if (!ballot.audit) {
-					ok = true;
+			for (const ballot of access) {
+				if (stop < 1) {
+					if (!req.session?.person
+						|| (ballot.person !== req.session.person && !req.session.site_admin)
+					) {
+						stop++;
+						return res.status(200).json({
+							error   : false,
+							message : `Your Tabroom account is not linked to that judge!`,
+							refresh : true,
+						});
+					}
+
+					if (!ballot.audit) {
+						ok = true;
+					}
 				}
-			});
+			}
 
 			if (ok) {
 				return res.status(200).json({
@@ -77,7 +82,7 @@ export const saveRubric = {
 		// eventually I'll want to put these access checks up the chain
 
 		if (!req.session) {
-			res.status(200).json({
+			return res.status(200).json({
 				error   : true,
 				message : 'You do not appear to be logged in with a current active session',
 			});
@@ -86,7 +91,7 @@ export const saveRubric = {
 		const judgeOK = await checkJudgePerson(req, judgeId);
 
 		if (!judgeOK) {
-			res.status(200).json({
+			return res.status(200).json({
 				error: true,
 				message: 'You do not have permission to change that ballot',
 			});
@@ -95,7 +100,7 @@ export const saveRubric = {
 			const ballot = await db.summon(db.ballot, autoSave.ballot);
 
 			if (ballot?.judge !== judgeId) {
-				res.status(200).json({
+				return res.status(200).json({
 					error   : true,
 					message : `You are not the listed judge for that ballot.  ${ballot?.judge} vs ${judgeId}`,
 				});
@@ -128,7 +133,7 @@ export const saveRubric = {
 					}
 				}
 
-				res.status(200).json({
+				return res.status(200).json({
 					error: false,
 					message: `Scores auto-saved!`,
 				});

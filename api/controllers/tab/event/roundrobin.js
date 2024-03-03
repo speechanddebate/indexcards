@@ -22,7 +22,7 @@ export const sectionTemplateRobin = {
 		const rrPattern = JSON.parse(rrSetting.value_text);
 
 		if (!rrPattern) {
-			res.status(200).json({ error: true, message: `No pattern found for ${entries.length}` });
+			return res.status(200).json({ error: true, message: `No pattern found for ${entries.length}` });
 		}
 
 		const rounds = await db.round.findAll({
@@ -31,7 +31,7 @@ export const sectionTemplateRobin = {
 		});
 
 		if (rounds.length !== rrPattern.rounds) {
-			res.status(200).json({ error: true, message: `Incorrect round count for pattern. ${rrPattern.rounds} rounds required` });
+			return res.status(200).json({ error: true, message: `Incorrect round count for pattern. ${rrPattern.rounds} rounds required` });
 		}
 
 		const judges = await db.judge.findAll({
@@ -77,7 +77,7 @@ export const sectionTemplateRobin = {
 			await writeRound(db, round);
 		});
 
-		res.status(200).json({ error: false, message: `${rounds.length} paired for the round robin`, refresh: true });
+		return res.status(200).json({ error: false, message: `${rounds.length} paired for the round robin`, refresh: true });
 	},
 };
 
