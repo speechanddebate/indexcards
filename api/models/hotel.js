@@ -13,6 +13,14 @@ const hotel = (sequelize, DataTypes) => {
 			type: DataTypes.FLOAT,
 			allowNull: true,
 		},
+		no_confirm: {
+			type: DataTypes.BOOLEAN,
+			allowNull: false,
+		},
+		tourn_default: {
+			type: DataTypes.BOOLEAN,
+			allowNull: false,
+		},
 	});
 };
 
