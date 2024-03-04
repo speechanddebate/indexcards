@@ -191,7 +191,7 @@ export const emailNotify = async (inputData) => {
 	}
 
 	return {
-		error   : true,
+		error   : false,
 		message : `No recipients found for the email notification`,
 	};
 };

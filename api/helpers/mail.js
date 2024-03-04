@@ -95,7 +95,9 @@ export const emailBlast = async (inputData) => {
 
 	let result = {};
 
-	if (process.env.NODE_ENV === 'production' || config.MAIL_SERVER === 'mail.in.speechanddebate.org') {
+	if (process.env.NODE_ENV === 'production'
+		|| config.MAIL_SERVER === 'mail.in.speechanddebate.org'
+	) {
 		try {
 			result = await transporter.sendMail(messageData);
 		} catch (err) {
@@ -109,6 +111,8 @@ export const emailBlast = async (inputData) => {
 		debugLogger.info(`From ${messageData.from}`);
 		debugLogger.info(`ReplyTo ${messageData.replyTo}`);
 	}
+
+	console.log(result);
 
 	return {
 		error   : false,
