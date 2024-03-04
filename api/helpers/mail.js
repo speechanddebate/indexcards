@@ -28,7 +28,6 @@ export const emailBlast = async (inputData) => {
 		});
 
 	} else {
-
 		transporter = nodemailer.createTransport({
 			host   : config.MAIL_SERVER,
 			port   : config.MAIL_PORT,
@@ -95,11 +94,9 @@ export const emailBlast = async (inputData) => {
 
 	let result = {};
 
-	if (process.env.NODE_ENV === 'production'
-		|| config.MAIL_SERVER === 'mail.in.speechanddebate.org'
-	) {
+	if (process.env.NODE_ENV === 'production') {
 		try {
-			result = await transporter.sendMail(messageData);
+			result =  await transporter.sendMail(messageData);
 		} catch (err) {
 			return new Error(`Failed to send mail: ${err.message}`);
 		}
@@ -111,8 +108,6 @@ export const emailBlast = async (inputData) => {
 		debugLogger.info(`From ${messageData.from}`);
 		debugLogger.info(`ReplyTo ${messageData.replyTo}`);
 	}
-
-	console.log(result);
 
 	return {
 		error   : false,

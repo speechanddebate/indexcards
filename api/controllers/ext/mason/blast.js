@@ -7,7 +7,11 @@ export const blastMessage = {
 	POST: async (req, res) => {
 
 		if (!req.body.text) {
-			return res.status(200).json({ error: true, message: 'No message to blast sent' });
+			if (req.body.body) {
+				req.body.text = req.body.body;
+			} else {
+				return res.status(200).json({ error: true, message: 'No message to blast sent' });
+			}
 		}
 
 		const notifyResponse = await notify({ ...req.body });
@@ -15,12 +19,12 @@ export const blastMessage = {
 		if (notifyResponse.error) {
 			errorLogger.error(notifyResponse.message);
 			return res.status(401).json(notifyResponse);
-		} else {
-			return res.status(200).json({
-				error   : false,
-				message : notifyResponse.message,
-			});
 		}
+
+		return res.status(200).json({
+			error   : false,
+			message : notifyResponse.message,
+		});
 	},
 };
 

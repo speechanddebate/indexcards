@@ -228,16 +228,17 @@ app.all(localRoutes, async (req, res, next) => {
 
 app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async (req, res, next) => {
 
-	// All EXT requests are from external services and sources that do not necessarily
-	// hook into the Tabroom authentication methods.  They must have instead a basic
-	// authentication header with a Tabroom ID and corresponding api_key setting for an
-	// account in person_settings.  Certain endpoints might be authorized to only some
-	// person accounts, such as site admins for internal NSDA purposes, or Hardy because
-	// that guy is super shady and I need to keep a specific eye on him.
+	// All EXT requests are from external services and sources that do not
+	// necessarily hook into the Tabroom authentication methods.  They must
+	// have instead a basic authentication header with a Tabroom ID and
+	// corresponding api_key setting for an account in person_settings.
+	// Certain endpoints might be authorized to only some person accounts, such
+	// as site admins for internal NSDA purposes, or Hardy because that guy is
+	// super shady and I need to keep a specific eye on him.
 
-	req.person = await keyAuth(req, res);
+	req.session = await keyAuth(req, res);
 
-	if (req.person) {
+	if (req.session?.person) {
 		next();
 	}
 });

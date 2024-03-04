@@ -155,7 +155,7 @@ export const emailNotify = async (inputData) => {
 	if (
 		!inputData.ids
 		|| inputData.ids.length < 1
-		|| !inputData.text
+		|| (!inputData.text && !inputData.html)
 	) {
 		return {
 			error   : false,
