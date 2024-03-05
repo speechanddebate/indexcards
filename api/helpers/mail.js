@@ -51,6 +51,7 @@ export const emailBlast = async (inputData) => {
 	// Only send BCC emails so folks do not reply all or see student contact
 	// etc. And then add the sender as the To as well so it will not deliver.
 
+	messageData.replyTo = messageData.replyTo || messageData.from || config.MAIL_FROM;
 	messageData.bcc = Array.from(new Set(messageData.email));
 	messageData.to = messageData.to || config.MAIL_FROM;
 	messageData.from = messageData.from || config.MAIL_FROM;
