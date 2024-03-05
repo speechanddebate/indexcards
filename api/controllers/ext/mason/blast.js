@@ -9,7 +9,7 @@ export const blastMessage = {
 		if (!req.body.text) {
 			if (req.body.body) {
 				req.body.text = req.body.body;
-			} else {
+			} else if (!req.body.html) {
 				return res.status(200).json({ error: true, message: 'No message to blast sent' });
 			}
 		}

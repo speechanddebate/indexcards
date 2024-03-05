@@ -63,7 +63,7 @@ export const emailBlast = async (inputData) => {
 		messageData.text += '\n----------------------------\n';
 		messageData.text += 'You received this email through your account on https://www.tabroom.com\n';
 		messageData.text += 'To stop them, login to your Tabroom account, click the Profile icon at top right, and ';
-		messageData.text += 'check off "No Emails", then save your profile. ';
+		messageData.text += 'check off "No Emails", then save your profile.\n';
 		messageData.text += 'You can also delete your Tabroom account entirely on that profile screen.';
 	}
 
@@ -76,8 +76,8 @@ export const emailBlast = async (inputData) => {
 		messageData.html += '<a href="https://www.tabroom.com">https://www.tabroom.com</a></p>';
 		messageData.html += '<p>To stop them, visit ';
 		messageData.html += '<a href="https://www.tabroom.com/user/login/profile.mhtml">Your Profile</a>, ';
-		messageData.html += 'check off "No Emails", and save.';
-		messageData.html += 'You can also delete your Tabroom account entirely on your profile.</p>';
+		messageData.html += 'check off "No Emails", and save.</p>';
+		messageData.html += '<p>You can also delete your Tabroom account entirely on your profile.</p>';
 	}
 
 	if (messageData.attachments && messageData.attachments.length > 0) {
@@ -101,7 +101,7 @@ export const emailBlast = async (inputData) => {
 			return new Error(`Failed to send mail: ${err.message}`);
 		}
 	} else {
-		debugLogger.info(`Local: email not sending from ${messageData.from} to ${messageData.to} bcc ${messageData.bcc}`);
+		debugLogger.info(`Local: email not sending from ${messageData.from} to ${messageData.to} bcc ${messageData.bcc} `);
 		debugLogger.info(`Subject ${messageData.subject}`);
 		debugLogger.info(`Text ${messageData.text}`);
 		debugLogger.info(`HTML ${messageData.html}`);
