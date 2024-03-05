@@ -279,7 +279,6 @@ export const tabAuth = async (req) => {
 		const outputs = await db.sequelize.query(`
 			select
 				${subType}.*,
-				round.id round,
 				event.category category,
 				event.tourn tourn
 			from ${subType}, round, event
