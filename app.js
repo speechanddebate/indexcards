@@ -82,8 +82,8 @@ app.use('/v1/tab/:tournId/round/:roundId/poke', messageLimiter);
 app.use('/v1/tab/:tournId/timeslot/:timeslotId/message', messageLimiter);
 app.use('/v1/tab/:tournId/timeslot/:timeslotId/blast', messageLimiter);
 app.use('/v1/tab/:tournId/timeslot/:timeslotId/poke', messageLimiter);
-app.use('/v1/tab/:tournId/section/:sectionId/message', messageLimiter);
-app.use('/v1/tab/:tournId/section/:sectionId/blast', messageLimiter);
+app.use('/v1/tab/:tournId/section/:sectionId/blastMessage', messageLimiter);
+app.use('/v1/tab/:tournId/section/:sectionId/blastPairing', messageLimiter);
 app.use('/v1/tab/:tournId/section/:sectionId/poke', messageLimiter);
 
 const searchLimiter = rateLimiter({

@@ -15,7 +15,7 @@ const contact = (sequelize, DataTypes) => {
 			allowNull    : false,
 			defaultValue : '0',
 		},
-		no_book: {
+		book: {
 			type         : DataTypes.BOOLEAN,
 			allowNull    : false,
 			defaultValue : '0',
