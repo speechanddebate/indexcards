@@ -16,11 +16,6 @@ export const blastSectionMessage = {
 		const section = await req.db.summon(req.db.section, req.params.sectionId);
 		const tourn = req.db.summon(req.db.tourn, req.params.tournId);
 
-		if (section.id !== parseInt(req.params.sectionId)) {
-			res.status(401).json(`Section ID ${req.params.sectionId} does not belong to this round`);
-			return;
-		}
-
 		const personIds = await getFollowers(
 			{ sectionId : req.params.sectionId },
 			req.body
