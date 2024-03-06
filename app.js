@@ -51,9 +51,6 @@ app.use(expressWinston.errorLogger({
 	},
 }));
 
-// Final fallback error handling
-app.use(errorHandler);
-
 // Enable getting forwarded client IP from proxy
 app.enable('trust proxy', 1);
 app.get('/v1/ip', (request, response) => response.send(request.ip));
@@ -293,6 +290,8 @@ const apiDocConfig = initialize({
 	errorMiddleware : errorHandler,
 });
 
+// Final fallback error handling
+app.use(errorHandler);
 
 // Swagger UI interface for the API
 app.use('/v1/apidoc', swaggerUI.serve, swaggerUI.setup(apiDocConfig.apiDoc));
