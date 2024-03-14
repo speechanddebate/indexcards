@@ -429,8 +429,9 @@ export const backupAccess = {
 		if (followers.length < 1) {
 			await backupAccounts.destroy();
 		} else {
-			backupAccounts.value_text = followers;
-			await backupAccounts.update();
+			backupAccounts.value_text = JSON.stringify(followers);
+			await backupAccounts.save();
+			console.log(backupAccounts);
 		}
 
 		res.status(200).json(`Backup follower removed`);
