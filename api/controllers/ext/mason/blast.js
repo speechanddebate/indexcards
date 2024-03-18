@@ -1,6 +1,6 @@
 /* eslint-disable no-useless-escape */
 import { notify } from '../../../helpers/blast.js';
-import { errorLogger } from '../../../helpers/logger.js'
+import { debugLogger, errorLogger } from '../../../helpers/logger.js';
 
 export const blastMessage = {
 
@@ -10,6 +10,8 @@ export const blastMessage = {
 			if (req.body.body) {
 				req.body.text = req.body.body;
 			} else if (!req.body.html) {
+				debugLogger.info('No message to blast sent');
+				debugLogger.info(req.body);
 				return res.status(200).json({ error: true, message: 'No message to blast sent' });
 			}
 		}
