@@ -7,6 +7,7 @@ import event from './event.js';
 import category from './category.js';
 import jpool from './jpool.js';
 import round from './round.js';
+import rpool from './rpool.js';
 import result from './result.js';
 import section from './section.js';
 import timeslot from './timeslot.js';
@@ -17,6 +18,7 @@ export default [
 	...event,
 	...category,
 	...jpool,
+	...rpool,
 	...round,
 	...result,
 	...section,
