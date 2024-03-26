@@ -91,11 +91,11 @@ export const changeAccess = {
 
 			if (
 				req.session.perms.tourn[req.params.tournId] !== 'owner'
-				&& !(targetPerson.id === req.session.person
-					&& req.session.perms.contact[req.params.tournId]
+				&& (targetPerson.id !== req.session.person
+					|| req.body.property_value
 				)
 			) {
-				res.status(401).json('Only tournament owners may adjust tournament contacts other than themselves');
+				res.status(401).json('Only tournament owners may adjust tournament contacts other than yourself');
 				return;
 			}
 
