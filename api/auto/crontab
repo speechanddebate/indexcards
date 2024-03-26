@@ -3,7 +3,7 @@
 * * * * * /usr/local/bin/node /www/indexcards/api/auto/autoBlastPairings.js > /proc/1/fd/1 2>/proc/1/fd/2
 
 # Clear out old sharenames once a week to prevent name collisions
-15 8 * * 4 /usr/bin/node /www/indexcards/api/auto/clearShareRooms.js
+15 8 * * 4 /usr/bin/node /www/indexcards/api/auto/clearShareRooms.js > /proc/1/fd/1 2>/proc/1/fd/2
 
 # NAUDL post to Salesforce
 15 3 * * * /usr/local/bin/node /www/indexcards/api/auto/naudl/chapters.js > /proc/1/fd/1 2>/proc/1/fd/2
