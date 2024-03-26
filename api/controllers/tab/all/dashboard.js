@@ -601,7 +601,7 @@ export const tournDashboard = {
 	GET: async (req, res) => {
 
 		const tournId = req.params.tournId;
-		const perms = req.session.perms;
+		const perms = req.session?.perms;
 
 		if (!perms.tourn[tournId]) {
 			res.status(200).json({ error: true, message: 'You do not have access to that tournament' });

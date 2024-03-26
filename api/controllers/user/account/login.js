@@ -6,6 +6,10 @@ const login = {
 	POST: async (req, res) => {
 		const db = req.db;
 
+		if (!req.body?.username) {
+			return res.status(400).json({ error: 'No username sent' });
+		}
+
 		const person = await db.person.findOne({
 			where: { email: req.body.username },
 			include : [
