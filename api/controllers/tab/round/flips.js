@@ -139,7 +139,7 @@ export const scheduleFlips = async (roundId) => {
 							values (:tag, :roundId, :activeAt, now())
 					`, {
 						replacements: { tag: `flip_${flight}`, roundId, activeAt: startDate },
-						type: db.Sequelize.QueryTypes.INSERT
+						type: db.Sequelize.QueryTypes.INSERT,
 					});
 
 					// Add the offset to the start time for the next flight
@@ -148,12 +148,12 @@ export const scheduleFlips = async (roundId) => {
 
 			} else {
 
-				const result = await db.sequelize.query(`
+				await db.sequelize.query(`
 					insert into autoqueue (tag, round, active_at, created_at)
 						values (:tag, :roundId, :activeAt, now())
 				`, {
 					replacements: { tag: `flip`, roundId, activeAt: startDate },
-					type: db.Sequelize.QueryTypes.INSERT
+					type: db.Sequelize.QueryTypes.INSERT,
 				});
 
 			}

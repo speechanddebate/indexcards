@@ -183,6 +183,7 @@ app.all(tabRoutes, async (req, res, next) => {
 
 	if (typeof req.session?.perms !== 'object') {
 		return res.status(401).json('You do not have access to that tournament area');
+	// eslint-disable-next-line no-else-return
 	} else {
 		next();
 	}
@@ -258,6 +259,7 @@ app.all('/v1/glp/*', async (req, res, next) => {
 	req.session = await auth(req, res);
 	if (!req.session?.site_admin) {
 		return res.status(401).json('That function is accessible to Tabroom site administrators only');
+	// eslint-disable-next-line no-else-return
 	} else {
 		next();
 	}

@@ -95,50 +95,48 @@ export const saveRubric = {
 				error: true,
 				message: 'You do not have permission to change that ballot',
 			});
+		}
+
+		const ballot = await db.summon(db.ballot, autoSave.ballot);
+
+		if (ballot?.judge !== judgeId) {
+			return res.status(200).json({
+				error   : true,
+				message : `You are not the listed judge for that ballot.  ${ballot?.judge} vs ${judgeId}`,
+			});
+		}
+
+		const score = await db.score.findOne({ where: { ballot: ballot.id, tag: 'rubric' } });
+		delete autoSave.ballot;
+
+		if (score && score.id) {
+
+			try {
+				score.content = JSON.stringify(autoSave);
+				await score.save();
+			} catch (err) {
+				errorLogger.info(`Error encountered in savings scores ${err} ballot ${ballot.id} score ${score.id}`);
+			}
+
 		} else {
 
-			const ballot = await db.summon(db.ballot, autoSave.ballot);
-
-			if (ballot?.judge !== judgeId) {
-				return res.status(200).json({
-					error   : true,
-					message : `You are not the listed judge for that ballot.  ${ballot?.judge} vs ${judgeId}`,
+			try {
+				await db.score.create({
+					ballot  : ballot.id,
+					tag     : 'rubric',
+					value   : 0,
+					content : JSON.stringify(autoSave),
 				});
-			} else {
-
-				const score = await db.score.findOne({ where: { ballot: ballot.id, tag: 'rubric' } });
-				delete autoSave.ballot;
-
-				if (score && score.id) {
-
-					try {
-						score.content = JSON.stringify(autoSave);
-						await score.save();
-					} catch (err) {
-						errorLogger.info(`Error encountered in savings scores ${err} ballot ${ballot.id} score ${score.id}`);
-					}
-
-				} else {
-
-					try {
-						await db.score.create({
-							ballot  : ballot.id,
-							tag     : 'rubric',
-							value   : 0,
-							content : JSON.stringify(autoSave),
-						});
-					} catch (err) {
-						errorLogger.info(`Error encountered in savings scores ${err} ballot ${ballot?.id} score ${score?.id}`);
-						errorLogger.info(req.params);
-					}
-				}
-
-				return res.status(200).json({
-					error: false,
-					message: `Scores auto-saved!`,
-				});
+			} catch (err) {
+				errorLogger.info(`Error encountered in savings scores ${err} ballot ${ballot?.id} score ${score?.id}`);
+				errorLogger.info(req.params);
 			}
 		}
+
+		return res.status(200).json({
+			error: false,
+			message: `Scores auto-saved!`,
+		});
 	},
 };
 

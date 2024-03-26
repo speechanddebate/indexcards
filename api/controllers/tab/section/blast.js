@@ -13,7 +13,7 @@ export const blastSectionMessage = {
 			});
 		}
 
-		const section = await req.db.summon(req.db.section, req.params.sectionId);
+		await req.db.summon(req.db.section, req.params.sectionId);
 		const tourn = req.db.summon(req.db.tourn, req.params.tournId);
 
 		const personIds = await getFollowers(
