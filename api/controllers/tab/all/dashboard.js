@@ -601,11 +601,15 @@ export const tournDashboard = {
 	GET: async (req, res) => {
 
 		const tournId = req.params.tournId;
-		const perms = req.session?.perms;
+
+		if (!req.session) {
+			return res.status(401).json('You are not logged in to view the dashboard');
+		}
+
+		const perms = req.session.perms;
 
 		if (!perms.tourn[tournId]) {
-			res.status(200).json({ error: true, message: 'You do not have access to that tournament' });
-			return;
+			return res.status(401).json('You do not have access to that tournament');
 		}
 
 		const db = req.db;

@@ -118,7 +118,6 @@ export const keyAuth = async (req, res) => {
 
 	// Legacy support for the Hardy Hacky Keys
 	if (config.LEGACY_KEYS?.[req.params?.area?.toUpperCase()]?.KEY) {
-		console.log(`Checking request against legacy keys`);
 		const hash = crypto.createHash('sha256').update(config[req.params.area.toUpperCase()].KEY).digest('hex');
 		const keyTag = `${req.params.area}_key`;
 

@@ -171,12 +171,11 @@ app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], as
 const tabRoutes = [
 	'/v1/tab/:tournId',
 	'/v1/tab/:tournId/:subType',
-	'/v1/tba/:tournId/:subType/:typeId',
+	'/v1/tab/:tournId/:subType/:typeId',
 	'/v1/tab/:tournId/:subType/:typeId/*',
 ];
 
 app.all(tabRoutes, async (req, res, next) => {
-
 	// Functions that require tabber or owner permissions to a tournament overall
 	req.session = await auth(req, res);
 	req.session = await tabAuth(req, res);
