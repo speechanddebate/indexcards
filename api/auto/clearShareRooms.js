@@ -1,6 +1,6 @@
 import db from '../helpers/litedb.js';
 
-const clearShareRooms = async () => {
+export const clearShareRooms = async () => {
 
 	await db.sequelize.query(`
 		delete
@@ -22,3 +22,4 @@ const clearShareRooms = async () => {
 await clearShareRooms();
 process.exit();
 
+export default clearShareRooms;

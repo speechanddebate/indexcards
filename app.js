@@ -161,17 +161,17 @@ app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], as
 
 	req.session = await auth(req, res);
 
-	if (req.session) {
-		next();
-	} else {
+	if (!req.session) {
 		return res.status(401).json('You are not logged in');
 	}
+
+	next();
 });
 
 const tabRoutes = [
 	'/v1/tab/:tournId',
 	'/v1/tab/:tournId/:subType',
-	'/v1/tab/:tournId/:subType/:typeId',
+	'/v1/tba/:tournId/:subType/:typeId',
 	'/v1/tab/:tournId/:subType/:typeId/*',
 ];
 
@@ -183,10 +183,8 @@ app.all(tabRoutes, async (req, res, next) => {
 
 	if (typeof req.session?.perms !== 'object') {
 		return res.status(401).json('You do not have access to that tournament area');
-	// eslint-disable-next-line no-else-return
-	} else {
-		next();
 	}
+	next();
 });
 
 const coachRoutes = [
@@ -212,6 +210,7 @@ app.all(coachRoutes, async (req, res, next) => {
 	} else {
 		return res.status(401).json('You are not currently logged in to Tabroom');
 	}
+	next();
 });
 
 const localRoutes = [
@@ -236,6 +235,7 @@ app.all(localRoutes, async (req, res, next) => {
 	} else {
 		return res.status(401).json('You are not currently logged in to Tabroom');
 	}
+	next();
 });
 
 app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async (req, res, next) => {
@@ -250,19 +250,20 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 
 	req.session = await keyAuth(req, res);
 
-	if (req.session?.person) {
-		next();
+	if (!req.session?.person) {
+		return res.status(401).json('That function is not accessible to your API credentials');
 	}
+
+	next();
 });
 
 app.all('/v1/glp/*', async (req, res, next) => {
 	req.session = await auth(req, res);
 	if (!req.session?.site_admin) {
 		return res.status(401).json('That function is accessible to Tabroom site administrators only');
-	// eslint-disable-next-line no-else-return
-	} else {
-		next();
 	}
+
+	next();
 });
 
 const systemPaths = [

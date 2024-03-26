@@ -4,6 +4,7 @@
 
 # Clear out old sharenames once a week to prevent name collisions
 15 8 * * 4 /usr/local/bin/node /www/indexcards/api/auto/clearShareRooms.js > /proc/1/fd/1 2>/proc/1/fd/2
+30 8 * * 4 /usr/local/bin/node /www/indexcards/api/auto/clearPaymentKeys.js > /proc/1/fd/1 2>/proc/1/fd/2
 
 # NAUDL post to Salesforce
 15 3 * * * /usr/local/bin/node /www/indexcards/api/auto/naudl/chapters.js > /proc/1/fd/1 2>/proc/1/fd/2
