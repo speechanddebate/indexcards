@@ -33,6 +33,16 @@ jobs:
         registry: registry.speechanddebate.org
         tags: "${{ env.COMMIT_VERSION }}"
 
+    - name: Publish cron image to Registry
+      uses: elgohr/Publish-Docker-Github-Action@v4
+      with:
+        name: nsda/indexcards/cron
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+        registry: registry.speechanddebate.org
+        tags: "${{ env.COMMIT_VERSION }}"
+        dockerfile: cron.Dockerfile
+
     - name: If image was published change icon
       if: success()
       run: echo "SLACK_ICON=:white_check_mark:" >> $GITHUB_ENV
