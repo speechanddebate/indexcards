@@ -39,6 +39,9 @@ const errorHandler = async (err, req, res, next) => {
 			email   : config.ERROR_DESTINATION,
 			subject : `Indexcards Bug Tripped`,
 			text    : `
+Host
+${config.DOCKERHOST}
+
 Stack
 ${err.stack}
 
