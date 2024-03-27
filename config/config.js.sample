@@ -2,99 +2,119 @@ import { config as envconfig } from 'dotenv';
 
 envconfig();
 
-// Default (Dev config)
 export const config = {
-	PORT                  : 10010,
+	PORT                  : 8001,
 	RATE_WINDOW           : 15 * 60 * 1000,
 	RATE_MAX              : 100000,
 	RATE_DELAY            : 0,
-	LOGIN_URL             : 'https://www.tabroom.com/user/login/login.mhtml',
-	MAIL_FROM             : 'live@www.tabroom.com',
-	MAIL_SERVER           : 'localhost',
-	LOGIN_TOKEN			  : 'random-long-string',
+	BASE_URL 			  : 'http://api.dev.tabroom.com',
+	LOGIN_URL             : 'http://old.dev.tabroom.com/user/login/login.mhtml',
+	DOCKERHOST		      : 'devenv',
+	LOG_PATH			  : '/var/log/indexcards',
+	MAIL_FROM			  : 'live@www.tabroom.com',
+	MAIL_SERVER			  : 'localhost',
+	MAIL_PORT			  : 25,
+	ERROR_DESTINATION	  : ['errors@tabroom.com'],
+	LOGIN_TOKEN			  : 'flurgleflimmer',
 	JITSI_KEY             : 'campus-jitsi-key',
 	JITSI_URI             : 'https://campus.speechanddebate.org',
-	NSDA_API_USER		  : 'nsda-api-userId',
-	NSDA_API_KEY		  : 'nsda-api-password',
-	NSDA_API_ENDPOINT     : 'https://api.speechanddebate.org',
-	NSDA_API_PATH         : '/v2',
 	CASELIST_KEY          : 'caselist-key',
-	SHARE_KEY             : 'share-key',
-	NSDA_KEY              : 'nsda-key',
+	SHARE_KEY             : 'fd4af7c6f485',
 	SHARE_SMTP_HOST       : '192.168.37.28',
-	SHARE_SMTP_USER       : 'sharesmtp@share.tabroom.com',
+	SHARE_SMTP_USER       : 'share@share.tabroom.com',
 	SHARE_SMTP_PASS       : 'sharepass',
-	LDAP_SERVER           : 'ldapserver.domain.com',
-	LDAP_PORT		      : '389',
-	LDAP_DN               : 'dc=tabroom,dc=com',
-	LDAP_USER             : 'cn=admin,dc=tabroom,dc=com',
-	LDAP_PW               : 'ldapAdminPasswordHere',
 	IPLOCATION            : '/var/lib/GeoIP/GeoLite2-City.mmdb',
 	IPISP                 : '/var/lib/GeoIP/GeoIP2-ISP.mmdb',
-	NAUDL_USERNAME		  : 'somethingfrom@salesforce.com',
-	NAUDL_PW			  : 'askLukeHill',
-	NAUDL_TOURN_ENDPOINT  : 'tournamentServiceUrl',
-	NAUDL_STUDENT_ENDPOINT: 'studentServiceTabroomUrl',
-	NAUDL_STA_ENDPOINT    : 'staTabroomServiceUrl',
-	COOKIE_NAME           : 'TabroomToken',
-	DB_PORT               : '3306',
 	S3_URL				  : 'https://s3.amazonaws.com/tabroom-files/tourns',
-	AWS_CREDENTIALS       : {
-		accessKeyId     : '',
-		secretAccessKey : '',
-		region          : 'us-east-2',
-		Bucket          : 's3://tabroom-files',
-	},
+	COOKIE_NAME           : 'TabroomLocal',
+	COOKIE_DOMAIN         : '.dev.tabroom.com',
+	DB_PORT               : '3306',
 	DB_DATABASE           : 'tabroom',
-	sequelizeOptions      : {
-		dialect         : 'mariadb',
-		define : {
+	NSDA 				  : {
+		USER_ID  : '12345678',
+		KEY      : 'IAmNotAPassword',
+		ENDPOINT : 'https://test-api.speechanddebate.org',
+		PATH     : '/v2',
+		PRODUCT_CODES : {
+			tabroom   : 00000,
+			nc        : 11111,
+			nco       : 22222,
+		},
+	},
+	NAUDL				  : {
+		USERNAME			: 'nope@nopesauce.org',
+		PW					: 'ThisIsAlsoNotAPassword',
+		TOKEN				: 'NotAToken',
+		CLIENT_SECRET		: 'DoNotEvenThinkIt',
+		CLIENT_ID			: 'IDontThinkThisWasSecretButWhyChanceIt',
+		URL					: 'https://urbandebate.my.salesforce.com',
+		TOURN_ENDPOINT		: '/services/apexrest/v.1/TournamentService',
+		STUDENT_ENDPOINT	: '/services/apexrest/v.1/StudentServiceTabroom',
+		STA_ENDPOINT		: '/services/apexrest/v.1/STATabroomService',
+	},
+	ONE_SIGNAL    : {
+		app_id    : 'DefNot',
+		safari_id : 'LolzDoesNotEvenWork',
+		userKey   : 'IThinkNot',
+		appKey    : 'Naught',
+	},
+	AWS_CREDENTIALS        : {
+		accessKeyId        : 'DefNo',
+		secretAccessKey    : 'DoNotTry',
+		region             : 'us-east-1',
+		Bucket             : 'tabroom-files',
+	},
+	sequelizeOptions : {
+		dialect : 'mariadb',
+		define  : {
 			freezeTableName : true,
 			modelName       : 'singularName',
 			underscored     : true,
 			timestamps      : false,
 		},
 	},
+	winstonConsoleOptions : {
+		silent : false,
+		level  : 'debug',
+	},
+	winstonFileOptions : {
+		maxsize  : 512 * 1024 * 1024,
+		maxFiles : 8,
+		tailable : true,
+	},
 };
 
 const env = process.env.NODE_ENV || 'development';
 
+/* eslint-disable indent */
 switch (env) {
-case 'test':
-	config.sequelizeOptions.logging = false;
-	config.DB_HOST = '127.0.0.1';
-	config.DB_USER = 'tabroom';
-	config.DB_PASS = 'tabroom';
-	break;
+	case 'staging':
+		config.DB_HOST          = 'localhost';
+		config.DB_USER          = 'tabroom';
+		config.DB_PASS          = '';
+		config.MESSAGE_RATE_MAX = '1000000000';
+		break;
 
-case 'staging':
-	config.DB_HOST = 'localhost';
-	config.DB_USER = 'tabroom';
-	config.DB_PASS = 'thisisadbpassword';
-	break;
+	case 'development':
+		config.DB_HOST          = 'localhost';
+		config.DB_USER          = 'tabroom';
+		config.DB_PASS          = 'lolz',
+		config.MESSAGE_RATE_MAX = '1000000000';
+		config.sequelizeOptions.logging = false;
+		break;
 
-case 'production':
-	config.PORT       = 3000;
-	config.DB_HOST    = 'db.speechanddebate.org';
-	config.DB_USER    = 'tabroom';
-	config.DB_PASS    = '';
-	config.sequelizeOptions.pool = {
-		max     : 50,
-		min     : 5,
-		acquire : 30000,
-		idle    : 10000,
-	};
-	config.sequelizeOptions.logging = false;
-	break;
+	case 'test':
+		config.DB_HOST          = 'localhost';
+		config.DB_USER          = 'tabroom';
+		config.DB_PASS          = 'DoNotBeANoob';
+		config.MESSAGE_RATE_MAX = '1000000000';
+		config.sequelizeOptions.logging = false;
+		break;
 
-case 'development':
-	config.DB_HOST = 'localhost';
-	config.DB_USER = 'tabroom';
-	config.DB_PASS = 'thisisadbpassword';
-	break;
-default:
-	break;
+	default:
+		break;
 }
+/* eslint-enable indent */
 
 config.sequelizeOptions.host = config.DB_HOST;
 
