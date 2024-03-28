@@ -10,6 +10,7 @@ on:
 
 env:
     CI: true
+    HUSKY: 0
     REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
     REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}

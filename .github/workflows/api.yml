@@ -13,6 +13,7 @@ env:
     TZ: 'America/Chicago'
     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     NODE_ENV: 'test'
+    HUSKY: 0
 
 jobs:
   build:
