@@ -9,6 +9,8 @@ const errorHandler = async (err, req, res, next) => {
 		return next(err);
 	}
 
+	err.host = config.DOCKERHOST;
+
 	// Validation error object from OpenAPI
 	if (err.status || err.errors) {
 		if (err.status === 400) {
@@ -16,6 +18,7 @@ const errorHandler = async (err, req, res, next) => {
 				message          : `OpenAPI Validation error : ${err.message}`,
 				errors           : err.errors,
 				stack            : err.stack,
+				host             : config.DOCKERHOST,
 				logCorrelationId : req.uuid,
 				env              : process.env,
 			});
@@ -32,7 +35,7 @@ const errorHandler = async (err, req, res, next) => {
 	errorLogger.error(err, err.stack);
 
 	// Production bugs should find their way to Palmer
-	if (process.env.NODE_ENV === 'production' || config.MAIL_SERVER === 'mail.in.speechanddebate.org') {
+	if (process.env.NODE_ENV === 'production') {
 
 		const messageData = {
 			from    : 'error-handler@tabroom.com',
@@ -70,10 +73,11 @@ ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
 
 	return res.status(500).json({
 		message          : err.message || 'Internal server error',
+		host             : config.DOCKERHOST,
 		logCorrelationId : req.uuid,
 		path             : req.path,
 		stack            : err.stack,
-		env				 : process.env,
+		env              : process.env,
 	});
 };
 

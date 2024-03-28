@@ -79,7 +79,7 @@ export const queryLogger = winston.createLogger({
 		winston.format.json(),
 	),
 	exitOnError: false,
-	// silent: process.env.NODE_ENV === 'test',
+	silent: process.env.NODE_ENV === 'test',
 	transports: [
 		new winston.transports.Console(config.winstonConsoleOptions),
 	],

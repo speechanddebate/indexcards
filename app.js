@@ -30,7 +30,7 @@ import {
 } from './api/helpers/auth';
 import db from './api/helpers/db';
 
-import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger';
+import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger.js';
 
 const app = express();
 
@@ -40,16 +40,18 @@ debugLogger.info('Initializing API...');
 // Enable Helmet security
 app.use(helmet());
 
-// Log global errors with Winston
-app.use(expressWinston.errorLogger({
-	winstonInstance : errorLogger,
-	meta            : true,
-	dynamicMeta: (req, res, next) => {
-		return {
-			logCorrelationId: req.uuid,
-		};
-	},
-}));
+// Add a unique UUID to every request, and add the configuration for easy
+// transport
+//
+// Database handle volleyball; don't have to call it in every last route. For I
+// am lazy, and apologize not.
+
+app.use((req, res, next) => {
+	req.uuid   = uuid();
+	req.config = config;
+	req.db     = db;
+	return next();
+});
 
 // Enable getting forwarded client IP from proxy
 app.enable('trust proxy', 1);
@@ -90,13 +92,6 @@ const searchLimiter = rateLimiter({
 
 app.use('/v1/public/search', searchLimiter);
 
-// Add a unique UUID to every request, and add the configuration for easy transport
-app.use((req, res, next) => {
-	req.uuid = uuid();
-	req.config = config;
-	return next();
-});
-
 // Enable CORS Access, hopefully in a way that means I don't
 // have to fight with it ever again.
 const corsOptions = {
@@ -115,18 +110,6 @@ const corsOptions = {
 
 app.use('/v1', cors(corsOptions));
 
-// Log all requests
-app.use(expressWinston.logger({
-	winstonInstance : requestLogger,
-	meta            : true,
-	env             : process.env.NODE_ENV,
-	dynamicMeta: (req, res) => {
-		return {
-			logCorrelationId: req.uuid,
-		};
-	},
-}));
-
 // Parse body
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ type: ['json', 'application/*json'], limit: '10mb' }));
@@ -141,28 +124,24 @@ if (process.env.NODE_ENV === 'development') {
 // Parse cookies and add them to the session
 app.use(cookieParser());
 
-// Database handle volleyball; don't have to call it in every last route.
-// For I am lazy, and apologize not.
-
-app.use((req, res, next) => {
-	req.db = db;
-	return next();
-});
-
 // Authentication.  Context depends on the sub-branch so that secondary
 // functions do not have to handle it in every call.
 
 app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
 
-	// Everything under /user should be a logged in user; and all functions there
-	// apply only to the logged in user; no parameters allowed.
-	// For /user/judge/ID, /user/student/ID, /user/entry/ID, /user/checker/ID,
-	// /user/prefs/ID, check the perms against additional data
+	try {
+		// Everything under /user should be a logged in user; and all functions there
+		// apply only to the logged in user; no parameters allowed.
+		// For /user/judge/ID, /user/student/ID, /user/entry/ID, /user/checker/ID,
+		// /user/prefs/ID, check the perms against additional data
 
-	req.session = await auth(req, res);
+		req.session = await auth(req, res);
 
-	if (!req.session) {
-		return res.status(401).json('You are not logged in');
+		if (!req.session) {
+			return res.status(401).json('You are not logged in');
+		}
+	} catch (err) {
+		next(err);
 	}
 
 	next();
@@ -176,13 +155,18 @@ const tabRoutes = [
 ];
 
 app.all(tabRoutes, async (req, res, next) => {
-	// Functions that require tabber or owner permissions to a tournament overall
-	req.session = await auth(req, res);
-	req.session = await tabAuth(req, res);
+	try {
+		// Functions that require tabber or owner permissions to a tournament overall
+		req.session = await auth(req, res);
+		req.session = await tabAuth(req, res);
 
-	if (typeof req.session?.perms !== 'object') {
-		return res.status(401).json('You do not have access to that tournament area');
+		if (typeof req.session?.perms !== 'object') {
+			return res.status(401).json('You do not have access to that tournament area');
+		}
+	} catch (err) {
+		next(err);
 	}
+
 	next();
 });
 
@@ -193,22 +177,27 @@ const coachRoutes = [
 
 app.all(coachRoutes, async (req, res, next) => {
 
-	// apis related to the coach or directors of a program.  Prefs only
-	// access is in the /user/prefs directory because it's such a bizarre
-	// one off
+	try {
+		// apis related to the coach or directors of a program.  Prefs only
+		// access is in the /user/prefs directory because it's such a bizarre
+		// one off
 
-	req.session = await auth(req, res);
-	if (req.session) {
-		const chapter = await coachAuth(req, res);
-		if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
-			req.chapter = chapter;
-			next();
+		req.session = await auth(req, res);
+		if (req.session) {
+			const chapter = await coachAuth(req, res);
+			if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
+				req.chapter = chapter;
+				next();
+			} else {
+				return res.status(401).json(`You do not have access to that institution`);
+			}
 		} else {
-			return res.status(401).json(`You do not have access to that institution`);
+			return res.status(401).json('You are not currently logged in to Tabroom');
 		}
-	} else {
-		return res.status(401).json('You are not currently logged in to Tabroom');
+	} catch (err) {
+		next(err);
 	}
+
 	next();
 });
 
@@ -219,21 +208,26 @@ const localRoutes = [
 
 app.all(localRoutes, async (req, res, next) => {
 
-	// apis related to administrators of districts (the committee), or
-	// a region, or an NCFL diocese, or a circuit.
+	// apis related to administrators of districts (the committee), or a
+	// region, or an NCFL diocese, or a circuit.
 
-	req.session = await auth(req, res);
+	try {
+		req.session = await auth(req, res);
 
-	if (req.session) {
-		const response = await localAuth(req, res);
-		if (typeof answer === 'object') {
-			req[req.params.localType] = response.local;
-			req.session.perms = { ...req.session.perms, ...response.perms };
-			next();
+		if (req.session) {
+			const response = await localAuth(req, res);
+			if (typeof answer === 'object') {
+				req[req.params.localType] = response.local;
+				req.session.perms = { ...req.session.perms, ...response.perms };
+				next();
+			}
+		} else {
+			return res.status(401).json('You are not currently logged in to Tabroom');
 		}
-	} else {
-		return res.status(401).json('You are not currently logged in to Tabroom');
+	} catch (err) {
+		next(err);
 	}
+
 	next();
 });
 
@@ -247,19 +241,30 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 	// as site admins for internal NSDA purposes, or Hardy because that guy is
 	// super shady and I need to keep a specific eye on him.
 
-	req.session = await keyAuth(req, res);
+	try {
+		req.session = await keyAuth(req, res);
 
-	if (!req.session?.person) {
-		return res.status(401).json('That function is not accessible to your API credentials');
+		if (!req.session?.person) {
+			return res.status(401).json('That function is not accessible to your API credentials');
+		}
+	} catch (err) {
+		next(err);
 	}
 
 	next();
 });
 
 app.all('/v1/glp/*', async (req, res, next) => {
-	req.session = await auth(req, res);
-	if (!req.session?.site_admin) {
-		return res.status(401).json('That function is accessible to Tabroom site administrators only');
+
+	// GLP are Godlike Powers; aka site administrators
+
+	try {
+		req.session = await auth(req, res);
+		if (!req.session?.site_admin) {
+			return res.status(401).json('That function is accessible to Tabroom site administrators only');
+		}
+	} catch (err) {
+		next(err);
 	}
 
 	next();
@@ -291,6 +296,29 @@ const apiDocConfig = initialize({
 	docsPath        : '/docs',
 	errorMiddleware : errorHandler,
 });
+
+// Log global errors with Winston
+app.use(expressWinston.errorLogger({
+	winstonInstance : errorLogger,
+	meta            : true,
+	dynamicMeta: (req, res, next) => {
+		return {
+			logCorrelationId: req.uuid,
+		};
+	},
+}));
+
+// Log all requests
+app.use(expressWinston.logger({
+	winstonInstance : requestLogger,
+	meta            : true,
+	env             : process.env.NODE_ENV,
+	dynamicMeta: (req, res) => {
+		return {
+			logCorrelationId: req.uuid,
+		};
+	},
+}));
 
 // Final fallback error handling
 app.use(errorHandler);
