@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module"          : "nodenext",
     "target"          : "es2022",
-    "rootDir"         : "./indexcards",
+    "rootDir"         : "./api",
     "esModuleInterop" : true,
   }
 }

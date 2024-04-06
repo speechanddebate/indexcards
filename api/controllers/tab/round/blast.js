@@ -16,11 +16,16 @@ export const blastRoundMessage = {
 		const personIds = await getFollowers(req.body);
 		const tourn = await req.db.summon(req.db.tourn, req.params.tournId);
 
+		const seconds = Math.floor(Date.now() / 1000);
+		const numberwang = seconds.toString().substring(-5);
+		const from = `${tourn.name} <${tourn.webname}_${numberwang}@www.tabroom.com>`;
+		const fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
+
 		const notifyResponse = await notify({
 			ids         : personIds,
 			text        : req.body.message,
-			from        : `${tourn.name} <${tourn.webname}@www.tabroom.com>`,
-			fromAddress : `<${tourn.webname}@www.tabroom.com>`,
+			from,
+			fromAddress,
 		});
 
 		if (notifyResponse.error) {
@@ -263,9 +268,11 @@ export const blastRoundPairing = {
 		});
 
 		const tourn = tourns.shift();
+		const seconds = Math.floor(Date.now() / 1000);
+		const numberwang = seconds.toString().substring(-5);
 
-		blastData.from = `${tourn.name} <${tourn.webname}@www.tabroom.com>`;
-		blastData.fromAddress = `<${tourn.webname}@www.tabroom.com>`;
+		blastData.from = `${tourn.name} <${tourn.webname}_${numberwang}@www.tabroom.com>`;
+		blastData.fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
 
 		const browserResponse = await sendPairingBlast(followers, blastData, req, res);
 

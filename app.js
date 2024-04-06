@@ -158,11 +158,17 @@ app.all(tabRoutes, async (req, res, next) => {
 	try {
 		// Functions that require tabber or owner permissions to a tournament overall
 		req.session = await auth(req, res);
+
+		if (!req.session) {
+			return res.status(401).json('You are not logged in');
+		}
+
 		req.session = await tabAuth(req, res);
 
 		if (typeof req.session?.perms !== 'object') {
 			return res.status(401).json('You do not have access to that tournament area');
 		}
+
 	} catch (err) {
 		next(err);
 	}
@@ -183,6 +189,7 @@ app.all(coachRoutes, async (req, res, next) => {
 		// one off
 
 		req.session = await auth(req, res);
+
 		if (req.session) {
 			const chapter = await coachAuth(req, res);
 			if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
@@ -260,6 +267,11 @@ app.all('/v1/glp/*', async (req, res, next) => {
 
 	try {
 		req.session = await auth(req, res);
+
+		if (!req.session) {
+			return res.status(401).json('You are not logged in');
+		}
+
 		if (!req.session?.site_admin) {
 			return res.status(401).json('That function is accessible to Tabroom site administrators only');
 		}

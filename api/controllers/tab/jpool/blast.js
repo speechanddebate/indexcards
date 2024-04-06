@@ -49,9 +49,18 @@ export const blastJudges = {
 			jpoolJudgeArray.push(jpj.id);
 		});
 
+		const tourn = req.db.summon(req.db.tourn, req.params.tournId);
+		const seconds = Math.floor(Date.now() / 1000);
+		const numberwang = seconds.toString().substring(-5);
+
+		const from = `${tourn.name} <${tourn.webname}_${numberwang}@www.tabroom.com>`;
+		const fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
+
 		const blastResponse = notify({
 			ids  : jpoolJudgeArray,
 			text : req.body.message,
+			from,
+			fromAddress,
 		});
 
 		const rawRounds = await req.db.sequelize.query(`

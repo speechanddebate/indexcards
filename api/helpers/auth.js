@@ -1,9 +1,9 @@
 // Parse the Tabroom cookies and determine whether there's an active session
 // import { b64_sha512crypt as crypt } from 'sha512crypt-node';\
 import basic from 'basic-auth';
-import { errorLogger } from './logger.js';
 import getSettings from './settings.js';
 import db from './db.js';
+import { errorLogger } from './logger.js';
 import { config } from '../../config/config.js';
 
 export const auth = async (req) => {
@@ -229,9 +229,11 @@ export const tabAuth = async (req) => {
 	let perms = {};
 
 	if (req.session.site_admin) {
+
 		req.session.perms.tourn[tournId] = 'owner';
 		req.session.tourn = tourn;
 		perms = req.session.perms;
+
 	} else {
 
 		perms = await tournPerms(tournId, req.session.person);

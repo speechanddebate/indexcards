@@ -21,11 +21,17 @@ export const blastSectionMessage = {
 			req.body
 		);
 
+		const seconds = Math.floor(Date.now() / 1000);
+		const numberwang = seconds.toString().substring(-5);
+
+		const from = `${tourn.name} <${tourn.webname}_${numberwang}@www.tabroom.com>`;
+		const fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
+
 		const notifyResponse = await notify({
 			ids         : personIds,
 			text        : req.body.message,
-			from        : `${tourn.name} <${tourn.webname}@www.tabroom.com>`,
-			fromAddress : `<${tourn.webname}@www.tabroom.com>`,
+			from,
+			fromAddress,
 		});
 
 		if (notifyResponse.error) {
@@ -69,8 +75,11 @@ export const blastSectionPairing = {
 		const blastData = await formatPairingBlast(queryData, req);
 		const tourn = req.db.summon(req.db.tourn, req.params.tournId);
 
-		blastData.from = `${tourn.name} <${tourn.webname}@www.tabroom.com>`;
-		blastData.fromAddress = `<${tourn.webname}@www.tabroom.com>`;
+		const seconds = Math.floor(Date.now() / 1000);
+		const numberwang = seconds.toString().substring(-5);
+
+		blastData.from = `${tourn.name} <${tourn.webname}_${numberwang}@www.tabroom.com>`;
+		blastData.fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
 
 		const followers = await getPairingFollowers(
 			queryData.replacements,
