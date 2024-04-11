@@ -6,6 +6,9 @@
 15 8 * * 4 /usr/local/bin/node /indexcards/api/auto/clearShareRooms.js > /proc/1/fd/1 2>/proc/1/fd/2
 30 8 * * 4 /usr/local/bin/node /indexcards/api/auto/clearPaymentKeys.js > /proc/1/fd/1 2>/proc/1/fd/2
 
+# Synchronize Nats appearances because apparently people care
+30 8 * * 4 /usr/local/bin/node /indexcards/api/auto/natsAppearances.js > /proc/1/fd/1 2>/proc/1/fd/2
+
 # NAUDL post to Salesforce
 15 3 * * * /usr/local/bin/node /indexcards/api/auto/naudl/chapters.js > /proc/1/fd/1 2>/proc/1/fd/2
 25 3 * * * /usr/local/bin/node /indexcards/api/auto/naudl/students.js > /proc/1/fd/1 2>/proc/1/fd/2

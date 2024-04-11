@@ -85,14 +85,14 @@ export const deleteContact = {
 		const secondStatusCheck = await checkContactStatus(req, res);
 
 		if (secondStatusCheck !== firstStatusCheck) {
-			res.status(200).json({
+			return res.status(200).json({
 				message : `Coach is now marked as ${req.body.property_name}`,
 				refresh : 1,
 				error   : false,
 			});
 		}
 
-		res.status(200).json({
+		return res.status(200).json({
 			message: `Coach removed for your roster`,
 			error: false,
 		});
