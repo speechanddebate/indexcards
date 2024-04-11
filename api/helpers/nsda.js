@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import CryptoJS from 'crypto-js';
-import config from '../../config/config';
+import config from '../../config/config.js';
 
 export const getNSDA  = async (path) => {
 
