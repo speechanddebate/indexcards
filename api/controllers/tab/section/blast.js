@@ -7,14 +7,14 @@ import { sendPairingBlast, formatPairingBlast } from '../../../helpers/pairing.j
 export const blastSectionMessage = {
 	POST: async (req, res) => {
 		if (!req.body.message) {
-			res.status(200).json({
+			return res.status(200).json({
 				error   : true,
 				message : 'No message to blast sent',
 			});
 		}
 
 		await req.db.summon(req.db.section, req.params.sectionId);
-		const tourn = req.db.summon(req.db.tourn, req.params.tournId);
+		const tourn = await req.db.summon(req.db.tourn, req.params.tournId);
 
 		const personIds = await getFollowers(
 			{ sectionId : req.params.sectionId },
@@ -36,30 +36,29 @@ export const blastSectionMessage = {
 
 		if (notifyResponse.error) {
 			errorLogger.error(notifyResponse.message);
-			res.status(200).json(notifyResponse);
-		} else {
-
-			await req.db.changeLog.create({
-				tag         : 'blast',
-				description : `${req.body.message} sent to ${notifyResponse.push?.count || 0} recipients`,
-				person      : req.session.person,
-				count       : notifyResponse.push?.count || 0,
-				panel       : req.params.sectionId,
-			});
-
-			await req.db.changeLog.create({
-				tag         : 'emails',
-				description : `${req.body.message} sent to ${notifyResponse.email?.count || 0}`,
-				person      : req.session.person,
-				count       : notifyResponse.email?.count || 0,
-				panel       : req.params.sectionId,
-			});
-
-			res.status(200).json({
-				error   : false,
-				message : notifyResponse.message,
-			});
+			return res.status(200).json(notifyResponse);
 		}
+
+		await req.db.changeLog.create({
+			tag         : 'blast',
+			description : `${req.body.message} sent to ${notifyResponse.push?.count || 0} recipients`,
+			person      : req.session.person,
+			count       : notifyResponse.push?.count || 0,
+			panel       : req.params.sectionId,
+		});
+
+		await req.db.changeLog.create({
+			tag         : 'emails',
+			description : `${req.body.message} sent to ${notifyResponse.email?.count || 0}`,
+			person      : req.session.person,
+			count       : notifyResponse.email?.count || 0,
+			panel       : req.params.sectionId,
+		});
+
+		return res.status(200).json({
+			error   : false,
+			message : notifyResponse.message,
+		});
 	},
 };
 
@@ -73,7 +72,7 @@ export const blastSectionPairing = {
 		queryData.fields = '';
 
 		const blastData = await formatPairingBlast(queryData, req);
-		const tourn = req.db.summon(req.db.tourn, req.params.tournId);
+		const tourn = await req.db.summon(req.db.tourn, req.params.tournId);
 
 		const seconds = Math.floor(Date.now() / 1000);
 		const numberwang = seconds.toString().substring(-5);

@@ -10,7 +10,7 @@ export const blastRoundMessage = {
 	POST: async (req, res) => {
 
 		if (!req.body.message) {
-			res.status(200).json({ error: true, message: 'No message to blast sent' });
+			return res.status(200).json({ error: true, message: 'No message to blast sent' });
 		}
 
 		const personIds = await getFollowers(req.body);
@@ -30,30 +30,29 @@ export const blastRoundMessage = {
 
 		if (notifyResponse.error) {
 			errorLogger.error(notifyResponse.message);
-			res.status(200).json(notifyResponse);
-		} else {
-
-			await req.db.changeLog.create({
-				tag         : 'blast',
-				description : `${req.body.message} sent to ${notifyResponse.push?.count || 0} recipients`,
-				person      : req.session.person,
-				count       : notifyResponse.push?.count || 0,
-				panel       : req.params.roundId,
-			});
-
-			await req.db.changeLog.create({
-				tag         : 'emails',
-				description : `${req.body.message} sent to ${notifyResponse.email?.count || 0}`,
-				person      : req.session.person,
-				count       : notifyResponse.email?.count || 0,
-				panel       : req.params.roundId,
-			});
-
-			res.status(200).json({
-				error   : false,
-				message : notifyResponse.message,
-			});
+			return res.status(200).json(notifyResponse);
 		}
+
+		await req.db.changeLog.create({
+			tag         : 'blast',
+			description : `${req.body.message} sent to ${notifyResponse.push?.count || 0} recipients`,
+			person      : req.session.person,
+			count       : notifyResponse.push?.count || 0,
+			panel       : req.params.roundId,
+		});
+
+		await req.db.changeLog.create({
+			tag         : 'emails',
+			description : `${req.body.message} sent to ${notifyResponse.email?.count || 0}`,
+			person      : req.session.person,
+			count       : notifyResponse.email?.count || 0,
+			panel       : req.params.roundId,
+		});
+
+		return res.status(200).json({
+			error   : false,
+			message : notifyResponse.message,
+		});
 	},
 };
 

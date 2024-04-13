@@ -406,7 +406,7 @@ export const formatPairingBlast = async (queryData, req) => {
 						} else if (sectionMessage.entrySingle) {
 							schoolMessage.text += sectionMessage.entrySingle;
 						} else if (round.eventType === 'speech') {
-							schoolMessage.text += ` Speaks ${entry.position} `;
+							schoolMessage.text += `Speaks ${entry.position} `;
 						} else if (entry.position) {
 							schoolMessage.text += ` ${entry.position} `;
 						}
@@ -839,7 +839,7 @@ const positionString = (entry, round, section) => {
 	}
 
 	if (round.eventType === 'speech') {
-		return ordinalize(entry.speakerorder);
+		return ordinalize(entry.speaker);
 	}
 
 	if (round.eventType === 'wudc') {

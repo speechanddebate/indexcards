@@ -56,6 +56,7 @@ export const emailBlast = async (inputData) => {
 	messageData.from = messageData.from || config.MAIL_FROM;
 	messageData.replyTo = messageData.replyTo || messageData.from;
 	messageData.subject = messageData.subject || 'Message from Tab';
+	messageData.subject = `[TAB] ${messageData.subject}`;
 
 	if (messageData.text) {
 		if (messageData.append) {
@@ -145,7 +146,7 @@ export const adminBlast = async (inputData) => {
 	}
 
 	if (!messageData.subject) {
-		messageData.subject = 'Admin Blast';
+		messageData.subject = '[TAB] Admin Blast';
 	}
 
 	if (messageData.text) {

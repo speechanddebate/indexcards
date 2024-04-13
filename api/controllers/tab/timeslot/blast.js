@@ -142,7 +142,7 @@ export const blastTimeslotPairings = {
 			totals.email += parseInt(response.email);
 		}
 
-		res.status(200).json(` Pairing blast sent to ${totals.web} web blast and ${totals.email} email recipients`);
+		return res.status(200).json(` Pairing blast sent to ${totals.web} web blast and ${totals.email} email recipients`);
 	},
 };
 
@@ -162,7 +162,7 @@ export const messageFreeJudges = {
 		// Yes I just used the world frolic.  Fight me.
 
 		if (!req.body.message) {
-			res.status(200).json({ error: true, message: 'No message to blast sent' });
+			return res.status(200).json({ error: true, message: 'No message to blast sent' });
 		}
 
 		const freeJudgesQuery = `
@@ -278,7 +278,7 @@ export const messageReleasedJudges = {
 		// message every judge who IS in standby but who is not judging
 
 		if (!req.body.message) {
-			res.status(200).json({ error: true, message: 'No message to blast sent' });
+			return res.status(200).json({ error: true, message: 'No message to blast sent' });
 		}
 
 		const releasedJudgesQuery = `
