@@ -1,11 +1,6 @@
 // General CRUD for contact coaches
 export const updateContact = {
 
-	GET: async (req, res) => {
-
-		res.status(200).json(req.params);
-	},
-
 	POST: async (req, res) => {
 
 		const firstStatusCheck = await checkContactStatus(req);
@@ -36,7 +31,7 @@ export const updateContact = {
 			(secondStatusCheck === 'OK' || firstStatusCheck === 'OK')
 			&& (secondStatusCheck !== firstStatusCheck)
 		) {
-			res.status(200).json({
+			return res.status(200).json({
 				message : `Coach is now marked as ${req.body.property_name}`,
 				refresh : 1,
 				error   : false,
@@ -44,7 +39,7 @@ export const updateContact = {
 		}
 
 		if (secondStatusCheck !== 'OK') {
-			res.status(200).json({
+			return res.status(200).json({
 				message : `Coach is now marked as ${req.body.property_name}`,
 				error   : false,
 				replace : [
@@ -54,10 +49,10 @@ export const updateContact = {
 		}
 
 		if (contact[req.body.property_name]) {
-			res.status(200).json(`Coach is now marked as ${req.body.property_name}`);
-		} else {
-			res.status(200).json(`Coach is no longer marked as ${req.body.property_name}`);
+			return res.status(200).json(`Coach is now marked as ${req.body.property_name}`);
 		}
+
+		return res.status(200).json(`Coach is no longer marked as ${req.body.property_name}`);
 	},
 };
 
@@ -106,17 +101,18 @@ export const checkContacts = {
 		const status = await checkContactStatus(req);
 
 		if (status === 'OK') {
-			res.status(200).json('Contacts are OK');
-		} else {
-			res.status(200).json({
-				error: true,
-				message: status.join('<br/>'),
-			});
+			return res.status(200).json('Contacts are OK');
 		}
+
+		return res.status(200).json({
+			error: true,
+			message: status.join('<br/>'),
+		});
 	},
 };
 
 export const checkContactStatus = async (req) => {
+
 	let limit = '';
 
 	if (req.body.email_contacts) {
@@ -148,7 +144,7 @@ export const checkContactStatus = async (req) => {
 
 		order by contact.official DESC, person.last, person.first, person.nsda
 	`, {
-		replacements: { schoolId: req.body.school },
+		replacements: { schoolId: req.body.school || req.params.schoolId },
 		type: req.db.Sequelize.QueryTypes.SELECT,
 	});
 
@@ -160,7 +156,6 @@ export const checkContactStatus = async (req) => {
 		onsiteOffical : false,
 		onsiteEmail   : false,
 		official      : 0,
-
 	};
 
 	let secondAdult = 'false';
@@ -219,6 +214,49 @@ export const checkContactStatus = async (req) => {
 	}
 
 	return ('OK');
+};
+
+export const userProfile = {
+	GET: async (req, res) => {
+
+		if (!req.session) {
+			return res.status(201).json({ message: 'You have no active user session' });
+		}
+		let result;
+
+		if (req.params.personId && req.session.site_admin) {
+			result = await req.db.person.findByPk(
+				req.params.personId,
+				{
+					include: [{
+						model: req.db.personSetting,
+						as: 'Settings',
+					}],
+				}
+			);
+
+		} else if (req.params.personId ) {
+			return res.status(201).json({ message: 'Only admin staff may access another profile' });
+		} else if (req.session.person) {
+			result = await req.db.person.findByPk(req.session.person,
+				{
+					include: [{
+						model: req.db.personSetting,
+						as: 'Settings',
+					}],
+				},
+			);
+		}
+
+		if (result.count < 1) {
+			return res.status(400).json({ message: 'User does not exist' });
+		}
+
+		const jsonOutput = result.toJSON();
+		delete jsonOutput.password;
+
+		return res.status(200).json(jsonOutput);
+	},
 };
 
 export default updateContact;

@@ -183,26 +183,21 @@ const coachRoutes = [
 
 app.all(coachRoutes, async (req, res, next) => {
 
-	try {
-		// apis related to the coach or directors of a program.  Prefs only
-		// access is in the /user/prefs directory because it's such a bizarre
-		// one off
+	// apis related to the coach or directors of a program.  Prefs only
+	// access is in the /user/prefs directory because it's such a bizarre
+	// one off
 
-		req.session = await auth(req, res);
+	req.session = await auth(req, res);
 
-		if (req.session) {
-			const chapter = await coachAuth(req, res);
-			if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
-				req.chapter = chapter;
-				next();
-			} else {
-				return res.status(401).json(`You do not have access to that institution`);
-			}
+	if (req.session) {
+		const chapter = await coachAuth(req, res);
+		if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
+			req.chapter = chapter;
 		} else {
-			return res.status(401).json('You are not currently logged in to Tabroom');
+			return res.status(401).json(`You do not have access to that institution`);
 		}
-	} catch (err) {
-		next(err);
+	} else {
+		return res.status(401).json('You are not currently logged in to Tabroom');
 	}
 
 	next();

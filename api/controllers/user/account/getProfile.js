@@ -1,19 +1,17 @@
-const getProfile = {
+export const getProfile = {
 	GET: async (req, res) => {
 
 		if (!req.session) {
 			return res.status(201).json({ message: 'You have no active user session' });
 		}
-		const db = req.db;
-
 		let result;
 
 		if (req.params.person_id && req.session.site_admin) {
-			result = await db.person.findByPk(
+			result = await req.db.person.findByPk(
 				req.params.person_id,
 				{
 					include: [{
-						model: db.personSetting,
+						model: req.db.personSetting,
 						as: 'Settings',
 					}],
 				}
@@ -22,10 +20,10 @@ const getProfile = {
 		} else if (req.params.person_id ) {
 			return res.status(201).json({ message: 'Only admin staff may access another profile' });
 		} else if (req.session.person) {
-			result = await db.person.findByPk(req.session.person,
+			result = await req.db.person.findByPk(req.session.person,
 				{
 					include: [{
-						model: db.personSetting,
+						model: req.db.personSetting,
 						as: 'Settings',
 					}],
 				},

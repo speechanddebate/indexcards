@@ -550,7 +550,7 @@ export const tournPerms = async (tournId, personId) => {
 	return perms;
 };
 
-export const coachAuth = async (req, res) => {
+export const coachAuth = async (req) => {
 
 	const chapterId = req.params.chapterId;
 	let chapterAccess = false;
@@ -558,7 +558,6 @@ export const coachAuth = async (req, res) => {
 	if (req.session.site_admin) {
 		chapterAccess = true;
 	} else {
-
 		const perms = await db.sequelize.query(`
 			select perm.id
 			from permission perm
@@ -579,10 +578,11 @@ export const coachAuth = async (req, res) => {
 	}
 
 	if (chapterAccess) {
-		return db.summon(db.chapter, chapterId);
+		const chapter = await db.summon(db.chapter, chapterId);
+		return chapter;
 	}
 
-	res.status(401).json('You have no access permissions to that institution');
+	return 'You do not have access to that institution';
 };
 
 export const localAuth = async (req, res) => {

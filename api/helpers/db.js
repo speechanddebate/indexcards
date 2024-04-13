@@ -760,7 +760,9 @@ db.summon = async (dbTable, objectId) => {
 		dbData.Settings
 			.sort((a, b) => { return (a.tag > b.tag) ? 1 : -1; })
 			.forEach( (item) => {
-				if (item.value === 'date' && item.value_date) {
+				if (item.tag === 'nsda_membership') {
+					console.log('Skipping decode for now');
+				} else if (item.value === 'date' && item.value_date) {
 					if (item.value_date !== null) {
 						dbData.settings[item.tag] = item.value_date;
 					}
