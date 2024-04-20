@@ -105,7 +105,6 @@ export const emailBlast = async (inputData) => {
 	} else {
 		debugLogger.info(`Local: email not sending from ${messageData.from} to ${messageData.to} bcc ${messageData.bcc} `);
 		debugLogger.info(`Env: ${process.env.NODE_ENV}`);
-		debugLogger.info(process.env);
 		debugLogger.info(`Subject ${messageData.subject}`);
 		debugLogger.info(`Text ${messageData.text}`);
 		debugLogger.info(`HTML ${messageData.html}`);
