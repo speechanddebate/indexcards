@@ -247,7 +247,7 @@ if (process.env.NODE_ENV === 'production') {
 		try {
 			req.session = await keyAuth(req, res);
 		} catch (err) {
-			next(err);
+			return next(err);
 		}
 
 		if (!req.session?.person) {
