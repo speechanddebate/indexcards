@@ -64,8 +64,6 @@ const autoBlastRounds = async () => {
 				});
 			}
 
-			console.log(`round ${round.id} has been marked published`);
-
 			// Docshare rooms
 			await shareRooms(round.id);
 

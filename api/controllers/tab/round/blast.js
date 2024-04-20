@@ -35,18 +35,10 @@ export const blastRoundMessage = {
 
 		await req.db.changeLog.create({
 			tag         : 'blast',
-			description : `${req.body.message} sent to ${notifyResponse.push?.count || 0} recipients`,
+			description : `${req.body.message} sent to ${notifyResponse.push?.count || 0} blast and ${notifyResponse.email?.count || 0} email recipients`,
 			person      : req.session.person,
 			count       : notifyResponse.push?.count || 0,
-			panel       : req.params.roundId,
-		});
-
-		await req.db.changeLog.create({
-			tag         : 'emails',
-			description : `${req.body.message} sent to ${notifyResponse.email?.count || 0}`,
-			person      : req.session.person,
-			count       : notifyResponse.email?.count || 0,
-			panel       : req.params.roundId,
+			round       : req.body.roundId,
 		});
 
 		return res.status(200).json({
@@ -274,6 +266,14 @@ export const blastRoundPairing = {
 		blastData.fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
 
 		const browserResponse = await sendPairingBlast(followers, blastData, req, res);
+
+		await req.db.changeLog.create({
+			tag         : 'blast',
+			description : `Pairing blast sent. ${browserResponse.message}`,
+			person      : req.session.person,
+			count       : browserResponse.push?.count || 0,
+			round       : req.params.roundId,
+		});
 
 		if (req.params.timeslotId) {
 			return browserResponse;

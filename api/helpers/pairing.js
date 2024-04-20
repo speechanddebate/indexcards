@@ -534,63 +534,55 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 		message : '',
 	};
 
-	for await (const judgeId of Object.keys(blastData.judges)) {
+	const promises = [];
+
+	Object.keys(blastData.judges).forEach( async (judgeId) => {
 
 		if (followers.judges[judgeId]) {
-			const notifyResponse = await notify({
+			const notifyResponse = notify({
 				ids    : followers.judges[judgeId],
 				append : blastData.append,
 				from   : blastData.from,
 				...blastData.judges[judgeId],
 			});
 
-			blastResponse.email += notifyResponse.email.count;
-			blastResponse.web += notifyResponse.web.count;
-
-			if (notifyResponse.error) {
-				blastResponse.error = true;
-				blastResponse.message += notifyResponse.message;
-			}
+			promises.push(notifyResponse);
 		}
-	}
+	});
 
-	for await (const entryId of Object.keys(blastData.entries)) {
-
+	Object.keys(blastData.entries).forEach( async (entryId) => {
 		if (followers.entries[entryId]) {
-			const notifyResponse = await notify({
+			const notifyResponse = notify({
 				ids    : followers.entries[entryId],
 				append : blastData.append,
 				from   : blastData.from,
 				...blastData.entries[entryId],
 			});
-
-			blastResponse.email += notifyResponse.email.count;
-			blastResponse.web += notifyResponse.web.count;
-
-			if (notifyResponse.error) {
-				blastResponse.error = true;
-				blastResponse.message += notifyResponse.message;
-			}
+			promises.push(notifyResponse);
 		}
-	}
+	});
 
-	for await (const schoolId of Object.keys(blastData.schools)) {
-
+	Object.keys(blastData.schools).forEach( (schoolId) => {
 		if (followers.schools[schoolId]) {
-			const notifyResponse = await notify({
+			const notifyResponse = notify({
 				ids    : followers.schools[schoolId],
 				append : blastData.append,
 				from   : blastData.from,
 				...blastData.schools[schoolId],
 			});
+			promises.push(notifyResponse);
+		}
+	});
 
-			blastResponse.email += notifyResponse.email.count;
-			blastResponse.web += notifyResponse.web.count;
+	await Promise.all(promises);
 
-			if (notifyResponse.error) {
-				blastResponse.error = true;
-				blastResponse.message += notifyResponse.message;
-			}
+	for await (const notifyResponse of promises) {
+		blastResponse.email += notifyResponse.email.count;
+		blastResponse.web += notifyResponse.web.count;
+
+		if (notifyResponse.error) {
+			blastResponse.error = true;
+			blastResponse.message += notifyResponse.message;
 		}
 	}
 
