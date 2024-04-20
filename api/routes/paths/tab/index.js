@@ -5,6 +5,7 @@
 import allPaths from './all.js';
 import event from './event.js';
 import category from './category.js';
+import district from './district.js';
 import jpool from './jpool.js';
 import round from './round.js';
 import rpool from './rpool.js';
@@ -17,6 +18,7 @@ export default [
 	...allPaths,
 	...event,
 	...category,
+	...district,
 	...jpool,
 	...rpool,
 	...round,

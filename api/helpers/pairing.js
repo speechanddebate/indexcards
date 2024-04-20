@@ -260,7 +260,7 @@ export const formatPairingBlast = async (queryData, req) => {
 
 						judge.role = judgeRole(judge, round) || '';
 
-						if (round.settings.anonymous_public) {
+						if (round.settings.anonymous_public && judge.code) {
 							sectionMessage.judgeText += `${judge.role} ${judge.code} `;
 							sectionMessage.judgeSingle += `${judge.role} ${judge.code} `;
 							sectionMessage.judgeHTML += `<p> ${judge.role} ${judge.code} `;

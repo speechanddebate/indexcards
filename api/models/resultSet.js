@@ -18,19 +18,23 @@ const resultSet = (sequelize, DataTypes) => {
 			allowNull    : false,
 			defaultValue : '0',
 		},
-		published: {
-			type: DataTypes.BOOLEAN,
-			allowNull: false,
-			defaultValue: '0',
+		published        : {
+			type         : DataTypes.BOOLEAN,
+			allowNull    : false,
+			defaultValue : '0',
 		},
-		coach: {
-			type: DataTypes.BOOLEAN,
-			allowNull: false,
-			defaultValue: '0',
+		coach            : {
+			type         : DataTypes.BOOLEAN,
+			allowNull    : false,
+			defaultValue : '0',
 		},
-		generated: {
-			type: DataTypes.DATE,
-			allowNull: true,
+		generated     : {
+			type      : DataTypes.DATE,
+			allowNull : true,
+		},
+		cache         : {
+			type      : DataTypes.JSON,
+			allowNull : true,
 		},
 	},{
 		tableName: 'result_set',

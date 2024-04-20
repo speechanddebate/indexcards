@@ -36,6 +36,8 @@ export const changeAccess = {
 
 		if (tag === 'none' || tag === 'undefined') {
 
+			console.log(`Tag ${tag} and person ${targetPerson.id}`);
+
 			// Remove any and all tourn level permissions from the user, except owner
 			// level permissions if I am not an owner myself.
 
@@ -48,25 +50,47 @@ export const changeAccess = {
 					{ model: db.event, as: 'Event' },
 					{ model: db.category, as: 'Category' },
 				],
+				raw: true,
 			});
 
 			let description = '';
+			console.log(currentPerms.length);
+			let counter = 0;
+			const promises = [];
 
-			for (const perm of currentPerms) {
+			for await (const perm of currentPerms) {
+
+				counter++;
+				console.log(`Count ${counter}`);
+				console.log(perm.id);
+				console.log(perm['Event.id']);
+				console.log(perm['Category.id']);
 
 				if (perm.tag !== 'contact') {
 					if (
-						perm.Event
-						|| perm.Category
+						perm['Event.id']
+						|| perm['Category.id']
 						|| (perm.tag === 'owner' && req.session.perms.tourn[req.params.tournId] !== 'owner')
 					) {
-						return;
+						console.log(`Skipping deletion of ${perm.id} due to it not being tournament wide`);
+					} else {
+						description += `${perm.tag} level tournament permissions removed from ${targetPerson.email}`;
+						// eslint-disable-next-line no-await-in-loop
+
+						console.log(`I am here with the perm for deletion ${perm.id}`);
+
+						const promise = db.sequelize.query(`
+							delete permission.* from permission where permission.id = :permId
+						`, {
+							replacements: { permId: perm.id },
+							type: db.sequelize.QueryTypes.DELETE,
+						});
+						promises.push(promise);
 					}
-					description += `${perm.tag} level tournament permissions removed from ${targetPerson.email}`;
-					// eslint-disable-next-line no-await-in-loop
-					await perm.destroy();
 				}
 			}
+
+			await Promise.all(promises);
 
 			if (description) {
 				await db.changeLog.create({
