@@ -41,17 +41,9 @@ export const blastSectionMessage = {
 
 		await req.db.changeLog.create({
 			tag         : 'blast',
-			description : `${req.body.message} sent to ${notifyResponse.push?.count || 0} recipients`,
+			description : `${req.body.message} sent to ${notifyResponse.push?.count || 0} web and ${notifyResponse.email?.count || 0} email recipients `,
 			person      : req.session.person,
 			count       : notifyResponse.push?.count || 0,
-			panel       : req.params.sectionId,
-		});
-
-		await req.db.changeLog.create({
-			tag         : 'emails',
-			description : `${req.body.message} sent to ${notifyResponse.email?.count || 0}`,
-			person      : req.session.person,
-			count       : notifyResponse.email?.count || 0,
 			panel       : req.params.sectionId,
 		});
 
@@ -89,7 +81,20 @@ export const blastSectionPairing = {
 			blastData.append = req.body.append;
 		}
 
-		sendPairingBlast(followers, blastData, req, res);
+		const response = await sendPairingBlast(followers, blastData, req, res);
+
+		await req.db.changeLog.create({
+			tag         : 'blast',
+			description : `Pairing individually sent to section : ${response.message} `,
+			person      : req.session.person,
+			tourn       : req.params.tournId,
+			panel       : req.params.sectionId,
+		});
+
+		return res.status(200).json({
+			error   : false,
+			message : response.message,
+		});
 	},
 };
 

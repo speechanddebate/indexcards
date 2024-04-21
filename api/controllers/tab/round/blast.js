@@ -36,7 +36,7 @@ export const blastRoundMessage = {
 		await req.db.changeLog.create({
 			tag         : 'blast',
 			description : `${req.body.message} sent to ${notifyResponse.push?.count || 0} blast and ${notifyResponse.email?.count || 0} email recipients`,
-			person      : req.session.person,
+			person      : req.session?.person,
 			count       : notifyResponse.push?.count || 0,
 			round       : req.body.roundId,
 		});
@@ -267,13 +267,42 @@ export const blastRoundPairing = {
 
 		const browserResponse = await sendPairingBlast(followers, blastData, req, res);
 
-		await req.db.changeLog.create({
-			tag         : 'blast',
-			description : `Pairing blast sent. ${browserResponse.message}`,
-			person      : req.session.person,
-			count       : browserResponse.push?.count || 0,
-			round       : req.params.roundId,
-		});
+		if (req.session?.person) {
+
+			const person = { personId : req.session?.person };
+
+			await req.db.sequelize.query(`
+				insert into change_log
+					(tag, description, person, count, round, tourn, created_at)
+				values
+					('tabbing', :description, :personId, :count, :roundId, :tournId, NOW())
+			`, {
+				replacements:  {
+					count       : browserResponse.push?.count || 0,
+					round       : req.params.roundId,
+					tourn       : req.params.tournId,
+					description : `Pairing blast sent. ${browserResponse.message} ${req.session?.person ? '' : 'by autoblast'} `,
+					...person,
+				},
+				type : req.db.sequelize.QueryTypes.INSERT,
+			});
+
+		} else {
+
+			await req.db.sequelize.query(`
+				insert into change_log
+					(tag, description, count, round, tourn)
+				values
+					('tabbing', :description, :count, :roundId, :tournId)
+			`, {
+				replacements:  {
+					count       : browserResponse.push?.count || 0,
+					description : `Pairing blast sent. ${browserResponse.message} ${req.session?.person ? '' : 'by autoblast'} `,
+					...req.params,
+				},
+				type : req.db.sequelize.QueryTypes.INSERT,
+			});
+		}
 
 		if (req.params.timeslotId) {
 			return browserResponse;

@@ -15,7 +15,7 @@ export const scheduleFlips = async (roundId) => {
 
 	try {
 		flips = await db.sequelize.query(`
-			select round.flighted, round.type, round.published,
+			select round.id, round.flighted, round.type, round.published,
 				round.start_time startTime, timeslot.start,
 				CONVERT_TZ(flip_already.active_at, '+00:00', tourn.tz) activeAt,
 				event.id eventId,
@@ -26,7 +26,7 @@ export const scheduleFlips = async (roundId) => {
 				flight_offset.value flightOffset,
 				no_side_constraints.value nsc,
 				sidelock_elims.value sidelockElims,
-				tourn.tz
+				tourn.tz, tourn.id tourn_id
 
 			from (round, event, timeslot, tourn)
 
@@ -78,11 +78,14 @@ export const scheduleFlips = async (roundId) => {
 	}
 
 	if (!flips || flips.length < 1) {
+		errorLogger.info(`No flips registered`);
 		return;
 	}
 
 	const round = flips[0];
 	let posted = false;
+
+	let message = '';
 
 	if (round.type !== 'elim'
 		&& round.type !== 'final'
@@ -90,17 +93,23 @@ export const scheduleFlips = async (roundId) => {
 		&& (!round.nsc)
 	) {
 		posted = true;
+		message = `Not posting flips because round is an ${round.type}`;
 	}
 
 	if (!round.published) {
 		posted = true;
+		message = `Not posting flips because round is not published`;
 	}
 
 	if (round.sidelockElims) {
 		posted = true;
+		message = `Not posting flips because round is sidelocked`;
 	}
 
-	let message = '';
+	if (round.activeAt) {
+		posted = true;
+		message = `Not posting flips because they are already scheduled for ${round.activeAt}`;
+	}
 
 	if (posted === false) {
 
@@ -114,36 +123,44 @@ export const scheduleFlips = async (roundId) => {
 			let startDate = new Date();
 
 			if (round.beforeStart) {
-
 				if (round.startTime) {
 					startDate = new Date(round.startTime);
 				} else {
 					startDate = new Date(round.start);
 				}
 
-				startDate.setMinutes(startDate.getMinutes() - round.beforeStart);
-				message += ` and flips scheduled to happen at ${startDate} `;
+				startDate = new Date(startDate.getTime() - round.beforeStart * 60000);
+				message += ` Flips scheduled to happen at ${startDate.toLocaleTimeString} UTC`;
 
-			} else if (round.autopublish) {
+			} else if (round.autoPublish) {
 
-				startDate.setMinutes(startDate.getMinutes() - round.autopublish);
-				message += ` and flips scheduled to happen at ${startDate} `;
+				startDate = new Date(startDate.getTime() + round.autoPublish * 60000);
+				message += ` Flips scheduled at ${startDate.toLocaleTimeString} UTC`;
 			}
 
 			if (round.flighted > 1 && round.flightOffset && round.splitFlights) {
 
-				for (let flight = 1; flight < round.flighted; flight++) {
+				for (let flight = 1; flight <= round.flighted; flight++) {
+
+					if (flight > 1) {
+						message += ` Flight ${flight} flips scheduled at ${startDate.toLocaleDateString} UTC`;
+					}
 
 					await db.sequelize.query(`
 						insert into autoqueue (tag, round, active_at, created_at)
 							values (:tag, :roundId, :activeAt, now())
 					`, {
-						replacements: { tag: `flip_${flight}`, roundId, activeAt: startDate },
+						replacements: {
+							tag      : `flip_${flight}`,
+							activeAt : startDate,
+							roundId,
+						},
 						type: db.Sequelize.QueryTypes.INSERT,
 					});
 
 					// Add the offset to the start time for the next flight
-					startDate.setMinutes(startDate.getMinutes() + round.flightOffset);
+
+					startDate = new Date(startDate.getTime() + round.flightOffset * 60000);
 				}
 
 			} else {
@@ -155,10 +172,28 @@ export const scheduleFlips = async (roundId) => {
 					replacements: { tag: `flip`, roundId, activeAt: startDate },
 					type: db.Sequelize.QueryTypes.INSERT,
 				});
-
 			}
+		} else {
+			message = `What the hell.  Round online ${round.online} before ${round.beforeStart} ${round.autoPublish}`;
 		}
 	}
 
+	await db.sequelize.query(`
+		insert into change_log
+			(tag, description, round, tourn, created_at)
+		values
+			('blast', :description, :roundId, :tournId, NOW())
+	`, {
+		replacements    : {
+			tag         : 'blast',
+			roundId     : round.id,
+			tournId     : round.tourn_id,
+			description : message,
+			created_at  : new Date(),
+		},
+		type : db.sequelize.QueryTypes.INSERT,
+	});
+
 	return message;
+
 };
