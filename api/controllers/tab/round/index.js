@@ -100,9 +100,7 @@ export const sideCounts = {
 				}
 			}
 		}
-
 		res.status(200).json(sideCounter);
-
 	},
 };
 
@@ -183,6 +181,10 @@ export const roundDecisionStatus = {
 				round.judges[ballot.judge][ballot.flight] = { panel: ballot.panel };
 			}
 
+			if (!round.panels[ballot.panel]) {
+				round.panels[ballot.panel] = 0;
+			}
+
 			const judge = round.judges[ballot.judge][ballot.flight];
 
 			if (!round.out[ballot.flight]) {
@@ -195,11 +197,7 @@ export const roundDecisionStatus = {
 					judge.text = '';
 				}
 
-				if (!round.panels[ballot.panel]) {
-					round.panels[ballot.panel] = 1000;
-				} else {
-					round.panels[ballot.panel] += 1000;
-				}
+				round.panels[ballot.panel] += 10000;
 
 				if (ballot.winloss) {
 					if (ballot.winner) {
@@ -243,6 +241,7 @@ export const roundDecisionStatus = {
 			} else {
 				round.out[ballot.flight][ballot.judge] = true;
 				delete round.judges[ballot.judge][ballot.flight];
+				round.panels[ballot.panel] += 1;
 			}
 		});
 

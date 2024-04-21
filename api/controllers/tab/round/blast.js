@@ -290,9 +290,9 @@ export const blastRoundPairing = {
 
 			await req.db.sequelize.query(`
 				insert into change_log
-					(tag, description, count, round, tourn)
+					(tag, description, count, round, tourn, created_at)
 				values
-					('tabbing', :description, :count, :roundId, :tournId)
+					('tabbing', :description, :count, :roundId, :tournId, NOW())
 			`, {
 				replacements:  {
 					count       : browserResponse.push?.count || 0,
