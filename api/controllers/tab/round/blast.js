@@ -268,7 +268,6 @@ export const blastRoundPairing = {
 		const browserResponse = await sendPairingBlast(followers, blastData, req, res);
 
 		if (req.session?.person) {
-
 			const person = { personId : req.session?.person };
 
 			await req.db.sequelize.query(`
@@ -277,10 +276,10 @@ export const blastRoundPairing = {
 				values
 					('tabbing', :description, :personId, :count, :roundId, :tournId, NOW())
 			`, {
-				replacements:  {
+				replacements : {
 					count       : browserResponse.push?.count || 0,
-					round       : req.params.roundId,
-					tourn       : req.params.tournId,
+					roundId     : req.params.roundId,
+					tournId     : req.params.tournId,
 					description : `Pairing blast sent. ${browserResponse.message} ${req.session?.person ? '' : 'by autoblast'} `,
 					...person,
 				},
