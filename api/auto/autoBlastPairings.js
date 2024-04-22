@@ -33,7 +33,7 @@ const autoBlastRounds = async () => {
 		const rounds = await db.sequelize.query(`
 			select
 				round.id, round.name, round.label, round.published,
-				event.tourn tournId
+				event.tourn tournId, event.type eventType
 			from round, event
 			where round.id = :roundId
 			and round.event = event.id
@@ -64,11 +64,15 @@ const autoBlastRounds = async () => {
 				});
 			}
 
-			// Docshare rooms
-			await shareRooms(round.id);
+			if (round.eventType === 'debate') {
+				// Docshare rooms
+				await shareRooms(round.id);
+			}
 
-			// Publish Flips
-			await scheduleFlips(round.id);
+			if (round.eventType === 'debate' || round.eventType === 'wsdc') {
+				// Publish Flips
+				await scheduleFlips(round.id);
+			}
 
 			// Invalidate Caches
 			if (process.env.NODE_ENV === 'production') {
