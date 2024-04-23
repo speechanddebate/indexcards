@@ -246,13 +246,13 @@ if (process.env.NODE_ENV === 'production') {
 
 		try {
 			req.session = await keyAuth(req, res);
+			if (!req.session?.person) {
+				return res.status(401).json('That function is not accessible to your API credentials');
+			}
 		} catch (err) {
 			return next(err);
 		}
 
-		if (!req.session?.person) {
-			return res.status(401).json('That function is not accessible to your API credentials');
-		}
 		next();
 	});
 }
