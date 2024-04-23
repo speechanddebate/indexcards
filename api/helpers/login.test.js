@@ -1,18 +1,16 @@
 import { assert } from 'chai';
-import pkg from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import config from '../../config/config';
 import db from './db';
 import login from './login';
 import userData from '../../tests/testFixtures';
-
-const { v4 } = pkg;
 
 describe('Login Password Validation', () => {
 	it('Authenticates the password correctly for a user', async () => {
 		const req = {
 			db,
 			config,
-			uuid     : v4(),
+			uuid     : uuidv4(),
 			params   : {
 				email    : userData.testUser.email,
 				password : userData.testPassword,
@@ -29,7 +27,7 @@ describe('Login Password Validation', () => {
 		const req = {
 			db,
 			config,
-			uuid     : v4(),
+			uuid     : uuidv4(),
 			params   : {
 				email    : userData.testUser.email,
 				password : `${userData.testPassword}garbage`,

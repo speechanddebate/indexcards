@@ -193,7 +193,7 @@ export const keyAuth = async (req, res) => {
 			req.session = { person };
 			return req.session;
 		}
-		return res.status(400).json(`No user with a valid API key found for area ${authTag}`);
+		return `No user with a valid API key found for area ${authTag}`;
 	}
 
 	return false;
@@ -337,6 +337,10 @@ export const tabAuth = async (req) => {
 					if (req.session.perms.event[eventId] === 'tabber') {
 						replacements.eventIds.push(eventId);
 					}
+				}
+
+				if (replacements.eventIds.length === 0) {
+					return 'You do not have access to that timeslot through your event level permissions';
 				}
 
 				queryLimiter = `
