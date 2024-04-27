@@ -112,8 +112,7 @@ export const auth = async (req) => {
 export const keyAuth = async (req, res) => {
 
 	if (!req.headers.authorization) {
-		res.status(401).json('No valid Authorization header found. Access denied.');
-		return;
+		return 'No valid Authorization header found. Access denied.';
 	}
 
 	// Legacy support for the Hardy Hacky Keys
@@ -148,15 +147,13 @@ export const keyAuth = async (req, res) => {
 	});
 
 	if (persons.length < 1) {
-		res.status(401).json('No valid Authorization header found. Access denied.');
-		return;
+		return 'No valid Authorization header found. Access denied.';
 	}
 
 	const person = persons.shift();
 
 	if (!person && !person.id) {
-		res.status(401).json('No valid Authorization header found. Access denied.');
-		return;
+		return 'No valid Authorization header found. Access denied.';
 	}
 
 	person.settings = await getSettings(
@@ -623,7 +620,7 @@ export const localAuth = async (req, res) => {
 		}
 	}
 
-	res.status(401).json(`You have no access permissions to that ${localType}`);
+	return `You have no access permissions to that ${localType}`;
 };
 
 export const hostAuth = async (req, res) => {
@@ -633,7 +630,7 @@ export const hostAuth = async (req, res) => {
 	if (req.config.CRON_HOSTS.includes(req.ip)) {
 		return true;
 	}
-	res.status(401).json(`Host ${req.ip} is not allowed to access automatic functions`);
+	return `Host ${req.ip} is not allowed to access automatic functions`;
 };
 
 export const checkJudgePerson = async (req, judgeId) => {
@@ -658,8 +655,7 @@ export const checkJudgePerson = async (req, judgeId) => {
 export const checkPerms = async (req, res, query, replacements) => {
 
 	if (!req.session) {
-		res.status(401).json('You must be logged in to access that function');
-		return;
+		return 'You must be logged in to access that function';
 	}
 
 	if (req.session?.site_admin) {
@@ -672,8 +668,7 @@ export const checkPerms = async (req, res, query, replacements) => {
 	});
 
 	if (!permsData) {
-		res.status(401).json('Data about that tournament element was not found');
-		return;
+		return 'Data about that tournament element was not found';
 	}
 
 	const permissions = await db.sequelize.query(`
@@ -690,8 +685,7 @@ export const checkPerms = async (req, res, query, replacements) => {
 	});
 
 	if (!permissions) {
-		res.status(401).json('You have no access permissions to tab that tournament');
-		return;
+		return 'You have no access permissions to tab that tournament';
 	}
 
 	const perms = {};
@@ -709,8 +703,7 @@ export const checkPerms = async (req, res, query, replacements) => {
 	}
 
 	if (permsData.ownerAccess) {
-		res.status(401).json('Only tournament owners may access that function');
-		return;
+		return 'Only tournament owners may access that function';
 	}
 
 	if (perms.tabber) {
