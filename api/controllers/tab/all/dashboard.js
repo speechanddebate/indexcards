@@ -356,8 +356,6 @@ export const tournAttendance = {
 			return;
 		}
 
-		console.log(req.body);
-
 		try {
 
 			const now = Date();
@@ -794,11 +792,6 @@ export const tournDashboard = {
 
 		delete status.done;
 
-		for await (const roundId of Object.keys(status)) {
-			if (!status[roundId].started || !status[roundId].undone) {
-				delete status[roundId];
-			}
-		}
 		return res.status(200).json(status);
 	},
 };
