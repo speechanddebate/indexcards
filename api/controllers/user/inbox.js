@@ -44,7 +44,7 @@ export const unreadCount = {
 };
 
 export const markMessageRead = {
-	GET: async (req, res) => {
+	POST: async (req, res) => {
 
 		const unreads = await req.db.sequelize.query(`
 			update
@@ -52,7 +52,7 @@ export const markMessageRead = {
 			set message.read_at = NOW()
 			where message.id = :messageId
 		`, {
-			replacements: { messageId: req.params.messageId },
+			replacements: { messageId: req.body.messageId },
 			type: req.db.Sequelize.QueryTypes.UPDATE,
 		});
 
@@ -61,7 +61,7 @@ export const markMessageRead = {
 };
 
 export const markMessageDeleted = {
-	GET: async (req, res) => {
+	POST: async (req, res) => {
 
 		const unreads = await req.db.sequelize.query(`
 			update
@@ -69,7 +69,7 @@ export const markMessageDeleted = {
 			set message.deleted_at = NOW()
 			where message.id = :messageId
 		`, {
-			replacements: { messageId: req.params.messageId },
+			replacements: { messageId: req.body.messageId },
 			type: req.db.Sequelize.QueryTypes.UPDATE,
 		});
 
