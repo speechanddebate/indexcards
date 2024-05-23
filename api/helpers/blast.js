@@ -1,7 +1,8 @@
 import axios from 'axios';
-import db from './litedb.js';
+import db from './db.js';
 import emailBlast from './mail.js';
 import config from '../../config/config.js';
+import { errorLogger } from './logger.js';
 
 //*
 //	Notification data structure for inputData wants to be.  I'll stick this in
@@ -23,6 +24,7 @@ export const notify = async (inputData) => {
 	const pushReply = {
 		web   : {},
 		email : {},
+		inbox : {},
 	};
 
 	if (!inputData.noEmail) {
@@ -33,15 +35,25 @@ export const notify = async (inputData) => {
 		pushReply.web = await webBlast(inputData);
 	}
 
+	pushReply.inbox = await inboxMessage(inputData);
+
 	let error = false;
 
 	if (pushReply.web?.error || pushReply.email?.error) {
 		error = true;
 	}
 
+	let message = '';
+
+	if (pushReply.web.message) {
+		message = ` ${pushReply.web.message}, ${pushReply.email.message} and ${pushReply.inbox.message}`;
+	} else {
+		message = `${pushReply.email.message} and ${pushReply.inbox.message}`;
+	}
+
 	const reply = {
 		error,
-		message : `${pushReply.web.message} and ${pushReply.email.message}`,
+		message,
 		email   : pushReply.email,
 		web     : pushReply.web,
 	};
@@ -79,7 +91,7 @@ export const webBlast = async (inputData) => {
 	if (recipients.length < 1) {
 		return {
 			error   : false,
-			message : `No recipients found for the push notification`,
+			message : `No web pushes active.`,
 			count   : 0,
 		};
 	}
@@ -138,14 +150,14 @@ export const webBlast = async (inputData) => {
 
 		return {
 			error   : false,
-			message : `Push notification sent to ${targetIds ? targetIds.length : 0} recipients`,
+			message : `${targetIds ? targetIds.length : 0} web pushes sent.`,
 			count   : targetIds.length,
 		};
 	}
 
 	return {
 		error   : false,
-		message : `No recipients found for the push notification`,
+		message : `No web pushes active.`,
 		count   : 0,
 	};
 };
@@ -159,7 +171,7 @@ export const emailNotify = async (inputData) => {
 	) {
 		return {
 			error   : false,
-			message : `No receipients or message sent for push noitications`,
+			message : `No web pushes active.`,
 			count   : inputData.ids.length,
 		};
 	}
@@ -175,24 +187,82 @@ export const emailNotify = async (inputData) => {
 		type: db.sequelize.QueryTypes.SELECT,
 	});
 
-	const emailPromise = recipients.map( async (person) => {
+	inputData.email = recipients.map( (person) => {
 		return person.email;
 	});
-
-	inputData.email = await Promise.all(emailPromise);
 
 	if (inputData.email && inputData.email.length > 0) {
 		await emailBlast(inputData);
 		return {
 			error   : false,
-			message : `Message emailed to ${inputData.email.length} recipients `,
+			message : `${inputData.email.length} emails sent.`,
 			count   : inputData.email.length,
 		};
 	}
 
 	return {
 		error   : false,
-		message : `No recipients found for the email notification`,
+		message : `No email addresses found`,
+	};
+};
+
+export const inboxMessage = async (inputData) => {
+
+	if (
+		!inputData.ids
+		|| inputData.ids.length < 1
+		|| (!inputData.text && !inputData.html)
+	) {
+		return {
+			error   : false,
+			message : `No receipients sent.`,
+			count   : inputData.ids.length,
+		};
+	}
+
+	const message = {
+		body          : inputData.html || inputData.text,
+		subject       : inputData.subject,
+		sender        : inputData.sender,
+		sender_string : inputData.replyTo || inputData.from,
+		url           : inputData.url,
+		email         : inputData.emailId,
+		tourn         : inputData.tourn,
+		created_at    : new Date(),
+	};
+
+	const responses = [];
+	const errors = [];
+
+	inputData.ids.forEach( async (id) => {
+		try {
+			const response = await db.message.create({
+				person: id,
+				...message,
+			});
+			responses.push(response);
+		} catch (err) {
+			errors.push(err);
+		}
+	});
+
+	await Promise.all(responses);
+
+	if (errors.length > 1) {
+
+		errorLogger.error(errors);
+
+		return {
+			error   : true,
+			message : `${errors.length} Errors saving messages to Tabroom inboxes`,
+			errors,
+		};
+	}
+
+	return {
+		error   : false,
+		count   : inputData.ids.length,
+		message : `${inputData.ids.length} Tabroom inbox messages delivered.`,
 	};
 };
 

@@ -5,73 +5,91 @@ or at least some system that isn't the present total chaos.
 TOP LEVEL:  
 
 	based on AUTHENTICATION STYLE.  Some of the names are a touch awkward because the intent 
-	is to reserve data types (tourn, school, chapter) for the expression of those only. 
+	is to reserve data type names (tourn, school, chapter).
 
-	/auto  	- public jobs with internal effects.  Autoqueue executors basically
+	/auto  	- public jobs with internal effects.  Autoqueue executors basically.  Restricted
+			  by origin IP of the address; must be from within the confines of the server env
+			  as defined in config.json
 
-	/ext 	- External APIs requiring an account with an API key to determine their scope
+	/ext 	- External APIs requiring an account with an API key to determine their scope. 
+			  The API keys are tied to user accounts, and the user must have an api_auth_method
+			  person_setting (only settable by us on the backend for now).
 
-	/tab 	- APIs and functions related to tabulation of a tournament.  
-		   	  Depends on tourn permissions
+	/tab/:tournId 	- APIs and functions related to tabulation of a tournament.  Checks on tourn
+			  permissions.  All event-specific permission accessible APIs should live under /event.
+			  All category-specific permission APIs should live under /category. /all is the
+			  source of APIs that anyone with a tournament can access, to set up things like
+			  the user specific access for menus and such. 
 
-	/coach 	- APIs and functions related to school/chapter administration.  
+			  Top level types under the tournament ID that support fine grained permissions are
+
+			  /category
+			  + /judge
+
+			  + /event
+			  ++ /round
+			  ++ /entry
+
+	/coach/:chapterId 	- APIs and functions related to school/chapter administration.  
 			  Depends on chapter permissions
 
 	/user	- Everything that is only personalized to a user's own account.  Student
 			  landing page, judge landing page, personal results records, paradigm 
-			  editing
+			  editing.  person ID is embedded in the session.
 
-	/glp 	- Only those with godlike powers may enter here. 
+	/glp 	- Only those with godlike powers may enter here.  person ID is embedded in
+			  the session
 
 	/local	- Managers of various subdivisions of Tabroom.  This will include 
-			  district committee members, NCFL dioceses, circuits, etc.  The auth
-			  layers here will be one level down which I guess breaks the convention, 
-			  but I don't care that much because otherwise I'd have to make six more
-			  top levels. 
+				/circuit/:circuitId
+				/diocese/:dioceseID
+				/region/:regionId
+				/district/:districtId
 
 CONVENTION:
 
 	Underneath each top level should be the data area being operated on, followed by the
 	ID of that area, followed by a functional breakdown. 
 
-	/tab/tourn/12345 -> get -> get a data backup of the whole tourn. post uploads a backup file.
-	/tab/tourn/12345/setting/nsda_district -> get/post/put/delete -> get or affect this setting
+	/tab/12345 -> get -> get a data backup of the whole tourn. post uploads a backup file.
+	/tab/12345/setting/nsda_district -> get/post/put/delete -> get or affect this tourn setting
 
-	/tab/round/12345 -> get -> get databackup like above.  post uploads the same.
-	/tab/round/12345/schemat -> get a schematic only representation of a round.  depending on what 
-		I do with the front end, this type of thing may not be desirable?
+	/tab/12345/event/14481/round/12345 -> get -> get databackup like above.  post uploads the same.
+
+	/tab/44151/event/44481/round/12345/schemat -> get a schematic only representation of a round.  
+		[depending on what I do with the front end, this type of thing may not be desirable?]
 
 Reserve plural for multiple reports based on this as primary for a one-to-many relationship:
-	/tab/tourn/12345/events -> get -> get all events from the tourn
-	/tab/tourn/12345/sites -> get -> get all sites
-	/tab/tourn/12345/status -> get -> get current event status
+	/tab/12345/events -> get -> get all events from the tourn
+	/tab/12345/sites -> get -> get all sites
+	/tab/12345/status -> get -> get current event status
 		These could all be the same function but hide that from the endpoint tree and user
 		because why should they care. 
 
-	/tab/event/12466/rounds -> get all the rounds in this event
+	/tab/12345/event/12466/rounds -> get all the rounds in this event
 
-	/tab/timeslot/23586/dashboard -> get -> get all timeslot dashboard status
-	/tab/round/233485/dashboard -> get -> get all round dashboard status
-	/tab/event/9535385/dashboard -> get -> get all event dashboard status
+	/tab/12345/timeslot/23586/dashboard -> get -> get all timeslot dashboard status
+	/tab/12345/round/233485/dashboard -> get -> get all round dashboard status
+	/tab/12345/event/9535385/dashboard -> get -> get all event dashboard status
 
-Functional things should be simple commands defaulting to GET, placed in the tree underneath 
+Functional things should be simple commands defaulting to POST, placed in the tree underneath 
 the thing operated on. Don't go too nuts with the escalating trees of doom; the single smallest
 necessary ID numbers are best.  Actions should as much as possible reflect what data is affected
-or added or something. 
+or added or something.  Parameters besides the id of the target operand should be in the body.
 
 use 'place' as a verb that is particular to the pairing/schematic/etc process.  Always use a verb
 when the backend is going to be manipulating data instead of simply delivering or accepting it. 
 
-	/tab/round/151551/placeEntries -> GET -> pair the round
-	/tab/round/151551/placeJudges -> GET -> place the judges
-	/tab/round/151551/placeRooms -> GET -> place the rooms
+	/tab/round/151551/placeEntries -> POST -> pair the round
+	/tab/round/151551/placeJudges -> POST -> place the judges
+	/tab/round/151551/placeRooms -> POST -> place the rooms
 
 Attach mass actions below the parent container
-	/tab/event/58125/rounds/placeEntries -> GET -> pair all the event's rounds
-	/tab/timeslot/395585/rounds/placeJudges -> GET -> place all the timeslot's judges
+	/tab/event/58125/rounds/placeEntries -> POST -> pair all the event's rounds
+	/tab/timeslot/395585/rounds/placeJudges -> POST -> place all the timeslot's judges
 
 Spec after everything if available
-	/tab/event/58125/rounds/placeEntries/prelims -> GET -> pair all the event's prelims
+	/tab/event/58125/rounds/placeEntries/prelims -> POST -> pair all the event's prelims
 
 And then the results and whatever else live in the same place
 	
@@ -80,3 +98,27 @@ And then the results and whatever else live in the same place
 	/tab/round/3558125/results 			results as of round whatever
 
 	/tab/sweeps/3595/results			results of the sweepstakes protocol.
+
+
+CHECKLIST OF PLACES THE API PATHS ARE REFERENCED IN LEGACY CODE:
+
+	#./web/funclib/docshare_rooms.mas
+	#./web/funclib/nsda/nats_appearances.mas
+	#./web/funclib/push_notifications.mas
+	#./web/funclib/send_notify.mas
+	#./web/lib/Tab/General.pm
+./web/panel/judge/jpool.mhtml
+./web/panel/judge/menu.mas
+./web/panel/judge/nats_pool_totals.mhtml
+./web/panel/schemat/blast_message.mas
+./web/panel/schemat/blast_pairing.mas
+./web/panel/schemat/section_blast.mhtml
+./web/panel/schemat/settings_edit.mas
+./web/panel/schemat/show.mhtml
+./web/setup/tourn/access.mhtml
+./web/tabbing/publish/index.mhtml
+./web/tabbing/status/dashboard.mhtml
+./web/tabbing/status/status.mhtml
+./web/user/enter/authorizenet.mas
+./web/user/enter/paypal.mas
+./web/user/judge/ballot_rubric.mas

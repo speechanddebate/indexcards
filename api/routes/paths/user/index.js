@@ -9,6 +9,7 @@ import processAuthorizeNet from '../../../controllers/user/enter/processAuthoriz
 import { enablePushNotifications, disablePushNotifications } from '../../../controllers/user/account/setNotifications.js';
 import pushMessage from '../../../controllers/user/blast.js';
 import judge from './judge';
+import inbox from './inbox';
 
 export default [
 	{ path : '/login'                        , module : login }                    ,
@@ -21,4 +22,5 @@ export default [
 	{ path : '/user/push/disable'            , module : disablePushNotifications } ,
 	{ path : '/user/push/send'               , module : pushMessage }              ,
 	...judge                                 ,
+	...inbox                                 ,
 ];

@@ -570,14 +570,16 @@ db.resultValue.belongsTo(db.protocol  , { as: 'Protocol'  , foreignKey: 'protoco
 
 // Person & identities
 
-db.person.hasMany(db.student,       { as: 'Students',      foreignKey: 'person' });
-db.person.hasMany(db.judge,         { as: 'Judges',        foreignKey: 'person' });
-db.person.hasMany(db.chapterJudge,  { as: 'ChapterJudges', foreignKey: 'person' });
-db.person.hasMany(db.conflict,      { as: 'Conflicts',     foreignKey: 'person' });
-db.person.hasMany(db.changeLog,     { as: 'ChangeLogs',    foreignKey: 'person' });
-db.person.hasMany(db.permission,    { as: 'Permissions',   foreignKey: 'person' });
-db.person.hasMany(db.studentVote,   { as: 'StudentVotes',  foreignKey: 'voter' });
-db.person.hasMany(db.caseList,      { as: 'CaseLists',     foreignKey: 'person' });
+db.person.hasMany(db.student      , { as : 'Students'      , foreignKey : 'person' });
+db.person.hasMany(db.judge        , { as : 'Judges'        , foreignKey : 'person' });
+db.person.hasMany(db.chapterJudge , { as : 'ChapterJudges' , foreignKey : 'person' });
+db.person.hasMany(db.conflict     , { as : 'Conflicts'     , foreignKey : 'person' });
+db.person.hasMany(db.changeLog    , { as : 'ChangeLogs'    , foreignKey : 'person' });
+db.person.hasMany(db.permission   , { as : 'Permissions'   , foreignKey : 'person' });
+db.person.hasMany(db.studentVote  , { as : 'StudentVotes'  , foreignKey : 'voter' });
+db.person.hasMany(db.caseList     , { as : 'CaseLists'     , foreignKey : 'person' });
+db.person.hasMany(db.message      , { as : 'Messages'      , foreignKey : 'person' });
+db.person.hasMany(db.message      , { as : 'Outbox'        , foreignKey : 'sender' });
 
 db.person.belongsToMany(db.tourn,   { as: 'IgnoredTourns', foreignKey: 'person', through: 'tourn_ignore' });
 db.person.belongsToMany(db.tourn,   {
@@ -612,16 +614,20 @@ db.person.belongsToMany(db.circuit, {
 	through    : 'permission',
 });
 
-db.caseList.belongsTo(db.person, { as: 'Person' , foreignKey: 'person' });
-db.caseList.belongsTo(db.person, { as: 'Partner', foreignKey: 'partner' });
+db.caseList.belongsTo(db.person, { as  : 'Person' , foreignKey     : 'person' });
+db.caseList.belongsTo(db.person, { as  : 'Partner', foreignKey     : 'partner' });
+db.conflict.belongsTo(db.person,  { as : 'Person'     , foreignKey : 'person' });
+db.conflict.belongsTo(db.person,  { as : 'Conflicted' , foreignKey : 'conflicted' });
+db.conflict.belongsTo(db.chapter, { as : 'Chapter'    , foreignKey : 'chapter' });
+db.conflict.belongsTo(db.person,  { as : 'AddedBy'    , foreignKey : 'added_by' });
 
-db.conflict.belongsTo(db.person,  { as: 'Person'     , foreignKey: 'person' });
-db.conflict.belongsTo(db.person,  { as: 'Conflicted' , foreignKey: 'conflicted' });
-db.conflict.belongsTo(db.chapter, { as: 'Chapter'    , foreignKey: 'chapter' });
-db.conflict.belongsTo(db.person,  { as: 'AddedBy'    , foreignKey: 'added_by' });
+// Messages
+db.message.belongsTo(db.person, { as: 'Person', foreignKey: 'person' });
+db.message.belongsTo(db.person, { as: 'Sender', foreignKey: 'sender' });
+db.message.belongsTo(db.email,  { as: 'Email',  foreignKey: 'email' });
+db.message.belongsTo(db.tourn,  { as: 'Tourn',  foreignKey: 'tourn' });
 
 // Permissions
-
 db.permission.belongsTo(db.person   , { as: 'Person'   , foreignKey: 'person' });
 db.permission.belongsTo(db.person   , { as: 'Creator'  , foreignKey: 'created_by' });
 db.permission.belongsTo(db.district , { as: 'District' , foreignKey: 'district' });
