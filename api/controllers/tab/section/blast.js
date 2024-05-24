@@ -81,6 +81,7 @@ export const blastSectionPairing = {
 			blastData.append = req.body.append;
 		}
 
+		blastData.tourn = tourn.id;
 		const response = await sendPairingBlast(followers, blastData, req, res);
 
 		await req.db.changeLog.create({

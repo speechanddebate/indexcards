@@ -264,6 +264,7 @@ export const blastRoundPairing = {
 
 		blastData.from = `${tourn.name} <${tourn.webname}_${numberwang}@www.tabroom.com>`;
 		blastData.fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
+		blastData.tourn = tourn.id;
 
 		const browserResponse = await sendPairingBlast(followers, blastData, req, res);
 

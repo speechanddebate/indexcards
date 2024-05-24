@@ -75,6 +75,10 @@ export const blastPairing = {
 			blastData.append = req.body.append;
 		}
 
+		console.log(`THERE IS A TOURNAMENT`);
+		console.log(tourn);
+		blastData.tourn = tourn.id;
+
 		const reply = await sendPairingBlast(followers, blastData, req, res);
 		res.status(200).json(reply);
 

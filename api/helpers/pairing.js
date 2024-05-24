@@ -2,6 +2,7 @@ import moment from 'moment-timezone';
 import { ordinalize } from '@speechanddebate/nsda-js-utils';
 import { notify } from './blast.js';
 import { sidelocks } from './round.js';
+import { config } from '../../config/config.js';
 import changeLogModel from '../models/changeLog.js';
 
 // Functions related to creating pairing blasts for each section.
@@ -204,7 +205,7 @@ export const formatPairingBlast = async (queryData, req) => {
 
 		let counter = 1;
 
-		for await ( const flight of sectionFlights) {
+		for await (const flight of sectionFlights) {
 
 			for await (const sectionId of Object.keys(round.flightSections[flight])) {
 
@@ -218,7 +219,7 @@ export const formatPairingBlast = async (queryData, req) => {
 				};
 
 				if (round.flights > 1) {
-					sectionMessage.text += `\nFlight ${section.flight} \n`;
+					sectionMessage.text += `\n Flight ${section.flight} \n`;
 					sectionMessage.html += `<p style="width: 25%; display: inline-block;">Flight ${section.flight}</p>`;
 					sectionMessage.single += `\n\tFlt ${section.flight} Start ${round.shortstart[section.flight]}\n`;
 				}
@@ -226,7 +227,7 @@ export const formatPairingBlast = async (queryData, req) => {
 				sectionMessage.text += `Start ${round.shortstart[section.flight]} \n`;
 				sectionMessage.text += `Room: ${section.room} `;
 
-				sectionMessage.html += `<p>Start ${round.start[section.flight]}</p>`;
+				sectionMessage.html += `<p>Start: ${round.start[section.flight]}</p>`;
 				sectionMessage.html += `<p>Room: ${section.room} `;
 				sectionMessage.single += `\tRoom ${section.room} Counter ${counter++} Letter ${section.letter}`;
 
@@ -467,8 +468,15 @@ export const formatPairingBlast = async (queryData, req) => {
 						judgeMessage.html += `</p>`;
 					}
 
+					judgeMessage.url = `${config.WEB_URL}/user/judge/panels.mhtml`;
 					judgeMessage.text += sectionMessage.entryText;
 					judgeMessage.html += sectionMessage.entryHTML;
+
+					judgeMessage.html += `
+						<p><a
+							href="${config.WEB_URL}/user/judge/panels.mhtml"
+						>Access Your Ballot</a></p>
+					`;
 
 					if (sectionMessage.judgeText) {
 						judgeMessage.text += sectionMessage.judgeText;
@@ -543,6 +551,7 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 				ids    : followers.judges[judgeId],
 				append : blastData.append,
 				from   : blastData.from,
+				tourn  : blastData.tourn,
 				...blastData.judges[judgeId],
 			});
 
@@ -556,6 +565,7 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 				ids    : followers.entries[entryId],
 				append : blastData.append,
 				from   : blastData.from,
+				tourn  : blastData.tourn,
 				...blastData.entries[entryId],
 			});
 			promises.push(notifyResponse);
@@ -568,6 +578,7 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 				ids    : followers.schools[schoolId],
 				append : blastData.append,
 				from   : blastData.from,
+				tourn  : blastData.tourn,
 				...blastData.schools[schoolId],
 			});
 			promises.push(notifyResponse);
