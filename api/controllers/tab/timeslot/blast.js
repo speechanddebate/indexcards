@@ -129,11 +129,11 @@ export const blastTimeslotPairings = {
 
 		const responses = [];
 
-		for (const round of rounds) {
+		rounds.forEach( async (round) => {
 			req.params.roundId = round.id;
-			const response =  blastRoundPairing.POST(req, res);
+			const response = await blastRoundPairing.POST(req, res);
 			responses.push(response);
-		}
+		});
 
 		await Promise.all(responses);
 

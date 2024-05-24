@@ -19,6 +19,10 @@ import { errorLogger } from './logger.js';
 //		noEmail : boolean  // Optional.  If true , no email sent, only web pushes
 //	}
 
+function onlyUnique(value, index, array) {
+	return array.indexOf(value) === index;
+}
+
 export const notify = async (inputData) => {
 
 	const pushReply = {
@@ -26,6 +30,8 @@ export const notify = async (inputData) => {
 		email : {},
 		inbox : {},
 	};
+
+	inputData.ids = inputData.ids.filter(onlyUnique);
 
 	if (!inputData.noEmail) {
 		pushReply.email = await emailNotify(inputData);
