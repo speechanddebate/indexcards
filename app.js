@@ -152,6 +152,8 @@ const tabRoutes = [
 	'/v1/tab/:tournId/:subType',
 	'/v1/tab/:tournId/:subType/:typeId',
 	'/v1/tab/:tournId/:subType/:typeId/*',
+	'/v1/tab/:tournId/:subType/:typeId/*/*',
+	'/v1/tab/:tournId/:subType/:typeId/*/*/*',
 ];
 
 app.all(tabRoutes, async (req, res, next) => {
