@@ -36,7 +36,7 @@ errorsPlease.forEach((dingbat) => {
 
 // Iterate the models directory and load all models dynamically
 const models = {};
-const files = await fs.promises.readdir('./api/models');
+const files = await fs.promises.readdir(`${config.CODE_PATH || '.'}/api/models`);
 const promises = files
 	.filter((file) => {
 		return (

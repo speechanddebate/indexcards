@@ -50,6 +50,24 @@ export const unreadCount = {
 	},
 };
 
+export const markAllMessagesRead = {
+	POST: async (req, res) => {
+
+		const unreads = await req.db.sequelize.query(`
+			update
+				message
+			set message.read_at = NOW()
+			where message.person = :personId
+				and message.read_at IS NULL
+		`, {
+			replacements: { personId: req.session.person },
+			type: req.db.Sequelize.QueryTypes.UPDATE,
+		});
+
+		return res.status(201).json(unreads);
+	},
+};
+
 export const markMessageRead = {
 	POST: async (req, res) => {
 
@@ -58,6 +76,7 @@ export const markMessageRead = {
 				message
 			set message.read_at = NOW()
 			where message.id = :messageId
+				and message.read_at IS NULL
 		`, {
 			replacements: { messageId: req.body.messageId },
 			type: req.db.Sequelize.QueryTypes.UPDATE,

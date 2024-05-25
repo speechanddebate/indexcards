@@ -10,6 +10,7 @@ export const config = {
 	BASE_URL 			  : 'http://api.dev.tabroom.com',
 	LOGIN_URL             : 'http://old.dev.tabroom.com/user/login/login.mhtml',
 	DOCKERHOST		      : 'devenv',
+	CODE_PATH             : '/www/indexcards',
 	LOG_PATH			  : '/var/log/indexcards',
 	MAIL_FROM			  : 'live@www.tabroom.com',
 	MAIL_SERVER			  : 'localhost',
