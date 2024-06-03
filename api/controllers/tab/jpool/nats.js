@@ -659,4 +659,205 @@ const getNatsJPoolJudges = async (db, parentId, jpools, weights) => {
 	return judges;
 };
 
+export const placeSuppOnlyJudges = {
+
+	POST: async (req, res) => {
+
+		const db = req.db;
+
+		const suppJPools = await db.sequelize.query(`
+			SELECT
+				jpool.id, jpool.name,
+				rounds.value rounds,
+				parent.value parent,
+				event.type eventType,
+				CAST(pool_target.value as SIGNED) pool_target,
+				CAST(pool_priority.value as SIGNED) pool_priority,
+				MIN(CONVERT_TZ(timeslot.start, '+00:00', tourn.tz)) as start,
+				MAX(CONVERT_TZ(timeslot.end, '+00:00', tourn.tz)) as end,
+				MIN(timeslot.id) as minTimeslot,
+				MAX(timeslot.id) as maxTimeslot
+
+			from (jpool, jpool_round jpr, round, tourn, event, event_setting supp)
+
+				left join timeslot
+					on timeslot.id = round.timeslot
+
+				left join jpool_setting rounds
+					on rounds.jpool = jpool.id
+					and rounds.tag = 'rounds'
+
+				left join jpool_setting parent
+					on parent.jpool = jpool.id
+					and parent.tag = 'parent'
+
+				left join jpool_setting pool_target
+					on pool_target.jpool = jpool.id
+					and pool_target.tag = 'pool_target'
+
+				left join jpool_setting pool_priority
+					on pool_priority.jpool = jpool.id
+					and pool_priority.tag = 'pool_priority'
+
+			where jpool.parent = :parentId
+
+				and jpool.id = jpr.jpool
+				and jpr.round = round.id
+				and round.event = event.id
+				and event.id = supp.event
+				and event.tourn = tourn.id
+
+				and NOT EXISTS (
+					select pool_ignore.id
+					from jpool_setting pool_ignore
+					where pool_ignore.jpool = jpool.id
+					and pool_ignore.tag = 'pool_ignore'
+				)
+
+				and supp.tag = 'supp'
+			group by jpool.id
+			order by pool_priority.value
+		`, {
+			replacements: { parentId: req.params.jpoolId },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+
+		// Get all judges who are
+		// 1) are in the parent jpool
+		// 2) whose schools have only supp entries.
+		// Indicate who has debate and speech and both.
+
+		const parent = await db.summon(db.jpool, req.params.jpoolId);
+		const suppOnlyJudges = await db.sequelize.query(`
+			SELECT
+				judge.id,
+				judge.first, judge.last,
+				school.name,
+				(coalesce(judge.obligation, 0) + coalesce(judge.hired, 0)) as rounds,
+				coalesce(judge.obligation, 0) obligation,
+				coalesce(judge.hired, 0) hired,
+				judge.school,
+				count (distinct debate.id) as debate,
+				count (distinct speech.id) as speech
+			from (judge, school)
+				left join entry debate on debate.school = school.id
+					and debate.unconfirmed = 0
+					and exists ( select db.id from event db where db.id = debate.event and db.type = 'debate')
+
+				left join entry speech on speech.school = school.id
+					and speech.unconfirmed = 0
+					and exists ( select db.id from event db where db.id = speech.event and db.type = 'speech')
+
+
+			where judge.category = :categoryId
+				and judge.school = school.id
+				and NOT EXISTS (
+					select entry.id
+						from entry
+					where entry.unconfirmed = 0
+					and entry.school = school.id
+					and NOT EXISTS (
+						select nosupp.id
+						from event_setting nosupp
+						where nosupp.event = entry.event
+						and nosupp.tag = 'supp'
+					)
+				)
+			group by judge.id
+			order by judge.obligation DESC
+		`, {
+			replacements : { categoryId: parent.category },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+
+		const judgeIds = suppOnlyJudges.map( (judge) => {
+			return judge.id;
+		});
+		const jpoolIds = suppJPools.map( jpool => {
+			return jpool.id;
+		});
+
+		// Remove existing pool assignments from supp subpools
+		await db.sequelize.query(`
+			delete jpj.* 
+				from jpool_judge jpj
+			where jpj.judge IN (:judgeIds)
+			and jpj.jpool IN (:jpoolIds)
+		`, {
+			replacements: { jpoolIds, judgeIds },
+			type: db.sequelize.QueryTypes.DELETE,
+		});
+
+		const judgeStrikes = await req.db.sequelize.query(`
+			select
+				judge.id, strike.type, strike.start, strike.end
+			from judge, strike
+			where strike.judge = judge.id
+				and judge.id IN ( :judgeIds )
+		`, {
+			replacements: {  judgeIds },
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		const judges = {};
+
+		for await (const judge of suppOnlyJudges) {
+			judge.busy = [];
+			judge.added = 0;
+			judges[judge.id] = judge;
+		}
+
+		for await (const strike of judgeStrikes) {
+			if (strike.start && strike.end) {
+				judges[strike.judge].busy.push({
+					start: new Date(strike.start),
+					end: new Date(strike.end),
+				});
+			}
+		}
+
+		// Find the time spans covered by each pool so we don't double book anyone
+		for await (const judgeId of judgeIds) {
+
+			for await (const jpool of suppJPools) {
+				if (
+					judges[judgeId][jpool.eventType] > 0
+					&& (jpool.rounds <= judges[judgeId].rounds)
+				) {
+
+					let busy = false;
+					for await (const block of judges[judgeId].busy) {
+						if (block.start < jpool.end && block.end > jpool.start) {
+							busy = true;
+						}
+					}
+
+					if (!busy) {
+						judges[judgeId].response = await db.sequelize.query(`
+							insert into jpool_judge (jpool, judge) values (:jpoolId, :judgeId)
+						`, {
+							replacements: { jpoolId: jpool.id, judgeId },
+							type: db.sequelize.QueryTypes.INSERT,
+						});
+
+						judges[judgeId].rounds -= jpool.rounds;
+
+						judges[judgeId].busy.push({
+							start : jpool.start,
+							end   : jpool.end,
+						});
+
+						judges[judgeId].added++;
+					}
+				}
+			}
+		}
+
+		res.status(201).json({
+			error: false,
+			message: ` ${judgeIds.length} supp only judges were placed into pools`,
+		});
+	},
+};
+
 export default getNatsJPoolJudges;
