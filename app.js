@@ -248,6 +248,15 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 	try {
 		req.session = await keyAuth(req, res);
 		if (!req.session?.person) {
+			req.session = await auth(req, res);
+			console.log(req.session);
+
+			if (!req.session?.settings[`api_auth_${req.params.area}`]) {
+				return res.status(401).json(`That function is not accessible to your API credentials.  Key ${req.params.area} required`);
+			}
+		}
+
+		if (!req.session?.person) {
 			console.log(req.session);
 			return res.status(401).json(`That function is not accessible to your API credentials.  Key ${req.params.area} required`);
 		}

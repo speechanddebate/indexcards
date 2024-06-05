@@ -123,4 +123,56 @@ export const syncNatsAppearances = {
 	},
 };
 
+export const natsIndividualHonors = {
+
+	GET: async (req, res) => {
+
+		const db = req.db;
+
+		const studentResults = await db.sequelize.query(`
+			select 
+				student.id studentId, student.first, student.last, student.nsda studentNSDA,
+				school.id schoolId, school.name schoolName, chapter.nsda chapterNSDA,
+				result.rank, result.place,
+				round.name roundName, round.label roundLabel,
+				event.abbr eventAbbr, event.name eventName, nsda_code.value nsdaCode,
+				tourn.name tournName, tourn.start tournDate
+
+			from (entry, result, result_set, entry_student es, student, event, tourn, tourn_setting ts, ballot, panel, round)
+				left join event_setting nsda_code 
+					on nsda_code.event = event.id
+					and nsda_code.tag = 'nsda_event_category'
+				left join school on entry.school = school.id
+				left join chapter on school.chapter = chapter.id
+
+			where ts.tag = 'nsda_nats'
+				and ts.tourn = tourn.id
+				and tourn.id = event.tourn
+				and event.id = entry.event
+				and entry.id = es.entry
+				and es.student = student.id
+				and entry.id = result.entry
+				and result.result_set = result_set.id
+				and result_set.label = 'Final Places'
+				and entry.id = ballot.entry
+				and ballot.panel = panel.id
+				and panel.round = round.id
+				and round.type = 'final'
+
+				and NOT EXISTS (
+					select dq.value
+					from entry_setting dq
+					where dq.entry = entry.id
+					and dq.tag = 'dq'
+				)
+			group by student.id, event.id
+			order by tourn.start DESC, event.abbr, result.place
+		`, {
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		res.status(201).json(studentResults);
+	},
+};
+
 export default syncNatsAppearances;
