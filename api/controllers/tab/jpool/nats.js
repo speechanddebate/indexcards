@@ -808,7 +808,7 @@ export const placeSuppOnlyJudges = {
 		}
 
 		for await (const strike of judgeStrikes) {
-			if (strike.start && strike.end) {
+			if (strike.start && strike.end && strike.judge && judges[strike.judge]) {
 				judges[strike.judge].busy.push({
 					start: new Date(strike.start),
 					end: new Date(strike.end),

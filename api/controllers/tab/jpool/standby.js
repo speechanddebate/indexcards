@@ -23,7 +23,8 @@ export const placeJudgesStandby = {
 							select jps.id
 							from jpool_setting jps
 							where jps.jpool = standby.jpool
-							and jps.tag = 'standby')
+							and jps.tag = 'standby'
+						)
 
 					left join ballot on ballot.judge = judge.id
 					left join panel on panel.id = ballot.panel
@@ -43,6 +44,8 @@ export const placeJudgesStandby = {
 				replacements: { parentId: req.body.parentId },
 				type: req.db.sequelize.QueryTypes.SELECT,
 			});
+
+			console.log(rawJudges);
 
 		} else if (req.body.categoryId) {
 
