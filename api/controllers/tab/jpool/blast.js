@@ -12,36 +12,68 @@ export const blastJudges = {
 			res.status(401).json('No message to blast sent');
 		}
 
-		const jpool = req.db.summon(req.db.jpool, req.params.jpoolId);
+		const jpool = await req.db.summon(req.db.jpool, req.params.jpoolId);
 
-		let queryLimit = '';
+		let query = '';
 
 		if (req.body.free) {
-			queryLimit = `
-				and not exists (
-					select ballot.id
-						from ballot, panel, round, jpool_setting jps
-					where ballot.judge = judge.id
-						and ballot.panel = panel.id
-						and panel.round = round.id
-						and round.timestamp = jps.value
-						and jps.tag = 'standby'
-						and jps.jpool = jpool.id
+			query = `
+				select distinct person.id
+					from (person, judge, jpool_judge jpj, jpool_round jpr, round)
+				where round.timeslot = :timeslotId
+					and round.id = jpr.round
+					and jpr.jpool = jpj.jpool
+					and round.site = :siteId
+					and jpj.judge = judge.id
+					and judge.person = person.id
+
+				and NOT EXISTS (
+						select b2.id
+						from (ballot b2, panel p2, round r2)
+						where r2.timeslot = round.timeslot
+						and r2.id = p2.round
+						and p2.id = b2.panel
+						and b2.judge = judge.id
 				)
+
+				and not exists (
+					select jpj.id
+					from jpool_judge jpj
+					where jpj.jpool = :jpoolId
+					and jpj.judge = judge.id
+				)
+			`;
+
+		} else {
+			query = `
+				select distinct person.id
+					from (person, judge, jpool_judge jpj)
+				where jpj.jpool = :jpoolId
+					and jpj.judge = judge.id
+					and judge.person = person.id
+					and not exists (
+						select ballot.id
+							from ballot, panel, round, jpool_setting jps
+						where ballot.judge = judge.id
+							and ballot.panel = panel.id
+							and panel.round = round.id
+							and round.timeslot = jps.value
+							and jps.tag = 'standby_timeslot'
+							and jps.jpool = :jpoolId
+					)
 			`;
 		}
 
-		const jpoolJudgeIds = await req.db.sequelize.query(`
-			select distinct person.id
-				from person, judge, jpool_judge jpj
-			where jpj.jpool = :jpoolId
-				and jpj.judge = judge.id
-				and judge.person = person.id
-				${queryLimit}
-		`, {
-			replacements: { jpoolId : req.params.jpoolId },
-			type: req.db.sequelize.QueryTypes.SELECT,
-		});
+		const jpoolJudgeIds = await req.db.sequelize.query(
+			query, {
+				replacements: {
+					jpoolId    : req.params.jpoolId,
+					timeslotId : jpool.settings.standby_timeslot,
+					siteId     : jpool.site,
+				},
+				type: req.db.sequelize.QueryTypes.SELECT,
+			}
+		);
 
 		const jpoolJudgeArray = [];
 
@@ -49,14 +81,14 @@ export const blastJudges = {
 			jpoolJudgeArray.push(jpj.id);
 		});
 
-		const tourn = req.db.summon(req.db.tourn, req.params.tournId);
+		const tourn = await req.db.summon(req.db.tourn, req.params.tournId);
 		const seconds = Math.floor(Date.now() / 1000);
 		const numberwang = seconds.toString().substring(-5);
 
 		const from = `${tourn.name} <${tourn.webname}_${numberwang}@www.tabroom.com>`;
 		const fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
 
-		const blastResponse = notify({
+		const blastResponse = await notify({
 			ids  : jpoolJudgeArray,
 			text : req.body.message,
 			from,
@@ -73,14 +105,18 @@ export const blastJudges = {
 			type: req.db.sequelize.QueryTypes.SELECT,
 		});
 
+		const promises = [];
+
 		rawRounds.forEach( async (round) => {
-			await req.db.changeLog.create({
+			promises.push(req.db.changeLog.create({
 				tag         : 'blast',
 				description : `${req.body.message} sent to ${jpoolJudgeIds.length} judges in ${jpool.name}`,
 				person      : req.session.person,
 				round       : round.id,
-			});
+			}));
 		});
+
+		await Promise.all(promises);
 
 		if (blastResponse.error) {
 			res.status(401).json(blastResponse.message);
