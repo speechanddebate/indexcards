@@ -167,8 +167,6 @@ app.all(tabRoutes, async (req, res, next) => {
 
 		req.session = await tabAuth(req, res);
 
-		console.log(req.session);
-
 		if (typeof req.session?.perms !== 'object') {
 			return res.status(401).json('You do not have access to that tournament area');
 		}
@@ -251,15 +249,12 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 		req.session = await keyAuth(req, res);
 		if (!req.session?.person) {
 			req.session = await auth(req, res);
-			console.log(req.session);
-
 			if (!req.session?.settings[`api_auth_${req.params.area}`]) {
 				return res.status(401).json(`That function is not accessible to your API credentials.  Key ${req.params.area} required`);
 			}
 		}
 
 		if (!req.session?.person) {
-			console.log(req.session);
 			return res.status(401).json(`That function is not accessible to your API credentials.  Key ${req.params.area} required`);
 		}
 	} catch (err) {
