@@ -459,8 +459,8 @@ export const tabAuth = async (req) => {
 		if (
 			perms.tourn[tournId] === 'owner'
 			|| perms.tourn[tournId] === 'tabber'
-			|| (subType === 'event' && req.session.perms.event?.[typeId].tag === 'tabber')
-			|| req.session.perms.categories?.[output.category].tag === 'tabber'
+			|| (subType === 'event' && req.session.perms.event?.[typeId] === 'tabber')
+			|| req.session.perms.category?.[output.category] === 'tabber'
 		) {
 			req.session[subType] = output;
 			return req.session;

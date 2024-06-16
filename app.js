@@ -167,6 +167,8 @@ app.all(tabRoutes, async (req, res, next) => {
 
 		req.session = await tabAuth(req, res);
 
+		console.log(req.session);
+
 		if (typeof req.session?.perms !== 'object') {
 			return res.status(401).json('You do not have access to that tournament area');
 		}
