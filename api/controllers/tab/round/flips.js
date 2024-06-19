@@ -173,8 +173,6 @@ export const scheduleFlips = async (roundId) => {
 					type: db.Sequelize.QueryTypes.INSERT,
 				});
 			}
-		} else {
-			message = `What the hell.  Round online ${round.online} before ${round.beforeStart} ${round.autoPublish}`;
 		}
 	}
 
