@@ -70,6 +70,47 @@ export const checkBallotAccess = {
 	},
 };
 
+export const getBallotSides = {
+
+	GET: async (req, res) => {
+
+		const db = req.db;
+		const judgeId = parseInt(req.params.judgeId);
+		const sectionId = parseInt(req.params.sectionId);
+
+		const ballots = await db.sequelize.query(`
+			select
+				ballot.id, ballot.entry, ballot.side
+			from ballot
+			where ballot.judge = :judgeId
+				and ballot.panel = :sectionId
+		`, {
+			replacements: {
+				sectionId,
+				judgeId,
+			},
+			type : db.Sequelize.QueryTypes.SELECT,
+		});
+
+		const ballotData = {
+			affBallot: 0,
+			negBallot: 0,
+		};
+
+		for (const ballot of ballots) {
+			if (ballot.side === 1) {
+				ballotData.affBallot = ballot.id;
+			}
+
+			if (ballot.side === 2) {
+				ballotData.negBallot = ballot.id;
+			}
+		}
+
+		return res.status(200).json(ballotData);
+	},
+};
+
 export const saveRubric = {
 
 	POST: async (req, res) => {
