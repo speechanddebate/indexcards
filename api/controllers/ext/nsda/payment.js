@@ -7,7 +7,7 @@ export const postPayment = {
 
 	GET: async (req, res) => {
 		const db = req.db;
-		const tourn = await db.summon(db.tourn, req.params.tourn_id);
+		const tourn = await db.summon(db.tourn, req.params.tournId);
 
 		if (!tourn.settings && !tourn.settings.store_cards) {
 			return res.status(400).json({ message: 'No shopping cart applies to that tournament' });
@@ -30,11 +30,11 @@ export const postPayment = {
 			return res.status(400).json({ message: `Permission key invalid` });
 		}
 
-		if (!postRequest.tourn_id) {
+		if (!postRequest.tournId) {
 			return res.status(400).json({ message: 'Invalid request sent: no tournament ID' });
 		}
 
-		const tourn = await db.summon(db.tourn, postRequest.tourn_id);
+		const tourn = await db.summon(db.tourn, postRequest.tournId);
 		const [invoiceId, cartKey] = postRequest.invoice_id.split('-');
 
 		if (!tourn.settings.store_carts) {
