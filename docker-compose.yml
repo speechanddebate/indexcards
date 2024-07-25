@@ -11,6 +11,6 @@ services:
     volumes:
       - /etc/tabroom/indexcards.config.js:/indexcards/config/config.js:ro
       - /var/log/indexcards:/var/log/indexcards:rw
-      - /var/lib/GeoIP:/var/lib/GeoIP
+      - /var/lib/GeoIP:/geoip:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
