@@ -8,7 +8,11 @@ const ipLocation = {
 		const ispData = await findISP(requestIP);
 		const userAgent = UAParser(req.get('user-agent'));
 
-		locationData.isp = ispData.isp;
+		if (locationData === undefined) {
+			return res.status(200).json({ message: `No location data found for ${requestIP}` });
+		}
+
+		locationData.isp = ispData?.isp;
 
 		if (ispData.isp !== ispData.organization) {
 			locationData.organization = ispData.organization;
@@ -17,7 +21,7 @@ const ipLocation = {
 		locationData.browser = userAgent.browser;
 		locationData.device = userAgent.device;
 		locationData.os = userAgent.os;
-		res.json(locationData);
+		return res.status(200).json(locationData);
 	},
 };
 
