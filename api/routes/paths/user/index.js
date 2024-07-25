@@ -12,15 +12,15 @@ import judge from './judge';
 import inbox from './inbox';
 
 export default [
-	{ path : '/login'                        , module : login }                    ,
-	{ path : '/user/profile'                 , module : getProfile }               ,
-	{ path : '/user/profile/{person_id}'     , module : getProfile }               ,
-	{ path : '/user/iplocation/{ip_address}' , module : ipLocation }               ,
-	{ path : '/user/enter/paypal'            , module : acceptPayPal }             ,
-	{ path : '/user/enter/authorize'         , module : processAuthorizeNet }      ,
-	{ path : '/user/push/enable'             , module : enablePushNotifications }  ,
-	{ path : '/user/push/disable'            , module : disablePushNotifications } ,
-	{ path : '/user/push/send'               , module : pushMessage }              ,
-	...judge                                 ,
-	...inbox                                 ,
+	{ path : '/login'                       , module : login }                    ,
+	{ path : '/user/profile'                , module : getProfile }               ,
+	{ path : '/user/profile/{person_id}'    , module : getProfile }               ,
+	{ path : '/user/iplocation/{ipAddress}' , module : ipLocation }               ,
+	{ path : '/user/enter/paypal'           , module : acceptPayPal }             ,
+	{ path : '/user/enter/authorize'        , module : processAuthorizeNet }      ,
+	{ path : '/user/push/enable'            , module : enablePushNotifications }  ,
+	{ path : '/user/push/disable'           , module : disablePushNotifications } ,
+	{ path : '/user/push/send'              , module : pushMessage }              ,
+	...judge                                ,
+	...inbox                                ,
 ];

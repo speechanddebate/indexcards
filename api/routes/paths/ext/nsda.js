@@ -12,5 +12,5 @@ export default [
 	{ path : '/ext/nsda/payment/tourn/{tournId}' , module : postPayment }          ,
 	{ path : '/ext/nsda/nats/appearances'        , module : syncNatsAppearances }  ,
 	{ path : '/ext/nsda/nats/placements'         , module : natsIndividualHonors } ,
-	{ path : '/ext/iplocation/{ip_address}'      , module : ipLocation }           ,
+	{ path : '/ext/iplocation/{ipAddress}'      , module : ipLocation }           ,
 ];
