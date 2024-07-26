@@ -1,26 +1,43 @@
 import UAParser from 'ua-parser-js';
 import { findLocation, findISP } from '../../../helpers/clientInfo';
+import { queryLogger } from '../../../helpers/logger.js';
 
 const ipLocation = {
 	GET: async (req, res) => {
 		const requestIP = req.params.ipAddress || req.get('x-forwarded-for');
-		const locationData = await findLocation(requestIP);
-		const ispData = await findISP(requestIP);
-		const userAgent = UAParser(req.get('user-agent'));
+
+		let locationData = {};
+
+		try {
+			locationData = await findLocation(requestIP);
+		} catch (err) {
+			return res.status(200).json({ message: `No location data found for ${requestIP}` });
+		}
+
+		try {
+			const ispData = await findISP(requestIP);
+			locationData.isp = ispData?.isp;
+			locationData.ispData = ispData;
+		} catch (err) {
+			queryLogger.info(`IP ${requestIP} was not found in the ISP database`);
+		}
 
 		if (locationData === undefined) {
 			return res.status(200).json({ message: `No location data found for ${requestIP}` });
 		}
 
-		locationData.isp = ispData?.isp;
-
-		if (ispData.isp !== ispData.organization) {
-			locationData.organization = ispData.organization;
+		if (locationData.isp && locationData.isp !== locationData.ispData.organization) {
+			locationData.organization = locationData.ispData.organization;
 		}
 
-		locationData.browser = userAgent.browser;
-		locationData.device = userAgent.device;
-		locationData.os = userAgent.os;
+		const userAgent = UAParser(req.get('user-agent'));
+
+		if (userAgent?.browser) {
+			locationData.browser = userAgent.browser;
+			locationData.device = userAgent.device;
+			locationData.os = userAgent.os;
+		}
+
 		return res.status(200).json(locationData);
 	},
 };
