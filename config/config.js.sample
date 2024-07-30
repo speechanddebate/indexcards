@@ -37,9 +37,9 @@ export const config = {
 		ENDPOINT : 'https://test-api.speechanddebate.org',
 		PATH     : '/v2',
 		PRODUCT_CODES : {
-			tabroom   : 00000,
-			nc        : 11111,
-			nco       : 22222,
+			tabroom   : 11111,
+			nc        : 22222,
+			nco       : 33333,
 		},
 	},
 	NAUDL				  : {
