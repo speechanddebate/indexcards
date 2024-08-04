@@ -149,7 +149,8 @@ export const roundDecisionStatus = {
 				rubric.id rubric,
 				panel.flight
 
-			from (judge, ballot, panel, round, event, tourn)
+			from (ballot, panel, round, event, tourn)
+				left join judge on ballot.judge = judge.id
 				left join score rank on rank.ballot = ballot.id and rank.tag = 'rank'
 				left join score point on point.ballot = ballot.id and point.tag = 'point'
 				left join score winloss on winloss.ballot = ballot.id and winloss.tag = 'winloss'
@@ -158,7 +159,6 @@ export const roundDecisionStatus = {
 			where round.id = :roundId
 				and panel.round = round.id
 				and panel.id = ballot.panel
-				and ballot.judge = judge.id
 				and round.event = event.id
 				and event.tourn = tourn.id
 		`, {
@@ -167,16 +167,57 @@ export const roundDecisionStatus = {
 		});
 
 		const round = {
-			judges : {},
-			out    : {},
-			panels : {},
+			judges    : {},
+			out       : {},
+			panels    : {},
+			byePanels : {},
 		};
 
 		rawBallots.forEach( (ballot) => {
 
+			if (ballot.bye || ballot.forfeit) {
+				console.log(ballot);
+			}
+
+			if (!ballot.judge) {
+
+				round.panels[ballot.panel] = round.panels[ballot.panel] || 0;
+
+				let already = round.byePanels[ballot.panel] || '';
+
+				if (already) {
+					already += `<br />`;
+				}
+
+				if (ballot.audit) {
+
+					if (ballot.forfeit) {
+						already += `${label[ballot.side]} FFT`;
+					} else if (ballot.bye) {
+						already += `${label[ballot.side]} BYE`;
+					} else {
+						already += `${label[ballot.side]} NONE`;
+					}
+
+					round.panels[ballot.panel] = 9000;
+
+				} else if (ballot.bye) {
+					already += ` &frac12; BYE`;
+					round.panels[ballot.panel] += 10;
+				} else if (ballot.forfeit) {
+					already += ` &frac12; FFT`;
+					round.panels[ballot.panel] += 10;
+				}
+
+				round.byePanels[ballot.panel] = already;
+
+				return;
+			}
+
 			if (!round.judges[ballot.judge]) {
 				round.judges[ballot.judge] = {};
 			}
+
 			if (!round.judges[ballot.judge][ballot.flight]) {
 				round.judges[ballot.judge][ballot.flight] = { panel: ballot.panel };
 			}
@@ -197,7 +238,7 @@ export const roundDecisionStatus = {
 					judge.text = '';
 				}
 
-				round.panels[ballot.panel] += 10000;
+				round.panels[ballot.panel] += 100;
 
 				if (ballot.winloss) {
 					if (ballot.winner) {
@@ -226,7 +267,7 @@ export const roundDecisionStatus = {
 					judge.class = 'fa fa-sm fa-star greentext';
 				}
 			} else if (ballot.pbye) {
-				round.panels[ballot.panel] += 1000;
+				round.panels[ballot.panel] = 10000;
 				judge.text = 'BYE';
 			} else if (ballot.winloss || ballot.rank || ballot.point || ballot.rubric ) {
 				round.out[ballot.flight][ballot.judge] = true;
