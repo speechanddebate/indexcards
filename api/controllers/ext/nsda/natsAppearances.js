@@ -171,7 +171,7 @@ export const natsIndividualHonors = {
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
-		res.status(201).json(studentResults);
+		res.status(200).json(studentResults);
 	},
 };
 
