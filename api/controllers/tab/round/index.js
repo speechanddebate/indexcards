@@ -161,6 +161,7 @@ export const roundDecisionStatus = {
 				and panel.id = ballot.panel
 				and round.event = event.id
 				and event.tourn = tourn.id
+			order by ballot.side
 		`, {
 			replacements: { roundId: req.params.roundId },
 			type         : db.sequelize.QueryTypes.SELECT,
@@ -192,9 +193,9 @@ export const roundDecisionStatus = {
 				if (ballot.audit) {
 
 					if (ballot.forfeit) {
-						already += `${label[ballot.side]} FFT`;
+						already += `${label[ballot.side]} Fft`;
 					} else if (ballot.bye) {
-						already += `${label[ballot.side]} BYE`;
+						already += `${label[ballot.side]} Bye`;
 					} else {
 						already += `${label[ballot.side]} NONE`;
 					}
