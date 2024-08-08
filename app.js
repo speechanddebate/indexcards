@@ -95,15 +95,7 @@ app.use('/v1/public/search', searchLimiter);
 // Enable CORS Access, hopefully in a way that means I don't
 // have to fight with it ever again.
 const corsOptions = {
-	origin : [
-		'https://www.tabroom.com',
-		'https://static.tabroom.com',
-		'http://old.dev.tabroom.com',
-		'http://new.dev.tabroom.com',
-		'http://old.staging.tabroom.com',
-		'http://new.staging.tabroom.com',
-		'https://tabweb1',
-	],
+	origin : config.CORS_ORIGINS,
 	optionsSuccessStatus : 204,
 	credentials          : true,
 };
