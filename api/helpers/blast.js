@@ -84,11 +84,12 @@ export const webBlast = async (inputData) => {
 	const recipients = await db.sequelize.query(`
 		select
 			person.id, person.first, person.last, person.no_email,
-			push_notify.value
-		from person, person_setting push_notify
+			session.push_notify
+		from person, session
 		where person.id IN (:personIds)
-			and person.id = push_notify.person
-			and push_notify.tag = 'push_notify'
+			and person.id = session.person
+			and session.push_notify is NOT NULL
+			and session.last_access > DATE_SUB(NOW(), INTERVAL 7 DAY)
 	`, {
 		replacements: { personIds: inputData.ids },
 		type: db.sequelize.QueryTypes.SELECT,
@@ -131,7 +132,7 @@ export const webBlast = async (inputData) => {
 	if (targetIds && targetIds.length > 0) {
 
 		const notification = {
-			app_id          : config.ONE_SIGNAL.app_id,
+			app_id          : config.ONESIGNAL.appId,
 			name            : inputData.sender || 'Tournament Blast',
 			url 		    : inputData.url || 'https://www.tabroom.com/user/home.mhtml',
 			contents        : { en: inputData.text },
@@ -147,7 +148,7 @@ export const webBlast = async (inputData) => {
 			notification,
 			{
 				headers : {
-					Authorization  : `Basic ${config.ONE_SIGNAL.appKey}`,
+					Authorization  : `Basic ${config.ONESIGNAL.appKey}`,
 					'Content-Type' : 'application/json',
 					Accept         : 'application/json',
 				},
