@@ -60,16 +60,13 @@ export const auth = async (req) => {
 				realname = `${session.Su.first} ${session.Su.last} as ${realname}`;
 
 				session = {
-					id          : session.id,
 					person      : session.Person.id,
 					site_admin  : session.Person.site_admin,
 					email       : session.Person.email,
 					name        : realname,
+					id          : session.id,
 					su          : session.Su.id,
-					defaults    : session.defaults,
-					geoip       : session.geoip,
-					agent       : session.agent_data,
-					push_notify : session.push_notify,
+					...session.get({ raw: true }),
 				};
 
 				session.settings = await getSettings(
@@ -92,10 +89,7 @@ export const auth = async (req) => {
 					site_admin  : session.Person.site_admin,
 					email       : session.Person.email,
 					name        : realname,
-					defaults    : session.defaults,
-					geoip       : session.geoip,
-					agent       : session.agent_data,
-					push_notify : session.push_notify,
+					...session.get({ raw: true }),
 				};
 
 				session.settings = await getSettings(
