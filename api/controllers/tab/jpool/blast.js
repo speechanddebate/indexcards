@@ -89,8 +89,9 @@ export const blastJudges = {
 		const fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
 
 		const blastResponse = await notify({
-			ids  : jpoolJudgeArray,
-			text : req.body.message,
+			ids     : jpoolJudgeArray,
+			text    : req.body.message,
+			subject : req.body.subject || `Message to ${jpool.name} judges`,
 			from,
 			fromAddress,
 		});

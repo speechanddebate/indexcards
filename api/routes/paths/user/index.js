@@ -3,7 +3,6 @@
 // account functions.
 import login from '../../../controllers/user/account/login'; // Except this one shouldn't require a logged in user or key
 import getProfile from '../../../controllers/user/account/getProfile';
-import ipLocation from '../../../controllers/user/account/ipLocation';
 import acceptPayPal from '../../../controllers/user/enter/acceptPayPal';
 import processAuthorizeNet from '../../../controllers/user/enter/processAuthorizeNet';
 import { enablePushNotifications, disablePushNotifications } from '../../../controllers/user/account/setNotifications.js';
@@ -15,7 +14,6 @@ export default [
 	{ path : '/login'                       , module : login }                    ,
 	{ path : '/user/profile'                , module : getProfile }               ,
 	{ path : '/user/profile/{person_id}'    , module : getProfile }               ,
-	{ path : '/user/iplocation/{ipAddress}' , module : ipLocation }               ,
 	{ path : '/user/enter/paypal'           , module : acceptPayPal }             ,
 	{ path : '/user/enter/authorize'        , module : processAuthorizeNet }      ,
 	{ path : '/user/push/enable'            , module : enablePushNotifications }  ,
