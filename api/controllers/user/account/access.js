@@ -10,10 +10,7 @@ export const updateLastAccess = {
 		const now  = new Date();
 		const then = now.setDate(now.getDate() - 1);
 
-		console.log(`Last is ${last}`);
-		console.log(`Yesterday is is ${then}`);
-
-		if (last < then) {
+		if ( Number.isNaN(last) || last < then) {
 			await req.db.sequelize.query(`
 				update session set last_access = NOW()
 				where session.id = :sessionId
