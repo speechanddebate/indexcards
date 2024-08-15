@@ -27,7 +27,7 @@ export const enablePushNotifications = {
 		};
 
 		if (!req.session?.push_notify
-			|| req.session?.push_notify?.id !== currentSubscription.id
+			|| req.session?.push_notify !== currentSubscription.id
 		) {
 			await db.session.update(
 				{ push_notify : currentSubscription.id },
