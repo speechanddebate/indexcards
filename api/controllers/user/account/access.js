@@ -18,7 +18,6 @@ export const updateLastAccess = {
 				replacements: { sessionId: req.session.id },
 				type: req.db.sequelize.QueryTypes.UPDATE,
 			});
-			console.log(`Updated the last access datestamp for ${req.session.id} user ${req.session.person}`);
 		}
 
 		return res.status(200).json('OK');
