@@ -26,14 +26,11 @@ export const enablePushNotifications = {
 			enabled : oneSignalData.currentSubscription?.optIn,
 		};
 
-		// Update this session with the active push notification signal
-		console.log(currentSubscription);
-
 		if (!req.session?.push_notify
 			|| req.session?.push_notify?.id !== currentSubscription.id
 		) {
 			await db.session.update(
-				{ push_notify : currentSubscription },
+				{ push_notify : currentSubscription.id },
 				{ where: { id : req.session.id } }
 			);
 		}
