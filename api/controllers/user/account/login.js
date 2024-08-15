@@ -17,7 +17,7 @@ const login = {
 			],
 		});
 
-		if (!person || typeof person !== 'object' || !person.id) {
+		if (!person || typeof person !== 'object' || !person.id || !person.password) {
 			return res.status(400).json({ error: 'No user found for username' });
 		}
 
