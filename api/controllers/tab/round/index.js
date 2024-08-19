@@ -180,7 +180,7 @@ export const roundDecisionStatus = {
 				console.log(ballot);
 			}
 
-			if (!ballot.judge) {
+			if (!ballot.judge && !ballot.pbye) {
 
 				round.panels[ballot.panel] = round.panels[ballot.panel] || 0;
 
@@ -253,6 +253,7 @@ export const roundDecisionStatus = {
 					if (judge.text) {
 						judge.text += `/`;
 					}
+					round.panels[ballot.panel] = 10000;
 					judge.text += `Bye`;
 					judge.class = 'graytext semibold';
 				} else if (ballot.forfeit) {
@@ -267,6 +268,7 @@ export const roundDecisionStatus = {
 				} else if (ballot.chair) {
 					judge.class = 'fa fa-sm fa-star greentext';
 				}
+
 			} else if (ballot.pbye) {
 				round.panels[ballot.panel] = 10000;
 				judge.text = 'BYE';
