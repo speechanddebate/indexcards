@@ -144,7 +144,7 @@ export const webBlast = async (inputData) => {
 		};
 
 		await axios.post(
-			'https://onesignal.com/api/v1/notifications',
+			`${config.ONESIGNAL.API_URL}/notifications`,
 			notification,
 			{
 				headers : {

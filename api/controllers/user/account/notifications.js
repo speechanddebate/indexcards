@@ -97,7 +97,7 @@ export const disablePushNotifications = {
 
 		if (req.session?.id) {
 
-			const pushNotify = JSON.parse(req.session.push_notify);
+			const pushNotify = req.session.push_notify;
 
 			await db.session.update({ push_notify: null }, {
 				where: {
@@ -107,7 +107,7 @@ export const disablePushNotifications = {
 
 			res.status(200).json({
 				error   : false,
-				message : `Invalid subscription ${pushNotify?.id} removed from session ${req.session.id}`,
+				message : `Invalid subscription ${pushNotify} removed from session ${req.session.id}`,
 			});
 
 		} else {
