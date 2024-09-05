@@ -27,6 +27,8 @@ const checkServerDeployments = async () => {
 			},
 		);
 
+		console.log(linodeReply.status);
+
 		if (parseInt(linodeReply.status) === 404) {
 
 			// This LinodeID does not correspond to an actual machine
