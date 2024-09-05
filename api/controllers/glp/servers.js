@@ -243,8 +243,9 @@ export const changeInstanceCount = {
 				}
 
 			} catch (err) {
-				console.log(`Machine creation ${hostname} failed with response code ${err.response.status} ${err.response.statusText} and errors`);
+				console.log(`Machine creation ${hostname} failed with response code ${err.response?.status} ${err.response?.statusText} and errors`);
 				console.log(err.response?.data?.errors);
+				console.log(err.response);
 			}
 
 			serialNumber++;
