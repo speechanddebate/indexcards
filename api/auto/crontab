@@ -1,8 +1,12 @@
 NODE_ENV=production
 TZ=UTC
+
+# Monitoring of server deployment status
+* * * * * /usr/local/bin/node /indexcards/api/auto/serverStatus.js >> /var/log/cron.log 2>&1
+
 # Automatic publication of round results
-* * * * * (cd /indexcards; /usr/local/bin/node /indexcards/api/auto/publishResults.js) >> /var/log/cron.log 2>&1
-* * * * * (cd /indexcards; /usr/local/bin/node /indexcards/api/auto/autoBlastPairings.js) >> /var/log/cron.log 2>&1
+* * * * * /usr/local/bin/node /indexcards/api/auto/publishResults.js >> /var/log/cron.log 2>&1
+* * * * * /usr/local/bin/node /indexcards/api/auto/autoBlastPairings.js >> /var/log/cron.log 2>&1
 
 # Clear out old messages from Tabroom inboxes
 15 9 * * * /usr/local/bin/node /indexcards/api/auto/clearInboxes.js >> /var/log/cron.log 2>&1
