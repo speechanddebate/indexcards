@@ -9,6 +9,10 @@ const server = (sequelize, DataTypes) => {
 			type      : DataTypes.ENUM('built', 'deploy', 'ready'),
 			allowNull : true,
 		},
+		linode_id : {
+			type      : DataTypes.INTEGER,
+			allowNull : true,
+		},
 		created_at: {
 			type      : DataTypes.DATE,
 			allowNull : true,

@@ -16,9 +16,6 @@ const checkServerDeployments = async () => {
 
 	for (const server of servers) {
 
-		console.log(`I am testing server ${server.hostname} with status ${server.status}`);
-		console.log(`Going to hit ${config.LINODE.API_URL}/instances/${server.linode_id}`);
-
 		const linodeReply = await axios.get(
 			`${config.LINODE.API_URL}/instances/${server.linode_id}`,
 			{
@@ -31,13 +28,8 @@ const checkServerDeployments = async () => {
 		);
 
 		const currentStatus = linodeReply.data;
-		console.log(`Current status for ${server.hostname} is ${currentStatus.status}`);
 
-		if (currentStatus.status === 'provisioning'
-			&& server.status !== 'provisioning'
-		) {
-
-			console.log(`I am updating the query here to set status to provisioning for linode ${server.linode_id}`);
+		if (currentStatus.status === 'provisioning' && server.status !== 'provisioning') {
 
 			await db.sequelize.query(`
 				update server set status = 'provisioning' where linode_id = :linodeId
@@ -51,8 +43,6 @@ const checkServerDeployments = async () => {
 
 		if (currentStatus.status === 'running') {
 
-			console.log(`Updating machine with linode ${server.linode_id} to status deploying`);
-
 			await db.sequelize.query(`
 				update server set status = 'deploying' where linode_id = :linodeId
 			`, {
@@ -63,7 +53,6 @@ const checkServerDeployments = async () => {
 			});
 		}
 
-		console.log(`Finished`);
 	}
 
 	return `Server status updated for ${servers.length} machines`;
