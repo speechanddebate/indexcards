@@ -225,7 +225,12 @@ export const changeInstanceCount = {
 					},
 				);
 
+				console.log(creationReply);
+				console.log(creationReply.status);
+
 				if (parseInt(creationReply.status) === 200) {
+
+					const data = creationReply.data;
 
 					await req.db.server.create({
 						hostname,
@@ -234,7 +239,6 @@ export const changeInstanceCount = {
 						linode_id  : data.id,
 					});
 
-					const data = creationReply.data;
 					resultMessages.push('');
 					resultMessages.push(`Machine ${hostname} creation request successful.`);
 					resultMessages.push(`Label ${data.label} IPv4 ${data.ipv4[0]} IPv6 ${data.ipv6}`);
@@ -244,8 +248,7 @@ export const changeInstanceCount = {
 
 			} catch (err) {
 				console.log(`Machine creation ${hostname} failed with response code ${err.response?.status} ${err.response?.statusText} and errors`);
-				console.log(err.response?.data?.errors);
-				console.log(err.response);
+				console.log(err);
 			}
 
 			serialNumber++;
