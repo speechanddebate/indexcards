@@ -9,7 +9,7 @@ const checkServerDeployments = async () => {
 			server.id, server.linode_id, server.status,
 			server.created_at, server.hostname
 		from server
-			where server.status NOT IN ('running', 'deploying')
+			where server.status NOT IN ('running', 'deploying', 'installing')
 	`, {
 		type: db.sequelize.QueryTypes.SELECT,
 	});
