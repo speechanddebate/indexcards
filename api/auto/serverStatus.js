@@ -27,30 +27,48 @@ const checkServerDeployments = async () => {
 			},
 		);
 
-		const currentStatus = linodeReply.data;
+		if (parseInt(linodeReply.status) === 404) {
 
-		if (currentStatus.status === 'provisioning' && server.status !== 'provisioning') {
+			// This LinodeID does not correspond to an actual machine
 
 			await db.sequelize.query(`
-				update server set status = 'provisioning' where linode_id = :linodeId
+				delete * from server where linode_id = :linodeId
 			`, {
 				replacements : {
 					linodeId : server.linode_id,
 				},
-				type : db.sequelize.QueryTypes.UPDATE,
+				type : db.sequelize.QueryTypes.DELETE,
 			});
+
 		}
 
-		if (currentStatus.status === 'running') {
+		if (parseInt(linodeReply.status) === 200) {
 
-			await db.sequelize.query(`
-				update server set status = 'deploying' where linode_id = :linodeId
-			`, {
-				replacements : {
-					linodeId : server.linode_id,
-				},
-				type : db.sequelize.QueryTypes.UPDATE,
-			});
+			const currentStatus = linodeReply.data;
+
+			if (currentStatus.status === 'provisioning' && server.status !== 'provisioning') {
+
+				await db.sequelize.query(`
+					update server set status = 'provisioning' where linode_id = :linodeId
+				`, {
+					replacements : {
+						linodeId : server.linode_id,
+					},
+					type : db.sequelize.QueryTypes.UPDATE,
+				});
+			}
+
+			if (currentStatus.status === 'running') {
+
+				await db.sequelize.query(`
+					update server set status = 'deploying' where linode_id = :linodeId
+				`, {
+					replacements : {
+						linodeId : server.linode_id,
+					},
+					type : db.sequelize.QueryTypes.UPDATE,
+				});
+			}
 		}
 
 	}
