@@ -1,3 +1,4 @@
+/* eslint-disable no-continue */
 export const circuitQualifiers = {
 	POST: async (req, res) => {
 		const db = req.db;
@@ -83,7 +84,7 @@ export const saveEventResult = async (db, eventId) => {
 		const allRules = JSON.parse(event.circuitRules);
 		const eventRules = allRules[event.rulesetId];
 
-		if (!eventRules) {
+		if (!eventRules || !eventRules.rulesets) {
 			return;
 		}
 
@@ -97,28 +98,28 @@ export const saveEventResult = async (db, eventId) => {
 
 		let qualRuleSet = {};
 
-		Object.keys(eventRules.rulesets).forEach( async (rulesetTag) => {
+		for (const rulesetTag of  Object.keys(eventRules.rulesets)) {
 
 			const ruleset = eventRules.rulesets[rulesetTag];
 
 			// I'm not over the entry threshold
 			if (event.entryCount < ruleset.entries) {
-				return;
+				continue;
 			}
 
 			// I'm not over the school threshold
 			if (event.schoolCount < ruleset.schools) {
-				return;
+				continue;
 			}
 
 			// I'm over a different, higher threshold already
 			if (qualRuleSet && Object.keys(qualRuleSet).length > 0) {
 				if ( ruleset.schools > 0 && (event.schoolCount - ruleset.schools) > margins.schools) {
-					return;
+					continue;
 				}
 
 				if ( ruleset.entries > 0 && (event.entryCount - ruleset.entries) > margins.entries) {
-					return;
+					continue;
 				}
 			}
 
@@ -131,7 +132,7 @@ export const saveEventResult = async (db, eventId) => {
 			if (ruleset.entries > 0) {
 				margins.entries = event.entryCount - ruleset.entries;
 			}
-		});
+		}
 
 		if (!qualRuleSet || Object.keys(qualRuleSet).length < 1) {
 			return;
@@ -182,7 +183,7 @@ export const saveEventResult = async (db, eventId) => {
 		});
 
 		if (finalResults.length < 1) {
-			return 'This event does not have a final results sheet';
+			return;
 		}
 
 		const entryByRank = {};
