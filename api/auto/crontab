@@ -2,23 +2,23 @@ NODE_ENV=production
 TZ=UTC
 
 # Monitoring of server deployment status
-* * * * * /usr/local/bin/node /indexcards/api/auto/serverStatus.js >> /var/log/cron.log 2>&1
-*/10 * * * * /usr/local/bin/node /indexcards/api/auto/serverPolling.js >> /var/log/cron.log 2>&1
+* * * * * cd indexcards && /usr/local/bin/node /indexcards/api/auto/serverStatus.js >> /var/log/cron.log 2>&1
+*/10 * * * * cd indexcards && /usr/local/bin/node /indexcards/api/auto/serverPolling.js >> /var/log/cron.log 2>&1
 
 # Automatic publication of round results
-* * * * * /usr/local/bin/node /indexcards/api/auto/publishResults.js >> /var/log/cron.log 2>&1
-* * * * * /usr/local/bin/node /indexcards/api/auto/autoBlastPairings.js >> /var/log/cron.log 2>&1
+* * * * * cd /indexcards && /usr/local/bin/node /indexcards/api/auto/publishResults.js >> /var/log/cron.log 2>&1
+* * * * * cd /indexcards && /usr/local/bin/node /indexcards/api/auto/autoBlastPairings.js >> /var/log/cron.log 2>&1
 
 # Clear out old messages from Tabroom inboxes
-15 9 * * * /usr/local/bin/node /indexcards/api/auto/clearInboxes.js >> /var/log/cron.log 2>&1
+15 9 * * * cd indexcards && /usr/local/bin/node /indexcards/api/auto/clearInboxes.js >> /var/log/cron.log 2>&1
 
 # Clear out old sharenames once a week to prevent name collisions
-15 8 * * 4 /usr/local/bin/node /indexcards/api/auto/clearShareRooms.js >> /var/log/cron.log 2>&1
-30 8 * * 4 /usr/local/bin/node /indexcards/api/auto/clearPaymentKeys.js >> /var/log/cron.log 2>&1
+15 8 * * 4 cd indexcards && /usr/local/bin/node /indexcards/api/auto/clearShareRooms.js >> /var/log/cron.log 2>&1
+30 8 * * 4 cd indexcards && /usr/local/bin/node /indexcards/api/auto/clearPaymentKeys.js >> /var/log/cron.log 2>&1
 
 # Synchronize Nats appearances because apparently people care
-30 8 * * 4 /usr/local/bin/node /indexcards/api/auto/natsAppearances.js >> /var/log/cron.log 2>&1
+30 8 * * 4 cd indexcards && /usr/local/bin/node /indexcards/api/auto/natsAppearances.js >> /var/log/cron.log 2>&1
 
 # NAUDL post to Salesforce
-15 3 * * * /usr/local/bin/node /indexcards/api/auto/naudl/chapters.js >> /var/log/cron.log 2>&1
-25 3 * * * /usr/local/bin/node /indexcards/api/auto/naudl/students.js >> /var/log/cron.log 2>&1
+15 3 * * * cd indexcards && /usr/local/bin/node /indexcards/api/auto/naudl/chapters.js >> /var/log/cron.log 2>&1
+25 3 * * * cd indexcards && /usr/local/bin/node /indexcards/api/auto/naudl/students.js >> /var/log/cron.log 2>&1
