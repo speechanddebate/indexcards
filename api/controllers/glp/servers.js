@@ -1,4 +1,5 @@
 import axios from 'axios';
+import notify from '../../helpers/blast.js';
 import config from '../../../config/config.js';
 import { errorLogger } from '../../helpers/logger.js';
 
@@ -21,6 +22,7 @@ export const getInstances = {
 
 			if (
 				machine.tags.includes('control')
+				|| machine.tags.includes('haproxy')
 				|| machine.tags.includes('tabroom-db')
 				|| machine.tags.includes('tabroom-replica')
 				|| machine.tags.includes(config.LINODE.WEBHOST_BASE)
@@ -53,6 +55,69 @@ export const getInstances = {
 	},
 };
 
+export const getTabroomUsage = {
+
+	GET: async (req, res) => {
+
+		const allStudents = await req.db.sequelize.query(`
+			select
+				count (distinct student.person)
+			from student, entry_student es, entry, event, tourn
+			where tourn.start < NOW()
+				and tourn.end > NOW()
+				and tourn.id = event.tourn
+				and event.id = entry.event
+				and entry.active = 1
+				and entry.id = es.entry
+				and es.student = student.id
+			group by student.id
+		`, {
+			type: req.db.sequelize.QueryTypes.SELECT,
+		});
+
+		const allJudges = await req.db.sequelize.query(`
+			select
+				count (distinct judge.person)
+			from judge, category, tourn
+			where tourn.start < NOW()
+				and tourn.end > NOW()
+				and tourn.id = category.tourn
+				and category.id = judge.category
+			group by judge.id
+		`, {
+			type: req.db.sequelize.QueryTypes.SELECT,
+		});
+
+		const tournamentCount = await req.db.sequelize.query(`
+			select
+				count (distinct tourn.id)
+			from tourn
+			where tourn.start < NOW()
+				and tourn.end > NOW()
+			group by tourn.id
+		`, {
+			type: req.db.sequelize.QueryTypes.SELECT,
+		});
+
+		const currentActiveUsers = await req.db.sequelize.query(`
+			select
+				count (distinct session.id)
+			from session
+				where session.last_access > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+			group by session.id
+		`, {
+			type: req.db.sequelize.QueryTypes.SELECT,
+		});
+
+		return res.status(200).json({
+			activeUsers : currentActiveUsers.length,
+			tournaments : tournamentCount.length,
+			judges      : allJudges.length,
+			students    : allStudents.length,
+		});
+	},
+};
+
 export const getInstanceStatus = {
 
 	GET: async (req, res) => {
@@ -61,6 +126,12 @@ export const getInstanceStatus = {
 		const existingMachines = await getInstances.GET(req, res);
 
 		const allStatus = {};
+
+		const tabwebs = existingMachines.filter(
+			machine => machine.tags.includes(config.LINODE.WEBHOST_BASE)
+		);
+
+		allStatus.tabwebCount = tabwebs.length;
 
 		for (const machine of existingMachines) {
 
@@ -72,6 +143,8 @@ export const getInstanceStatus = {
 				node_memory_MemAvailable_bytes : 'memory_available',
 				node_memory_SwapTotal_bytes    : 'swap_total',
 				node_memory_SwapFree_bytes     : 'swap_available',
+				node_time_seconds              : 'current_time',
+				node_boot_time_seconds         : 'last_boot_time',
 			};
 
 			try {
@@ -101,18 +174,17 @@ export const getInstanceStatus = {
 					} else {
 						machineStatus[loadValues[key]] = Number(splitme[2]);
 					}
-
 				}
+
+				machineStatus.uptime = (
+					parseFloat(machineStatus.current_time) - parseFloat(machineStatus.last_boot_time)
+				) / 60 / 60 / 24;
 
 				allStatus[machine.label] = machineStatus;
 
 			} catch (err) {
-				errorLogger.info(`The Prometheus scanner done messed up and returned`);
-				errorLogger.info(err.name);
-				errorLogger.info(err.code);
-				errorLogger.info(err.message);
+				errorLogger.error(`Status error returned ${err.message} ${err.code} on machine ${err.name}`);
 			}
-
 		}
 
 		return res.status(200).json(allStatus);
@@ -133,13 +205,17 @@ export const getTabroomInstance = {
 			},
 		);
 
+		if (req.returnToSender) {
+			return linodeData.data;
+		}
+
 		return res.status(200).json(linodeData.data);
 	},
 };
 
 export const changeInstanceCount = {
 
-	GET: async (req, res) => {
+	POST: async (req, res) => {
 
 		req.returnToSender = true;
 
@@ -155,14 +231,18 @@ export const changeInstanceCount = {
 
 		const hostnames = tabwebs.map( (machine) => machine.label );
 
-		const target = parseInt(req.params.target) || 0;
+		const target = parseInt(req.params.target) || parseInt(req.body.target) || 0;
 
-		if (target > 8) {
-			return res.status(401).json(`This process only allows the creation of 8 machines at one time.`);
+		if ((target + tabwebs.length) > 16)  {
+			return res.status(401).json({
+				message: `This process only allows for 16 machines to exist at one time.`,
+			});
 		}
 
 		if (target < 1) {
-			return res.status(401).json(`No count target sent; nothing done because I cannot make ${target} machines`);
+			return res.status(401).json({
+				message: `No count target sent; nothing done because I cannot make ${target} machines`,
+			});
 		}
 
 		// Find the next serial number needed.  Tabweb1 should always exist.
@@ -174,8 +254,6 @@ export const changeInstanceCount = {
 
 		const resultMessages = [];
 		const limit = serialNumber + target;
-		console.log(`Serial number is ${serialNumber}.  Target ${target}.  Limit is therefore ${limit}!`);
-		console.log(`Control ID is ${control[0].linode_id}`);
 
 		while (serialNumber < limit) {
 
@@ -225,9 +303,6 @@ export const changeInstanceCount = {
 					},
 				);
 
-				console.log(creationReply);
-				console.log(creationReply.status);
-
 				if (parseInt(creationReply.status) === 200) {
 
 					const data = creationReply.data;
@@ -247,14 +322,28 @@ export const changeInstanceCount = {
 				}
 
 			} catch (err) {
-				console.log(`Machine creation ${hostname} failed with response code ${err.response?.status} ${err.response?.statusText} and errors`);
-				console.log(err);
+				return res.status(401).json({
+					message: `Machine creation ${hostname} failed with response code ${err.response?.status} ${err.response?.statusText} and errors`,
+				});
 			}
-
 			serialNumber++;
 		}
 
-		return res.status(200).json(resultMessages);
+		await req.db.changeLog.create({
+			person     : req.session.su || req.session.person,
+			tag        : 'sitewide',
+			created_at : new Date(),
+			description: resultMessages.join(),
+		});
+
+		const emailResponse = await notifyCloudAdmins(req, resultMessages.join());
+
+		const response = {
+			emailResponse,
+			message : resultMessages.join(),
+		};
+
+		return res.status(200).json(response);
 	},
 
 	DELETE: async (req, res) => {
@@ -274,10 +363,13 @@ export const changeInstanceCount = {
 		if (serialNumber < 3) {
 			let reply = `You may only shrink the Tabroom instance footprint to a minimum of 2 machines.`;
 			reply += `Deleting ${target} would leave me with ${hostnames.length - target}.`;
-			return res.status(401).json(reply);
+			return res.status(401).json({
+				message: reply,
+			});
 		}
 
 		const resultMessages = [];
+		const destroyMe = [];
 
 		while (hostnames.includes(`${config.LINODE.WEBHOST_BASE}${serialNumber}`)) {
 
@@ -309,6 +401,8 @@ export const changeInstanceCount = {
 						resultMessages.push(`Linode ID ${machine.linode_id} UUID ${machine.uuid} terminating`);
 						resultMessages.push(deletionReply.data);
 
+						destroyMe.push(hostname);
+
 						await req.db.sequelize.query(`delete from server where linode_id = :linodeId`,
 							{
 								replacements: { linodeId: machine.linode_id },
@@ -318,18 +412,119 @@ export const changeInstanceCount = {
 					}
 
 				} catch (err) {
-					console.log(`Deleting ${hostname} failed with response code ${err.response.status}
-						${err.response.statusText} and errors: `);
-					console.log(err.response?.data?.errors);
+
+					return res.status(401).json({
+						message: `Deleting ${hostname} failed with response code ${err.response.status} ${err.response.statusText} and errors ${err.response?.data?.errors}`,
+					});
 				}
 			}
-
 			serialNumber++;
 		}
 
-		return res.status(200).json(resultMessages);
-	},
+		await req.db.changeLog.create({
+			person     : req.session.su || req.session.person,
+			tag        : 'sitewide',
+			created_at : new Date(),
+			description: resultMessages.join(),
+		});
 
+		const emailResponse = await notifyCloudAdmins(req, resultMessages.join());
+
+		const response = {
+			delete : destroyMe,
+			emailResponse,
+			message: resultMessages.join(),
+		};
+
+		return res.status(200).json(response);
+	},
+};
+
+export const rebootInstance = {
+
+	POST: async (req, res) => {
+
+		req.returnToSender = true;
+		const machine = await getTabroomInstance.GET(req, res);
+
+		if (!machine || !machine?.tags?.includes(config.LINODE.WEBHOST_BASE)) {
+			return res.status(200).json({
+				message: `Only active tabweb instances can be rebooted with this interface.  Please try again with another host.`,
+			});
+		}
+
+		const resultMessages = [];
+
+		try {
+
+			const rebootReply = await axios.post(
+				`${config.LINODE.API_URL}/instances/${machine.id}/reboot`,
+				{},
+				{
+					headers : {
+						Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
+						'Content-Type' : 'application/json',
+						Accept         : 'application/json',
+					},
+				},
+			);
+
+			if (parseInt(rebootReply.status) === 200) {
+				resultMessages.push(`Machine ${machine.label} reboot request successful. This operation will take a few minutes.`);
+			}
+
+		} catch (err) {
+
+			errorLogger.error(err.response.data);
+
+			return res.status(200).json({
+				message: `Deleting ${machine.label} failed with response code ${err.response.status} ${err.response.statusText} and errors ${err.response?.data?.errors}`,
+			});
+		}
+
+		await req.db.changeLog.create({
+			person     : req.session.su || req.session.person,
+			tag        : 'sitewide',
+			created_at : new Date(),
+			description: resultMessages.join(),
+		});
+
+		await notifyCloudAdmins(req, resultMessages.join());
+
+		return res.status(200).json({
+			message: resultMessages.join(),
+		});
+	},
+};
+
+const notifyCloudAdmins = async (req, log) => {
+
+	const cloudAdmins = await req.db.sequelize.query(`
+		select distinct person.id
+			from person, person_setting ps
+		where person.id = ps.person
+			and ps.tag = :tag
+	`, {
+		replacements: { tag: 'system_administrators' },
+		type: req.db.sequelize.QueryTypes.SELECT,
+	});
+
+	let sender = '';
+
+	if (req.session.su) {
+		sender = await req.db.summon(req.db.person, req.session.su);
+	} else {
+		sender = await req.db.summon(req.db.person, req.session.person);
+	}
+
+	const emailResponse = await notify({
+		ids     : cloudAdmins,
+		text    : log,
+		from    : `${sender.first} ${sender.last} <${sender.email}>`,
+		subject : `Tabroom Cloud Server Change`,
+	});
+
+	return emailResponse;
 };
 
 export default getInstances;
