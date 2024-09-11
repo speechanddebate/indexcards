@@ -24,8 +24,6 @@ const checkServerExistence = async () => {
 	}
 
 	if (activeMachines.length > 1) {
-
-		console.log(`Deleting any machines that are not ${activeMachines}`);
 		await db.sequelize.query(`
 			delete from server where linode_id NOT IN (:activeMachines)
 		`, {
@@ -35,7 +33,6 @@ const checkServerExistence = async () => {
 	}
 
 	console.log(`Server existence checked. ${activeMachines.length} actually exist.`);
-
 };
 
 await checkServerExistence();

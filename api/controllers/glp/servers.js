@@ -94,6 +94,7 @@ export const getTabroomUsage = {
 			from tourn
 			where tourn.start < NOW()
 				and tourn.end > NOW()
+				and tourn.hidden != 1
 			group by tourn.id
 		`, {
 			type: req.db.sequelize.QueryTypes.SELECT,
