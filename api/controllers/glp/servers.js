@@ -506,7 +506,7 @@ const notifyCloudAdmins = async (req, log) => {
 		where person.id = ps.person
 			and ps.tag = :tag
 	`, {
-		replacements: { tag: 'system_administrators' },
+		replacements: { tag: 'system_administrator' },
 		type: req.db.sequelize.QueryTypes.SELECT,
 	});
 
@@ -518,12 +518,20 @@ const notifyCloudAdmins = async (req, log) => {
 		sender = await req.db.summon(req.db.person, req.session.person);
 	}
 
-	const emailResponse = await notify({
+	const message = {
 		ids     : cloudAdmins,
 		text    : log,
 		from    : `${sender.first} ${sender.last} <${sender.email}>`,
 		subject : `Tabroom Cloud Server Change`,
-	});
+	};
+
+	const emailResponse = await notify(message);
+
+	console.log(`Notified the admins with message object`);
+	console.log(message);
+
+	console.log(`Response returned was`);
+	console.log(emailResponse);
 
 	return emailResponse;
 };
