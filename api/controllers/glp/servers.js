@@ -316,10 +316,10 @@ export const changeInstanceCount = {
 					});
 
 					resultMessages.push('');
-					resultMessages.push(`Machine ${hostname} creation request successful.`);
-					resultMessages.push(`Label ${data.label} IPv4 ${data.ipv4[0]} IPv6 ${data.ipv6}`);
-					resultMessages.push(`Linode ID ${data.id} UUID ${data.host_uuid}`);
-					resultMessages.push(`Machine now queued for ansible deployment`);
+					resultMessages.push(`Machine ${hostname} creation request successful.\n`);
+					resultMessages.push(`Label ${data.label} IPv4 ${data.ipv4[0]} IPv6 ${data.ipv6}\n`);
+					resultMessages.push(`Linode ID ${data.id} UUID ${data.host_uuid}\n`);
+					resultMessages.push(`Machine now queued for ansible deployment\n`);
 				}
 
 			} catch (err) {
@@ -398,8 +398,8 @@ export const changeInstanceCount = {
 
 					if (parseInt(deletionReply.status) === 200) {
 						resultMessages.push('');
-						resultMessages.push(`Machine ${hostname} deletion request successful.`);
-						resultMessages.push(`Linode ID ${machine.linode_id} UUID ${machine.uuid} terminating`);
+						resultMessages.push(`Machine ${hostname} deletion request successful.\n`);
+						resultMessages.push(`Linode ID ${machine.linode_id} UUID ${machine.uuid} terminating\n`);
 						resultMessages.push(deletionReply.data);
 
 						destroyMe.push(hostname);
@@ -518,21 +518,16 @@ const notifyCloudAdmins = async (req, log) => {
 		sender = await req.db.summon(req.db.person, req.session.person);
 	}
 
+	const adminIds = cloudAdmins.map( item => item.id );
+
 	const message = {
-		ids     : cloudAdmins,
+		ids     : adminIds,
 		text    : log,
 		from    : `${sender.first} ${sender.last} <${sender.email}>`,
 		subject : `Tabroom Cloud Server Change`,
 	};
 
 	const emailResponse = await notify(message);
-
-	console.log(`Notified the admins with message object`);
-	console.log(message);
-
-	console.log(`Response returned was`);
-	console.log(emailResponse);
-
 	return emailResponse;
 };
 
