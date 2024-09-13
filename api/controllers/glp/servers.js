@@ -134,6 +134,47 @@ export const getInstanceStatus = {
 
 		allStatus.tabwebCount = tabwebs.length;
 
+		let haproxyData = {};
+		const haproxyKey = {};
+
+		try {
+			haproxyData = await axios.get(
+				`http://haproxy.${config.INTERNAL_DOMAIN}:9000/;json`,
+			);
+		} catch (err) {
+			console.log(`haproxy returned error`);
+			console.log(err);
+			return;
+		}
+
+		const parsedProxyData = {};
+
+		// HAproxy's export format is so convoluted I swear Jon Bruschke designed it.
+		// Parse it down to a key value store organized by host that an actual human might find useful.
+
+		for (const proxy of haproxyData.data) {
+
+			for (const row of proxy) {
+
+				if (row.id > 0 && row.value?.value && row.field?.name) {
+
+					const rowId = `${row.proxyId}-${row.id}`;
+
+					if (typeof parsedProxyData[rowId] === 'undefined') {
+						parsedProxyData[rowId] = {
+							rowId,
+						};
+					}
+
+					parsedProxyData[rowId][row.field.name] = row.value.value;
+
+					if (row.field?.name === 'svname') {
+						haproxyKey[row.value.value] = rowId;
+					}
+				}
+			}
+		}
+
 		for (const machine of existingMachines) {
 
 			const loadValues = {
@@ -154,13 +195,8 @@ export const getInstanceStatus = {
 					`http://${machine.label}.${config.INTERNAL_DOMAIN}:9100/metrics`,
 				);
 
-				// const haproxyData = await axios.get(
-				// 	`http://haproxy.${config.INTERNAL_DOMAIN}:9000;json`,
-				// );
-
 				const outputArray = outputText.data.split('\n');
 				const filteredOutput = outputArray.filter( line => !line.includes(`#`) );
-
 				const machineStatus = {};
 
 				for (const key of Object.keys(loadValues)) {
@@ -181,13 +217,64 @@ export const getInstanceStatus = {
 					parseFloat(machineStatus.current_time) - parseFloat(machineStatus.last_boot_time)
 				) / 60 / 60 / 24;
 
+				// Figure out the HAProxy round robin status of the expected containers on this machine
+
+				if (machine.tags.includes('tabweb')) {
+
+					const machineNumber = machine.label.replace(/\D/g,'');
+
+					for  (const tick of [1,2,3,4]) {
+
+						const masonHost = `mason${machineNumber}${tick}`;
+						const masonId = haproxyKey[masonHost];
+
+						if (!machineStatus.mason) {
+							// The day may come when I iterate this properly.  BUT IT IS NOT THIS DAY.
+							machineStatus.mason = {
+								1: {},
+								2: {},
+								3: {},
+								4: {},
+							};
+						}
+
+						machineStatus.mason[tick] = {
+							id          : masonId,
+							status      : parsedProxyData[masonId]?.status,
+							checkStatus : parsedProxyData[masonId]?.check_status,
+							checkCode   : parsedProxyData[masonId]?.check_code,
+							downtime    : parsedProxyData[masonId]?.downtime || 0,
+						};
+
+						const indexcardsHost = `indexcards${machineNumber}${tick}`;
+						const indexcardsId = haproxyKey[indexcardsHost];
+
+						if (!machineStatus.indexcards) {
+							// The day may come when I iterate this properly.  BUT IT IS NOT THIS DAY.
+							machineStatus.indexcards = {
+								1: {},
+								2: {},
+								3: {},
+								4: {},
+							};
+						}
+
+						machineStatus.indexcards[tick] = {
+							id          : indexcardsId,
+							status      : parsedProxyData[indexcardsId]?.status,
+							checkStatus : parsedProxyData[masonId]?.check_status,
+							checkCode   : parsedProxyData[masonId]?.check_code,
+							downtime    : parsedProxyData[masonId]?.downtime || 0,
+						};
+					}
+				}
+
 				allStatus[machine.label] = machineStatus;
 
 			} catch (err) {
 				errorLogger.error(`Status error returned ${err.message} ${err.code} on machine ${err.name}`);
 			}
 		}
-
 		return res.status(200).json(allStatus);
 	},
 };
