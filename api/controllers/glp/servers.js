@@ -63,7 +63,7 @@ export const getTabroomUsage = {
 			select
 				count (distinct student.person)
 			from student, entry_student es, entry, event, tourn
-			where tourn.start < NOW()
+			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > NOW()
 				and tourn.id = event.tourn
 				and event.id = entry.event
@@ -79,8 +79,8 @@ export const getTabroomUsage = {
 			select
 				count (distinct judge.person)
 			from judge, category, tourn
-			where tourn.start < NOW()
-				and tourn.end > NOW()
+			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+				and tourn.end > CURRENT_TIMESTAMP
 				and tourn.id = category.tourn
 				and category.id = judge.category
 			group by judge.id
@@ -92,8 +92,8 @@ export const getTabroomUsage = {
 			select
 				count (distinct tourn.id)
 			from tourn
-			where tourn.start < NOW()
-				and tourn.end > NOW()
+			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+				and tourn.end > CURRENT_TIMESTAMP
 				and tourn.hidden != 1
 			group by tourn.id
 		`, {
@@ -424,7 +424,7 @@ export const changeInstanceCount = {
 			description: resultMessages.join(),
 		});
 
-		const emailResponse = await notifyCloudAdmins(req, resultMessages.join());
+		const emailResponse = await notifyCloudAdmins(req, resultMessages.join(), `${target} Machines Added`);
 
 		const response = {
 			emailResponse,
@@ -516,7 +516,7 @@ export const changeInstanceCount = {
 			description: resultMessages.join(),
 		});
 
-		const emailResponse = await notifyCloudAdmins(req, resultMessages.join());
+		const emailResponse = await notifyCloudAdmins(req, resultMessages.join(), `${target} Machines Removed`);
 
 		const response = {
 			delete : destroyMe,
@@ -577,7 +577,7 @@ export const rebootInstance = {
 			description: resultMessages.join(),
 		});
 
-		await notifyCloudAdmins(req, resultMessages.join());
+		await notifyCloudAdmins(req, resultMessages.join(), `${machine.label} Rebooted`);
 
 		return res.status(200).json({
 			message: resultMessages.join(),
@@ -585,7 +585,7 @@ export const rebootInstance = {
 	},
 };
 
-const notifyCloudAdmins = async (req, log) => {
+const notifyCloudAdmins = async (req, log, subject) => {
 
 	const cloudAdmins = await req.db.sequelize.query(`
 		select distinct person.id
@@ -611,7 +611,7 @@ const notifyCloudAdmins = async (req, log) => {
 		ids     : adminIds,
 		text    : log,
 		from    : `${sender.first} ${sender.last} <${sender.email}>`,
-		subject : `Tabroom Cloud Server Change`,
+		subject : `Tabroom Cloud Change: ${subject}`,
 	};
 
 	const emailResponse = await notify(message);

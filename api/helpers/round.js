@@ -1,16 +1,14 @@
 // Common helper functions that attach to rounds & schematics
 import fetch from 'node-fetch';
-import db from './litedb.js';
 import { errorLogger } from './logger.js';
 import objectify from './objectify.js';
-import Panel from '../models/panel.js';
-import Ballot from '../models/ballot.js';
+import litedb from './litedb.js';
 
 // Takes a created round object with sections and writes it into the database
 
-export const writeRound = async (round) => {
+export const writeRound = async (db, round) => {
 
-	await Panel.destroy({ where: { round: round.id } });
+	await db.panel.destroy({ where: { round: round.id } });
 	let letter = 1;
 
 	if (round.type === 'debate') {
@@ -22,14 +20,14 @@ export const writeRound = async (round) => {
 
 			if (section.b) {
 
-				const panel = await Panel.create({
+				const panel = await db.panel.create({
 					round   : round.id,
 					letter,
 					flight  : 1,
 					bye     : 1,
 				});
 
-				const ballot = await Ballot.create({
+				const ballot = await db.ballot.create({
 					panel : panel.id,
 					side  : 1,
 					entry : section.b,
@@ -41,20 +39,20 @@ export const writeRound = async (round) => {
 
 			} else if (section.a && section.n) {
 
-				const panel = await Panel.create({
+				const panel = await db.panel.create({
 					round   : round.id,
 					letter,
 					flight  : 1,
 				});
 
-				const aff = await Ballot.create({
+				const aff = await db.ballot.create({
 					panel : panel.id,
 					side  : 1,
 					entry : section.a,
 					judge,
 				});
 
-				const neg = await Ballot.create({
+				const neg = await db.ballot.create({
 					panel : panel.id,
 					side  : 2,
 					entry : section.n,
@@ -72,14 +70,14 @@ export const writeRound = async (round) => {
 
 		round.sections.forEach( async (section) => {
 			if (section.length === 1) {
-				const panel = await Panel.create({
+				const panel = await db.panel.create({
 					round   : round.id,
 					letter,
 					flight  : 1,
 					bye     : 1,
 				});
 
-				const ballot = await Ballot.create({
+				const ballot = await db.db.ballot.create({
 					panel : panel.id,
 					side  : 1,
 					entry : section.b,
@@ -91,7 +89,7 @@ export const writeRound = async (round) => {
 
 			} else {
 
-				const panel = await Panel.create({
+				const panel = await db.panel.create({
 					round   : round.id,
 					letter,
 					flight  : 1,
@@ -101,7 +99,7 @@ export const writeRound = async (round) => {
 				panel.ballots = [];
 
 				section.forEach( async (entry) => {
-					const ballot = await Ballot.create({
+					const ballot = await db.ballot.create({
 						panel : panel.id,
 						side,
 						entry,
@@ -118,7 +116,7 @@ export const writeRound = async (round) => {
 
 		round.sections.forEach( async (section) => {
 
-			const panel = await Panel.create({
+			const panel = await db.panel.create({
 				round   : round.id,
 				letter,
 				flight  : 1,
@@ -128,7 +126,7 @@ export const writeRound = async (round) => {
 			panel.ballots = [];
 
 			section.forEach( async (entry) => {
-				const ballot = await Ballot.create({
+				const ballot = await db.ballot.create({
 					panel : panel.id,
 					speakerorder,
 					entry,
@@ -175,9 +173,9 @@ export const sidelocks = async (roundId) => {
 			and neg_bo.entry = neg_e.id
 	`;
 
-	const sideLocks = await db.sequelize.query(sidelockQuery, {
+	const sideLocks = await litedb.sequelize.query(sidelockQuery, {
 		replacements : { roundId },
-		type         : db.sequelize.QueryTypes.SELECT,
+		type         : litedb.sequelize.QueryTypes.SELECT,
 	});
 
 	if (sideLocks) {
@@ -187,7 +185,7 @@ export const sidelocks = async (roundId) => {
 
 export const flightTimes = async (roundId) => {
 
-	const roundSettings = await db.sequelize.query(`
+	const roundSettings = await litedb.sequelize.query(`
 		select
 			round.id, round.name, round.start_time, round.flighted, round.type,
 			tourn.tz,
@@ -214,7 +212,7 @@ export const flightTimes = async (roundId) => {
 			and event.tourn = tourn.id
 
 	`, { replacements: { roundId },
-		type: db.sequelize.QueryTypes.SELECT,
+		type: litedb.sequelize.QueryTypes.SELECT,
 	});
 
 	const round = roundSettings.shift();
