@@ -1,0 +1,19 @@
+version: '3'
+services:
+  indexcards:
+    container_name: indexcards-dev
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: indexcards-dev:latest
+    restart: always
+    ports:
+        - 8001:3000
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - /etc/tabroom/indexcards.config.dev.js:/indexcards/config/config.js:ro
+      - /var/log/indexcards:/var/log/indexcards:rw
+      - /var/lib/GeoIP:/geoip:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
