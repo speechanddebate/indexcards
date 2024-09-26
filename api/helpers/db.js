@@ -46,7 +46,7 @@ const promises = files
 		);
 	})
 	.map((file) => {
-		return import(join(process.cwd(), 'api/models', file));
+		return import(join(process.cwd(), `${config.CODE_PATH || '.'}/api/models`, file));
 	});
 
 const modules = await Promise.all(promises);
@@ -326,7 +326,6 @@ db.rpool.belongsToMany(db.round, { as: 'Rounds', foreignKey: 'rpool', through: '
 
 // Registration data
 db.school.hasMany(db.entry     , { as: 'Entries'    , foreignKey: 'school' });
-db.school.hasMany(db.rating    , { as: 'Ratings'    , foreignKey: 'school' });
 db.school.hasMany(db.fine      , { as: 'Fines'      , foreignKey: 'school' });
 db.school.hasMany(db.strike    , { as: 'Strikes'    , foreignKey: 'school' });
 db.school.hasMany(db.changeLog , { as: 'ChangeLogs' , foreignKey: 'school' });
@@ -478,7 +477,6 @@ db.invoice.belongsTo(db.school,  { as: 'School',    foreignKey: 'school' });
 
 // Pref Sheets
 db.rating.belongsTo(db.tourn,        { as: 'Tourn',        foreignKey: 'tourn' });
-db.rating.belongsTo(db.school,       { as: 'School',       foreignKey: 'school' });
 db.rating.belongsTo(db.entry,        { as: 'Entry',        foreignKey: 'entry' });
 db.rating.belongsTo(db.ratingTier,   { as: 'RatingTier',   foreignKey: 'rating_tier' });
 db.rating.belongsTo(db.judge,        { as: 'Judge',        foreignKey: 'judge' });

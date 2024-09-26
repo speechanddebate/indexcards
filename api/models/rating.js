@@ -1,13 +1,13 @@
 const rating = (sequelize, DataTypes) => {
 	return sequelize.define('rating', {
 		type : {
-			type: DataTypes.ENUM('school', 'entry', 'coach'),
+			type: DataTypes.ENUM('entry', 'coach'),
 			allowNull: true,
 		},
 		draft : {
-			type: DataTypes.BOOLEAN,
-			allowNull: false,
-			defaultValue: 0,
+			type         : DataTypes.BOOLEAN,
+			allowNull    : false,
+			defaultValue : 0,
 		},
 		entered : {
 			type: DataTypes.DATE,

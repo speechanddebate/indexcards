@@ -3,7 +3,6 @@ import helmet from 'helmet';
 import cors from 'cors';
 import rateLimiter from 'express-rate-limit';
 import pkg from 'uuid';
-const { v4: uuid } = pkg;
 import expressWinston from 'express-winston';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
@@ -33,6 +32,7 @@ import db from './api/helpers/db';
 
 import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger.js';
 
+const { v4: uuid } = pkg;
 const app = express();
 
 // Startup log message
@@ -107,7 +107,6 @@ app.use('/v1', cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ type: ['json', 'application/*json'], limit: '10mb' }));
 app.use(bodyParser.text({ type: '*/*', limit: '10mb' }));
-
 
 if (process.env.NODE_ENV === 'development') {
 	// Pretty print JSON in the dev environment

@@ -456,13 +456,16 @@ export const changeInstanceCount = {
 			});
 		}
 
-		const resultMessages = [];
+		const resultMessages = [
+			`${req.session.person.first} ${req.session.person.last} has initiated a cloud services change:`,
+			'\n',
+		];
+
 		const destroyMe = [];
 
 		while (hostnames.includes(`${config.LINODE.WEBHOST_BASE}${serialNumber}`)) {
 
 			const hostname = `${config.LINODE.WEBHOST_BASE}${serialNumber}`;
-
 			const matches = tabwebs.filter(
 				host => host.label === hostname
 			);

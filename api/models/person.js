@@ -62,23 +62,33 @@ const person = (sequelize, DataTypes) => {
 			type: DataTypes.STRING(63),
 			allowNull: true,
 		},
-		phone: {
-			type: DataTypes.STRING(31),
-			allowNull: true,
+		phone         : {
+			type      : DataTypes.STRING(31),
+			allowNull : true,
 		},
-		provider: {
-			type: DataTypes.STRING(63),
-			allowNull: true,
+		pass_timestamp : {
+			type       : DataTypes.DATE,
+			allowNull  : true,
 		},
 		site_admin: {
-			type: DataTypes.BOOLEAN,
-			allowNull: false,
-			defaultValue: '0',
+			type         : DataTypes.BOOLEAN,
+			allowNull    : false,
+			defaultValue : '0',
+
 		},
 		nsda: {
-			type: DataTypes.INTEGER(11),
-			allowNull: true,
-			unique: true,
+			type      : DataTypes.INTEGER(11),
+			allowNull : true,
+			unique    : true,
+		},
+		accesses: {
+			type         : DataTypes.INTEGER(11),
+			allowNull    : false,
+			defaultValue : '0',
+		},
+		last_access   : {
+			type      : DataTypes.DATE,
+			allowNull : true,
 		},
 	});
 };
