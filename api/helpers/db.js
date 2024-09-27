@@ -1,6 +1,5 @@
 import { Sequelize, DataTypes } from 'sequelize';
 import fs from 'fs';
-import { join } from 'path';
 import { errorLogger, debugLogger } from './logger.js';
 
 import config from '../../config/config.js';
@@ -36,7 +35,9 @@ errorsPlease.forEach((dingbat) => {
 
 // Iterate the models directory and load all models dynamically
 const models = {};
+
 const files = await fs.promises.readdir(`${config.CODE_PATH || '.'}/api/models`);
+
 const promises = files
 	.filter((file) => {
 		return (
@@ -46,7 +47,7 @@ const promises = files
 		);
 	})
 	.map((file) => {
-		return import(join(process.cwd(), `${config.CODE_PATH || '.'}/api/models`, file));
+		return import(`${config.CODE_PATH}/api/models/${file}`);
 	});
 
 const modules = await Promise.all(promises);
