@@ -238,6 +238,10 @@ export const inboxMessage = async (inputData) => {
 		created_at    : new Date(),
 	};
 
+	if (message.email) {
+		delete message.body;
+	}
+
 	const responses = [];
 	const errors = [];
 

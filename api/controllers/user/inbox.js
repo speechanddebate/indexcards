@@ -6,6 +6,7 @@ export const inboxList = {
 				message.*,
 				tourn.name tournName, tourn.id tournId, tourn.webname,
 				sender.first, sender.middle, sender.last, sender.email sender_mail,
+				email.content,
 				CONVERT_TZ(message.created_at, '+00:00', person.tz) as createdAt,
 				CONVERT_TZ(message.read_at, '+00:00', person.tz) as readAt,
 				( CASE
@@ -15,6 +16,7 @@ export const inboxList = {
 			from (message, person)
 				left join tourn on message.tourn = tourn.id
 				left join person sender on message.sender = sender.id
+				left join email on email.id = message.email
 			where message.person = :personId
 				and message.person = person.id
 				and message.deleted_at IS NULL

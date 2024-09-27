@@ -34,8 +34,6 @@ errorsPlease.forEach((dingbat) => {
 });
 
 // Iterate the models directory and load all models dynamically
-const models = {};
-
 const files = await fs.promises.readdir(`${config.CODE_PATH || '.'}/api/models`);
 
 const promises = files
@@ -43,6 +41,7 @@ const promises = files
 		return (
 			file.indexOf('.') !== 0
 			&& file !== 'index.js'
+			&& file !== 'db.js'
 			&& file.slice(-3) === '.js'
 		);
 	})
@@ -51,19 +50,13 @@ const promises = files
 	});
 
 const modules = await Promise.all(promises);
-modules.forEach((m) => {
-	models[m.default.name] = m.default;
-});
-
 const db = {};
-Object.keys(models).forEach(m => {
-	const model = models[m](sequelize, DataTypes);
-	db[model.name] = model;
-});
 
-Object.keys(db).forEach( (modelName) => {
-	if ('associate' in db[modelName]) {
-		db[modelName].associate(db);
+modules.forEach((m) => {
+	const model = m.default(sequelize, DataTypes);
+	db[model.name] = model;
+	if ('associate' in db[model.name]) {
+		db[model.name].associate(db);
 	}
 });
 
