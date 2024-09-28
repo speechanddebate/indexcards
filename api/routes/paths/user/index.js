@@ -6,18 +6,21 @@ import getProfile from '../../../controllers/user/account/getProfile';
 import acceptPayPal from '../../../controllers/user/enter/acceptPayPal';
 import processAuthorizeNet from '../../../controllers/user/enter/processAuthorizeNet';
 import updateLastAccess from '../../../controllers/user/account/access.js';
+import updateLearnCourses from '../../../controllers/user/account/learnCourse.js';
 import judge from './judge';
 import inbox from './inbox';
 import push from './push';
 
 export default [
-	{ path : '/login'                    , module : login }               ,
-	{ path : '/user/updateLastAccess'    , module : updateLastAccess }    ,
-	{ path : '/user/profile'             , module : getProfile }          ,
-	{ path : '/user/profile/{person_id}' , module : getProfile }          ,
-	{ path : '/user/enter/paypal'        , module : acceptPayPal }        ,
-	{ path : '/user/enter/authorize'     , module : processAuthorizeNet } ,
-	...push                              ,
-	...judge                             ,
-	...inbox                             ,
+	{ path : '/login'                       , module : login }               ,
+	{ path : '/user/updateLastAccess'       , module : updateLastAccess }    ,
+	{ path : '/user/profile'                , module : getProfile }          ,
+	{ path : '/user/profile/{personId}'     , module : getProfile }          ,
+	{ path : '/user/enter/paypal'           , module : acceptPayPal }        ,
+	{ path : '/user/enter/authorize'        , module : processAuthorizeNet } ,
+	{ path : '/user/updateLearn'            , module : updateLearnCourses }  ,
+	{ path : '/user/updateLearn/{personId}' , module : updateLearnCourses }  ,
+	...push                                 ,
+	...judge                                ,
+	...inbox                                ,
 ];

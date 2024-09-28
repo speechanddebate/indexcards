@@ -13,6 +13,10 @@ const quiz = (sequelize, DataTypes) => {
 			allowNull: false,
 			defaultValue: '0',
 		},
+		nsda_course: {
+			type         : DataTypes.INTEGER(11),
+			allowNull    : true,
+		},
 		bracket: {
 			type: DataTypes.INTEGER(6),
 			allowNull: false,

@@ -6,9 +6,9 @@ export const getProfile = {
 		}
 		let person;
 
-		if (req.params.person_id && req.session.site_admin) {
+		if (req.params.personId && req.session.site_admin) {
 			person = await req.db.person.findByPk(
-				req.params.person_id,
+				req.params.personId,
 				{
 					include: [{
 						model: req.db.personSetting,
@@ -17,7 +17,7 @@ export const getProfile = {
 				}
 			);
 
-		} else if (req.params.person_id ) {
+		} else if (req.params.personId ) {
 			return res.status(201).json({ message: 'Only admin staff may access another profile' });
 		} else if (req.session.person) {
 			person = await req.db.person.findByPk(req.session.person,
@@ -35,10 +35,7 @@ export const getProfile = {
 		}
 
 		const personData = person.dataValues;
-
 		personData.settings = {};
-
-		console.log(personData.Settings);
 
 		for (const set of personData.Settings) {
 			const setting = set.dataValues;
@@ -65,7 +62,7 @@ getProfile.GET.apiDoc = {
 	parameters: [
 		{
 			in          : 'path',
-			name        : 'person_id',
+			name        : 'personId',
 			description : 'ID of user whose profile you wish to access.  Defaults to present session.',
 			required    : false,
 			schema      : {
