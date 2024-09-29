@@ -1,7 +1,4 @@
-import Base64 from 'crypto-js/enc-base64.js';
-import Utf8 from 'crypto-js/enc-utf8';
-import axios from 'axios';
-import config from '../../../../config/config.js';
+import { getNSDAMemberId, getNSDA } from '../../../helpers/nsda.js';
 
 export const updateLearnCourses = {
 
@@ -15,33 +12,35 @@ export const updateLearnCourses = {
 		let targetPerson;
 
 		if (req.params.personId && req.session.site_admin) {
-			targetPerson = await db.summon(db.person, req.params.personId);
+			targetPerson = await db.person.findByPk(req.params.personId);
 		} else if (req.session.person) {
-			targetPerson = await db.summon(db.person, req.session.person);
+			targetPerson = await db.person.findByPk(req.session.person);
 		} else if (req.params.personId) {
 			return res.status(401).json('Only a site admin may check other the courses of other users');
 		} else {
 			return res.status(401).json('Tabroom user account has no NSDA membership');
 		}
 
-		if ( !targetPerson || !targetPerson.nsda ) {
+		if ( !targetPerson ) {
 			return res.status(401).json('Learn courses may only be synced to valid Tabroom accounts linked to an NSDA ID');
 		}
 
-		const hashDigest = Base64.stringify(Utf8.parse(`${config.NSDA.USER_ID}:${config.NSDA.KEY}`));
+		if ( !targetPerson.nsda) {
+			const membership = await getNSDAMemberId(targetPerson.email);
+			if (membership && membership.id) {
+				targetPerson.nsda = membership.id;
+				await targetPerson.save();
+			}
+		}
 
-		const learnResults = await axios.get(
-			`${config.NSDA.ENDPOINT}${config.NSDA.PATH}/members/${targetPerson.nsda}/learn`,
-			{
-				headers : {
-					Authorization  : `Basic ${hashDigest}`,
-					'Content-Type' : 'application/json',
-					Accept         : 'application/json',
-				},
-			},
-		);
+		if ( !targetPerson.nsda) {
+			return res.status(401).json('No NSDA ID is tied to that Tabroom account, and no NSDA account was found with that email');
+		}
 
-		if (!learnResults.data?.length > 0) {
+		const path = `/members/${targetPerson.nsda}/learn`;
+		const learnResults = await getNSDA(path);
+
+		if (!learnResults.length > 0) {
 			return res.status(200).json(`User ${targetPerson.nsda} does not have any completed NSDA Learn courses.`);
 		}
 
@@ -70,7 +69,7 @@ export const updateLearnCourses = {
 			new     : 0,
 		};
 
-		for (const result of learnResults.data) {
+		for (const result of learnResults) {
 
 			if (result.status === 'completed') {
 				if (quizByNSDA[result.courseId]?.pqId) {
@@ -80,7 +79,7 @@ export const updateLearnCourses = {
 							update person_quiz pq
 								set pq.pending = 0,
 								pq.completed   = 1,
-								pq.approved_by = 2
+								pq.approved_by = 3
 							where pq.id = :personQuizId
 						`, {
 							replacements: { personQuizId: quizByNSDA[result.courseId].pqId },
@@ -95,7 +94,7 @@ export const updateLearnCourses = {
 					await db.sequelize.query(`
 						INSERT INTO person_quiz
 							(hidden, pending, approved_by, completed, updated_at, person, quiz)
-							VALUES (0, 0, 2, 1, NOW(), :personId, :quizId)
+							VALUES (0, 0, 3, 1, NOW(), :personId, :quizId)
 					`, {
 						replacements : {
 							personId : targetPerson.id,
@@ -109,7 +108,10 @@ export const updateLearnCourses = {
 			}
 		}
 
-		return res.status(200).json(`I have updated ${results.new} new quizzes and ${results.updates} existing ones`);
+		return res.status(200).json({
+			message: `I have updated ${results.new} new quizzes and ${results.updates} existing ones}`,
+			...results,
+		});
 	},
 };
 

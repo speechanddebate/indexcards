@@ -1,6 +1,20 @@
-import fetch from 'node-fetch';
 import CryptoJS from 'crypto-js';
+import axios from 'axios';
 import config from '../../config/config.js';
+
+export const getNSDAMemberId = async (email) => {
+
+	const path = `/search?q=${email}&type=members`;
+	const memberships = await getNSDA(path);
+
+	if (memberships && memberships[0]?.id) {
+		return {
+			id    : memberships[0].id,
+			first : memberships[0].last,
+			last  : memberships[0].first,
+		};
+	}
+};
 
 export const getNSDA  = async (path) => {
 
@@ -9,12 +23,17 @@ export const getNSDA  = async (path) => {
 	const authToken = CryptoJS.enc.Base64.stringify(words);
 
 	try {
-		const response = await fetch(uri, {
-			method  : 'get',
-			headers : { Authorization : `Basic ${authToken}` },
-		});
-
-		return await response.json();
+		const response = await axios.get(
+			uri,
+			{
+				headers : {
+					Authorization  : `Basic ${authToken}`,
+					'Content-Type' : 'application/json',
+					Accept         : 'application/json',
+				},
+			},
+		);
+		return response.data;
 
 	} catch (err) {
 		return {
