@@ -3,9 +3,23 @@ export const circuitQualifiers = {
 	POST: async (req, res) => {
 		const db = req.db;
 
-		const events = await db.event.findAll(
-			{ where: { tourn: req.params.tournId } }
-		);
+		console.log(`Event paramters are`);
+		console.log(req.params);
+
+		console.log(`Event body post is`);
+		console.log(req.body);
+
+		let events = [];
+
+		if (req.body.qualifying_target) {
+
+			events = await db.event.findByPk(req.body.qualifying_target);
+
+		} else {
+			events = await db.event.findAll(
+				{ where: { tourn: req.params.tournId } }
+			);
+		}
 
 		events.forEach( async (event) => {
 			if (req.body.eventId && req.body.eventId !== event.id) {
@@ -23,6 +37,7 @@ export const circuitQualifiers = {
 };
 
 export const saveEventResult = async (db, eventId) => {
+
 	// Get event and qualifier event tags
 
 	const eventQuery = `
@@ -264,9 +279,13 @@ export const saveEventResult = async (db, eventId) => {
 			// placement supercedes it
 
 			if (rule.reverse_elim > 0) {
+
 				const targetRound = allElims[(rule.reverse_elim - 1)];
 
-				if (targetRound) {
+				console.log(`Target round is ${targetRound.name} and the entries array is `);
+				console.log(entriesByLastRound[targetRound.name]);
+
+				if (targetRound && entriesByLastRound[targetRound.name]) {
 					for (const entry of entriesByLastRound[targetRound.name]) {
 						if (entry && !entryPoints[entry]) {
 							entryPoints[entry] = rule.points;

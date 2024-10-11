@@ -125,6 +125,11 @@ export const keyAuth = async (req, res) => {
 	}
 
 	const authHeader = basic(req);
+
+	if (!authHeader) {
+		return 'No authentication header sent.';
+	}
+
 	const personId = parseInt(authHeader.name);
 	const key = authHeader.pass;
 
