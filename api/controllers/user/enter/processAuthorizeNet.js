@@ -60,25 +60,27 @@ export const processAuthorizeNet = {
 			return res.status(500).json({ message: 'Missing payment data' });
 		}
 
-		if (!orderData.base) {
+		let base = parseFloat(orderData.base);
+
+		if (!base || isNaN(base)) {
 			return res.status(500).json({ message: 'Missing base amount' });
 		}
-		if (orderData.base < 10) {
+		if (base < 10) {
 			return res.status(500).json({ message: '$10 minimum for online payments' });
 		}
 
 		let processing = 0;
 		if (typeof orderData.encryptedCardData !== 'undefined') {
-			processing = orderData.base * ccFeePercent;
+			processing = base * ccFeePercent;
 		} else if (typeof orderData.encryptedBankData !== 'undefined') {
-			processing = orderData.base * achFeePercent;
+			processing = base * achFeePercent;
 		} else {
 			// Default to the CC processing fee for now, if something is weird
 			// we don't want to undercharge
-			processing = orderData.base * ccFeePercent;
+			processing = base * ccFeePercent;
 		}
 
-		let total = processing + orderData.base;
+		let total = parseFloat(processing + base);
 		total = total.toFixed(2);
 
 		const APIContracts = authorizenet.APIContracts;
