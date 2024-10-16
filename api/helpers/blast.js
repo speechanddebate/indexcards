@@ -17,6 +17,7 @@ import { errorLogger } from './logger.js';
 //		append  : string // Text appended to the message as a footer. Optional.
 //		noWeb   : boolean  // Optional.  If true , no web pushes sent , only email
 //		noEmail : boolean  // Optional.  If true , no email sent, only web pushes
+//		noInbox : boolean  // Optional.  If true , no message created in Tabroom inbox
 //	}
 
 function onlyUnique(value, index, array) {
@@ -41,7 +42,9 @@ export const notify = async (inputData) => {
 		pushReply.web = await webBlast(inputData);
 	}
 
-	pushReply.inbox = await inboxMessage(inputData);
+	if (!inputData.noInbox) {
+		pushReply.inbox = await inboxMessage(inputData);
+	}
 
 	let error = false;
 
