@@ -5,18 +5,25 @@ export const getInvite = {
 		const invite = {};
 
 		if (req.params.tourn_id) {
+
 			const result = await db.tourn.findByPk(parseInt(req.params.tourn_id));
 			invite.tourn = result.get({ plain: true });
 
 		} else if (req.params.webname) {
 
-			const result = await db.tourn.findOne({
-				where : { webname: req.params.webname },
-				order : [['start', 'desc']],
-				limit : 1,
-			});
+			try {
 
-			invite.tourn = result.get({ plain: true });
+				const result = await db.tourn.findOne({
+					where : { webname: req.params.webname },
+					order : [['start', 'desc']],
+					limit : 1,
+				});
+
+				invite.tourn = result.get({ plain: true });
+
+			} catch (err) {
+				console.log(err);
+			}
 		}
 
 		// I included theses as "includes" from sequelize but the sql it
