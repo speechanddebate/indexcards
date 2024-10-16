@@ -60,9 +60,9 @@ export const processAuthorizeNet = {
 			return res.status(500).json({ message: 'Missing payment data' });
 		}
 
-		let base = parseFloat(orderData.base);
+		const base = parseFloat(orderData.base);
 
-		if (!base || isNaN(base)) {
+		if (!base || Number.isNaN(base)) {
 			return res.status(500).json({ message: 'Missing base amount' });
 		}
 		if (base < 10) {
