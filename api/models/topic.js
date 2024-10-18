@@ -12,6 +12,10 @@ const topic = (sequelize, DataTypes) => {
 			type: DataTypes.STRING(31),
 			allowNull: true,
 		},
+		pattern: {
+			type: DataTypes.STRING(15),
+			allowNull: true,
+		},
 		topic_text: {
 			type: DataTypes.TEXT,
 			allowNull: true,
