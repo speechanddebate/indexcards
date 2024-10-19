@@ -11,11 +11,15 @@ export const blastTimeslotMessage = {
 	POST: async (req, res) => {
 
 		if (!req.body.message) {
-			res.status(401).json(`No message to blast was input`);
-			return;
+			return res.status(401).json(`No message to blast was input`);
 		}
 
 		req.body.timeslotId = req.session.timeslot?.id;
+
+		if (!req.body.timeslotId) {
+			return res.status(401).json(`No timeslot to blast was sent`);
+		}
+
 		delete req.body.roundId;
 		const options = {};
 
@@ -165,6 +169,10 @@ export const messageFreeJudges = {
 			return res.status(200).json({ error: true, message: 'No message to blast sent' });
 		}
 
+		if (!req.body.timeslotId) {
+			return res.status(401).json(`No timeslot to blast was sent`);
+		}
+
 		const freeJudgesQuery = `
 			select
 				judge.id, judge.first, judge.last, judge.person,
@@ -279,6 +287,10 @@ export const messageReleasedJudges = {
 
 		if (!req.body.message) {
 			return res.status(200).json({ error: true, message: 'No message to blast sent' });
+		}
+
+		if (!req.body.timeslotId) {
+			return res.status(401).json(`No timeslot to blast was sent`);
 		}
 
 		const releasedJudgesQuery = `
