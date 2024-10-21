@@ -191,13 +191,19 @@ export const emailNotify = async (inputData) => {
 			person.id, person.first, person.last, person.email
 		from person
 		where person.id IN (:personIds)
-			and person.no_email != 1
 	`, {
 		replacements: { personIds: inputData.ids },
 		type: db.sequelize.QueryTypes.SELECT,
 	});
 
-	inputData.email = recipients.map( (person) => {
+	inputData.email = recipients.filter( (person) => {
+		if (inputData.ignoreNoEmail || (!person.no_email)) {
+			return person;
+		}
+
+		return null;
+
+	}).map( (person) => {
 		return person.email;
 	});
 
