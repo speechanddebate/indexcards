@@ -13,9 +13,20 @@ const syncAllLearn = async () => {
 		type: db.Sequelize.QueryTypes.SELECT,
 	});
 
-	for (const course of courses) {
-		await syncLearnByCourse(course);
-	}
+	const promises = [];
+
+	courses.forEach( (course) => {
+		console.log(`Syncing ${course.label}`);
+		const promise = syncLearnByCourse(course);
+		promises.push(promise);
+	});
+
+	await Promise.all(promises);
+
+	promises.forEach( (promise) => {
+		console.log(promise);
+	});
+	console.log(`${courses.length} courses synchronized `);
 };
 
 await syncAllLearn();
