@@ -19,6 +19,9 @@ TZ=UTC
 # Synchronize Nats appearances because apparently people care
 30 8 * * 4 cd /indexcards && /usr/local/bin/node /indexcards/api/auto/natsAppearances.js >> /var/log/cron.log 2>&1
 
+# NSDA Learn Course Status
+30 9 * * * cd /indexcards && /usr/local/bin/node /indexcards/api/auto/syncLearnCourse.js >> /var/log/cron.log 2>&1
+
 # NAUDL post to Salesforce
 15 3 * * * cd /indexcards && /usr/local/bin/node /indexcards/api/auto/naudl/chapters.js >> /var/log/cron.log 2>&1
 25 3 * * * cd /indexcards && /usr/local/bin/node /indexcards/api/auto/naudl/students.js >> /var/log/cron.log 2>&1
