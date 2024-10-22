@@ -212,13 +212,19 @@ export const syncLearnByCourse = async (quiz) => {
 		}
 	}
 
+	const userIds = Object.keys(usersById);
+
+	if (userIds.length < 1) {
+		userIds.push(0);
+	}
+
 	const notExisting = await db.sequelize.query(`
 		select person.id, person.nsda, person.email
 			from person
 		where 1=1
 		and person.nsda IN (:userIds)
 	`, {
-		replacements : { userIds: Object.keys(usersById) || [0] },
+		replacements : { userIds },
 		type         : db.sequelize.QueryTypes.SELECT,
 	});
 
@@ -231,7 +237,7 @@ export const syncLearnByCourse = async (quiz) => {
 			and pq.quiz = :quizId
 	`, {
 		replacements : {
-			userIds  : Object.keys(usersById) || [0],
+			userIds,
 			quizId   : quiz.id,
 		},
 		type         : db.sequelize.QueryTypes.DELETE,
@@ -256,13 +262,18 @@ export const syncLearnByCourse = async (quiz) => {
 
 	const emailAdds = [];
 
+	const userEmails = Object.keys(usersByEmail);
+	if (userEmails.length < 1) {
+		userEmails.push('nope');
+	}
+
 	const stillNotExisting = await db.sequelize.query(`
 		select person.id, person.nsda, person.email
 			from person
 		where 1=1
 		and person.email IN (:userEmails)
 	`, {
-		replacements : { userEmails: Object.keys(usersByEmail) },
+		replacements : { userEmails },
 		type         : db.sequelize.QueryTypes.SELECT,
 	});
 
@@ -275,7 +286,7 @@ export const syncLearnByCourse = async (quiz) => {
 			and pq.quiz = :quizId
 	`, {
 		replacements   : {
-			userEmails : Object.keys(usersByEmail),
+			userEmails,
 			quizId     : quiz.id,
 		},
 		type : db.sequelize.QueryTypes.DELETE,
