@@ -15,8 +15,7 @@ export const changeAccess = {
 		const targetEvent = await req.db.summon(db.event, req.params.eventId);
 
 		if (!targetPerson || !targetEvent) {
-			res.status(401).json('No person found with that Tabroom ID');
-			return;
+			return res.status(401).json('No person found with that Tabroom ID');
 		}
 
 		if (
@@ -33,8 +32,7 @@ export const changeAccess = {
 			});
 
 			if (!currentPerm) {
-				res.status(400).json(`User ${targetPerson.email} does not have access ${targetEvent.abbr} and so it cannot be altered`);
-				return;
+				return res.status(400).json(`User ${targetPerson.email} does not have access ${targetEvent.abbr} and so it cannot be altered`);
 			}
 
 			if (currentPerm.tag === 'checker') {
@@ -76,7 +74,7 @@ export const changeAccess = {
 
 	// Show permissions for a user
 	GET : async (req, res) => {
-		res.status(200).json({ message: 'Hello', params: req.params, body: req.body });
+		return res.status(200).json({ message: 'Hello', params: req.params, body: req.body });
 	},
 
 	// Delete a user's access to this tournament
@@ -112,7 +110,7 @@ export const changeAccess = {
 				description : `${targetPerson.email} access removed from ${targetEvent.abbr}`,
 			});
 
-			res.status(200).json({
+			return res.status(200).json({
 				error   : false,
 				destroy : `event_${targetEvent.id}_${targetPerson.id}`,
 				message : log.description,
@@ -133,11 +131,11 @@ export const backupAccess = {
 		const targetEvent = await req.db.summon(req.db.event, req.params.eventId);
 
 		if (!targetPerson) {
-			res.status(400).json('No tabroom account was found with that email');
+			return res.status(400).json('No tabroom account was found with that email');
 		}
 
 		if (targetPerson.no_email) {
-			res.status(400).json('That Tabroom account is set to not allow emails to be sent to it');
+			return res.status(400).json('That Tabroom account is set to not allow emails to be sent to it');
 		}
 
 		const backupAccounts = await req.db.eventSetting.findOne({
@@ -176,7 +174,7 @@ export const backupAccess = {
 			});
 		}
 
-		res.status(200).json(`Added ${targetPerson.email} as a backup follower for ${targetEvent.abbr}`);
+		return res.status(200).json(`Added ${targetPerson.email} as a backup follower for ${targetEvent.abbr}`);
 	},
 
 	DELETE : async (req, res) => {
@@ -189,7 +187,7 @@ export const backupAccess = {
 		});
 
 		if (!backupAccounts?.id) {
-			res.status(200).json(`Event has no current backup followers`);
+			return res.status(200).json(`Event has no current backup followers`);
 		}
 
 		const followers = [];
@@ -212,7 +210,7 @@ export const backupAccess = {
 			await backupAccounts.update();
 		}
 
-		res.status(200).json(`Backup follower removed`);
+		return res.status(200).json(`Backup follower removed`);
 	},
 };
 
