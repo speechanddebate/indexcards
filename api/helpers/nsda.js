@@ -348,7 +348,7 @@ export const syncLearnByCourse = async (quiz) => {
 		});
 	}
 
-	return `NSDA Learn Course ${quiz.label} synchronized`;
+	return `${quiz.label} synchronized for ${courseData.length} records with ${nsdaMismatches.length} mismatches`;
 
 };
 
