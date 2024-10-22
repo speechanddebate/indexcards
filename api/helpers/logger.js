@@ -1,11 +1,18 @@
+import os from 'os';
 import winston from 'winston';
 import config from '../../config/config.js';
 
 const logPath = config.LOG_PATH || '/tmp';
 
+const addHostname = winston.format(info => {
+	info.hostname = os.hostname();
+	return info;
+});
+
 export const debugLogger = winston.createLogger({
 	level: 'debug',
 	format: winston.format.combine(
+		addHostname(),
 		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
 		winston.format.json(),
 	),
@@ -23,6 +30,7 @@ export const debugLogger = winston.createLogger({
 export const requestLogger = winston.createLogger({
 	level: 'info',
 	format: winston.format.combine(
+		addHostname(),
 		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
 		winston.format.json(),
 	),
@@ -40,7 +48,7 @@ export const requestLogger = winston.createLogger({
 export const errorLogger = winston.createLogger({
 	level: 'error',
 	format: winston.format.combine(
-		winston.format.label({ label: 'OH NOES! A 500 ERROR!' }),
+		winston.format.label({ hostname: process.env.HOSTNAME }),
 		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
 		winston.format.prettyPrint(),
 	),
@@ -58,6 +66,7 @@ export const errorLogger = winston.createLogger({
 export const clientLogger = winston.createLogger({
 	level: 'info',
 	format: winston.format.combine(
+		addHostname(),
 		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
 		winston.format.json(),
 	),
@@ -75,6 +84,7 @@ export const clientLogger = winston.createLogger({
 export const queryLogger = winston.createLogger({
 	level: 'info',
 	format: winston.format.combine(
+		addHostname(),
 		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
 		winston.format.json(),
 	),
@@ -88,6 +98,7 @@ export const queryLogger = winston.createLogger({
 export const autoemailLogger = winston.createLogger({
 	level: 'error',
 	format: winston.format.combine(
+		addHostname(),
 		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
 		winston.format.json(),
 	),
