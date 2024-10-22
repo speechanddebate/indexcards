@@ -1,5 +1,19 @@
 const personQuiz = (sequelize, DataTypes) => {
 	return sequelize.define('personQuiz', {
+		person: {
+			type         : DataTypes.INTEGER,
+			allowNull    : false,
+			defaultValue : '0',
+		},
+		approved_by: {
+			type         : DataTypes.INTEGER,
+			allowNull    : true,
+		},
+		quiz: {
+			type         : DataTypes.INTEGER,
+			allowNull    : false,
+			defaultValue : '0',
+		},
 		hidden: {
 			type         : DataTypes.BOOLEAN,
 			allowNull    : false,
@@ -27,6 +41,8 @@ const personQuiz = (sequelize, DataTypes) => {
 			type       : DataTypes.DATE,
 			allowNull  : true,
 		},
+	},{
+		tableName: 'person_quiz',
 	});
 };
 

@@ -33,6 +33,7 @@ export const getNSDA  = async (path) => {
 				},
 			},
 		);
+
 		return response.data;
 
 	} catch (err) {
@@ -103,7 +104,9 @@ export const syncLearnResults = async (person) => {
 
 	for (const result of learnResults) {
 		if (result.status === 'completed') {
+
 			if (quizByNSDA[result.courseId]?.pqId) {
+
 				if (!quizByNSDA[result.courseId].approved_by) {
 
 					await db.sequelize.query(`
@@ -123,16 +126,12 @@ export const syncLearnResults = async (person) => {
 
 			} else if (quizByNSDA[result.courseId]) {
 
-				await db.sequelize.query(`
-					INSERT INTO person_quiz
-						(hidden, pending, approved_by, completed, updated_at, person, quiz)
-						VALUES (0, 0, 3, 1, NOW(), :personId, :quizId)
-				`, {
-					replacements : {
-						personId : targetPerson.id,
-						quizId   : quizByNSDA[result.courseId].id,
-					},
-					type: db.sequelize.QueryTypes.UPDATE,
+				await db.personQuiz.create({
+					person      : targetPerson.id,
+					approved_by : 3,
+					quiz        : quizByNSDA[result.courseId].id,
+					completed   : 1,
+					updated_at  : new Date(),
 				});
 
 				results.new++;
@@ -149,72 +148,93 @@ export const syncLearnResults = async (person) => {
 
 export const syncLearnByCourse = async (quiz) => {
 
-	const url = `${config.NSDA.ENDPOINT}${config.NSDA.LEARN_PATH}`;
-	const words = CryptoJS.enc.Utf8.parse(`${config.NSDA.USER_ID}:${config.NSDA.KEY}`);
-	const authToken = CryptoJS.enc.Base64.stringify(words);
+	const courseData = await getNSDA(`/learn/courses/${quiz.nsda_course}`);
 
-	const response = await axios.get(
-		url,
-		{
-			headers            : {
-				Authorization  : `Basic ${authToken}`,
-				'Content-Type' : 'application/json',
-				Accept         : 'application/json',
-			},
-		}
-	);
+	const usersById = {};
+	const usersByEmail = {};
 
-	const userIds = [];
-	const userDates = {};
-
-	for (const courseResult of response.data) {
-		userIds.push(courseResult.user_id);
-		userDates[courseResult.user_id] = courseResult.completed;
+	for (const courseResult of courseData) {
+		usersById[courseResult.user_id] = courseResult;
+		usersByEmail[courseResult.email] = courseResult;
 	}
 
-	// First the linked people who do have a PQ in Tabroom already.
+	// First filter everyone out who's already been tagged, and then
+	// update everyone with an existing PQ that is not completed.
 
-	const existing = await db.sequelize.query(`
-		select person.id, person.nsda, pq.id pq, pq.completed, pq.updated_at
-			from person, pq, quiz
+	const existingPQs = await db.sequelize.query(`
+		select person.id, person.email, person.nsda,
+			pq.id pq, pq.completed, pq.updated_at
+		from person, person_quiz pq, quiz
+		where 1=1
+			and person.id = pq.person
+			and pq.quiz = :quizId
+	`, {
+		replacements : {
+			quizId: quiz.id,
+		},
+		type : db.sequelize.QueryTypes.SELECT,
+	});
+
+	const allPromises = [];
+	const nsdaMismatches = [];
+
+	for (const person of existingPQs) {
+
+		if (person.email
+			&& usersByEmail[person.email]
+			&& person.nsda !== usersByEmail[person.email].user_id
+		) {
+			usersByEmail[person.email].tabroom = person;
+			nsdaMismatches.push(usersByEmail[person.email]);
+		}
+
+		if (person.completed && person.approved_by) {
+
+			delete usersById[person.nsda];
+			delete usersByEmail[person.email];
+
+		} else {
+
+			if (usersById[person.nsda] || usersByEmail[person.email]) {
+
+				const promise = db.sequelize.query(`
+					update person_quiz pq set completed = 1, approved_by = 3, updated_at = :updatedAt where id = :pqId
+				`, {
+					replacements: { pqId: person.pq, updatedAt: person.updated_at },
+					type: db.sequelize.QueryTypes.UPDATE,
+				});
+
+				allPromises.push(promise);
+
+				delete usersById[person.nsda];
+				delete usersByEmail[person.email];
+			}
+		}
+	}
+
+	const notExisting = await db.sequelize.query(`
+		select person.id, person.nsda, person.email
+			from person
+		where 1=1
+		and person.nsda IN (:userIds)
+	`, {
+		replacements : { userIds: Object.keys(usersById) || [0] },
+		type         : db.sequelize.QueryTypes.SELECT,
+	});
+
+	await db.sequelize.query(`
+		delete pq.*
+			from person, person_quiz pq
 		where 1=1
 			and person.nsda IN (:userIds)
 			and person.id = pq.person
 			and pq.quiz = :quizId
 	`, {
-		replacements : { userIds, quizId: quiz.id },
-		type         : db.sequelize.QueryTypes.SELECT,
-	});
-
-	for (const person of existing) {
-
-		// don't need an await here because it'll finish when it finishes.
-		if (userDates[person.nsda] !== person.updated_at) {
-			db.sequelize.query(`
-				update pq set completed = 1, updated_at = :updatedAt where id = :pqId
-			`, {
-				replacements: { pqId: person.pq, updatedAt: person.updated_at },
-				type: db.sequelize.QueryTypes.UPDATE,
-			});
-		}
-
-		delete userDates[person.nsda];
-	}
-
-	const notExisting = await db.sequelize.query(`
-		select person.id, person.nsda
-			from person
-		where 1=1
-		and person.nsda IN (:userIds)
-			and not exists (
-				select pq.id
-					from pq
-				where pq.person = person.id
-					and pq.quiz = :quizId
-			)
-	`, {
-		replacements : { userIds: Object.keys(userDates), quizId: quiz.id } ,
-		type         : db.sequelize.QueryTypes.SELECT,
+		replacements : {
+			userIds  : Object.keys(usersById) || [0],
+			quizId   : quiz.id,
+		},
+		type         : db.sequelize.QueryTypes.DELETE,
 	});
 
 	const pqAdds = [];
@@ -225,11 +245,99 @@ export const syncLearnByCourse = async (quiz) => {
 			quiz        : quiz.id,
 			completed   : 1,
 			approved_by : 3,
-			updated_at  : userDates[person.nsda],
+			updated_at  : new Date(usersById[person.nsda].completed),
+		});
+
+		delete usersByEmail[person.email];
+	}
+
+	const bigPromise = db.personQuiz.bulkCreate(pqAdds);
+	allPromises.push(bigPromise);
+
+	const emailAdds = [];
+
+	const stillNotExisting = await db.sequelize.query(`
+		select person.id, person.nsda, person.email
+			from person
+		where 1=1
+		and person.email IN (:userEmails)
+	`, {
+		replacements : { userEmails: Object.keys(usersByEmail) },
+		type         : db.sequelize.QueryTypes.SELECT,
+	});
+
+	await db.sequelize.query(`
+		delete pq.*
+			from person, person_quiz pq
+		where 1=1
+			and person.nsda IN (:userEmails)
+			and person.id = pq.person
+			and pq.quiz = :quizId
+	`, {
+		replacements   : {
+			userEmails : Object.keys(usersByEmail),
+			quizId     : quiz.id,
+		},
+		type : db.sequelize.QueryTypes.DELETE,
+	});
+
+	for (const person of stillNotExisting) {
+
+		const courseUser = usersByEmail[person.email];
+
+		if (courseUser) {
+
+			if (person.nsda && courseUser.user_id !== person.nsda) {
+
+				courseUser.tabroom = person;
+				nsdaMismatches.push(courseUser);
+
+			} else if (courseUser && !person.nsda) {
+
+				const promiseOne = db.sequelize.query(`
+					update person set nsda = :nsdaId where id = :personId
+				`, {
+					replacements: { personId: person.id, nsdaId: courseUser.user_id },
+					type: db.sequelize.QueryTypes.UPDATE,
+				});
+
+				allPromises.push(promiseOne);
+			}
+
+			emailAdds.push({
+				person      : person.id,
+				quiz        : quiz.id,
+				completed   : 1,
+				approved_by : 3,
+				updated_at  : new Date(courseUser.completed),
+			});
+
+			delete usersByEmail[person.email];
+		}
+	}
+
+	const otherPromise = db.personQuiz.bulkCreate(emailAdds);
+	allPromises.push(otherPromise);
+
+	await Promise.resolve(allPromises);
+	const quizLog = await db.tabroomSetting.findOne({ where: { tag: `quiz_log_${quiz.id}` } });
+
+	if (quizLog) {
+
+		quizLog.value_text = JSON.stringify(nsdaMismatches, null, 4);
+		await quizLog.save();
+
+	} else {
+
+		await db.tabroomSetting.create({
+			tag        : `quiz_log_${quiz.id}`,
+			value      : 'text',
+			person     : 3,
+			value_text : JSON.stringify(nsdaMismatches, null, 4),
 		});
 	}
 
-	await db.personQuiz.bulkCreate(pqAdds);
+	return `NSDA Learn Course ${quiz.label} synchronized`;
 
 };
 
