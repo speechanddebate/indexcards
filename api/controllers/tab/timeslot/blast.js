@@ -58,7 +58,7 @@ export const blastTimeslotMessage = {
 			}
 
 			const rounds = await req.db.round.findAll({
-				whereTimeslot,
+				where: whereTimeslot,
 			});
 
 			const promises = [];
