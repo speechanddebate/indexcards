@@ -3,9 +3,15 @@
 import { writeRound } from '../../../helpers/round.js';
 
 export const sectionTemplateRobin = {
+
 	POST: async (req, res) => {
+
 		const db = req.db;
 		const division = await db.summon(db.event, req.params.eventId);
+
+		if (!division || !division.id) {
+			return res.status(200).json(`No event found with ID ${req.params.eventId}`);
+		}
 
 		const entries = await db.entry.findAll({
 			where: { event: division.id, active: 1 },
@@ -31,7 +37,7 @@ export const sectionTemplateRobin = {
 		});
 
 		if (rounds.length !== rrPattern.rounds) {
-			return res.status(200).json({ error: true, message: `Incorrect round count for pattern. ${rrPattern.rounds} rounds required` });
+			return res.status(400).json(`Incorrect round count for pattern. ${rrPattern.rounds} rounds required`);
 		}
 
 		const judges = await db.judge.findAll({
