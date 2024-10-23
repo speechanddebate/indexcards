@@ -1,7 +1,6 @@
 import { Sequelize, DataTypes } from 'sequelize';
 import fs from 'fs';
 import { errorLogger, debugLogger } from './logger.js';
-
 import config from '../../config/config.js';
 
 const sequelize = new Sequelize(
@@ -21,7 +20,7 @@ const errorsPlease = ['findAll', 'findOne', 'save', 'create', 'findByPk'];
 
 const dbError = (err) => {
 	debugLogger.error(err);
-	process.exit(0);
+	return `Database query error`;
 };
 
 errorsPlease.forEach((dingbat) => {
@@ -36,6 +35,13 @@ errorsPlease.forEach((dingbat) => {
 // Iterate the models directory and load all models dynamically
 const files = await fs.promises.readdir(`${config.CODE_PATH || '.'}/api/models`);
 
+// Prevent me from wondering what the hell is going on for 20 minutes...again
+
+if (!config.CODE_PATH) {
+	console.log(`You must defined CODE_PATH to the location of your code tree in the config file`);
+	process.exit();
+}
+
 const promises = files
 	.filter((file) => {
 		return (
@@ -45,7 +51,7 @@ const promises = files
 			&& file.slice(-3) === '.js'
 		);
 	})
-	.map((file) => {
+	.map(async (file) => {
 		return import(`${config.CODE_PATH}/api/models/${file}`);
 	});
 
