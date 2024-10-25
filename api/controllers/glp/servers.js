@@ -66,6 +66,7 @@ export const getTabroomUsage = {
 			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > NOW()
 				and tourn.id = event.tourn
+				and tourn.hidden != 1
 				and event.id = entry.event
 				and entry.active = 1
 				and entry.id = es.entry
@@ -82,6 +83,7 @@ export const getTabroomUsage = {
 			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > CURRENT_TIMESTAMP
 				and tourn.id = category.tourn
+				and tourn.hidden != 1
 				and category.id = judge.category
 			group by judge.id
 		`, {
@@ -95,6 +97,13 @@ export const getTabroomUsage = {
 			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > CURRENT_TIMESTAMP
 				and tourn.hidden != 1
+				and exists (
+					select timeslot.id
+					from timeslot
+					where timeslot.tourn = tourn.id
+					and timeslot.start > CURRENT_TIMESTAMP
+					and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+				)
 			group by tourn.id
 		`, {
 			type: req.db.sequelize.QueryTypes.SELECT,

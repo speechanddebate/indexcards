@@ -6,7 +6,9 @@ export const clearShareRooms = async () => {
 		delete
 			ps.*
 		from panel_setting ps, panel, round, event, tourn
-		where tourn.end < NOW() - INTERVAL 30 DAY
+		where 1=1
+			and tourn.end < NOW() - INTERVAL 30 DAY
+			and tourn.end > NOW() - INTERVAL 45 DAY
 			and tourn.id = event.tourn
 			and event.id = round.event
 			and round.id = panel.round
