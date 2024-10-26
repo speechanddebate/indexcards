@@ -133,6 +133,10 @@ export const keyAuth = async (req, res) => {
 	const personId = parseInt(authHeader.name);
 	const key = authHeader.pass;
 
+	if (Number.isNaN(personId)) {
+		return 'No valid Authorization header found. Access denied.  Name must be a Tabroom ID number.';
+	}
+
 	const persons = await db.sequelize.query(`
 		select * from person where id = :personId
 		and exists (
