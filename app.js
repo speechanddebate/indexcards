@@ -108,6 +108,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ type: ['json', 'application/*json'], limit: '10mb' }));
 app.use(bodyParser.text({ type: '*/*', limit: '10mb' }));
 
+debugLogger.info(`Loading environment ${process.env?.NODE_ENV}`);
+
 if (process.env.NODE_ENV === 'development') {
 	// Pretty print JSON in the dev environment
 	app.use(bodyParser.json());
