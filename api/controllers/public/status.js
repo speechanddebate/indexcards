@@ -1,9 +1,32 @@
+import os from 'os';
+import config from '../../../config/config.js';
+
 export const systemStatus = {
 	GET: async (req, res) => {
-		return res.status(200).json({ message: 'OK' });
+		return res.status(200).json({
+			message  : 'OK',
+			webhost  : config.DOCKERHOST || config.HOST || 'undefined',
+			server   : os.hostname(),
+			load     : os.loadavg(),
+			uptime   : os.uptime(),
+			freemem  : os.freemem(),
+			totalmem : os.totalmem(),
+			node     : process.version,
+			runtime  : process.env?.NODE_ENV,
+		});
 	},
 	POST: async (req, res) => {
-		return res.status(200).json({ message: 'OK' });
+		return res.status(200).json({
+			message  : 'OK',
+			webhost  : config.DOCKERHOST || config.HOST || 'undefined',
+			server   : os.hostname(),
+			load     : os.loadavg(),
+			uptime   : os.uptime(),
+			freemem  : os.freemem(),
+			totalmem : os.totalmem(),
+			node     : process.version,
+			runtime  : process.env?.NODE_ENV,
+		});
 	},
 };
 
@@ -14,9 +37,9 @@ export const barfPlease = {
 };
 
 systemStatus.GET.apiDoc = {
-	summary: 'Responds with a 200 if up',
-	operationId: 'getStatus',
-	responses: {
+	summary     : 'Responds with a 200 if up, with some system data',
+	operationId : 'getStatus',
+	responses   : {
 		200: {
 			description: 'Server is up',
 			content: { '*/*': { schema: { type: 'string' } } },
@@ -27,8 +50,8 @@ systemStatus.GET.apiDoc = {
 };
 
 systemStatus.POST.apiDoc = {
-	summary: 'Responds with a 200 if up',
-	operationId: 'postStatus',
+	summary     : 'Responds with a 200 if up, with some system data',
+	operationId : 'postStatus',
 	responses: {
 		200: {
 			description: 'Server is up',
