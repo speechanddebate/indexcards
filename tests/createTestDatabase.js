@@ -15,11 +15,27 @@ const pruneDatabase = async () => {
 		29807, // Rushmore District (double elimination)
 	];
 
+	const keeperEvents = [
+		244135,244137,244138,244140,244141,244146,244150,244156,248095,248096,248097,
+		248101,248106,274437,273242,273250,273251,273255,273257,273258,274615,274616,
+		274619,274623,274624,274626,274628,275386,275387,275389,275933,275934,275943,
+		291000,291003,291004,282898,286196,289814,289815,289816,289819,289821,
+	];
+
 	await db.sequelize.query(`
 		delete from tourn where id NOT IN (:keeperTourns)
 	`, {
 		replacements: {
 			keeperTourns,
+		},
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from event where id NOT IN (:keeperEvents)
+	`, {
+		replacements: {
+			keeperEvents,
 		},
 		type: db.sequelize.QueryTypes.DELETE,
 	});
@@ -33,19 +49,9 @@ const pruneDatabase = async () => {
 	});
 
 	await db.sequelize.query(`
-		DELETE
-			FROM student
-			WHERE 1=1
-			AND NOT EXISTS (select chapter.id from chapter where chapter.id = student.chapter);
-	`, {
-		type: db.sequelize.QueryTypes.DELETE,
-	});
-
-	await db.sequelize.query(`
-		DELETE
-			FROM student
-			WHERE 1=1
-			AND retired = 1
+		DELETE FROM student
+		where 1=1
+		AND not exists ( select es.id from entry_student es where es.student = student.id);
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
@@ -72,6 +78,27 @@ const pruneDatabase = async () => {
 
 	await db.sequelize.query(`
 		delete from change_log;
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from site where not exists (select ts.id from tourn_site ts where ts.site = site.id);
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+	await db.sequelize.query(`
+		delete from room where not exists (select site.id from site where site.id = room.site);
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+	await db.sequelize.query(`
+		delete from person_setting where tag = "paradigm"
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+	await db.sequelize.query(`
+		delete from score where tag IN ('rfd', 'comment')
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
