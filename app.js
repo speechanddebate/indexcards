@@ -37,6 +37,7 @@ const app = express();
 
 // Startup log message
 debugLogger.info('Initializing API...');
+debugLogger.info(`Loading environment ${process.env?.NODE_ENV}`);
 
 // Enable Helmet security
 app.use(helmet());
