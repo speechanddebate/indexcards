@@ -1,9 +1,32 @@
+import os from 'os';
+import config from '../../../config/config.js';
+
 export const systemStatus = {
 	GET: async (req, res) => {
-		return res.status(200).json({ message: 'OK' });
+		return res.status(200).json({
+			message  : 'OK',
+			webhost  : config.DOCKERHOST || config.HOST || 'undefined',
+			server   : os.hostname(),
+			load     : os.loadavg(),
+			uptime   : os.uptime(),
+			freemem  : os.freemem(),
+			totalmem : os.totalmem(),
+			node     : process.version,
+			runtime  : process.env?.NODE_ENV,
+		});
 	},
 	POST: async (req, res) => {
-		return res.status(200).json({ message: 'OK' });
+		return res.status(200).json({
+			message  : 'OK',
+			webhost  : config.DOCKERHOST || config.HOST || 'undefined',
+			server   : os.hostname(),
+			load     : os.loadavg(),
+			uptime   : os.uptime(),
+			freemem  : os.freemem(),
+			totalmem : os.totalmem(),
+			node     : process.version,
+			runtime  : process.env?.NODE_ENV,
+		});
 	},
 };
 
