@@ -6,12 +6,22 @@ export const futureTourns = {
 		const db = req.db;
 		let limit = '';
 
+		let timeScope = ' DATE(NOW() - INTERVAL 2 DAY)';
+
+		if (req.config.MODE === 'test') {
+			// the nine test suite tournaments are forever in the past.  This one
+			// excludes Nationals but not the other eight others.
+
+			timeScope = `'2023-08-01 00:00:00'`;
+		}
+
 		if (typeof req.params.circuit === 'number') {
 			limit = ` and exists (
 				select tourn_circuit.id from tourn_circuit
 				where tourn_circuit.tourn = tourn.id
 				and tourn_circuit.approved = 1
-				and tourn_circuit.circuit = ${req.params.circuit} ) `;
+				and tourn_circuit.circuit = ${req.params.circuit}
+			) `;
 		}
 
 		if (typeof req.query.state === 'string' && req.query.state.length === 2) {
@@ -20,7 +30,7 @@ export const futureTourns = {
 
 		const [future] = await db.sequelize.query(`
 			select tourn.id, tourn.webname, tourn.name, tourn.tz, tourn.hidden,
-				tourn.city as location, tourn.state, tourn.country, 
+				tourn.city as location, tourn.state, tourn.country,
 				CONVERT_TZ(tourn.start, '+00:00', tourn.tz) start,
 				CONVERT_TZ(tourn.end, '+00:00', tourn.tz) end,
 				CONVERT_TZ(tourn.reg_end, '+00:00', tourn.tz) reg_end,
@@ -46,7 +56,7 @@ export const futureTourns = {
 							from category_setting csd
 							where csd.category = signup.id
 							and csd.tag = 'public_signups_deadline'
-							and csd.value_date > NOW()
+							and csd.value_date > ${timeScope}
 						)
 						and not exists (
 							select csd.id
@@ -99,8 +109,9 @@ export const futureTourns = {
 				and nats.tag = 'nsda_nats'
 
 			left join school on tourn.id = school.tourn
-		where tourn.hidden = 0
-			and tourn.end > DATE(NOW() - INTERVAL 2 DAY)
+		where 1=1
+			and tourn.hidden = 0
+			and tourn.end > ${timeScope}
 			${limit}
 			and not exists (
 				select weekend.id
@@ -139,7 +150,7 @@ export const futureTourns = {
 							from category_setting csd
 							where csd.category = signup.id
 							and csd.tag = 'public_signups_deadline'
-							and csd.value_date > NOW()
+							and csd.value_date > ${timeScope}
 						)
 						and not exists (
 							select csd.id
@@ -183,7 +194,7 @@ export const futureTourns = {
 			left join school on tourn.id = school.tourn
 
 			where tourn.hidden = 0
-			and weekend.end > DATE(NOW() - INTERVAL 2 DAY)
+			and weekend.end > ${timeScope}
 			and weekend.tourn = tourn.id
 
 			group by weekend.id

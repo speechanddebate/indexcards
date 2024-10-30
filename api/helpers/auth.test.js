@@ -61,6 +61,7 @@ describe('Authentication Functions', () => {
 		assert.typeOf(req.session.perms, 'object');
 		assert.typeOf(req.session.tourn, 'object');
 		assert.equal(req.session.perms.tourn[testTourn], 'tabber');
+
 	});
 
 	it('Denies user access to a tournament it is not admin for', async () => {

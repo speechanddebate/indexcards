@@ -13,6 +13,7 @@ const pruneDatabase = async () => {
 		30371, // Dartmouth Round Robin (includes bye)
 		29714, // New England District (single elimination)
 		29807, // Rushmore District (double elimination)
+		24674, // Share Test tournament with some billing nonsense
 	];
 
 	const keeperEvents = [

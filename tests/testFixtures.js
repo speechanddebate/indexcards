@@ -53,10 +53,24 @@ export const testAdminSession = {
 
 export const testUserTournPerm = {
 	id     : 1,
-	tourn  : '1518',
+	tourn  : '29595',
 	person : '69',
 	tag    : 'tabber',
 };
+
+export const testUserAPIKey = {
+	person : 69,
+	value  : 'OpenSesame',
+	tag    : 'api_key',
+};
+
+export const testUserAPIPerms = [
+	{ person: 69, value: 1, tag: 'api_auth_caselist' },
+	{ person: 69, value: 1, tag: 'api_auth_nsda' },
+	{ person: 69, value: 1, tag: 'api_auth_share' },
+	{ person: 69, value: 1, tag: 'api_auth_iplocation' },
+	{ person: 69, value: 1, tag: 'api_auth_mason' },
+];
 
 export const testCampusUsers = [
 	{ id: 10, email: 'test10@tabroom.com', first: 'Test', last: 'Ten' },
@@ -109,4 +123,6 @@ export default {
 	testPassword,
 	testCampusUsers,
 	testCampusLogs,
+	testUserAPIKey,
+	testUserAPIPerms,
 };

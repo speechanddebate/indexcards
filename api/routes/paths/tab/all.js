@@ -4,10 +4,12 @@
 
 import { tournDashboard, tournAttendance } from '../../../controllers/tab/all/dashboard.js';
 import { eventCheckin, categoryCheckin } from '../../../controllers/tab/all/checkin.js';
+import { searchAttendees } from '../../../controllers/tab/all/search.js';
 
 export default [
 	{ path : '/tab/{tournId}/all/dashboard'                     , module : tournDashboard }  ,
 	{ path : '/tab/{tournId}/all/attendance'                    , module : tournAttendance } ,
 	{ path : '/tab/{tournId}/all/category/{categoryId}/checkin' , module : categoryCheckin } ,
 	{ path : '/tab/{tournId}/all/event/{eventId}/checkin'       , module : eventCheckin }    ,
+	{ path : '/tab/{tournId}/search/{searchString}'             , module : searchAttendees } ,
 ];
