@@ -6,12 +6,13 @@ export const searchAttendees = {
 			res.status(201).json({ message: 'Nothing to search' });
 		}
 
-		const db      = req.db;
+		const db = req.db;
 
 		const replacements = {
-			tournId: req.params.tournId,
-			searchString: req.params.searchString,
-			likeString: `${req.params.searchString}%`,
+			tournId          : req.params.tournId,
+			searchString     : req.params.searchString,
+			likeString       : `${req.params.searchString}%`,
+			doubleLikeString : `%${req.params.searchString}%`,
 		};
 
 		const entries = await db.sequelize.query(`
@@ -25,7 +26,7 @@ export const searchAttendees = {
 				and entry.unconfirmed = 0
 				and entry.id = es.entry
 				and es.student = student.id
-				and (student.last LIKE :likeString OR entry.code LIKE :likeString)
+				and (student.last LIKE :likeString OR entry.code LIKE :doubleLikeString)
 			group by entry.id
 		`, {
 			replacements,
@@ -62,7 +63,7 @@ export const searchAttendees = {
 		const exactMatches = [];
 		const partialMatches = [];
 
-		[...entries, ...judges, ...schools].forEach( (result) => {
+		[...schools, ...judges, ...entries].forEach( (result) => {
 			if (
 				(result.code && result.code === req.params.searchString)
 				|| (result.last && result.last === req.params.searchString)

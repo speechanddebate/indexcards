@@ -4,7 +4,9 @@ import Base64 from 'crypto-js/enc-base64';
 import config from '../../../../config/config';
 import db from '../../../helpers/db';
 import server from '../../../../app';
-import { testStoreCartSetting }  from '../../../../tests/testFixtures';
+import { testUserAPIKey, testStoreCartSetting } from '../../../../tests/testFixtures';
+
+const authHeader = Buffer.from(`69:${testUserAPIKey.value}`).toString('base64');
 
 describe('Payment Gateway', () => {
 
@@ -23,7 +25,7 @@ describe('Payment Gateway', () => {
 		await request(server)
 			.post(`/v1/ext/nsda/payment`)
 			.set('Accept', 'application/json')
-			.set('Authorization', `Basic ${hashDigest}`)
+			.set('Authorization', `Basic ${authHeader}`)
 			.send({
 				tourn_id   : 1,
 				invoice_id : '1234567890abcdef-1',

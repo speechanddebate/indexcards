@@ -7,9 +7,6 @@ import { testAdminSession }  from '../../../../tests/testFixtures';
 
 describe('Attendee Search Function', () => {
 
-	// Using an old tournament with stable data rather than the test tournament
-	// this time because I don't need particular baroque issues
-
 	let adminSession = {};
 
 	beforeAll(async () => {
@@ -18,38 +15,42 @@ describe('Attendee Search Function', () => {
 
 	it('Searches for tournament attendees by name', async () => {
 
-		const searchNorthwestern = 'Northwestern';
+		const searchNavy = 'Navy';
 
-		const resNU = await request(server)
-			.get(`/v1/tourn/1518/register/search/${searchNorthwestern}`)
+		// I may have overly committed to the bit there
+
+		const manOverboard = await request(server)
+			.get(`/v1/tab/29774/search/${searchNavy}`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${adminSession.userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
-		assert.typeOf(resNU.body, 'object', 'Object returned');
-		assert.typeOf(resNU.body.exactMatches, 'array', 'Array of exact matches found');
-		assert.typeOf(resNU.body.partialMatches, 'array', 'Array of partial matches found');
+		const lifePreserver = manOverboard.body;
 
-		assert.typeOf(resNU.body.partialMatches[0].id, 'number', 'ID of partial match is a number');
-		assert.typeOf(resNU.body.partialMatches[0].name, 'string', 'Name of partial match is a number');
+		assert.typeOf(lifePreserver, 'object', 'Object returned');
+		assert.typeOf(lifePreserver.exactMatches, 'array', 'Array of exact matches found');
+		assert.typeOf(lifePreserver.partialMatches, 'array', 'Array of partial matches found');
 
-		assert.typeOf(resNU.body.exactMatches[0].id, 'number', 'ID of exact matches is a number');
-		assert.equal(resNU.body.exactMatches[0].id, 42163, 'Exact match ID is correct');
-		assert.equal(resNU.body.exactMatches[0].name, 'Northwestern', 'Exact match name is correct');
-		assert.equal(resNU.body.exactMatches[0].tag, 'school', 'Exact match tag is correct');
+		assert.typeOf(lifePreserver.partialMatches[0].id, 'number', 'ID of partial match is a number');
+		assert.typeOf(lifePreserver.partialMatches[0].name, 'string', 'Name of partial match is a number');
 
-		assert.equal(resNU.body.partialMatches[0].id, 107589, 'Exact match ID is correct');
-		assert.equal(resNU.body.partialMatches[0].first, 'Peyton', 'Partial match name is correct');
-		assert.equal(resNU.body.partialMatches[0].tag, 'entry', 'Exact match tag is correct');
+		assert.typeOf(lifePreserver.exactMatches[0].id, 'number', 'ID of exact matches is a number');
+		assert.equal(lifePreserver.exactMatches[0].id, 651034, 'Exact match ID is correct');
+		assert.equal(lifePreserver.exactMatches[0].name, 'Navy', 'Exact match name is correct');
+		assert.equal(lifePreserver.exactMatches[0].tag, 'school', 'Exact match tag is correct');
 
-		// Search for an individual in that same tournament and BONUS ROUND
+		assert.equal(lifePreserver.partialMatches[0].id, 1400939, 'Exact match ID is correct');
+		assert.equal(lifePreserver.partialMatches[0].first, 'Jake', 'Partial match name is correct');
+		assert.equal(lifePreserver.partialMatches[0].tag, 'entry', 'Exact match tag is correct');
+
+		// Search for an individual in that same tournament and BONUS ROUND!
 		// make sure the special character doesn't mess with us
 
 		const searchDaisy = 'O\'Gorman';
 
 		const resDVOG = await request(server)
-			.get(`/v1/tourn/1518/register/search/${searchDaisy}`)
+			.get(`/v1/tab/29774/search/${searchDaisy}`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${adminSession.userkey}`])
 			.expect('Content-Type', /json/)
@@ -61,5 +62,6 @@ describe('Attendee Search Function', () => {
 		assert.equal(resDVOG.body.partialMatches.length, 0, 'Array of partial matches is empty');
 		assert.equal(resDVOG.body.exactMatches[0].first, 'Danielle', 'Name match found for exact match');
 		assert.equal(resDVOG.body.exactMatches[0].tag, 'judge', 'Exact match tag is correct');
+
 	});
 });

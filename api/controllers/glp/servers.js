@@ -92,7 +92,7 @@ export const getTabroomUsage = {
 
 		const tournamentCount = await req.db.sequelize.query(`
 			select
-				count (distinct tourn.id)
+				count (tourn.id)
 			from tourn
 			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > CURRENT_TIMESTAMP
