@@ -494,6 +494,7 @@ export const tournAttendance = {
 				}
 
 				const log = {
+					marker 		: req.session.person,
 					tag         : 'absent',
 					description : logMessage,
 					tourn       : tournId,
@@ -552,6 +553,7 @@ export const tournAttendance = {
 				description : logMessage,
 				tourn       : tournId,
 				panel       : panel.id,
+				marker 		: req.session.person,
 			};
 
 			if (targetType === 'student') {
