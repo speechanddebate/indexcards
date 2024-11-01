@@ -6,159 +6,162 @@ import db from '../../../helpers/db';
 import server from '../../../../app';
 import userData from '../../../../tests/testFixtures';
 
-describe.skip('Status Board', () => {
-	let testAdminSession = {};
+const testUserSession = await db.session.findByPk(userData.testUserSession.id);
+
+const testTourn = {
+	id     : 27074,
+	name   : 'Cal Berkeley Invitational',
+	round  : 1150315,
+	panel  : 7212079,
+	entry  : 5141238,
+	person : 8157,
+	judge  : 2143673,
+};
+
+describe('Status Board', () => {
 
 	beforeAll(async () => {
-		testAdminSession = await db.session.findByPk(userData.testAdminSession.id);
-		await db.sequelize.query(`
-			update ballot
-				set judge_started = NOW(), started_by = 1
-			where ballot.judge = 355
-				and ballot.panel = 37
-		`);
-		await db.sequelize.query(`update campus_log set timestamp = NOW() where person = 13 and tag = 'absent'`);
-		await db.sequelize.query(`delete from campus_log where person = 15 and tag = 'absent'`);
-		await db.sequelize.query(`delete from campus_log where person = 16 and tag = 'present'`);
+
+		const permission = {
+			person : testUserSession.person,
+			tourn  : testTourn.id,
+			tag    : 'tabber',
+		};
+
+		await db.permission.create(permission);
+
+		const campusLogs = [
+			{ 	tag         : 'present',
+				description : 'LASA marked as present by testrunner',
+				entry       : testTourn.entry,
+				marker      : testUserSession.person || 69,
+				tourn       : testTourn.id,
+				panel       : testTourn.panel,
+			},
+			{ 	tag         : 'present',
+				description : 'Cayman marked as present by testrunner',
+				person      : testTourn.person,
+				marker      : testUserSession.person || 69,
+				tourn       : testTourn.id,
+				panel       : testTourn.panel,
+			},
+		];
+
+		await db.campusLog.bulkCreate(campusLogs);
+
 	});
 
 	it('Return a correct JSON status object', async () => {
 
 		const res = await request(server)
-			.get(`/v1/tourn/1/tab/status/round/1`)
+			.get(`/v1/tab/${testTourn.id}/round/${testTourn.round}/attendance`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
 		assert.isObject(res.body, 'Response is an object');
 
 		assert.equal(
-			res.body.person[10][37].started_by,
-			'Chris Palmer',
-			'Judge Person 10 marked started by an admin');
-
-		assert.equal(
-			res.body.person[10][37].tag,
+			res.body.person[testTourn.person][testTourn.panel].tag,
 			'present',
-			'Judge Person 10 marked present by an admin');
+			'Judge Giordano marked present by an admin'
+		);
 
 		assert.equal(
-			res.body.person[11][6].tag,
+			res.body.entry[testTourn.entry][testTourn.panel].tag,
 			'present',
-			'Entry Person 11 present');
+			'LASA marked present by an admin'
+		);
 
 		assert.equal(
-			res.body.person[12][6].tag,
-			'present',
-			'Entry Person 12 present');
+			res.body.entry[testTourn.entry][testTourn.panel].markerId,
+			'69',
+			'LASA marked present by the correct admin'
+		);
 
-		assert.equal(
-			res.body.person[14][37].tag,
-			'present',
-			'Entry Person 14 present');
-
-		assert.equal(
-			res.body.person[15][37].tag,
-			'present',
-			'Entry Person 15 present');
-
-		assert.equal(
-			res.body.person[16][27].tag,
-			'absent',
-			'Entry Person 16 absent');
-
-		assert.equal(
-			res.body.person[17][27].tag,
-			'absent',
-			'Entry Person 17 absent');
-
-		assert.equal(
-			res.body.person[13][27].tag,
-			'absent',
-			'Judge Person 13 absent');
-
-		assert.notProperty(
-			res.body.person[10],
-			'6',
-			'Judge 10 not present in section 6');
 	});
 
 	it('Reflects absence & presence changes in a new status object', async() => {
 
-		// Mark Entry 16 section 27 present
+		// Mark Cayman as absent
 		await request(server)
-			.post(`/v1/tourn/1/tab/status/update`)
+			.post(`/v1/tab/${testTourn.id}/all/attendance`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
 			.send({
-				targetId      : 16,   	// person who was absent now present
-				related_thing : 27, 	// panel ID
+				targetId : testTourn.person,   	// person who was absent now present
+				panel    : testTourn.panel, 	// panel ID
+				present  : 0,
+			})
+			.expect('Content-Type', /json/)
+			.expect(201);
+
+		// Mark LASA as absent
+		await request(server)
+			.post(`/v1/tab/${testTourn.id}/all/attendance`)
+			.set('Accept', 'application/json')
+			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.send({
+				targetId   : testTourn.entry,
+				panel      : testTourn.panel,
+				targetType : `entry`,
+				present    : 0,
+			})
+			.expect('Content-Type', /json/)
+			.expect(201);
+
+		// Mark Ediger ballot as started
+		await request(server)
+			.post(`/v1/tab/${testTourn.id}/all/attendance`)
+			.set('Accept', 'application/json')
+			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.send({
+				targetId      : testTourn.judge,
+				panel         : 7212078,
+				targetType    : `judge`,
+				setting_name  : `judge_started`,
 				property_name : 0,
 			})
 			.expect('Content-Type', /json/)
 			.expect(201);
 
-		// Mark Entry 15 section 37 absent
-		await request(server)
-			.post(`/v1/tourn/1/tab/status/update`)
-			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
-			.send({
-				targetId      : 15,   	// person who was absent now present
-				related_thing : 37, 	// panel ID
-				property_name : 1,
-			})
-			.expect('Content-Type', /json/)
-			.expect(201);
-
-		// Mark Judge 355 Person 10 Section 37 as not started
-		await request(server)
-			.post(`/v1/tourn/1/tab/status/update`)
-			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
-			.send({
-				targetId      : 10,   	// person who was absent now present
-				related_thing : 37, 	// panel ID
-				setting_name  : 'judge_started',
-				another_thing : 355,	// why yes I do hate this little library I cobbled together
-				property_name : 1,		// was started, should now be unstarted
-			})
-			.expect('Content-Type', /json/)
-			.expect(201);
-
 		const newResponse = await request(server)
-			.get(`/v1/tourn/1/tab/status/round/1`)
+			.get(`/v1/tab/${testTourn.id}/round/${testTourn.round}/attendance`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testAdminSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
 		assert.isObject(newResponse.body, 'Response is indeed an object');
+		const newBody = newResponse.body;
 
 		assert.equal(
-			newResponse.body.person[16][27].tag,
+			newBody.person[testTourn.person][testTourn.panel].tag,
 			'present',
-			'After the change, Entry Person 16 present');
+			'After the change posted, Judge Giordano marked absent by an admin'
+		);
 
 		assert.equal(
-			newResponse.body.person[15][37].tag,
-			'absent',
-			'After the change, Entry Person 17 absent');
+			newBody.entry[testTourn.entry][testTourn.panel].tag,
+			'present',
+			'LASA marked present by an admin'
+		);
 
-		assert.isUndefined(
-			newResponse.body.person[10][37].started_by,
-			'After the change, Judge Person 10 not marked started');
-
+		assert.equal(
+			newBody.entry[testTourn.entry][testTourn.panel].markerId,
+			'69',
+			'LASA marked present by the correct admin'
+		);
 	});
 });
 
 describe.skip('Event Dashboard', () => {
 	it('Return a correct JSON status object for the event dashboard', async () => {
 		const res = await request(server)
-			.get(`/v1/tourn/1/tab/dashboard`)
+			.get(`/v1/tab/${testTourn.id}/status/dashboard`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userData.testAdminSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${userData.testUserSession.userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 

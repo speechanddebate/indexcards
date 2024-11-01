@@ -79,9 +79,12 @@ export const tournAttendance = {
 				cl.panel panel, cl.tag tag, cl.description description,
 					cl.timestamp timestamp,
 				person.id person,
-				tourn.tz tz
+				tourn.tz tz,
+				marker.id marker_id, marker.email marker_email,
+				marker.first marker_first, marker.last marker_last
 
-			from panel, campus_log cl, tourn, person, round
+			from (panel, campus_log cl, tourn, person, round)
+				left join person marker on marker.id = cl.marker
 
 			${queryLimit}
 
@@ -118,9 +121,13 @@ export const tournAttendance = {
 				cl.panel panel, cl.tag tag, cl.description description,
 					cl.timestamp timestamp,
 				cl.student student, cl.judge judge,
-				tourn.tz tz
+				tourn.tz tz,
+				marker.id marker_id, marker.email marker_email,
+				marker.first marker_first, marker.last marker_last
 
-			from panel, campus_log cl, tourn, round
+			from (panel, campus_log cl, tourn, round)
+
+				left join person marker on marker.id = cl.marker
 
 			${queryLimit}
 
@@ -157,9 +164,13 @@ export const tournAttendance = {
 			select
 				cl.panel panel, cl.tag tag, cl.description description,
 					cl.timestamp timestamp,
-				cl.entry entry, tourn.tz tz
+				cl.entry entry, tourn.tz tz,
+				marker.id marker_id, marker.email marker_email,
+				marker.first marker_first, marker.last marker_last
 
-			from panel, campus_log cl, tourn, round, ballot, entry
+			from (panel, campus_log cl, tourn, round, ballot, entry)
+
+				left join person marker on marker.id = cl.marker
 
 			${queryLimit}
 
@@ -184,13 +195,16 @@ export const tournAttendance = {
 				cl.tag,
 				started_by.first startFirst, started_by.last startLast,
 				judge.first judgeFirst, judge.last judgeLast,
-				tourn.tz tz
+				tourn.tz tz,
+				marker.id marker_id, marker.email marker_email,
+				marker.first marker_first, marker.last marker_last
 
 			from (panel, tourn, round, ballot, event, judge, entry)
 
 				left join person started_by on ballot.started_by = started_by.id
 				left join campus_log cl on cl.panel = panel.id and cl.person = judge.person
 					and cl.tag != 'observer'
+				left join person marker on marker.id = cl.marker
 
 			${queryLimit}
 
@@ -248,6 +262,9 @@ export const tournAttendance = {
 				tag         : attend.tag,
 				timestamp   : attend.timestamp.toJSON,
 				description : attend.description,
+				markerId    : attend.marker_id,
+				markerEmail : attend.marker_email,
+				markerName  : `${attend.marker_first} ${attend.marker_last}`,
 			};
 		});
 
@@ -269,6 +286,9 @@ export const tournAttendance = {
 						timestamp   : attend.timestamp.toJSON,
 						description : attend.description,
 						started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
+						markerId    : attend.marker_id,
+						markerEmail : attend.marker_email,
+						markerName  : `${attend.marker_first} ${attend.marker_last}`,
 					},
 				};
 			} else if (attend.judge) {
@@ -278,6 +298,9 @@ export const tournAttendance = {
 						timestamp   : attend.timestamp.toJSON,
 						description : attend.description,
 						started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
+						markerId    : attend.marker_id,
+						markerEmail : attend.marker_email,
+						markerName  : `${attend.marker_first} ${attend.marker_last}`,
 					},
 				};
 			} else if (attend.person) {
@@ -287,6 +310,9 @@ export const tournAttendance = {
 						timestamp   : attend.timestamp.toJSON,
 						description : attend.description,
 						started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
+						markerId    : attend.marker_id,
+						markerEmail : attend.marker_email,
+						markerName  : `${attend.marker_first} ${attend.marker_last}`,
 					},
 				};
 			}
@@ -299,6 +325,9 @@ export const tournAttendance = {
 					timestamp   : attend.timestamp.toJSON,
 					description : attend.description,
 					started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
+					markerId    : attend.marker_id,
+					markerEmail : attend.marker_email,
+					markerName  : `${attend.marker_first} ${attend.marker_last}`,
 				},
 			};
 		});
@@ -401,7 +430,10 @@ export const tournAttendance = {
 					judge = await db.judge.findByPk(req.body.judge);
 				}
 
-				if (parseInt(req.body.property_name) > 0) {
+				if (
+					parseInt(req.body.present) > 0
+					|| parseInt(req.body.property_name) > 0
+				) {
 
 					const eraseStart = `
 						update ballot
@@ -480,7 +512,10 @@ export const tournAttendance = {
 				return res.status(201).json(response);
 			}
 
-			if (parseInt(req.body.property_name) === 1) {
+			if (
+				parseInt(req.body.present) === 1
+				|| parseInt(req.body.property_name) === 1
+			) {
 
 				// The property already being 1 means that they're currently
 				// present, so mark them as absent.
@@ -494,6 +529,7 @@ export const tournAttendance = {
 				}
 
 				const log = {
+					marker      : req.session.person,
 					tag         : 'absent',
 					description : logMessage,
 					tourn       : tournId,
@@ -548,6 +584,7 @@ export const tournAttendance = {
 			}
 
 			const log = {
+				marker      : req.session.person,
 				tag         : 'present',
 				description : logMessage,
 				tourn       : tournId,

@@ -94,6 +94,7 @@ db.changeLog.belongsTo(db.category , { as: 'Category'   , foreignKey: 'category'
 db.changeLog.belongsTo(db.circuit  , { as: 'Circuit'    , foreignKey: 'circuit' });
 
 db.campusLog.belongsTo(db.person  , { as: 'Person'  , foreignKey: 'person' });
+db.campusLog.belongsTo(db.person  , { as: 'Marker'  , foreignKey: 'marker' });
 db.campusLog.belongsTo(db.tourn   , { as: 'Tourn'   , foreignKey: 'tourn' });
 db.campusLog.belongsTo(db.panel   , { as: 'Panel'   , foreignKey: 'panel' });
 db.campusLog.belongsTo(db.section , { as: 'Section' , foreignKey: 'panel' });
@@ -573,6 +574,7 @@ db.person.hasMany(db.judge        , { as : 'Judges'        , foreignKey : 'perso
 db.person.hasMany(db.chapterJudge , { as : 'ChapterJudges' , foreignKey : 'person' });
 db.person.hasMany(db.conflict     , { as : 'Conflicts'     , foreignKey : 'person' });
 db.person.hasMany(db.changeLog    , { as : 'ChangeLogs'    , foreignKey : 'person' });
+db.person.hasMany(db.campusLog    , { as : 'MarkedLogs'    , foreignKey : 'marker' });
 db.person.hasMany(db.permission   , { as : 'Permissions'   , foreignKey : 'person' });
 db.person.hasMany(db.studentVote  , { as : 'StudentVotes'  , foreignKey : 'voter' });
 db.person.hasMany(db.caseList     , { as : 'CaseLists'     , foreignKey : 'person' });
