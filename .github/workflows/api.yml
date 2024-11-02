@@ -13,6 +13,9 @@ env:
     TZ: 'America/Chicago'
     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     NODE_ENV: 'test'
+    CODE_PATH: '/home/runner/work/indexcards/indexcards'
+    DB_USER: 'tabroom'
+    DB_PASS: 'tabroom'
     HUSKY: 0
 
 jobs:
@@ -33,18 +36,18 @@ jobs:
 
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Shutdown Ubuntu MySQL
       run: sudo service mysql stop
 
     - name: Load local database
-      run: mysql -h 127.0.0.1 -P 3306 -u root -ptabroom tabroom < ./tests/tabroom.sql
+      run: mysql -h 127.0.0.1 -P 3306 -u root -ptabroom tabroom < ./tests/test.sql
 
     - name: Get node
       uses: actions/setup-node@v1
       with:
-        node-version: 18.2.0
+        node-version: 18.17.1
 
     - name: Install packages
       run: npm install

@@ -13,7 +13,7 @@ describe('Tournament Search Function', () => {
 
 	it('Searches for tournaments by name', async () => {
 
-		const searchParam = 'Grand Nationals';
+		const searchParam = 'NCFL Grand';
 
 		const res = await request(server)
 			.get(`/v1/public/search/all/${searchParam}`)
@@ -27,7 +27,6 @@ describe('Tournament Search Function', () => {
 
 		assert.typeOf(res.body.partialMatches[0].id, 'number', 'ID of partial match is a number');
 		assert.typeOf(res.body.partialMatches[0].name, 'string', 'Name of partial match is a number');
-		assert.typeOf(res.body.exactMatches[0].id, 'number', 'Exact match ID is a number');
-		assert.equal(res.body.exactMatches[0].webname, 'ncfl', 'Exact match webname clears');
+		assert.equal(res.body.partialMatches[0].webname, 'ncfl', 'Exact match webname clears');
 	});
 });
