@@ -14,13 +14,12 @@ env:
     REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
     REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-    CODE_PATH: "/home/runner/work/indexcards/indexcards"
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set Docker Tag by commit
       id: get_version

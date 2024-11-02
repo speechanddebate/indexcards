@@ -13,6 +13,7 @@ env:
     TZ: 'America/Chicago'
     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     NODE_ENV: 'test'
+    CODE_PATH: '/home/runner/work/indexcards/indexcards'
     HUSKY: 0
 
 jobs:
@@ -33,7 +34,7 @@ jobs:
 
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Shutdown Ubuntu MySQL
       run: sudo service mysql stop
