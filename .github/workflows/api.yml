@@ -44,7 +44,7 @@ jobs:
     - name: Get node
       uses: actions/setup-node@v1
       with:
-        node-version: 18.2.0
+        node-version: 18.17.1
 
     - name: Install packages
       run: npm install
