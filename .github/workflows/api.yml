@@ -39,7 +39,7 @@ jobs:
       run: sudo service mysql stop
 
     - name: Load local database
-      run: mysql -h 127.0.0.1 -P 3306 -u root -ptabroom tabroom < ./tests/tests.sql
+      run: mysql -h 127.0.0.1 -P 3306 -u root -ptabroom tabroom < ./tests/test.sql
 
     - name: Get node
       uses: actions/setup-node@v1
