@@ -8,10 +8,9 @@ export const config = {
 	RATE_MAX              : 100000,
 	RATE_DELAY            : 0,
 	BASE_URL 			  : 'http://api.dev.tabroom.com',
-	LOGIN_URL             : 'http://old.dev.tabroom.com/user/login/login.mhtml',
+	LOGIN_URL             : 'http://mason.dev.tabroom.com/user/login/login.mhtml',
 	DOCKERHOST		      : 'devenv',
 	CODE_PATH             : '/www/indexcards',
-	LOG_PATH			  : '/var/log/indexcards',
 	MAIL_FROM			  : 'live@www.tabroom.com',
 	MAIL_SERVER			  : 'localhost',
 	MAIL_PORT			  : 25,
@@ -94,6 +93,7 @@ switch (env) {
 		config.DB_USER          = 'tabroom';
 		config.DB_PASS          = '';
 		config.MESSAGE_RATE_MAX = '1000000000';
+		config.LOG_PATH         = '/var/log/indexcards',
 		break;
 
 	case 'development':
@@ -102,14 +102,16 @@ switch (env) {
 		config.DB_PASS          = 'lolz',
 		config.MESSAGE_RATE_MAX = '1000000000';
 		config.sequelizeOptions.logging = false;
+		config.LOG_PATH         = '/var/log/indexcards',
 		break;
 
 	case 'test':
-		config.DB_HOST          = 'localhost';
-		config.DB_USER          = 'tabroom';
-		config.DB_PASS          = 'DoNotBeANoob';
-		config.MESSAGE_RATE_MAX = '1000000000';
+		config.DB_HOST                  = 'localhost';
+		config.DB_USER                  = 'tabroom';
+		config.DB_PASS                  = 'DoNotBeANoob';
+		config.MESSAGE_RATE_MAX         = '1000000000';
 		config.sequelizeOptions.logging = false;
+		config.MODE                     = 'test';
 		break;
 
 	default:

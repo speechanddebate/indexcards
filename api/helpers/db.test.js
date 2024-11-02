@@ -16,14 +16,14 @@ describe('Data Access Helpers', () => {
 	const testDate =  new Date();
 
 	beforeAll(async () => {
-		testTourn = await db.summon(db.tourn, 1);
+		testTourn = await db.summon(db.tourn, 29807);
 		await db.sequelize.query(`delete from tourn_setting where tourn = 1 and tag like "test_%"`);
 	});
 
 	it('Tournament, I summon thee and all thy settings!', async () => {
 		assert.typeOf(testTourn, 'object');
 		assert.equal(testTourn.table, 'tourn');
-		assert.equal(testTourn.id, 1);
+		assert.equal(testTourn.id, 29807);
 	});
 
 	it('Creates settings for the test tournament', async () => {
