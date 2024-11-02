@@ -9,9 +9,9 @@
 		"production": "NODE_ENV='production' NODE_OPTIONS='--max_old_space_size=200' pm2 -i 16 start app.js --name indexcards --node-args='--experimental-specifier-resolution=node --use_strict' -e /var/log/indexcards/error.log",
 		"staging": "NODE_ENV='staging' NODE_OPTIONS='--max_old_space_size=1000' pm2 -i 4 start app.js --name indexcards --node-args='--experimental-specifier-resolution=node --use_strict' -o /var/log/indexcards/output.log -e /var/log/indexcards/error.log ",
 		"dev": "TZ='UTC' NODE_ENV='development' NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' nodemon --use-strict app.js",
-		"test": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest watch",
-		"test-ci": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest --run",
-		"cover": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest --coverage",
+		"test": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest watch",
+		"test-ci": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest --watch false --run",
+		"cover": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest --coverage",
 		"lint": "eslint --ignore-path .gitignore .",
 		"prepare": "husky"
 	},
