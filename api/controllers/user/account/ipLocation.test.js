@@ -2,6 +2,9 @@ import request from 'supertest';
 import { assert } from 'chai';
 import { vi } from 'vitest';
 import server from '../../../../app';
+import { testUserAPIKey } from '../../../../tests/testFixtures';
+
+const authHeader = Buffer.from(`69:${testUserAPIKey.value}`).toString('base64');
 
 vi.mock('@maxmind/geoip2-node', () => ({
 	Reader: {
@@ -26,8 +29,9 @@ vi.mock('@maxmind/geoip2-node', () => ({
 describe('IP Location Results', () => {
 	it('Returns correct location data', async () => {
 		const res = await request(server)
-			.get(`/v1/user/iplocation/1.1.1.1`)
+			.get(`/v1/ext/iplocation/1.1.1.1`)
 			.set('Accept', 'application/json')
+			.set('Authorization', `Basic ${authHeader}`)
 			.expect('Content-Type', /json/)
 			.expect(200);
 

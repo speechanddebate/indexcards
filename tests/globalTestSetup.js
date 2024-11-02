@@ -1,53 +1,67 @@
 import db from '../api/helpers/db';
+import config from '../config/config.js';
 import testData from './testFixtures';
 
 export const setup = async () => {
+
+	const tourncount = await db.sequelize.query(
+		`select count(id) as count from tourn`,
+		{ type: db.sequelize.QueryTypes.SELECT },
+	);
+
+	if (tourncount?.[0]?.count === 9) {
+
+		const firstPromises = [];
+
+		firstPromises.push(db.sequelize.query( `delete from session where person > 3 and person < 100 ` ));
+		firstPromises.push(db.sequelize.query( `delete from campus_log where id < 100`));
+		firstPromises.push(db.sequelize.query( `delete from campus_log where person > 3 and person < 100` ));
+		firstPromises.push(db.sequelize.query( `delete from person where id > 3 and id < 100` ));
+
+		await Promise.all(firstPromises);
+
+		const secondPromises = [];
+
+		secondPromises.push(db.person.create(testData.testUser));
+		secondPromises.push(db.person.create(testData.testAdmin));
+
+		await Promise.all(secondPromises);
+
+		const thirdPromises = [];
+
+		thirdPromises.push(db.session.create(testData.testUserSession));
+		thirdPromises.push(db.permission.create(testData.testUserTournPerm));
+		thirdPromises.push(db.session.create(testData.testAdminSession));
+		thirdPromises.push(db.person.bulkCreate(testData.testCampusUsers));
+		thirdPromises.push(db.personSetting.create(testData.testUserAPIKey));
+		thirdPromises.push(db.personSetting.bulkCreate(testData.testUserAPIPerms));
+
+		await Promise.all(thirdPromises);
+
+		console.log(`Test data properly loaded and ready to run`);
+		return;
+	}
+
+	console.log(`Database ${config.DB_DATABASE} is not loaded with the proper test data `);
+	console.log(`Test data should live in a separate database connected via the 'development' env `);
+	console.log(`and loaded from /indexcards/test/test.sql.  Yes this is a lazy way to do it, but `);
+	console.log(`until Tabroom has six developers working with me, that's how it's gonna be.`);
+
+	console.log(``);
+	console.log(`Someday I might automate this but node and command line shells don't play well together.`);
+	console.log(``);
+
+	throw new Error('No test data found');
+};
+
+export const teardown = async () => {
+
+	console.log(`Cleanup commencing`);
+
 	await db.sequelize.query( `delete from session where person > 3 and person < 100 ` );
 	await db.sequelize.query( `delete from campus_log where id < 100`);
 	await db.sequelize.query( `delete from campus_log where person > 3 and person < 100` );
 	await db.sequelize.query( `delete from person where id > 3 and id < 100` );
 
-	await db.person.create(testData.testUser);
-	await db.session.create(testData.testUserSession);
-	await db.person.create(testData.testAdmin);
-	await db.session.create(testData.testAdminSession);
-	await db.person.bulkCreate(testData.testCampusUsers);
-
-	// Campus logs test data is failing because of foreign key constraints with
-	// missing tournament events Will likely not matter if we plan to use a
-	// real production database for tests, so just disabling associated tests
-	// of the status board for now
-	//
-	// await db.campusLog.bulkCreate(testData.testCampusLogs);
-
-	await db.permission.create(testData.testUserTournPerm);
-};
-
-export const teardown = async () => {
-	try {
-		const testUser = await db.person.findByPk(testData.testUser.id);
-		if (testUser) {
-			await testUser.destroy();
-		}
-
-		const testAdmin = await db.person.findByPk(testData.testAdmin.id);
-		if (testAdmin) {
-			await testAdmin.destroy();
-		}
-
-		const testUserSession = await db.session.findByPk(testData.testUserSession.id);
-		if (testUserSession) {
-			await testUserSession.destroy();
-		}
-
-		const testAdminSession = await db.session.findByPk(testData.testAdminSession.id);
-		if (testAdminSession) {
-			await testAdminSession.destroy();
-		}
-		await db.sequelize.query('delete from campus_log where person > 3 and person < 100');
-
-		await db.sequelize.close();
-	} catch (err) {
-		console.log(err);
-	}
+	console.log(`Cleanup done`);
 };
