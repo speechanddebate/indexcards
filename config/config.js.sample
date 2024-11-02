@@ -93,7 +93,7 @@ switch (env) {
 		config.DB_USER          = 'tabroom';
 		config.DB_PASS          = '';
 		config.MESSAGE_RATE_MAX = '1000000000';
-		config.LOG_PATH         = '/var/log/indexcards',
+		config.LOG_PATH         = '/var/log/indexcards';
 		break;
 
 	case 'development':
@@ -102,7 +102,7 @@ switch (env) {
 		config.DB_PASS          = 'lolz',
 		config.MESSAGE_RATE_MAX = '1000000000';
 		config.sequelizeOptions.logging = false;
-		config.LOG_PATH         = '/var/log/indexcards',
+		config.LOG_PATH         = '/var/log/indexcards';
 		break;
 
 	case 'test':
