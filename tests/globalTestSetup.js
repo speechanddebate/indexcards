@@ -56,10 +56,13 @@ export const setup = async () => {
 
 export const teardown = async () => {
 
+	console.log(`Cleanup commencing`);
+
 	await db.sequelize.query( `delete from session where person > 3 and person < 100 ` );
 	await db.sequelize.query( `delete from campus_log where id < 100`);
 	await db.sequelize.query( `delete from campus_log where person > 3 and person < 100` );
 	await db.sequelize.query( `delete from person where id > 3 and id < 100` );
 
-	return 'Done';
+	console.log(`Cleanup done`);
+
 };
