@@ -243,9 +243,12 @@ export const inboxMessage = async (inputData) => {
 		sender_string : inputData.replyTo || inputData.from,
 		url           : inputData.url,
 		email         : inputData.emailId,
-		tourn         : inputData.tourn,
 		created_at    : new Date(),
 	};
+
+	if (inputData.tourn) {
+		message.tourn = inputData.tourn;
+	}
 
 	if (message.email) {
 		delete message.body;
