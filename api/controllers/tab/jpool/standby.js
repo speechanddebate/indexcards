@@ -45,8 +45,6 @@ export const placeJudgesStandby = {
 				type: req.db.sequelize.QueryTypes.SELECT,
 			});
 
-			console.log(rawJudges);
-
 		} else if (req.body.categoryId) {
 
 			const standbyJudgeQuery = `

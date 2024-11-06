@@ -16,17 +16,12 @@ const syncAllLearn = async () => {
 	const promises = [];
 
 	courses.forEach( (course) => {
-		console.log(`Syncing ${course.label}`);
 		const promise = syncLearnByCourse(course);
 		promises.push(promise);
 	});
 
 	await Promise.all(promises);
-
-	promises.forEach( (promise) => {
-		console.log(promise);
-	});
-	console.log(`${courses.length} courses synchronized `);
+	return `${courses.length} courses synchronized`;
 };
 
 await syncAllLearn();

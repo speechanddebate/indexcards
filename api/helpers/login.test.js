@@ -30,7 +30,7 @@ describe('Login Password Validation', () => {
 			uuid     : uuidv4(),
 			params   : {
 				email    : userData.testUser.email,
-				password : `${userData.testPassword}garbage`,
+				password : `puregarbage`,
 			},
 		};
 

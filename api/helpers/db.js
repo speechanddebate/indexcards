@@ -38,7 +38,7 @@ const files = await fs.promises.readdir(`${config.CODE_PATH || '.'}/api/models`)
 // Prevent me from wondering what the hell is going on for 20 minutes...again
 
 if (!config.CODE_PATH) {
-	console.log(`You must defined CODE_PATH to the location of your code tree in the config file`);
+	errorLogger.error(`You must defined CODE_PATH to the location of your code tree in the config file`);
 	process.exit();
 }
 

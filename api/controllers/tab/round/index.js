@@ -176,10 +176,6 @@ export const roundDecisionStatus = {
 
 		rawBallots.forEach( (ballot) => {
 
-			if (ballot.bye || ballot.forfeit) {
-				console.log(ballot);
-			}
-
 			if (!ballot.judge && !ballot.pbye) {
 
 				round.panels[ballot.panel] = round.panels[ballot.panel] || 0;
