@@ -10,15 +10,18 @@ const login = async (req) => {
 
 	if (req.params.email && req.params.password) {
 
-		const person = await db.person.findOne({
-			where: { email: req.params.email },
-			include : [
-				{ model: db.personSetting, as: 'Settings' },
-			],
+		const persons = await db.sequelize.query(`
+			select person.id, person.password, person.site_admin, person.email
+			from person
+			where person.email = :email
+		`, {
+			replacements: { email: req.params.email },
+			type: db.sequelize.QueryTypes.SELECT,
 		});
 
-		if (typeof person === 'object') {
+		if (persons.length > 0) {
 
+			const person = persons[0];
 			const hash = crypt(req.params.password, person.password);
 
 			if (hash !== person.password) {
@@ -26,7 +29,6 @@ const login = async (req) => {
 			}
 
 			const now = new Date();
-
 			const userkey = crypt(req.uuid, person.password);
 
 			const sessionTemplate = {

@@ -151,8 +151,7 @@ export const getInstanceStatus = {
 				`http://haproxy.${config.INTERNAL_DOMAIN}:9000/;json`,
 			);
 		} catch (err) {
-			console.log(`haproxy returned error`);
-			console.log(err);
+			errorLogger.error(err);
 			return;
 		}
 

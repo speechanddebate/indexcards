@@ -53,8 +53,6 @@ const s3Client = {
 
 	mv: async (filepath, dest) => {
 
-		console.log(config.AWS.Bucket);
-
 		const cpCommand = new CopyObjectCommand({
 			CopySource : `${config.AWS.Bucket}/${filepath}`,
 			Bucket     : config.AWS.Bucket,

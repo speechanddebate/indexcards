@@ -302,8 +302,6 @@ export const invalidateCache = async (tournId, roundId) => {
 			errorLogger.info(err);
 		}
 	}
-
-	console.log(`Invalidated cache for ${roundId}`);
 };
 
 export default writeRound;

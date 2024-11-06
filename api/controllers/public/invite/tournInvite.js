@@ -68,9 +68,7 @@ export const getInvite = {
 
 				for ( const setting of event.Settings ) {
 
-					if (settingsFilter.includes(setting.tag)) {
-						console.log(`nope`);
-					} else {
+					if (!settingsFilter.includes(setting.tag)) {
 						if (setting.value === 'date') {
 							event.settings[setting.tag] = new Date(setting.value_date);
 						} else if (setting.value === 'json' && setting.value_text) {

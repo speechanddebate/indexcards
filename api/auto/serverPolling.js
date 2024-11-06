@@ -32,7 +32,7 @@ const checkServerExistence = async () => {
 		});
 	}
 
-	console.log(`Server existence checked. ${activeMachines.length} actually exist.`);
+	return `Server existence checked. ${activeMachines.length} actually exist.`;
 };
 
 await checkServerExistence();

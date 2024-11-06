@@ -253,9 +253,7 @@ const syncNAUDLChapterRoster = async (chapterId, naudlId) => {
 	});
 
 	if (createSettings.length > 0) {
-		console.log(`I have created ${createSettings.length} settings`);
-		const reply = await db.studentSetting.bulkCreate(createSettings);
-		console.log(`with reply ${JSON.stringify(reply)} `);
+		await db.studentSetting.bulkCreate(createSettings);
 	}
 
 	return studentsById;
@@ -313,7 +311,7 @@ export const syncExistingNAUDLStudents = async () => {
 	try {
 		await db.studentSetting.bulkCreate(settings.create);
 	} catch (err) {
-		console.log(err);
+		errorLogger.info(err);
 	}
 
 	await db.sequelize.query(`
