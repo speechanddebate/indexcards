@@ -231,7 +231,45 @@ const pruneDatabase = async () => {
 			'nats_appearances',
 			'nsda_joined',
 			'districts_eligible'
+			'ada',
+			'birthdate',
+			'diet',
+			'jot_id',
+			'naudl_id',
+			'naudl_updated',
+			'override_appearances',
+			'race',
+			'school_sid',
+			'student_email'
 		)
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from follower where id NOT IN (
+			1420670,
+			1453992,
+			1431214
+		)
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from room where not exists (select panel.id from panel where panel.room = room.id);
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from rpool where not exists (select jpr.id from rpool_round jpr where jpr.rpool = rpool.id);
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from jpool where not exists (select jpr.id from jpool_round jpr where jpr.jpool = jpool.id);
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
@@ -258,6 +296,73 @@ const pruneDatabase = async () => {
 			'hotel',
 			'eligibility_forms',
 			'release_forms'
+			'contact',
+			'judging_unmet',
+			'notes',
+			'notes_log',
+			'no_judge_warnings',
+			'purchase_order',
+			'purchase_order_at',
+			'purchase_order_by',
+			'refund_address',
+			'refund_payable',
+			'rejected',
+			'rejected_at',
+			'rejected_by',
+			'signup_active',
+			'signup_deadline',
+			'signup_inform_parents',
+			'signup_notice',
+			'signup_show_fees',
+			'single_entry_letters',
+			'state',
+			'tbook_coaches',
+			'tbook_coach_ids',
+			'unpaid_onsite',
+			'upload_file',
+			'upload_file_timestamp'
+		)
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from judge_setting where tag IN (
+			'ballot_trained',
+			'cfl_tab_first',
+			'cfl_tab_second',
+			'cfl_tab_third',
+			'conflicts',
+			'diverse',
+			'email',
+			'final_bio',
+			'first_year',
+			'gender',
+			'hire_approved',
+			'hire_offer',
+			'incomplete',
+			'neutral',
+			'nomination',
+			'notes',
+			'notes_processed',
+			'nsda',
+			'online_hybrid',
+			'phone',
+			'prelim_jpool',
+			'prelim_jpool_name',
+			'public_signup',
+			'public_signup_at',
+			'public_signup_by',
+			'public_signup_id',
+			'public_signup_pending',
+			'qual_history',
+			'registered_by',
+			'reg_answers',
+			'scorer',
+			'self_registered',
+			'special_job',
+			'sub_only',
+			'tab_room'
 		)
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
@@ -265,6 +370,7 @@ const pruneDatabase = async () => {
 
 	await db.sequelize.query(`
 		delete from person_setting where tag IN (
+			'accesses',
 			'paradigm',
 			'paradigm_timestamp',
 			'pass_changekey',
@@ -288,6 +394,33 @@ const pruneDatabase = async () => {
 			'last_login_ip',
 			'inbox_accessed',
 			'default_chapter'
+			'ban_reason',
+			'campus_test_private',
+			'campus_test_public',
+			'congress_topic',
+			'default_chapter',
+			'diamonds',
+			'email_confirmation_key',
+			'email_unconfirmed',
+			'fontsize',
+			'hof',
+			'keyboard_shortcut',
+			'last_login_ip',
+			'no_ads_plz',
+			'nsda_admin',
+			'nsda_membership',
+			'nsda_paid',
+			'nsda_points',
+			'pass_changekey',
+			'pass_change_expires',
+			'pass_change_ip',
+			'please_stop_screaming',
+			'push_notify',
+			'scream_in_pain',
+			'judge_training_88',
+			'judge_tr_meta_88',
+			'learn_sync',
+			'nsda_beta'
 		)
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
@@ -301,6 +434,24 @@ const pruneDatabase = async () => {
 
 	await db.sequelize.query(`
 		delete from email
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from invoice
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from fine
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from message
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
@@ -320,6 +471,68 @@ const pruneDatabase = async () => {
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
+
+	await db.sequelize.query(`
+		delete from entry_setting where tag IN (
+			'accepted_at',
+			'accepted_by',
+			'alternate',
+			'author',
+			'autoqual',
+			'ballot_notes',
+			'bibliography',
+			'coach_points',
+			'incomplete_reasons',
+			'lastchance',
+			'nsda_house_bloc',
+			'nsda_vacate',
+			'observers',
+			'pairing_seed',
+			'positions',
+			'publisher',
+			'publish_date',
+			'publish_isbn',
+			'publish_print_date',
+			'publish_url',
+			'rejected_at',
+			'rejected_by',
+			'reregistered',
+			'script_file',
+			'script_timestamp',
+			'signup_by',
+			'status',
+			'student_ballot',
+			'supp_log',
+			'tba',
+			'title',
+			'topic'
+		)
+	`, {
+		type : db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from chapter_setting where tag IN (
+			'ceeb',
+			'coaches',
+			'coach_ballot_review',
+			'ipeds',
+			'jot_id',
+			'nats_appearances',
+			'naudl',
+			'naudl_id',
+			'nces',
+			'nsda_charter',
+			'nsda_degrees',
+			'nsda_paid',
+			'nsda_status',
+			'nsda_strength',
+			'self_prefs'
+		)
+	`, {
+		type : db.sequelize.QueryTypes.DELETE,
+	});
+
 };
 
 await pruneDatabase();
