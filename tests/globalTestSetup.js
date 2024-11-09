@@ -9,7 +9,7 @@ export const setup = async () => {
 		{ type: db.sequelize.QueryTypes.SELECT },
 	);
 
-	if (tourncount?.[0]?.count === 9) {
+	if (tourncount?.[0]?.count === 10) {
 
 		const firstPromises = [];
 
@@ -43,9 +43,12 @@ export const setup = async () => {
 	}
 
 	console.log(`Database ${config.DB_DATABASE} is not loaded with the proper test data `);
-	console.log(`Test data should live in a separate database connected via the 'development' env `);
+	console.log(`Test data should live in a separate database connected via the ${config.MODE} env `);
 	console.log(`and loaded from /indexcards/test/test.sql.  Yes this is a lazy way to do it, but `);
 	console.log(`until Tabroom has six developers working with me, that's how it's gonna be.`);
+	console.log(``);
+
+	console.log(`I expected 10 tournaments and found ${tourncount?.[0]?.count}`);
 
 	console.log(``);
 	console.log(`Someday I might automate this but node and command line shells don't play well together.`);

@@ -281,6 +281,8 @@ export const roundDecisionStatus = {
 				round.out[ballot.flight][ballot.judge] = true;
 				round.panels[ballot.panel] += 10;
 				const started = new Date(ballot.startTime);
+				const decimals = parseFloat(`.${started.getUTCHours()}${addZero(started.getUTCMinutes())}`);
+				round.panels[ballot.panel] += decimals;
 				judge.text = `${started.getUTCHours()}:${addZero(started.getUTCMinutes())}`;
 			} else {
 				round.out[ballot.flight][ballot.judge] = true;
