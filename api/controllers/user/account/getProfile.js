@@ -53,7 +53,6 @@ export const getProfile = {
 		delete personData.password;
 
 		personData.session = req.session;
-
 		return res.status(200).json(personData);
 	},
 };
