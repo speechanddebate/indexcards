@@ -7,19 +7,23 @@ import { blastRoundPairing } from '../controllers/tab/round/blast.js';
 const autoBlastRounds = async () => {
 
 	const pendingQueues = await db.sequelize.query(`
-		select autoqueue.*,	tourn.id tournId
-			from autoqueue, round, event, tourn
-		where (autoqueue.active_at < NOW() OR autoqueue.active_at IS NULL)
-			and autoqueue.tag IN ("blast", "publish", "blast_publish")
-			and autoqueue.round = round.id
+		select aq.id, aq.tag, aq.created_at,
+			round.id roundId, round.name, round.label, round.published,
+			event.tourn tournId, event.type eventType, event.abbr eventAbbr
+		from (autoqueue aq, round, event, tourn)
+		where (aq.active_at < NOW() OR aq.active_at IS NULL)
+			and aq.tag IN ("blast", "publish", "blast_publish")
+			and aq.round = round.id
 			and round.event = event.id
 			and event.tourn = tourn.id
-		order by created_at
+		order by aq.created_at
 	`, {
 		type: db.Sequelize.QueryTypes.SELECT,
 	});
 
-	await db.sequelize.query(`
+	const promises = [];
+
+	const aq = db.sequelize.query(`
 		delete autoqueue.*
 			from autoqueue
 		where (autoqueue.active_at < NOW() OR autoqueue.active_at IS NULL)
@@ -28,79 +32,75 @@ const autoBlastRounds = async () => {
 		type: db.Sequelize.QueryTypes.DELETE,
 	});
 
-	for await (const queue of pendingQueues) {
+	promises.push(aq);
 
-		const rounds = await db.sequelize.query(`
-			select
-				round.id, round.name, round.label, round.published,
-				event.tourn tournId, event.type eventType
-			from round, event
-			where round.id = :roundId
-			and round.event = event.id
-		`, {
-			replacements: {
-				roundId: queue.round,
-			},
-			type: db.Sequelize.QueryTypes.SELECT,
-		});
+	pendingQueues.forEach( async (round) => {
 
-		if (rounds.length < 1) {
-			return;
-		}
+		// Set the round to publish and process the various dependencies
+		// thereof.
 
-		const round = rounds.shift();
-
-		// Set the round to publish and process the various dependencies thereof.
-		if (queue.tag !== 'blast') {
+		if (round.tag !== 'blast') {
 
 			if (round.published !== 1) {
-				await db.sequelize.query(`
+
+				const publish = db.sequelize.query(`
 					update round set published = 1 where round.id = :roundId
 				`, {
 					replacements: {
-						roundId: round.id,
+						roundId: round.roundId,
 					},
 					type: db.Sequelize.QueryTypes.UPDATE,
 				});
+
+				promises.push(publish);
 			}
 
 			if (round.eventType === 'debate') {
 				// Docshare rooms
-				await shareRooms(round.id);
+				const share = shareRooms(round.roundId);
+				promises.push(share);
 			}
 
 			if (round.eventType === 'debate' || round.eventType === 'wsdc') {
 				// Publish Flips
-				await scheduleFlips(round.id);
+				const flips = scheduleFlips(round.roundId);
+				promises.push(flips);
 			}
 
 			// Invalidate Caches
 			if (process.env.NODE_ENV === 'production') {
-				await invalidateCache(round.tournId, round.id);
+				const production = invalidateCache(round.tournId, round.roundId);
+				promises.push(production);
 			}
 		}
 
-		if (queue.tag !== 'publish') {
-
+		if (round.tag !== 'publish') {
 			// Blast the round! BLAST IT!
 
 			const req = {
 				body: {
-					sender     : queue.created_by,
+					sender     : round.created_by,
 					noResponse : true,
-					message    : queue.message,
+					message    : round.message,
+				},
+				session : {
+					person : round.created_by,
 				},
 				params: {
-					roundId: round.id,
+					roundId: round.roundId,
 					tournId: round.tournId,
 				},
 				db,
 			};
 
 			const res = {};
-			await blastRoundPairing.POST(req, res);
+			const blast = blastRoundPairing.POST(req, res);
+			promises.push(blast);
 		}
-	}
+
+	});
+
+	await Promise.all(promises);
 };
 
 await autoBlastRounds();
