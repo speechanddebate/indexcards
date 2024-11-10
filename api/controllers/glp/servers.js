@@ -466,7 +466,7 @@ export const changeInstanceCount = {
 		}
 
 		const resultMessages = [
-			`${req.session.person.first} ${req.session.person.last} has initiated a cloud services change:`,
+			`${req.session.name} ${req.session.email} has initiated a cloud services change:\n`,
 			'\n',
 		];
 
@@ -499,7 +499,7 @@ export const changeInstanceCount = {
 						resultMessages.push('');
 						resultMessages.push(`Machine ${hostname} deletion request successful.\n`);
 						resultMessages.push(`Linode ID ${machine.linode_id} UUID ${machine.uuid} terminating\n`);
-						resultMessages.push(deletionReply.data);
+						resultMessages.push(`${JSON.stringify(deletionReply.data)} \n`);
 
 						destroyMe.push(hostname);
 
