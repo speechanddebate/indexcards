@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import db from './db';
+import db from './db.js';
 
 describe('Data Access Helpers', () => {
 

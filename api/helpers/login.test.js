@@ -1,9 +1,9 @@
 import { assert } from 'chai';
 import { v4 as uuidv4 } from 'uuid';
-import config from '../../config/config';
-import db from './db';
-import login from './login';
-import userData from '../../tests/testFixtures';
+import config from '../../config/config.js';
+import db from './db.js';
+import login from './login.js';
+import userData from '../../tests/testFixtures.js';
 
 describe('Login Password Validation', () => {
 	it('Authenticates the password correctly for a user', async () => {

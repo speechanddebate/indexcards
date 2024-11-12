@@ -1,4 +1,4 @@
-import { blastSectionPairing, blastSectionMessage } from '../../../controllers/tab/section/blast';
+import { blastSectionPairing, blastSectionMessage } from '../../../controllers/tab/section/blast.js';
 
 export default [
 	{ path : '/tab/{tournId}/section/{sectionId}/blastPairing' , module : blastSectionPairing },

@@ -1,5 +1,5 @@
-import { emailBlast } from '../../../helpers/mail';
-import { debugLogger } from '../../../helpers/logger';
+import { emailBlast } from '../../../helpers/mail.js';
+import { debugLogger } from '../../../helpers/logger.js';
 
 export const acceptPayPalPayment = {
 

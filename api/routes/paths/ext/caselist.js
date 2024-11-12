@@ -1,8 +1,8 @@
 // These paths are ones that require a caselist_key
-import getPersonChapters from '../../../controllers/ext/caselist/getPersonChapters';
-import getPersonRounds from '../../../controllers/ext/caselist/getPersonRounds';
-import getPersonStudents from '../../../controllers/ext/caselist/getPersonStudents';
-import postCaselistLink from '../../../controllers/ext/caselist/postCaselistLink';
+import getPersonChapters from '../../../controllers/ext/caselist/getPersonChapters.js';
+import getPersonRounds from '../../../controllers/ext/caselist/getPersonRounds.js';
+import getPersonStudents from '../../../controllers/ext/caselist/getPersonStudents.js';
+import postCaselistLink from '../../../controllers/ext/caselist/postCaselistLink.js';
 
 export default [
 	{ path : '/ext/caselist/chapters' , module : getPersonChapters } ,

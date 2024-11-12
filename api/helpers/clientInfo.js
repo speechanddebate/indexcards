@@ -1,5 +1,5 @@
 import { Reader } from '@maxmind/geoip2-node';
-import config from '../../config/config';
+import config from '../../config/config.js';
 
 export const findLocation = async (ipAddress) => {
 

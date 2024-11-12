@@ -1,4 +1,4 @@
-import { errorLogger } from '../../../helpers/logger';
+import { errorLogger } from '../../../helpers/logger.js';
 
 // Functions that manage overall tournament access.
 

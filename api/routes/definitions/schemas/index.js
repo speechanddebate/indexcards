@@ -1,18 +1,18 @@
-import Err from './Err';
-import Person from './Person';
-import LoginRequest from './LoginRequest';
-import Session from './Session';
-import School from './School';
-import SchoolSetting from './SchoolSetting';
-import Chapter from './Chapter';
-import Event from './Event';
-import Round from './Round';
-import Student from './Student';
-import CaselistLink from './CaselistLink';
-import Share from './Share';
-import Search from './Search';
-import Invite from './Invite';
-import Ad from './Ad';
+import Err from './Err.js';
+import Person from './Person.js';
+import LoginRequest from './LoginRequest.js';
+import Session from './Session.js';
+import School from './School.js';
+import SchoolSetting from './SchoolSetting.js';
+import Chapter from './Chapter.js';
+import Event from './Event.js';
+import Round from './Round.js';
+import Student from './Student.js';
+import CaselistLink from './CaselistLink.js';
+import Share from './Share.js';
+import Search from './Search.js';
+import Invite from './Invite.js';
+import Ad from './Ad.js';
 
 export default {
 	Err,

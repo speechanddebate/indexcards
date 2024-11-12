@@ -2,10 +2,10 @@
 // logged in user with access to the tournament in question.
 
 // Utility functions
-import caselist from './caselist';
-import share from './share';
-import nsda from './nsda';
-import mason from './mason';
+import caselist from './caselist.js';
+import share from './share.js';
+import nsda from './nsda.js';
+import mason from './mason.js';
 
 export default [
 	...caselist,
