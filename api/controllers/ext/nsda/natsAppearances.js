@@ -1,6 +1,6 @@
 // Functions to establish access parameters
-import getNSDA from '../../../helpers/nsda';
-import { multiObjectify } from '../../../helpers/objectify';
+import getNSDA from '../../../helpers/nsda.js';
+import { multiObjectify } from '../../../helpers/objectify.js';
 
 export const syncNatsAppearances = {
 

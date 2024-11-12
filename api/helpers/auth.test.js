@@ -1,8 +1,8 @@
 import { assert } from 'chai';
-import config from '../../config/config';
-import db from './db';
-import { auth, tabAuth } from './auth';
-import userData from '../../tests/testFixtures';
+import config from '../../config/config.js';
+import db from './db.js';
+import { auth, tabAuth } from './auth.js';
+import userData from '../../tests/testFixtures.js';
 
 describe('Authentication Functions', () => {
 

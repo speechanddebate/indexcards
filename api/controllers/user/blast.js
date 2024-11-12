@@ -1,4 +1,4 @@
-import notify from '../../helpers/blast';
+import notify from '../../helpers/blast.js';
 
 export const pushMessage = {
 

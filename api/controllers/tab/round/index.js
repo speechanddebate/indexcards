@@ -1,4 +1,4 @@
-import { addZero } from '../../../helpers/text';
+import { addZero } from '../../../helpers/text.js';
 
 // General CRUD for the round itself
 export const updateRound = {
@@ -174,11 +174,9 @@ export const roundDecisionStatus = {
 			byePanels : {},
 		};
 
-		rawBallots.forEach( (ballot) => {
+		const done = [];
 
-			if (ballot.bye || ballot.forfeit) {
-				console.log(ballot);
-			}
+		rawBallots.forEach( (ballot) => {
 
 			if (!ballot.judge && !ballot.pbye) {
 
@@ -250,17 +248,23 @@ export const roundDecisionStatus = {
 					judge.text = 'BYE';
 					judge.class = 'graytext semibold';
 				} else if (ballot.bye) {
-					if (judge.text) {
-						judge.text += `/`;
+					if (!done[ballot.ballot]) {
+						if (judge.text) {
+							judge.text += `/`;
+						}
+						round.panels[ballot.panel] = 10000;
+						judge.text += `Bye`;
+						done[ballot.ballot] = true;
 					}
-					round.panels[ballot.panel] = 10000;
-					judge.text += `Bye`;
 					judge.class = 'graytext semibold';
 				} else if (ballot.forfeit) {
-					if (judge.text) {
-						judge.text += `/`;
+					if (!done[ballot.ballot]) {
+						if (judge.text) {
+							judge.text += `/`;
+						}
+						judge.text += `Fft`;
+						done[ballot.ballot] = true;
 					}
-					judge.text += `Fft`;
 					judge.class = 'graytext semibold';
 				} else if (ballot.rank) {
 					judge.text = 'in';

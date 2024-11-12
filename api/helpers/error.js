@@ -1,6 +1,6 @@
-import { errorLogger } from './logger';
-import { adminBlast } from './mail';
-import config from '../../config/config';
+import { errorLogger } from './logger.js';
+import { adminBlast } from './mail.js';
+import config from '../../config/config.js';
 
 const errorHandler = async (err, req, res, next) => {
 
