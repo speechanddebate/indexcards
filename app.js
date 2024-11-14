@@ -96,7 +96,7 @@ app.use('/v1/public/search', searchLimiter);
 // Enable CORS Access, hopefully in a way that means I don't
 // have to fight with it ever again.
 const corsOptions = {
-	methods              : ['GET', 'POST', 'DELETE'],
+	methods              : ['GET', 'POST', 'DELETE', 'PUT'],
 	optionsSuccessStatus : 204,
 	credentials          : true,
 	origin               : config.CORS_ORIGINS,

@@ -217,15 +217,15 @@ export const roundDecisionStatus = {
 				round.judges[ballot.judge] = {};
 			}
 
-			if (!round.judges[ballot.judge][ballot.flight]) {
-				round.judges[ballot.judge][ballot.flight] = { panel: ballot.panel };
+			if (!round.judges[ballot.judge][ballot.panel]) {
+				round.judges[ballot.judge][ballot.panel] = { panel: ballot.panel };
 			}
 
 			if (!round.panels[ballot.panel]) {
 				round.panels[ballot.panel] = 0;
 			}
 
-			const judge = round.judges[ballot.judge][ballot.flight];
+			const judge = round.judges[ballot.judge][ballot.panel];
 
 			if (!round.out[ballot.flight]) {
 				round.out[ballot.flight] = {};
@@ -290,7 +290,7 @@ export const roundDecisionStatus = {
 				judge.text = `${started.getUTCHours()}:${addZero(started.getUTCMinutes())}`;
 			} else {
 				round.out[ballot.flight][ballot.judge] = true;
-				delete round.judges[ballot.judge][ballot.flight];
+				delete round.judges[ballot.judge][ballot.panel];
 				round.panels[ballot.panel] += 1;
 			}
 		});
