@@ -690,11 +690,12 @@ export const tournDashboard = {
 
 				and exists (
 					select b2.id
-					from ballot b2
-					where b2.panel = panel.id
+					from ballot b2, panel p2
+					where 1 = 1
+					and p2.round   = round.id
+					and p2.id      = b2.panel
 					and b2.bye     = 0
 					and b2.forfeit = 0
-					and (b2.audit  = 0 OR round.type = 'final')
 					and b2.judge   > 0
 				)
 			order by event.name, round.name, ballot.judge, ballot.audit
