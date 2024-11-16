@@ -1,10 +1,10 @@
 // These paths are for tournament published data only, and can be seen by any
 // users, even if not logged in.
 
-import { getInvite, getRounds } from '../../../controllers/public/invite/tournInvite';
-import { futureTourns } from '../../../controllers/public/invite/tournList';
-import { searchTourns, searchCircuitTourns } from '../../../controllers/public/search';
-import { getAds } from '../../../controllers/public/ads';
+import { getInvite, getRounds } from '../../../controllers/public/invite/tournInvite.js';
+import { futureTourns } from '../../../controllers/public/invite/tournList.js';
+import { searchTourns, searchCircuitTourns } from '../../../controllers/public/search.js';
+import { getAds } from '../../../controllers/public/ads.js';
 
 export default [
 	{ path: '/public/invite/{webname}'                              , module : getInvite }           ,

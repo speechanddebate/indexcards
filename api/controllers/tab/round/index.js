@@ -1,4 +1,4 @@
-import { addZero } from '../../../helpers/text';
+import { addZero } from '../../../helpers/text.js';
 
 // General CRUD for the round itself
 export const updateRound = {

@@ -1,6 +1,6 @@
 import authorizenet from 'authorizenet';
-import { debugLogger } from '../../../helpers/logger';
-import { emailBlast } from '../../../helpers/mail';
+import { debugLogger } from '../../../helpers/logger.js';
+import { emailBlast } from '../../../helpers/mail.js';
 
 export const processAuthorizeNet = {
 	POST: async (req, res) => {

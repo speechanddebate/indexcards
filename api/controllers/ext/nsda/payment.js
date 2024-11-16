@@ -1,7 +1,7 @@
 // Functions to establish access parameters
-import hmacSHA512 from 'crypto-js/hmac-sha512';
-import Base64 from 'crypto-js/enc-base64';
-import config from '../../../../config/config';
+import hmacSHA512 from 'crypto-js/hmac-sha512.js';
+import Base64 from 'crypto-js/enc-base64.js';
+import config from '../../../../config/config.js';
 
 export const postPayment = {
 

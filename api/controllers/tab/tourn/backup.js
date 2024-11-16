@@ -1,5 +1,5 @@
-// import { showDateTime } from '../../../helpers/common';
-import { objectify, arrayify, objectStrip, objectifySettings, objectifyGroupSettings } from '../../../helpers/objectify';
+// import { showDateTime } from '../../../helpers/common.js';
+import { objectify, arrayify, objectStrip, objectifySettings, objectifyGroupSettings } from '../../../helpers/objectify.js';
 
 export const backupTourn = {
 	GET: async (req, res) => {

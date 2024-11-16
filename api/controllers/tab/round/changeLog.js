@@ -1,4 +1,4 @@
-import objectify from '../../../helpers/objectify';
+import objectify from '../../../helpers/objectify.js';
 
 export const roundChangeLog = {
 	GET: async (req, res) => {

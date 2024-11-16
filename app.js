@@ -8,18 +8,18 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import { initialize } from 'express-openapi';
 import swaggerUI from 'swagger-ui-express';
-import config from './config/config';
-import { barfPlease, systemStatus } from './api/controllers/public/status';
-import errorHandler from './api/helpers/error';
-import apiDoc from './api/routes/api-doc';
+import config from './config/config.js';
+import { barfPlease, systemStatus } from './api/controllers/public/status.js';
+import errorHandler from './api/helpers/error.js';
+import apiDoc from './api/routes/api-doc.js';
 
-import coachPaths from './api/routes/paths/coach/index';
-import extPaths from './api/routes/paths/ext/index';
-import glpPaths from './api/routes/paths/glp/index';
-import localPaths from './api/routes/paths/local/index';
-import publicPaths from './api/routes/paths/public/index';
-import tabPaths from './api/routes/paths/tab/index';
-import userPaths from './api/routes/paths/user/index';
+import coachPaths from './api/routes/paths/coach/index.js';
+import extPaths from './api/routes/paths/ext/index.js';
+import glpPaths from './api/routes/paths/glp/index.js';
+import localPaths from './api/routes/paths/local/index.js';
+import publicPaths from './api/routes/paths/public/index.js';
+import tabPaths from './api/routes/paths/tab/index.js';
+import userPaths from './api/routes/paths/user/index.js';
 
 import {
 	auth,
@@ -27,8 +27,8 @@ import {
 	tabAuth,
 	coachAuth,
 	localAuth,
-} from './api/helpers/auth';
-import db from './api/helpers/db';
+} from './api/helpers/auth.js';
+import db from './api/helpers/db.js';
 
 import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger.js';
 

@@ -1,5 +1,5 @@
-import { checkJudgePerson } from '../../../helpers/auth';
-import { errorLogger } from '../../../helpers/logger';
+import { checkJudgePerson } from '../../../helpers/auth.js';
+import { errorLogger } from '../../../helpers/logger.js';
 
 export const checkBallotAccess = {
 
