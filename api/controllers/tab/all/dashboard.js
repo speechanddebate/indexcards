@@ -1,6 +1,6 @@
 /* eslint-disable no-continue */
 import { showDateTime } from '@speechanddebate/nsda-js-utils';
-import { flightTimes } from '../../../helpers/round';
+import { flightTimes } from '../../../helpers/round.js';
 
 //  Perms work done, needs testing
 

@@ -1,5 +1,5 @@
 import UAParser from 'ua-parser-js';
-import { findLocation, findISP } from '../../../helpers/clientInfo';
+import { findLocation, findISP } from '../../../helpers/clientInfo.js';
 import { queryLogger } from '../../../helpers/logger.js';
 
 const ipLocation = {
