@@ -35,6 +35,7 @@ const login = {
 			name      : `${person.first} ${person.last}`,
 			email     : req.body.username,
 			phone     : person.phone,
+			pronoun   : person.pronoun,
 			trusted   : false,
 		};
 
