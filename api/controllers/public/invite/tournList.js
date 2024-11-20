@@ -28,7 +28,7 @@ export const futureTourns = {
 			limit = ` and tourn.state = '${req.query.state.toUpperCase()}'`;
 		}
 
-		const [future] = await db.sequelize.query(`
+		const [rawFuture] = await db.sequelize.query(`
 			select tourn.id, tourn.webname, tourn.name, tourn.tz, tourn.hidden,
 				tourn.city as location, tourn.state, tourn.country,
 				CONVERT_TZ(tourn.start, '+00:00', tourn.tz) start,
@@ -39,8 +39,9 @@ export const futureTourns = {
 				nats.value as nats,
 				closed.value as closed,
 				count(distinct school.id) as schoolcount,
-				YEAR(tourn.start) as year,
-				WEEK(tourn.start) as week,
+				YEAR(tourn.end) as year,
+				CONCAT(YEAR(tourn.start), DATE_FORMAT(tourn.start, '%v')) as week,
+				CONCAT(YEAR(tourn.end), DATE_FORMAT(tourn.end, '%v')) as endweek,
 				( select GROUP_CONCAT(signup.abbr SEPARATOR ', ')
 						from category signup
 					where signup.tourn = tourn.id
@@ -111,6 +112,7 @@ export const futureTourns = {
 			left join school on tourn.id = school.tourn
 		where 1=1
 			and tourn.hidden = 0
+			and tourn.name != 'TEST'
 			and tourn.end > ${timeScope}
 			${limit}
 			and not exists (
@@ -118,6 +120,7 @@ export const futureTourns = {
 				from weekend
 				where weekend.tourn = tourn.id
 			)
+			and exists (select event.id from event where event.tourn = tourn.id)
 			group by tourn.id
 			order by tourn.end, schoolcount DESC
 		`);
@@ -134,7 +137,8 @@ export const futureTourns = {
 				CONVERT_TZ(weekend.reg_start, '+00:00', tourn.tz) reg_start,
 				count(distinct school.id) as schoolcount,
 				YEAR(weekend.start) as year,
-				WEEK(weekend.start) as week,
+				CONCAT(YEAR(weekend.start), DATE_FORMAT(weekend.start, '%v')) as week,
+				CONCAT(YEAR(weekend.end), DATE_FORMAT(weekend.end, '%v')) as endweek,
 				( select GROUP_CONCAT(signup.abbr SEPARATOR ', ')
 						from category signup
 					where signup.tourn = tourn.id
@@ -196,12 +200,20 @@ export const futureTourns = {
 			where tourn.hidden = 0
 			and weekend.end > ${timeScope}
 			and weekend.tourn = tourn.id
+			and exists (select event.id from event where event.tourn = tourn.id)
 
 			group by weekend.id
 			order by weekend.start
 		`);
 
-		future.push(...futureDistricts);
+		rawFuture.push(...futureDistricts);
+
+		const future = rawFuture.map( tourn => {
+			if (tourn.endweek - tourn.week > 2) {
+				tourn.week = tourn.endweek;
+			}
+			return tourn;
+		});
 
 		const thisWeek = moment().subtract(11, 'days').weeks();
 
