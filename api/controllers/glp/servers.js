@@ -330,7 +330,7 @@ export const changeInstanceCount = {
 
 		const target = parseInt(req.params.target) || parseInt(req.body.target) || 0;
 
-		if ((target + tabwebs.length) > config.TABWEB_CAP || 16)  {
+		if ((target + tabwebs.length) > (config.TABWEB_CAP || 16))  {
 			return res.status(401).json({
 				message: `This process only allows for ${config.TABWEB_CAP || 16} machines to exist at one time.`,
 			});
