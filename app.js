@@ -8,7 +8,7 @@ import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import { initialize } from 'express-openapi';
 import swaggerUI from 'swagger-ui-express';
-import config from './config/config.js';
+import config from './config/config';
 import { barfPlease, systemStatus } from './api/controllers/public/status.js';
 import errorHandler from './api/helpers/error.js';
 import apiDoc from './api/routes/api-doc.js';

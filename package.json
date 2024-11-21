@@ -8,12 +8,16 @@
 		"start": "NODE_ENV='production' NODE_OPTIONS='--max_old_space_size=200 --experimental-vm-modules --experimental-specifier-resolution=node' node --use-strict app.js",
 		"production": "NODE_ENV='production' NODE_OPTIONS='--max_old_space_size=200' pm2 -i 16 start app.js --name indexcards --node-args='--experimental-specifier-resolution=node --use_strict' -e /var/log/indexcards/error.log",
 		"staging": "NODE_ENV='staging' NODE_OPTIONS='--max_old_space_size=1000' pm2 -i 4 start app.js --name indexcards --node-args='--experimental-specifier-resolution=node --use_strict' -o /var/log/indexcards/output.log -e /var/log/indexcards/error.log ",
-		"dev": "TZ='UTC' NODE_ENV='development' NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' nodemon --use-strict app.js",
+		"dev": "TZ='UTC' NODE_ENV='development' NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node --import=extensionless/register' nodemon --use-strict app.js",
 		"test": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest watch",
 		"test-ci": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest --run",
 		"cover": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest --coverage",
 		"lint": "eslint --ignore-path .gitignore .",
 		"prepare": "husky"
+	},
+	"extensionless": {
+		"lookFor": ["js", "json"],
+		"resolveDirs": true
 	},
 	"repository": {
 		"type": "git",
@@ -35,7 +39,7 @@
 		"url": "https://github.com/speechanddebate/tabroom/issues"
 	},
 	"engines": {
-		"node": ">= 18.2.0"
+		"node": ">= 20.16.0"
 	},
 	"homepage": "https://www.tabroom.com/about",
 	"dependencies": {
@@ -59,6 +63,7 @@
 		"express-openapi": "^4.6.1",
 		"express-rate-limit": "^3.4.1",
 		"express-winston": "^3.1.0",
+		"extensionless": "^1.9.9",
 		"fs": "0.0.1-security",
 		"full-name-splitter": "^1.1.1",
 		"helmet": "^3.16.0",

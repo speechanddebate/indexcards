@@ -224,8 +224,8 @@ export const futureTourns = {
 				|| b.schoolcount - a.schoolcount;
 		});
 
-		if (future.length > 256) {
-			future.length = 256;
+		if (future.length > 10) {
+			future.length = 10;
 		}
 
 		return res.status(200).json(future);
