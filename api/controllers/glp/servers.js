@@ -349,7 +349,11 @@ export const changeInstanceCount = {
 			serialNumber++;
 		}
 
-		const resultMessages = [];
+		const resultMessages = [
+			`${req.session.name} ${req.session.email} has INCREASED the tabweb cloud server count by ${target}:\n`,
+			'\n',
+		];
+
 		const limit = serialNumber + target;
 
 		while (serialNumber < limit) {
@@ -466,7 +470,7 @@ export const changeInstanceCount = {
 		}
 
 		const resultMessages = [
-			`${req.session.name} ${req.session.email} has initiated a cloud services change:\n`,
+			`${req.session.name} ${req.session.email} has DECREASED the tabweb cloud server count by ${target}:\n`,
 			'\n',
 		];
 
@@ -553,7 +557,10 @@ export const rebootInstance = {
 			});
 		}
 
-		const resultMessages = [];
+		const resultMessages = [
+			`${req.session.name} ${req.session.email} has REBOOTED ${machine}:\n`,
+			'\n',
+		];
 
 		try {
 
