@@ -698,25 +698,25 @@ export const tournDashboard = {
 					and b2.forfeit = 0
 					and b2.judge   > 0
 				)
-			order by event.name, round.name, ballot.judge, ballot.audit
+			order by event.abbr, round.name, ballot.judge, ballot.audit
 		`, {
 			replacements,
-			type         : db.sequelize.QueryTypes.SELECT,
+			type: db.sequelize.QueryTypes.SELECT,
 		});
 
-		const status = { done: {} };
+		const status = { done: {}, keys : [] };
 
-		for await (const result of statusResults) {
+		const lasts = {};
 
-			// Judges have more than one ballot per section so stop if we've
-			// seen you before
+		for (const result of statusResults) {
+
+			// Judges have more than one ballot per section so stop if we've seen you before
 
 			if (status.done[result.panel]?.[result.judge]) {
 				continue;
 			}
 
-			// If the round isn't on the status board already, create an object
-			// for it
+			// If the round isn't on the status board already, create an object for it
 
 			if (!status[result.roundId]) {
 
@@ -739,6 +739,8 @@ export const tournDashboard = {
 					flights   : {},
 				};
 
+				status.keys.push(result.roundId);
+
 				for (let f = 1; f <= numFlights; f++) {
 					status[result.roundId].flights[f] = {
 						done      : 0,
@@ -747,6 +749,10 @@ export const tournDashboard = {
 						nada      : 0,
 						...times[f],
 					};
+				}
+
+				if (!lasts[result.event_id] || lasts[result.event_id] < result.round_name) {
+					lasts[result.event_id] = result.round_name;
 				}
 			}
 
@@ -785,6 +791,16 @@ export const tournDashboard = {
 						status[result.roundId].flights[result.flight].nada++;
 					}
 				}
+			}
+		}
+
+		for (const roundId of status.keys) {
+			if (
+				status[roundId].type !== 'final'
+				&& status[roundId].number !== lasts[status[roundId].eventId]
+				&& !status[roundId].undone
+			) {
+				delete status[roundId];
 			}
 		}
 
