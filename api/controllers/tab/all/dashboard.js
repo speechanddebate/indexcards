@@ -79,12 +79,9 @@ export const tournAttendance = {
 				cl.panel panel, cl.tag tag, cl.description description,
 					cl.timestamp timestamp,
 				person.id person,
-				tourn.tz tz,
-				marker.id marker_id, marker.email marker_email,
-				marker.first marker_first, marker.last marker_last
+				tourn.tz tz
 
-			from (panel, campus_log cl, tourn, person, round)
-				left join person marker on marker.id = cl.marker
+			from panel, campus_log cl, tourn, person, round
 
 			${queryLimit}
 
@@ -121,13 +118,9 @@ export const tournAttendance = {
 				cl.panel panel, cl.tag tag, cl.description description,
 					cl.timestamp timestamp,
 				cl.student student, cl.judge judge,
-				tourn.tz tz,
-				marker.id marker_id, marker.email marker_email,
-				marker.first marker_first, marker.last marker_last
+				tourn.tz tz
 
-			from (panel, campus_log cl, tourn, round)
-
-				left join person marker on marker.id = cl.marker
+			from panel, campus_log cl, tourn, round
 
 			${queryLimit}
 
@@ -164,13 +157,9 @@ export const tournAttendance = {
 			select
 				cl.panel panel, cl.tag tag, cl.description description,
 					cl.timestamp timestamp,
-				cl.entry entry, tourn.tz tz,
-				marker.id marker_id, marker.email marker_email,
-				marker.first marker_first, marker.last marker_last
+				cl.entry entry, tourn.tz tz
 
-			from (panel, campus_log cl, tourn, round, ballot, entry)
-
-				left join person marker on marker.id = cl.marker
+			from panel, campus_log cl, tourn, round, ballot, entry
 
 			${queryLimit}
 
@@ -195,16 +184,13 @@ export const tournAttendance = {
 				cl.tag,
 				started_by.first startFirst, started_by.last startLast,
 				judge.first judgeFirst, judge.last judgeLast,
-				tourn.tz tz,
-				marker.id marker_id, marker.email marker_email,
-				marker.first marker_first, marker.last marker_last
+				tourn.tz tz
 
 			from (panel, tourn, round, ballot, event, judge, entry)
 
 				left join person started_by on ballot.started_by = started_by.id
 				left join campus_log cl on cl.panel = panel.id and cl.person = judge.person
 					and cl.tag != 'observer'
-				left join person marker on marker.id = cl.marker
 
 			${queryLimit}
 
@@ -262,9 +248,6 @@ export const tournAttendance = {
 				tag         : attend.tag,
 				timestamp   : attend.timestamp.toJSON,
 				description : attend.description,
-				markerId    : attend.marker_id,
-				markerEmail : attend.marker_email,
-				markerName  : `${attend.marker_first} ${attend.marker_last}`,
 			};
 		});
 
@@ -286,9 +269,6 @@ export const tournAttendance = {
 						timestamp   : attend.timestamp.toJSON,
 						description : attend.description,
 						started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
-						markerId    : attend.marker_id,
-						markerEmail : attend.marker_email,
-						markerName  : `${attend.marker_first} ${attend.marker_last}`,
 					},
 				};
 			} else if (attend.judge) {
@@ -298,9 +278,6 @@ export const tournAttendance = {
 						timestamp   : attend.timestamp.toJSON,
 						description : attend.description,
 						started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
-						markerId    : attend.marker_id,
-						markerEmail : attend.marker_email,
-						markerName  : `${attend.marker_first} ${attend.marker_last}`,
 					},
 				};
 			} else if (attend.person) {
@@ -310,9 +287,6 @@ export const tournAttendance = {
 						timestamp   : attend.timestamp.toJSON,
 						description : attend.description,
 						started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
-						markerId    : attend.marker_id,
-						markerEmail : attend.marker_email,
-						markerName  : `${attend.marker_first} ${attend.marker_last}`,
 					},
 				};
 			}
@@ -325,9 +299,6 @@ export const tournAttendance = {
 					timestamp   : attend.timestamp.toJSON,
 					description : attend.description,
 					started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
-					markerId    : attend.marker_id,
-					markerEmail : attend.marker_email,
-					markerName  : `${attend.marker_first} ${attend.marker_last}`,
 				},
 			};
 		});
@@ -430,10 +401,7 @@ export const tournAttendance = {
 					judge = await db.judge.findByPk(req.body.judge);
 				}
 
-				if (
-					parseInt(req.body.present) > 0
-					|| parseInt(req.body.property_name) > 0
-				) {
+				if (parseInt(req.body.property_name) > 0) {
 
 					const eraseStart = `
 						update ballot
@@ -512,10 +480,7 @@ export const tournAttendance = {
 				return res.status(201).json(response);
 			}
 
-			if (
-				parseInt(req.body.present) === 1
-				|| parseInt(req.body.property_name) === 1
-			) {
+			if (parseInt(req.body.property_name) === 1) {
 
 				// The property already being 1 means that they're currently
 				// present, so mark them as absent.
@@ -529,7 +494,7 @@ export const tournAttendance = {
 				}
 
 				const log = {
-					marker      : req.session.person,
+					marker 		: req.session.person,
 					tag         : 'absent',
 					description : logMessage,
 					tourn       : tournId,
@@ -584,11 +549,11 @@ export const tournAttendance = {
 			}
 
 			const log = {
-				marker      : req.session.person,
 				tag         : 'present',
 				description : logMessage,
 				tourn       : tournId,
 				panel       : panel.id,
+				marker 		: req.session.person,
 			};
 
 			if (targetType === 'student') {
@@ -725,32 +690,33 @@ export const tournDashboard = {
 
 				and exists (
 					select b2.id
-					from ballot b2
-					where b2.panel = panel.id
+					from ballot b2, panel p2
+					where 1 = 1
+					and p2.round   = round.id
+					and p2.id      = b2.panel
 					and b2.bye     = 0
 					and b2.forfeit = 0
-					and (b2.audit  = 0 OR round.type = 'final')
 					and b2.judge   > 0
 				)
-			order by event.name, round.name, ballot.judge, ballot.audit
+			order by event.abbr, round.name, ballot.judge, ballot.audit
 		`, {
 			replacements,
-			type         : db.sequelize.QueryTypes.SELECT,
+			type: db.sequelize.QueryTypes.SELECT,
 		});
 
-		const status = { done: {} };
+		const status = { done: {}, keys : [] };
 
-		for await (const result of statusResults) {
+		const lasts = {};
 
-			// Judges have more than one ballot per section so stop if we've
-			// seen you before
+		for (const result of statusResults) {
+
+			// Judges have more than one ballot per section so stop if we've seen you before
 
 			if (status.done[result.panel]?.[result.judge]) {
 				continue;
 			}
 
-			// If the round isn't on the status board already, create an object
-			// for it
+			// If the round isn't on the status board already, create an object for it
 
 			if (!status[result.roundId]) {
 
@@ -773,6 +739,8 @@ export const tournDashboard = {
 					flights   : {},
 				};
 
+				status.keys.push(result.roundId);
+
 				for (let f = 1; f <= numFlights; f++) {
 					status[result.roundId].flights[f] = {
 						done      : 0,
@@ -781,6 +749,10 @@ export const tournDashboard = {
 						nada      : 0,
 						...times[f],
 					};
+				}
+
+				if (!lasts[result.event_id] || lasts[result.event_id] < result.round_name) {
+					lasts[result.event_id] = result.round_name;
 				}
 			}
 
@@ -819,6 +791,16 @@ export const tournDashboard = {
 						status[result.roundId].flights[result.flight].nada++;
 					}
 				}
+			}
+		}
+
+		for (const roundId of status.keys) {
+			if (
+				status[roundId].type !== 'final'
+				&& status[roundId].number !== lasts[status[roundId].eventId]
+				&& !status[roundId].undone
+			) {
+				delete status[roundId];
 			}
 		}
 
