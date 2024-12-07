@@ -92,7 +92,7 @@ export const getTabroomUsage = {
 
 		const tournamentCount = await req.db.sequelize.query(`
 			select
-				count (tourn.id)
+				count (distinct tourn.id)
 			from tourn
 			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > CURRENT_TIMESTAMP
@@ -151,7 +151,8 @@ export const getInstanceStatus = {
 				`http://haproxy.${config.INTERNAL_DOMAIN}:9000/;json`,
 			);
 		} catch (err) {
-			errorLogger.error(err);
+			console.log(`haproxy returned error`);
+			console.log(err);
 			return;
 		}
 
@@ -329,9 +330,9 @@ export const changeInstanceCount = {
 
 		const target = parseInt(req.params.target) || parseInt(req.body.target) || 0;
 
-		if ((target + tabwebs.length) > 16)  {
+		if ((target + tabwebs.length) > (config.TABWEB_CAP || 16))  {
 			return res.status(401).json({
-				message: `This process only allows for 16 machines to exist at one time.`,
+				message: `This process only allows for ${config.TABWEB_CAP || 16} machines to exist at one time.`,
 			});
 		}
 
@@ -465,7 +466,7 @@ export const changeInstanceCount = {
 		}
 
 		const resultMessages = [
-			`${req.session.person.first} ${req.session.person.last} has initiated a cloud services change:`,
+			`${req.session.name} ${req.session.email} has initiated a cloud services change:\n`,
 			'\n',
 		];
 
@@ -498,7 +499,7 @@ export const changeInstanceCount = {
 						resultMessages.push('');
 						resultMessages.push(`Machine ${hostname} deletion request successful.\n`);
 						resultMessages.push(`Linode ID ${machine.linode_id} UUID ${machine.uuid} terminating\n`);
-						resultMessages.push(deletionReply.data);
+						resultMessages.push(`${JSON.stringify(deletionReply.data)} \n`);
 
 						destroyMe.push(hostname);
 
