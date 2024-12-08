@@ -7,7 +7,10 @@ export const getInvite = {
 		if (req.params.tourn_id) {
 
 			const result = await db.tourn.findByPk(parseInt(req.params.tourn_id));
-			invite.tourn = result.get({ plain: true });
+
+			if (result) {
+				invite.tourn = result.get({ plain: true });
+			}
 
 		} else if (req.params.webname) {
 
