@@ -209,6 +209,10 @@ export const futureTourns = {
 		rawFuture.push(...futureDistricts);
 
 		const future = rawFuture.map( tourn => {
+
+			tourn.week = parseInt(tourn.week);
+			tourn.endweek = parseInt(tourn.endweek);
+
 			if (tourn.endweek - tourn.week > 2) {
 				tourn.week = tourn.endweek;
 			}
