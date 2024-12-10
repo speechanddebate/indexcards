@@ -78,10 +78,11 @@ export const tournAttendance = {
 			select
 				cl.panel panel, cl.tag tag, cl.description description,
 					cl.timestamp timestamp,
-				person.id person,
+				person.id person, person.first personFirst, person.last personLast,
+				cl.marker markerId,
 				tourn.tz tz
 
-			from panel, campus_log cl, tourn, person, round
+			from (panel, campus_log cl, tourn, person, round)
 
 			${queryLimit}
 
@@ -118,9 +119,12 @@ export const tournAttendance = {
 				cl.panel panel, cl.tag tag, cl.description description,
 					cl.timestamp timestamp,
 				cl.student student, cl.judge judge,
+				person.id person, person.first personFirst, person.last personLast,
+				cl.marker markerId,
 				tourn.tz tz
 
-			from panel, campus_log cl, tourn, round
+			from (panel, campus_log cl, tourn, round)
+				left join person on person.id = cl.person
 
 			${queryLimit}
 
@@ -157,9 +161,13 @@ export const tournAttendance = {
 			select
 				cl.panel panel, cl.tag tag, cl.description description,
 					cl.timestamp timestamp,
+				person.id person, person.first personFirst, person.last personLast,
+				cl.marker markerId,
 				cl.entry entry, tourn.tz tz
 
-			from panel, campus_log cl, tourn, round, ballot, entry
+			from (panel, campus_log cl, tourn, round, ballot, entry)
+
+				left join person on person.id = cl.person
 
 			${queryLimit}
 
@@ -182,6 +190,7 @@ export const tournAttendance = {
 				ballot.audit audited,
 				ballot.timestamp lastChange,
 				cl.tag,
+				started_by.id markerId,
 				started_by.first startFirst, started_by.last startLast,
 				judge.first judgeFirst, judge.last judgeLast,
 				tourn.tz tz
@@ -211,6 +220,7 @@ export const tournAttendance = {
 			select
 				panel.id panel, panel.bye bye,
 					confirmed_started.timestamp confirmedAt,
+				confirmed_by.id markerId,
 				CONCAT(confirmed_by.first,' ',confirmed_by.last) confirmedBy,
 					panel.timestamp lastChange,
 				tourn.tz tz
@@ -248,6 +258,7 @@ export const tournAttendance = {
 				tag         : attend.tag,
 				timestamp   : attend.timestamp.toJSON,
 				description : attend.description,
+				markerId    : attend.markerId,
 			};
 		});
 
@@ -269,6 +280,7 @@ export const tournAttendance = {
 						timestamp   : attend.timestamp.toJSON,
 						description : attend.description,
 						started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
+						markerId    : attend.markerId,
 					},
 				};
 			} else if (attend.judge) {
@@ -278,6 +290,7 @@ export const tournAttendance = {
 						timestamp   : attend.timestamp.toJSON,
 						description : attend.description,
 						started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
+						markerId    : attend.markerId,
 					},
 				};
 			} else if (attend.person) {
@@ -287,6 +300,7 @@ export const tournAttendance = {
 						timestamp   : attend.timestamp.toJSON,
 						description : attend.description,
 						started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
+						markerId    : attend.markerId,
 					},
 				};
 			}
@@ -299,6 +313,7 @@ export const tournAttendance = {
 					timestamp   : attend.timestamp.toJSON,
 					description : attend.description,
 					started     : showDateTime(attend.timestamp, { tz: attend.tz, format: 'daytime' }),
+					markerId    : attend.markerId,
 				},
 			};
 		});
@@ -517,8 +532,11 @@ export const tournAttendance = {
 				// to do the following nonsense
 
 				return res.status(201).json({
+
 					error   : false,
 					message : logMessage,
+					marker  : req.session.person,
+
 					reclass : [
 						{	id          : targetType && targetType !== 'person' ? `${panel.id}_${targetType}_${targetId}` : `${panel.id}_${targetId}`,
 							removeClass : 'greentext',
@@ -571,6 +589,7 @@ export const tournAttendance = {
 			return res.status(201).json({
 				error   : false,
 				message : logMessage,
+				markerId: req.session.person,
 				reclass : [
 					{	id          : targetType && targetType !== 'person' ? `${panel.id}_${targetType}_${targetId}` : `${panel.id}_${targetId}`,
 						addClass	: 'greentext',
