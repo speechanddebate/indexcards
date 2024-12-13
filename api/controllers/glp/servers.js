@@ -18,6 +18,18 @@ export const getInstances = {
 			},
 		);
 
+		const dbServers = await req.db.sequelize.query(`select * from server`,
+			{ type: req.db.sequelize.QueryTypes.SELECT }
+		);
+
+		const serverByLinodeId = {};
+
+		for (const server of dbServers) {
+			serverByLinodeId[server.linode_id] = server;
+		}
+
+		const databaseSyncs = [];
+
 		const tabroomMachines = existingMachines.data.data.filter( machine => {
 
 			if (
@@ -32,20 +44,50 @@ export const getInstances = {
 			return null;
 
 		}).map( machine => {
+
+			const status = serverByLinodeId[machine.id]?.status || machine.status;
+
+			if (machine.tags.includes('tabweb') && (!serverByLinodeId[machine.id])) {
+				databaseSyncs.push(machine);
+			}
+
 			return {
+				...machine,
 				linode_id : machine.id,
 				uuid      : machine.host_uuid,
-				label     : machine.label,
-				tags      : machine.tags,
-				status    : machine.status,
-				created   : machine.created,
-				updated   : machine.updated,
-				region    : machine.region,
-				type      : machine.type,
 				ipv4      : machine.ipv4?.[0],
-				ipv6      : machine.ipv6,
+				status,
 			};
 		});
+
+		if (databaseSyncs.length) {
+
+			const deletionPromises = [];
+
+			databaseSyncs.forEach( (machine) => {
+				const promise = req.db.server.destroy({
+					where: { hostname: machine.label },
+				});
+				deletionPromises.push(promise);
+			});
+
+			await Promise.all(deletionPromises);
+
+			const creationPromises = [];
+
+			databaseSyncs.forEach( (machine) => {
+				const promise = req.db.server.create({
+					hostname   : machine.label,
+					status     : machine.status,
+					created_at : new Date(),
+					linode_id  : machine.id,
+				});
+
+				creationPromises.push(promise);
+			});
+
+			await Promise.all(creationPromises);
+		}
 
 		if (req.returnToSender) {
 			return tabroomMachines;
@@ -145,145 +187,145 @@ export const getInstanceStatus = {
 
 		let haproxyData = {};
 		const haproxyKey = {};
+		const parsedProxyData = {};
 
 		try {
 			haproxyData = await axios.get(
 				`http://haproxy.${config.INTERNAL_DOMAIN}:9000/;json`,
 			);
-		} catch (err) {
-			console.log(`haproxy returned error`);
-			console.log(err);
-			return;
-		}
 
-		const parsedProxyData = {};
+			// HAproxy's export format is so convoluted I swear Jon Bruschke
+			// designed it. Parse it down to a key value store organized by
+			// host that an actual human might find useful.
 
-		// HAproxy's export format is so convoluted I swear Jon Bruschke designed it.
-		// Parse it down to a key value store organized by host that an actual human might find useful.
+			for (const proxy of haproxyData.data) {
 
-		for (const proxy of haproxyData.data) {
+				for (const row of proxy) {
 
-			for (const row of proxy) {
+					if (row.id > 0 && row.value?.value && row.field?.name) {
 
-				if (row.id > 0 && row.value?.value && row.field?.name) {
+						const rowId = `${row.proxyId}-${row.id}`;
 
-					const rowId = `${row.proxyId}-${row.id}`;
+						if (typeof parsedProxyData[rowId] === 'undefined') {
+							parsedProxyData[rowId] = {
+								rowId,
+							};
+						}
 
-					if (typeof parsedProxyData[rowId] === 'undefined') {
-						parsedProxyData[rowId] = {
-							rowId,
-						};
-					}
+						parsedProxyData[rowId][row.field.name] = row.value.value;
 
-					parsedProxyData[rowId][row.field.name] = row.value.value;
-
-					if (row.field?.name === 'svname') {
-						haproxyKey[row.value.value] = rowId;
+						if (row.field?.name === 'svname') {
+							haproxyKey[row.value.value] = rowId;
+						}
 					}
 				}
 			}
-		}
 
-		for (const machine of existingMachines) {
+			for (const machine of existingMachines) {
 
-			const loadValues = {
-				node_load1                     : '1m_cpu_load',
-				node_load5                     : '5m_cpu_load',
-				node_load15                    : '15m_cpu_load',
-				node_memory_MemTotal_bytes     : 'memory_total',
-				node_memory_MemAvailable_bytes : 'memory_available',
-				node_memory_SwapTotal_bytes    : 'swap_total',
-				node_memory_SwapFree_bytes     : 'swap_available',
-				node_time_seconds              : 'current_time',
-				node_boot_time_seconds         : 'last_boot_time',
-			};
+				const loadValues = {
+					node_load1                     : '1m_cpu_load',
+					node_load5                     : '5m_cpu_load',
+					node_load15                    : '15m_cpu_load',
+					node_memory_MemTotal_bytes     : 'memory_total',
+					node_memory_MemAvailable_bytes : 'memory_available',
+					node_memory_SwapTotal_bytes    : 'swap_total',
+					node_memory_SwapFree_bytes     : 'swap_available',
+					node_time_seconds              : 'current_time',
+					node_boot_time_seconds         : 'last_boot_time',
+				};
 
-			try {
+				try {
 
-				const outputText = await axios.get(
-					`http://${machine.label}.${config.INTERNAL_DOMAIN}:9100/metrics`,
-				);
+					const outputText = await axios.get(
+						`http://${machine.label}.${config.INTERNAL_DOMAIN}:9100/metrics`,
+					);
 
-				const outputArray = outputText.data.split('\n');
-				const filteredOutput = outputArray.filter( line => !line.includes(`#`) );
-				const machineStatus = {};
+					const outputArray = outputText.data.split('\n');
+					const filteredOutput = outputArray.filter( line => !line.includes(`#`) );
+					const machineStatus = {};
 
-				for (const key of Object.keys(loadValues)) {
+					for (const key of Object.keys(loadValues)) {
 
-					const endValues = filteredOutput.filter( line => line.includes(`${key} `));
-					const splitme = endValues[0].split(/(\s+)/);
+						const endValues = filteredOutput.filter( line => line.includes(`${key} `));
+						const splitme = endValues[0].split(/(\s+)/);
 
-					machineStatus[loadValues[key]] = Number(splitme[2]);
-
-					if (key.includes('memory')) {
-						machineStatus[loadValues[key]] = Number(splitme[2]) / 1024 / 1024 / 1024;
-					} else {
 						machineStatus[loadValues[key]] = Number(splitme[2]);
+
+						if (key.includes('memory')) {
+							machineStatus[loadValues[key]] = Number(splitme[2]) / 1024 / 1024 / 1024;
+						} else {
+							machineStatus[loadValues[key]] = Number(splitme[2]);
+						}
 					}
-				}
 
-				machineStatus.uptime = (
-					parseFloat(machineStatus.current_time) - parseFloat(machineStatus.last_boot_time)
-				) / 60 / 60 / 24;
+					machineStatus.uptime = (
+						parseFloat(machineStatus.current_time) - parseFloat(machineStatus.last_boot_time)
+					) / 60 / 60 / 24;
 
-				// Figure out the HAProxy round robin status of the expected containers on this machine
+					// Figure out the HAProxy round robin status of the expected containers on this machine
 
-				if (machine.tags.includes('tabweb')) {
+					if (machine.tags.includes('tabweb')) {
 
-					const machineNumber = machine.label.replace(/\D/g,'');
+						const machineNumber = machine.label.replace(/\D/g,'');
 
-					for  (const tick of [1,2,3,4]) {
+						for  (const tick of [1,2,3,4]) {
 
-						const masonHost = `mason${machineNumber}${tick}`;
-						const masonId = haproxyKey[masonHost];
+							const masonHost = `mason${machineNumber}${tick}`;
+							const masonId = haproxyKey[masonHost];
 
-						if (!machineStatus.mason) {
-							// The day may come when I iterate this properly.  BUT IT IS NOT THIS DAY.
-							machineStatus.mason = {
-								1: {},
-								2: {},
-								3: {},
-								4: {},
+							if (!machineStatus.mason) {
+								// The day may come when I iterate this properly.  BUT IT IS NOT THIS DAY.
+								machineStatus.mason = {
+									1: {},
+									2: {},
+									3: {},
+									4: {},
+								};
+							}
+
+							machineStatus.mason[tick] = {
+								id          : masonId,
+								status      : parsedProxyData[masonId]?.status,
+								checkStatus : parsedProxyData[masonId]?.check_status,
+								checkCode   : parsedProxyData[masonId]?.check_code,
+								downtime    : parsedProxyData[masonId]?.downtime || 0,
+							};
+
+							const indexcardsHost = `indexcards${machineNumber}${tick}`;
+							const indexcardsId = haproxyKey[indexcardsHost];
+
+							if (!machineStatus.indexcards) {
+								// The day may come when I iterate this properly.  BUT IT IS NOT THIS DAY.
+								machineStatus.indexcards = {
+									1: {},
+									2: {},
+									3: {},
+									4: {},
+								};
+							}
+
+							machineStatus.indexcards[tick] = {
+								id          : indexcardsId,
+								status      : parsedProxyData[indexcardsId]?.status,
+								checkStatus : parsedProxyData[masonId]?.check_status,
+								checkCode   : parsedProxyData[masonId]?.check_code,
+								downtime    : parsedProxyData[masonId]?.downtime || 0,
 							};
 						}
-
-						machineStatus.mason[tick] = {
-							id          : masonId,
-							status      : parsedProxyData[masonId]?.status,
-							checkStatus : parsedProxyData[masonId]?.check_status,
-							checkCode   : parsedProxyData[masonId]?.check_code,
-							downtime    : parsedProxyData[masonId]?.downtime || 0,
-						};
-
-						const indexcardsHost = `indexcards${machineNumber}${tick}`;
-						const indexcardsId = haproxyKey[indexcardsHost];
-
-						if (!machineStatus.indexcards) {
-							// The day may come when I iterate this properly.  BUT IT IS NOT THIS DAY.
-							machineStatus.indexcards = {
-								1: {},
-								2: {},
-								3: {},
-								4: {},
-							};
-						}
-
-						machineStatus.indexcards[tick] = {
-							id          : indexcardsId,
-							status      : parsedProxyData[indexcardsId]?.status,
-							checkStatus : parsedProxyData[masonId]?.check_status,
-							checkCode   : parsedProxyData[masonId]?.check_code,
-							downtime    : parsedProxyData[masonId]?.downtime || 0,
-						};
 					}
+
+					allStatus[machine.label] = machineStatus;
+
+				} catch (err) {
+					errorLogger.error(`Status error returned ${err.message} ${err.code} on machine ${err.name}`);
 				}
-
-				allStatus[machine.label] = machineStatus;
-
-			} catch (err) {
-				errorLogger.error(`Status error returned ${err.message} ${err.code} on machine ${err.name}`);
 			}
+
+		} catch (err) {
+			console.log(`haproxy returned ${err.cause} ERRNO ${err.cause.errno}`);
 		}
+
 		return res.status(200).json(allStatus);
 	},
 };
@@ -423,6 +465,9 @@ export const changeInstanceCount = {
 				}
 
 			} catch (err) {
+
+				console.log(err);
+
 				return res.status(401).json({
 					message: `Machine creation ${hostname} failed with response code ${err.response?.status} ${err.response?.statusText} and errors`,
 				});
