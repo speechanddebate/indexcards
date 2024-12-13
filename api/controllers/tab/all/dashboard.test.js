@@ -154,6 +154,14 @@ describe('Status Board', () => {
 			'LASA marked present by the correct admin'
 		);
 	});
+
+	afterAll(async () => {
+
+		await db.sequelize.query(`delete from campus_log where marker = 69`,
+			{ type: db.sequelize.QueryTypes.DELETE }
+		);
+	});
+
 });
 
 describe.skip('Event Dashboard', () => {
