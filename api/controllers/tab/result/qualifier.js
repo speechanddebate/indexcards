@@ -3,12 +3,6 @@ export const circuitQualifiers = {
 	POST: async (req, res) => {
 		const db = req.db;
 
-		console.log(`Event paramters are`);
-		console.log(req.params);
-
-		console.log(`Event body post is`);
-		console.log(req.body);
-
 		let events = [];
 
 		if (req.body.qualifying_target) {
@@ -282,10 +276,8 @@ export const saveEventResult = async (db, eventId) => {
 
 				const targetRound = allElims[(rule.reverse_elim - 1)];
 
-				console.log(`Target round is ${targetRound.name} and the entries array is `);
-				console.log(entriesByLastRound[targetRound.name]);
+				if (targetRound && entriesByLastRound[targetRound?.name]) {
 
-				if (targetRound && entriesByLastRound[targetRound.name]) {
 					for (const entry of entriesByLastRound[targetRound.name]) {
 						if (entry && !entryPoints[entry]) {
 							entryPoints[entry] = rule.points;
