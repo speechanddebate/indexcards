@@ -146,7 +146,7 @@ export const formatPairingBlast = async (queryData, req) => {
 
 	const roundData = await processRounds(rawRoundData);
 
-	for await (const entry of rawEntries) {
+	for (const entry of rawEntries) {
 		const section = roundData[entry.roundid].sections[entry.sectionid];
 		section.entries.push({
 			id         : entry.id,
@@ -160,7 +160,7 @@ export const formatPairingBlast = async (queryData, req) => {
 		});
 	}
 
-	for await (const judge of rawJudges) {
+	for (const judge of rawJudges) {
 		const section = roundData[judge.roundid].sections[judge.sectionid];
 		section.judges.push({
 			id         : judge.id,
@@ -192,7 +192,7 @@ export const formatPairingBlast = async (queryData, req) => {
 		schoolJudges  : {},
 	};
 
-	for await (const roundId of Object.keys(roundData)) {
+	for (const roundId of Object.keys(roundData)) {
 
 		const round = roundData[roundId];
 		const roundMessage = { };
@@ -205,9 +205,9 @@ export const formatPairingBlast = async (queryData, req) => {
 
 		let counter = 1;
 
-		for await (const flight of sectionFlights) {
+		for (const flight of sectionFlights) {
 
-			for await (const sectionId of Object.keys(round.flightSections[flight])) {
+			for (const sectionId of Object.keys(round.flightSections[flight])) {
 
 				const section = round.sections[sectionId];
 
@@ -257,7 +257,7 @@ export const formatPairingBlast = async (queryData, req) => {
 
 					let firstJudge = 0;
 
-					for await (const judge of section.judges) {
+					for (const judge of section.judges) {
 
 						judge.role = judgeRole(judge, round) || '';
 
@@ -303,7 +303,7 @@ export const formatPairingBlast = async (queryData, req) => {
 
 				let notFirstEntry = 0;
 
-				for await (const entry of section.entries) {
+				for (const entry of section.entries) {
 
 					entry.position = positionString(entry, round, section);
 
@@ -326,7 +326,7 @@ export const formatPairingBlast = async (queryData, req) => {
 						delete sectionMessage.entryText;
 					} else if (round.eventType === 'debate' || round.eventType === 'wsdc') {
 
-						for await (const other of section.entries) {
+						for (const other of section.entries) {
 							if (entry.id !== other.id) {
 								entry.opponent = other.code;
 							}
@@ -345,7 +345,7 @@ export const formatPairingBlast = async (queryData, req) => {
 				// And now that we have the standard texts, we can assemble the
 				// notifications for the actual entries
 
-				for await (const entry of section.entries) {
+				for (const entry of section.entries) {
 					// Myself
 					if (!blastData.entries[entry.id]) {
 						blastData.entries[entry.id] = {
@@ -421,7 +421,7 @@ export const formatPairingBlast = async (queryData, req) => {
 					}
 				}
 
-				for await (const judge of section.judges) {
+				for (const judge of section.judges) {
 
 					// Myself
 					if (!blastData.judges[judge.id]) {
@@ -449,7 +449,7 @@ export const formatPairingBlast = async (queryData, req) => {
 					if (round.eventType === 'mock_trial') {
 						let firstJudge = 0;
 
-						for await (const other of section.judges) {
+						for (const other of section.judges) {
 							if (firstJudge++ > 0) {
 								judgeMessage.text += ', ';
 							}
@@ -515,7 +515,7 @@ export const formatPairingBlast = async (queryData, req) => {
 			}
 		}
 
-		for await (const schoolId of Object.keys(blastData.schools)) {
+		for (const schoolId of Object.keys(blastData.schools)) {
 			blastData.schools[schoolId].text += `\n${round.eventAbbr} ${round.name} Start ${round.shortstart[1]}\n\n`;
 			if (blastData.schoolEntries?.[schoolId]) {
 				blastData.schools[schoolId].text += `ENTRIES\n${blastData.schoolEntries[schoolId].text}`;
@@ -544,110 +544,118 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 
 	const promises = [];
 
-	Object.keys(blastData.judges).forEach( async (judgeId) => {
-
+	Object.keys(blastData.judges).forEach( (judgeId) => {
 		if (followers.judges[judgeId]) {
-			const notifyResponse = notify({
+			const promise = notify({
 				ids    : followers.judges[judgeId],
 				append : blastData.append,
 				from   : blastData.from,
 				tourn  : blastData.tourn,
 				...blastData.judges[judgeId],
 			});
-
-			promises.push(notifyResponse);
+			promises.push(promise);
 		}
 	});
 
-	Object.keys(blastData.entries).forEach( async (entryId) => {
+	Object.keys(blastData.entries).forEach( (entryId) => {
 		if (followers.entries[entryId]) {
-			const notifyResponse = notify({
+			const promise = notify({
 				ids    : followers.entries[entryId],
 				append : blastData.append,
 				from   : blastData.from,
 				tourn  : blastData.tourn,
 				...blastData.entries[entryId],
 			});
-			promises.push(notifyResponse);
+			promises.push(promise);
 		}
 	});
 
 	Object.keys(blastData.schools).forEach( (schoolId) => {
 		if (followers.schools[schoolId]) {
-			const notifyResponse = notify({
+			const promise = notify({
 				ids    : followers.schools[schoolId],
 				append : blastData.append,
 				from   : blastData.from,
 				tourn  : blastData.tourn,
 				...blastData.schools[schoolId],
 			});
-			promises.push(notifyResponse);
+			promises.push(promise);
 		}
 	});
 
-	await Promise.all(promises);
+	const returnPromise = new Promise( (resolve) => {
 
-	for await (const notifyResponse of promises) {
-		blastResponse.email += notifyResponse.email.count;
-		blastResponse.web += notifyResponse.web.count;
+		Promise.all(promises).then( (values) => {
 
-		if (notifyResponse.error) {
-			blastResponse.error = true;
-			blastResponse.message += notifyResponse.message;
-		}
-	}
+			for (const notifyResponse of values) {
+				blastResponse.email += notifyResponse.email;
+				blastResponse.web += notifyResponse.web;
+				blastResponse.inbox += notifyResponse.inbox;
+				if (notifyResponse.error) {
+					blastResponse.error = true;
+				}
+			}
 
-	if (blastResponse.error) {
+			if (blastResponse.error) {
+				resolve({
+					blastError   : blastResponse.error,
+					blastMessage : blastResponse.message,
+					emailCount   : blastResponse.email,
+					webCount     : blastResponse.web,
+				});
 
-		res.status(400).json({
-			blastError   : blastResponse.error,
-			blastMessage : blastResponse.message,
-			emailCount   : blastResponse.email,
-			webCount     : blastResponse.web,
-		});
+			}
 
-	} else {
+			const changeLog = changeLogModel(req.db.sequelize, req.db.Sequelize.DataTypes);
+			const logPromises = [];
 
-		const changeLog = changeLogModel(req.db.sequelize, req.db.Sequelize.DataTypes);
-
-		if (req.params.sectionId) {
-			await changeLog.create({
-				tag         : 'blast',
-				description : `Pairing sent to section. Message: ${req.body.message}`,
-				person      : blastData.sender || req.session?.person?.id,
-				count       : (blastResponse.web + blastResponse.email) || 0,
-				panel       : req.params.sectionId,
-			});
-
-		} else {
-			for (const round of blastData.rounds) {
-				// eslint-disable-next-line no-await-in-loop
-				await changeLog.create({
+			if (req.params.sectionId) {
+				const promise = changeLog.create({
 					tag         : 'blast',
-					description : `Round pairings blasted. Message: ${req.body.message}`,
+					description : `Pairing sent to section. Message: ${req.body.message}`,
 					person      : blastData.sender || req.session?.person?.id,
 					count       : (blastResponse.web + blastResponse.email) || 0,
-					round       : round.id,
+					panel       : req.params.sectionId,
+				});
+
+				logPromises.push(promise);
+
+			} else {
+
+				blastData.rounds.forEach( (round) => {
+					const promise = changeLog.create({
+						tag         : 'blast',
+						description : `Round pairings blasted. Message: ${req.body.message}`,
+						person      : blastData.sender || req.session?.person?.id,
+						count       : (blastResponse.web + blastResponse.email) || 0,
+						round       : round.id,
+					});
+					logPromises.push(promise);
 				});
 			}
-		}
 
-		const browserResponse = {
-			error   : false,
-			message : `Pairings sent to ${blastResponse.web} web and ${blastResponse.email} email recipients`,
-			web     : blastResponse.web,
-			email   : blastResponse.email,
-		};
+			const returnMessage = Promise.all(logPromises).then( () => {
+				resolve({
+					error   : false,
+					message : `Pairings sent to ${blastResponse.web} web and ${blastResponse.email} email recipients`,
+					web     : blastResponse.web,
+					email   : blastResponse.email,
+				});
+			});
 
-		return browserResponse;
-	}
+			resolve(returnMessage);
+
+		});
+	});
+
+	return returnPromise;
 };
 
 const processRounds = async (rawRounds) => {
 
 	const roundData  = { };
 
-	for await (const rawRound of rawRounds) {
+	for (const rawRound of rawRounds) {
 
 		if (!roundData[rawRound.roundid]) {
 
