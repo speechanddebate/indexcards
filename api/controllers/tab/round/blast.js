@@ -201,7 +201,9 @@ export const blastRoundPairing = {
 			sender = req.session.person;
 		}
 
-		const roundId = rawRoundId || req.params.roundId;
+		const roundId = parseInt(rawRoundId) || req.params.roundId;
+
+		console.log(`Round is ${roundId}`);
 
 		const queryData = {};
 		queryData.replacements = { roundId };
@@ -211,6 +213,8 @@ export const blastRoundPairing = {
 		let promises = [];
 
 		if (req.body.publish) {
+
+			console.log(`QUeryData is ${JSON.stringify(queryData)}`);
 
 			const publish = req.db.sequelize.query(
 				`update round set published = 1 where round.id = :roundId `, {
@@ -281,6 +285,8 @@ export const blastRoundPairing = {
 
 		const blastResponse = await sendPairingBlast(followers, blastData, req, res);
 
+		console.log(`blast response is ${JSON.stringify(blastResponse)}`);
+
 		if (req.session?.person) {
 			const person = { personId : req.session?.person };
 
@@ -292,7 +298,7 @@ export const blastRoundPairing = {
 			`, {
 				replacements : {
 					tournId     : req.params.tournId,
-					description : `Pairing blast sent. ${blastResponse.message} ${req.session?.person ? '' : 'by autoblast'} `,
+					description : `Pairing blast sent. ${blastResponse?.message} ${req.session?.person ? '' : 'by autoblast'} `,
 					roundId,
 					...person,
 				},
@@ -308,7 +314,7 @@ export const blastRoundPairing = {
 					('tabbing', :description, :roundId, :tournId, NOW())
 			`, {
 				replacements:  {
-					description : `Pairing blast sent. ${blastResponse.message} ${req.session?.person ? '' : 'by autoblast'} `,
+					description : `Pairing blast sent. ${blastResponse?.message} ${req.session?.person ? '' : 'by autoblast'} `,
 					...req.params,
 				},
 				type : req.db.sequelize.QueryTypes.INSERT,
