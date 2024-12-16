@@ -45,56 +45,48 @@ export const blastTimeslotMessage = {
 		});
 
 		if (notifyResponse.error) {
-
 			errorLogger.error(notifyResponse.message);
-			res.status(200).json(notifyResponse);
-
-		} else {
-
-			const whereTimeslot = { timeslot: req.params.timeslotId };
-
-			if (req.events) {
-				whereTimeslot.events = req.events;
-			}
-
-			const rounds = await req.db.round.findAll({
-				where: whereTimeslot,
-			});
-
-			const promises = [];
-
-			rounds.forEach( (round) => {
-
-				const pushPromise = req.db.changeLog.create({
-					tag    : 'blast',
-					person : req.session.person,
-					count  : notifyResponse.push?.count || 0,
-					round  : round.id,
-					description : `${req.body.message} sent to whole timeslot. ${notifyResponse.push?.count || 0} recipients`,
-				});
-
-				const emailPromise = req.db.changeLog.create({
-					tag    : 'emails',
-					person : req.session.person,
-					count  : notifyResponse.email?.count || 0,
-					round  : round.id,
-					description : `${req.body.message} sent to whole timeslot. ${notifyResponse.email?.count || 0}`,
-				});
-
-				promises.push(emailPromise);
-				promises.push(pushPromise);
-			});
-
-			await Promise.all(promises);
-			res.status(200).json({
-				...notifyResponse,
-			});
+			return res.status(200).json(notifyResponse);
 		}
+
+		const whereTimeslot = { timeslot: req.params.timeslotId };
+
+		if (req.events) {
+			whereTimeslot.events = req.events;
+		}
+
+		const rounds = await req.db.round.findAll({
+			where: whereTimeslot,
+		});
+
+		const promises = [];
+
+		rounds.forEach( (round) => {
+
+			const pushPromise = req.db.changeLog.create({
+				tag    : 'blast',
+				person : req.session.person,
+				count  : notifyResponse.push?.count || 0,
+				round  : round.id,
+				description : `${req.body.message} sent to whole timeslot. ${notifyResponse.inbox || 0} recipients`,
+			});
+
+			promises.push(pushPromise);
+		});
+
+		await Promise.all(promises);
+
+		const message = `Message sent to whole timeslot. ${notifyResponse.inbox || 0} recipients messaged, ${notifyResponse.web || 0} by web and ${notifyResponse.email || 0} by email`;
+		return res.status(200).json({
+			error: false,
+			message,
+		});
 	},
 };
 
 // Blast a whole timeslot's rounds with pairings
 export const blastTimeslotPairings = {
+
 	POST: async (req, res) => {
 
 		const replacements = {
@@ -138,35 +130,40 @@ export const blastTimeslotPairings = {
 
 		const responses = [];
 
-		rounds.forEach( async (round) => {
+		rounds.forEach( (round) => {
 			req.params.roundId = round.id;
-			const response = await blastRoundPairing.POST(req, res);
+			const response = blastRoundPairing.POST(req, res);
 			responses.push(response);
 		});
 
-		await Promise.all(responses);
+		const replies = await Promise.all(responses);
 
-		for (const response of responses) {
+		for (const response of replies) {
 			totals.web += parseInt(response.web);
 			totals.email += parseInt(response.email);
+			totals.inbox += parseInt(response.inbox);
 		}
 
-		return res.status(200).json(` Pairing blast sent to ${totals.web} web blast and ${totals.email} email recipients`);
+		return res.status(200).json({
+			message: `Pairing blast sent to ${totals.web} web blast and ${totals.email} email recipients`,
+			...totals,
+		});
 	},
+
 };
 
-// Refactor this one to also work and remove all that objectify nonsense,
-// and to use the notify() interface for messaging and blasting.
+// Refactor this one to also work and remove all that objectify nonsense, and
+// to use the notify() interface for messaging and blasting.
 
 export const messageFreeJudges = {
 
 	POST: async (req, res) => {
 
 		// Given a timeslot ID and site ID, the aim here is to individually
-		// message every judge who IS in the pools that the rounds tied to
-		// that timeslot pull from, but who is NOT either judging, or in a
-		// standby timeslot attached to this timeslot.  In other words, they
-		// are completely free to go and frolic or whatever.
+		// message every judge who IS in the pools that the rounds tied to that
+		// timeslot pull from, but who is NOT either judging, or in a standby
+		// timeslot attached to this timeslot.  In other words, they are
+		// completely free to go and frolic or whatever.
 
 		// Yes I just used the world frolic.  Fight me.
 
@@ -263,10 +260,8 @@ export const messageFreeJudges = {
 		rounds.forEach( (round) => {
 			const promise = req.db.changeLog.create({
 				tag         : 'blast',
-				description : `${req.body.message} sent to ${totals.web + totals.email}
-					 judges ${totals.web} push and ${totals.email} emails`,
+				description : `${req.body.message} sent to ${totals.judges} people: ${totals.web} push and ${totals.email} emails`,
 				person      : req.session.person,
-				count       : totals.web + totals.emails,
 				round       : round.id,
 			});
 

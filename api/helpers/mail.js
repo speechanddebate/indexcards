@@ -8,6 +8,8 @@ export const emailBlast = async (inputData) => {
 	const messageData = { ...inputData };
 	let transporter = {};
 
+	const promises = [];
+
 	if (messageData.share) {
 
 		transporter = nodemailer.createTransport({
@@ -98,7 +100,8 @@ export const emailBlast = async (inputData) => {
 
 	if (process.env.NODE_ENV === 'production') {
 		try {
-			result =  await transporter.sendMail(messageData);
+			result = transporter.sendMail(messageData);
+			promises.push(result);
 		} catch (err) {
 			return new Error(`Failed to send mail: ${err.message}`);
 		}
@@ -112,12 +115,18 @@ export const emailBlast = async (inputData) => {
 		debugLogger.info(`ReplyTo ${messageData.replyTo}`);
 	}
 
-	return {
-		error   : false,
-		count   : messageData.bcc?.length,
-		message : `Email sent to ${(messageData.bcc ? messageData.bcc.length : 0)} recipients`,
-		result,
-	};
+	const promise = new Promise( (resolve) => {
+		Promise.all(promises).then( () => {
+			resolve({
+				error   : false,
+				count   : messageData.bcc?.length,
+				message : `Email sent to ${(messageData.bcc ? messageData.bcc.length : 0)} recipients`,
+			});
+		});
+	});
+
+	return promise;
+
 };
 
 export const phoneBlast = async () => {
@@ -171,12 +180,13 @@ export const adminBlast = async (inputData) => {
 
 	messageData.from = messageData.from ? messageData.from : config.MAIL_FROM;
 
-	let result = {};
+	const promises = [];
 
 	if (messageData.email) {
 		messageData.to = messageData.email;
 		if (process.env.NODE_ENV === 'production' || config.MAIL_SERVER === 'mail.in.speechanddebate.org') {
-			result = await transporter.sendMail(messageData);
+			const result = transporter.sendMail(messageData);
+			promises.push(result);
 		} else {
 			debugLogger.info(`Local: Admin email not sending from ${messageData.from} to ${messageData.bcc}`);
 			debugLogger.info(`Subject ${messageData.subject}`);
@@ -186,13 +196,18 @@ export const adminBlast = async (inputData) => {
 		}
 	}
 
-	return {
-		error   : false,
-		count   : messageData.to?.length,
-		to      : messageData.to,
-		message : `Administration blast message sent`,
-		result,
-	};
+	const promise = new Promise( (resolve) => {
+		Promise.all(promises).then( () => {
+			resolve({
+				error   : false,
+				count   : messageData.to?.length,
+				to      : messageData.to,
+				message : `Administration blast message sent`,
+			});
+		});
+	});
+
+	return promise;
 };
 
 export default emailBlast;

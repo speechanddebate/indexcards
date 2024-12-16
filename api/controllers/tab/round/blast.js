@@ -1,7 +1,6 @@
 /* eslint-disable no-useless-escape */
 import moment from 'moment-timezone';
 import { getFollowers, getPairingFollowers } from '../../../helpers/followers.js';
-import { errorLogger } from '../../../helpers/logger.js';
 import { notify } from '../../../helpers/blast.js';
 import { sendPairingBlast, formatPairingBlast } from '../../../helpers/pairing.js';
 
@@ -21,29 +20,25 @@ export const blastRoundMessage = {
 		const from = `${tourn.name} <${tourn.webname}_${numberwang}@www.tabroom.com>`;
 		const fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
 
-		const notifyResponse = await notify({
-			ids         : personIds,
-			text        : req.body.message,
+		const blast = await notify({
+			ids  : personIds,
+			text : req.body.message,
 			from,
 			fromAddress,
 		});
 
-		if (notifyResponse.error) {
-			errorLogger.error(notifyResponse.message);
-			return res.status(200).json(notifyResponse);
-		}
-
 		await req.db.changeLog.create({
 			tag         : 'blast',
-			description : `${req.body.message} sent to ${notifyResponse.push?.count || 0} blast and ${notifyResponse.email?.count || 0} email recipients`,
+			description : `${req.body.message} sent.  ${blast.message}`,
 			person      : req.session?.person,
-			count       : notifyResponse.push?.count || 0,
 			round       : req.body.roundId,
 		});
 
+		const message = `Message sent to whole timeslot. ${blast.inbox || 0} recipients messaged, ${blast.web || 0} by web and ${blast.email || 0} by email`;
+
 		return res.status(200).json({
 			error   : false,
-			message : notifyResponse.message,
+			message,
 		});
 	},
 };
@@ -120,7 +115,9 @@ export const scheduleAutoFlip = async (roundId, req) => {
 
 	if (roundData) {
 
-		for await (const round of roundData) {
+		const promises = [];
+
+		roundData.forEach( round => {
 
 			if (!round.no_side_constraints
 				&& ( round.type !== 'elim'
@@ -138,7 +135,7 @@ export const scheduleAutoFlip = async (roundId, req) => {
 			const flipAt = {};
 			let flights = [];
 
-			if (round.flip_split_flights) {
+			if (round.flip_split_flights && round.flights > 1) {
 				flights = [...Array(round.flights).keys()];
 			} else {
 				flights = [0];
@@ -161,35 +158,39 @@ export const scheduleAutoFlip = async (roundId, req) => {
 				}
 			}
 
-			for (const tick of flights) {
+			flights.forEach( (tick) => {
+
 				const flight = tick + 1;
 
-				if (round.flip_split_flights) {
-					// eslint-disable-next-line no-await-in-loop
-					await req.db.autoqueue.create({
+				if (round.flip_split_flights && round.flights > 1) {
+					const promise = req.db.autoqueue.create({
 						tag        : `flip_${flight}`,
 						round      : round.id,
 						active_at  : flipAt[flight],
 						created_at : Date(),
 					});
+					promises.push(promise);
 				} else {
-					// eslint-disable-next-line no-await-in-loop
-					await req.db.autoqueue.create({
+					const promise = req.db.autoqueue.create({
 						tag        : `flip`,
 						round      : round.id,
 						active_at  : flipAt[flight],
 						created_at : Date(),
 					});
+
+					promises.push(promise);
 				}
-			}
-		}
+			});
+		});
+
+		await Promise.all(promises);
 	}
 };
 
 // Blast a single round with a pairing
 export const blastRoundPairing = {
 
-	POST: async (req, res) => {
+	POST: async (req, res, rawRoundId) => {
 
 		let sender = '';
 		if (req.body?.sender) {
@@ -200,39 +201,51 @@ export const blastRoundPairing = {
 			sender = req.session.person;
 		}
 
+		const roundId = rawRoundId || req.params.roundId;
+
 		const queryData = {};
-		queryData.replacements = { roundId : req.params.roundId };
+		queryData.replacements = { roundId };
 		queryData.where = 'where section.round = :roundId';
 		queryData.fields = '';
 
+		let promises = [];
+
 		if (req.body.publish) {
-			await req.db.sequelize.query(
+
+			const publish = req.db.sequelize.query(
 				`update round set published = 1 where round.id = :roundId `, {
 					replacements : queryData.replacements,
 					type         : req.db.sequelize.QueryTypes.UPDATE,
 				});
 
-			await req.db.changeLog.create({
+			const log = req.db.changeLog.create({
 				tag         : 'publish',
 				description : `Round published`,
 				person      : sender,
-				round       : req.params.roundId,
+				round       : roundId,
 			});
 
-			await scheduleAutoFlip(req.params.roundId, req);
+			const flip = scheduleAutoFlip(roundId, req);
+
+			promises = [flip, log, publish];
 		}
 
-		await req.db.sequelize.query(
+		const rmBlasted = req.db.sequelize.query(
 			`delete from round_setting where round = :roundId and tag = 'blasted'`, {
 				replacements : queryData.replacements,
-				type         : req.db.sequelize.QueryTypes.UPDATE,
+				type         : req.db.sequelize.QueryTypes.DELETE,
 			});
 
-		await req.db.sequelize.query(
+		promises.push(rmBlasted);
+
+		const mkBlasted = req.db.sequelize.query(
 			`insert into round_setting (tag, round, value_date, value) values ('blasted', :roundId, now(), 'date')`, {
 				replacements : queryData.replacements,
-				type         : req.db.sequelize.QueryTypes.UPDATE,
+				type         : req.db.sequelize.QueryTypes.INSERT,
 			});
+
+		promises.push(mkBlasted);
+		await Promise.all(promises);
 
 		const blastData = await formatPairingBlast(queryData, req);
 		blastData.sender = sender;
@@ -266,22 +279,21 @@ export const blastRoundPairing = {
 		blastData.fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
 		blastData.tourn = tourn.id;
 
-		const browserResponse = await sendPairingBlast(followers, blastData, req, res);
+		const blastResponse = await sendPairingBlast(followers, blastData, req, res);
 
 		if (req.session?.person) {
 			const person = { personId : req.session?.person };
 
 			await req.db.sequelize.query(`
 				insert into change_log
-					(tag, description, person, count, round, tourn, created_at)
+					(tag, description, person, round, tourn, created_at)
 				values
-					('tabbing', :description, :personId, :count, :roundId, :tournId, NOW())
+					('tabbing', :description, :personId, :roundId, :tournId, NOW())
 			`, {
 				replacements : {
-					count       : browserResponse.push?.count || 0,
-					roundId     : req.params.roundId,
 					tournId     : req.params.tournId,
-					description : `Pairing blast sent. ${browserResponse.message} ${req.session?.person ? '' : 'by autoblast'} `,
+					description : `Pairing blast sent. ${blastResponse.message} ${req.session?.person ? '' : 'by autoblast'} `,
+					roundId,
 					...person,
 				},
 				type : req.db.sequelize.QueryTypes.INSERT,
@@ -291,13 +303,12 @@ export const blastRoundPairing = {
 
 			await req.db.sequelize.query(`
 				insert into change_log
-					(tag, description, count, round, tourn, created_at)
+					(tag, description, round, tourn, created_at)
 				values
-					('tabbing', :description, :count, :roundId, :tournId, NOW())
+					('tabbing', :description, :roundId, :tournId, NOW())
 			`, {
 				replacements:  {
-					count       : browserResponse.push?.count || 0,
-					description : `Pairing blast sent. ${browserResponse.message} ${req.session?.person ? '' : 'by autoblast'} `,
+					description : `Pairing blast sent. ${blastResponse.message} ${req.session?.person ? '' : 'by autoblast'} `,
 					...req.params,
 				},
 				type : req.db.sequelize.QueryTypes.INSERT,
@@ -305,14 +316,15 @@ export const blastRoundPairing = {
 		}
 
 		if (req.params.timeslotId) {
-			return browserResponse;
+			return blastResponse;
 		}
 
 		if (res.status) {
-			return res.status(200).json(browserResponse.message);
+			return res.status(200).json(blastResponse);
 		}
 
-		return browserResponse.message;
+		return blastResponse;
+
 	},
 };
 
