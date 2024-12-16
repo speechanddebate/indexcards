@@ -634,17 +634,20 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 				});
 			}
 
-			const returnMessage = Promise.all(logPromises).then( () => {
+			Promise.all(logPromises).then( () => {
 				resolve({
 					error   : false,
-					message : `Pairings sent to ${blastResponse.web} web and ${blastResponse.email} email recipients`,
 					web     : blastResponse.web,
 					email   : blastResponse.email,
 				});
 			});
 
-			resolve(returnMessage);
-
+			resolve({
+				error   : false,
+				message : `Pairings sent to ${blastResponse.web} web and ${blastResponse.email} email recipients`,
+				web     : blastResponse.web,
+				email   : blastResponse.email,
+			});
 		});
 	});
 
