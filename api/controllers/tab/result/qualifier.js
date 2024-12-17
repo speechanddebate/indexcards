@@ -276,7 +276,8 @@ export const saveEventResult = async (db, eventId) => {
 
 				const targetRound = allElims[(rule.reverse_elim - 1)];
 
-				if (targetRound && entriesByLastRound[targetRound.name]) {
+				if (targetRound && entriesByLastRound[targetRound?.name]) {
+
 					for (const entry of entriesByLastRound[targetRound.name]) {
 						if (entry && !entryPoints[entry]) {
 							entryPoints[entry] = rule.points;

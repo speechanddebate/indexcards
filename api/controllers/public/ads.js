@@ -5,7 +5,7 @@ export const getAds = {
 		const db = req.db;
 
 		const currentAds = await db.sequelize.query(`
-			select id, filename, url
+			select id, filename, url, background
 				from ad
 			where ad.start < NOW()
 				and ad.end > NOW()
