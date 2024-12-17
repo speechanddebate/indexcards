@@ -103,7 +103,7 @@ export const getTabroomUsage = {
 
 		const allStudents = await req.db.sequelize.query(`
 			select
-				count(distinct student.person)
+				count(distinct student.person) count
 			from student, entry_student es, entry, event, tourn
 			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > NOW()
@@ -126,7 +126,7 @@ export const getTabroomUsage = {
 
 		const allJudges = await req.db.sequelize.query(`
 			select
-				count(distinct judge.person)
+				count(distinct judge.person) count
 			from judge, category, tourn
 			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > CURRENT_TIMESTAMP
@@ -146,7 +146,7 @@ export const getTabroomUsage = {
 
 		const tournamentCount = await req.db.sequelize.query(`
 			select
-				count(distinct tourn.id)
+				count(distinct tourn.id) count
 			from tourn
 			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > CURRENT_TIMESTAMP
@@ -165,19 +165,18 @@ export const getTabroomUsage = {
 
 		const currentActiveUsers = await req.db.sequelize.query(`
 			select
-				count (distinct session.id)
+				count(distinct session.id) count
 			from session
 				where session.last_access > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-			group by session.id
 		`, {
 			type: req.db.sequelize.QueryTypes.SELECT,
 		});
 
 		return res.status(200).json({
-			activeUsers : currentActiveUsers.length,
-			tournaments : tournamentCount.length,
-			judges      : allJudges.length,
-			students    : allStudents.length,
+			activeUsers : currentActiveUsers[0]?.count,
+			tournaments : tournamentCount[0]?.count,
+			judges      : allJudges[0]?.count,
+			students    : allStudents[0].count,
 		});
 	},
 };
