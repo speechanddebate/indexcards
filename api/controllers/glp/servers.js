@@ -103,7 +103,7 @@ export const getTabroomUsage = {
 
 		const allStudents = await req.db.sequelize.query(`
 			select
-				count (distinct student.person)
+				count(distinct student.person)
 			from student, entry_student es, entry, event, tourn
 			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > NOW()
@@ -113,28 +113,40 @@ export const getTabroomUsage = {
 				and entry.active = 1
 				and entry.id = es.entry
 				and es.student = student.id
-			group by student.id
+				and exists (
+					select timeslot.id
+					from timeslot
+					where timeslot.tourn = tourn.id
+					and timeslot.start > CURRENT_TIMESTAMP
+					and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+				)
 		`, {
 			type: req.db.sequelize.QueryTypes.SELECT,
 		});
 
 		const allJudges = await req.db.sequelize.query(`
 			select
-				count (distinct judge.person)
+				count(distinct judge.person)
 			from judge, category, tourn
 			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > CURRENT_TIMESTAMP
 				and tourn.id = category.tourn
 				and tourn.hidden != 1
 				and category.id = judge.category
-			group by judge.id
+				and exists (
+					select timeslot.id
+					from timeslot
+					where timeslot.tourn = tourn.id
+					and timeslot.start > CURRENT_TIMESTAMP
+					and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+				)
 		`, {
 			type: req.db.sequelize.QueryTypes.SELECT,
 		});
 
 		const tournamentCount = await req.db.sequelize.query(`
 			select
-				count (distinct tourn.id)
+				count(distinct tourn.id)
 			from tourn
 			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				and tourn.end > CURRENT_TIMESTAMP
