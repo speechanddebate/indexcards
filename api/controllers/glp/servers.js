@@ -158,7 +158,6 @@ export const getTabroomUsage = {
 					and timeslot.start > CURRENT_TIMESTAMP
 					and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
 				)
-			group by tourn.id
 		`, {
 			type: req.db.sequelize.QueryTypes.SELECT,
 		});
