@@ -138,7 +138,9 @@ export const webBlast = async (inputData) => {
 	// TEST_USERID though, I will look for you. I will find you.  And I
 	// will....
 
-	if (process.env.NODE_ENV !== 'production' && config.MAIL_SERVER !== 'mail.in.speechanddebate.org') {
+	if (process.env.NODE_ENV !== 'production'
+		&& config.MAIL_SERVER !== 'mail.in.speechanddebate.org'
+	) {
 		targetIds = process.env.TEST_USERID || ['100'];
 	}
 
