@@ -203,8 +203,6 @@ export const blastRoundPairing = {
 
 		const roundId = parseInt(rawRoundId) || req.params.roundId;
 
-		console.log(`Round is ${roundId}`);
-
 		const queryData = {};
 		queryData.replacements = { roundId };
 		queryData.where = 'where section.round = :roundId';
@@ -213,8 +211,6 @@ export const blastRoundPairing = {
 		let promises = [];
 
 		if (req.body.publish) {
-
-			console.log(`QUeryData is ${JSON.stringify(queryData)}`);
 
 			const publish = req.db.sequelize.query(
 				`update round set published = 1 where round.id = :roundId `, {
@@ -283,54 +279,45 @@ export const blastRoundPairing = {
 		blastData.fromAddress = `<${tourn.webname}_${numberwang}@www.tabroom.com>`;
 		blastData.tourn = tourn.id;
 
-		const blastResponse = await sendPairingBlast(followers, blastData, req, res);
+		const blast = sendPairingBlast(followers, blastData, req, res);
 
-		console.log(`blast response is ${JSON.stringify(blastResponse)}`);
+		const blastPromise = new Promise( (resolve) => {
 
-		if (req.session?.person) {
-			const person = { personId : req.session?.person };
+			Promise.resolve(blast).then( (blastResponse) => {
 
-			await req.db.sequelize.query(`
-				insert into change_log
-					(tag, description, person, round, tourn, created_at)
-				values
-					('tabbing', :description, :personId, :roundId, :tournId, NOW())
-			`, {
-				replacements : {
+				const replacements = {
 					tournId     : req.params.tournId,
+					personId    : req.session.person || '',
 					description : `Pairing blast sent. ${blastResponse?.message} ${req.session?.person ? '' : 'by autoblast'} `,
 					roundId,
-					...person,
-				},
-				type : req.db.sequelize.QueryTypes.INSERT,
+				};
+
+				const logPromise = req.db.sequelize.query(`
+					insert into change_log
+						(tag, description, person, round, tourn, created_at)
+					values
+						('tabbing', :description, :personId, :roundId, :tournId, NOW())
+				`, {
+					type : req.db.sequelize.QueryTypes.INSERT,
+					replacements,
+				});
+
+				Promise.resolve(logPromise).then( () => {
+					resolve(blastResponse);
+				});
+
+				resolve(blastResponse);
 			});
 
-		} else {
+		});
 
-			await req.db.sequelize.query(`
-				insert into change_log
-					(tag, description, round, tourn, created_at)
-				values
-					('tabbing', :description, :roundId, :tournId, NOW())
-			`, {
-				replacements:  {
-					description : `Pairing blast sent. ${blastResponse?.message} ${req.session?.person ? '' : 'by autoblast'} `,
-					...req.params,
-				},
-				type : req.db.sequelize.QueryTypes.INSERT,
-			});
+		if (req.params.timeslotId || (!res.status)) {
+			return blastPromise;
 		}
 
-		if (req.params.timeslotId) {
-			return blastResponse;
-		}
-
-		if (res.status) {
+		Promise.resolve(blastPromise).then( (blastResponse) => {
 			return res.status(200).json(blastResponse);
-		}
-
-		return blastResponse;
-
+		});
 	},
 };
 

@@ -145,7 +145,7 @@ export const blastTimeslotPairings = {
 		}
 
 		return res.status(200).json({
-			message: `Pairing blast sent to ${totals.web} web blast and ${totals.email} email recipients`,
+			message: `Timeslot-wide pairing blast sent to ${totals.web} web blast and ${totals.email} email recipients`,
 			...totals,
 		});
 	},
