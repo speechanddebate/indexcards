@@ -36,7 +36,7 @@ export const emailBlast = async (inputData) => {
 			host           : config.MAIL_SERVER,
 			port           : config.MAIL_PORT,
 			secure         : config.MAIL_SECURE || false,
-			pool           : true,
+			pool           : false,
 			maxConnections : 400,
 			maxMessages    : 'Infinity',
 			tls            : {
@@ -51,9 +51,14 @@ export const emailBlast = async (inputData) => {
 			host           : config.MAIL_SERVER,
 			port           : config.MAIL_PORT,
 			secure         : false,
-			pool           : true,
+			pool           : false, // you'd think this would make it faster but in testing it does not
 			maxConnections : config.MAIL_POOL || 128,
 			maxMessages    : 'Infinity',
+			tls            : {
+				secure             : false,
+				ignoreTLS          : true,
+				rejectUnauthorized : false,
+			},
 		});
 	}
 
