@@ -15,7 +15,7 @@ export const writeRound = async (db, round) => {
 
 		round.sections.forEach( async (section) => {
 
-			const judge = section.j || 0;
+			const judge = section.j || null;
 			round.panels = [];
 
 			if (section.b) {
@@ -32,6 +32,7 @@ export const writeRound = async (db, round) => {
 					side  : 1,
 					entry : section.b,
 					audit : 1,
+					judge,
 				});
 
 				panel.ballots = [ballot];
@@ -45,19 +46,22 @@ export const writeRound = async (db, round) => {
 					flight  : 1,
 				});
 
-				const aff = await db.ballot.create({
+				const affBallot = {
 					panel : panel.id,
 					side  : 1,
 					entry : section.a,
 					judge,
-				});
+				};
 
-				const neg = await db.ballot.create({
+				const negBallot = {
 					panel : panel.id,
 					side  : 2,
 					entry : section.n,
 					judge,
-				});
+				};
+
+				const aff = await db.ballot.create(affBallot);
+				const neg = await db.ballot.create(negBallot);
 
 				panel.ballots = [aff, neg];
 				round.panels.push(panel);
