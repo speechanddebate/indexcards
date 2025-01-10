@@ -8,6 +8,7 @@ const autoBlastRounds = async () => {
 
 	const pendingQueues = await db.sequelize.query(`
 		select aq.id, aq.tag, aq.created_at,
+			aq.created_by,
 			round.id roundId, round.name, round.label, round.published,
 			event.tourn tournId, event.type eventType, event.abbr eventAbbr
 		from (autoqueue aq, round, event, tourn)
@@ -63,7 +64,7 @@ const autoBlastRounds = async () => {
 
 			if (round.eventType === 'debate' || round.eventType === 'wsdc') {
 				// Publish Flips
-				const flips = scheduleFlips(round.roundId);
+				const flips = scheduleFlips(round.roundId, round.created_by);
 				promises.push(flips);
 			}
 
