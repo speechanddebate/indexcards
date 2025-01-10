@@ -27,12 +27,19 @@ export const blastRoundMessage = {
 			fromAddress,
 		});
 
-		await req.db.changeLog.create({
+		const logMessage = {
 			tag         : 'blast',
 			description : `${req.body.message} sent.  ${blast.message}`,
-			person      : req.session?.person,
 			round       : req.body.roundId,
-		});
+		};
+
+		if (req.session?.person) {
+			logMessage.person = req.session.person;
+		} else if (req.body.sender) {
+			logMessage.person = req.body.sender;
+		}
+
+		await req.db.changeLog.create(logMessage);
 
 		const message = `Message sent to whole timeslot. ${blast.inbox || 0} recipients messaged, ${blast.web || 0} by web and ${blast.email || 0} by email`;
 
@@ -168,6 +175,7 @@ export const scheduleAutoFlip = async (roundId, req) => {
 						round      : round.id,
 						active_at  : flipAt[flight],
 						created_at : Date(),
+						created_by : req.body.sender || 0,
 					});
 					promises.push(promise);
 				} else {
@@ -176,6 +184,7 @@ export const scheduleAutoFlip = async (roundId, req) => {
 						round      : round.id,
 						active_at  : flipAt[flight],
 						created_at : Date(),
+						created_by : req.body.sender || 0,
 					});
 
 					promises.push(promise);
