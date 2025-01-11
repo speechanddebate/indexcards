@@ -112,12 +112,14 @@ export const roundDecisionStatus = {
 		const labels = await db.sequelize.query(`
 			select
 				SUBSTRING(aff_label.value, 1, 1) aff,
-				SUBSTRING(neg_label.value, 1, 1) neg
-			from event_setting aff_label, event_setting neg_label, round
+				SUBSTRING(neg_label.value, 1, 1) neg,
+				event.type eventType
+			from event_setting aff_label, event_setting neg_label, round, event
 
 			where round.id = :roundId
-				and round.event = aff_label.event
-				and round.event = neg_label.event
+				and round.event = event.id
+				and event.id = aff_label.event
+				and event.id = neg_label.event
 				and aff_label.tag = 'aff_label'
 				and neg_label.tag = 'neg_label'
 		`, {
@@ -200,12 +202,15 @@ export const roundDecisionStatus = {
 
 					round.panels[ballot.panel] = 9000;
 
-				} else if (ballot.bye) {
-					already += ` &frac12; BYE`;
-					round.panels[ballot.panel] += 10;
-				} else if (ballot.forfeit) {
-					already += ` &frac12; FFT`;
-					round.panels[ballot.panel] += 10;
+				} else if (tmplabel.eventType !== 'speech' && tmplabel.eventType !== 'congress') {
+
+					if (ballot.bye) {
+						already += ` &frac12; BYE`;
+						round.panels[ballot.panel] += 10;
+					} else if (ballot.forfeit) {
+						already += ` &frac12; FFT`;
+						round.panels[ballot.panel] += 10;
+					}
 				}
 
 				round.byePanels[ballot.panel] = already;
@@ -244,10 +249,16 @@ export const roundDecisionStatus = {
 						judge.text = label[ballot.side];
 						judge.class = 'greentext semibold';
 					}
-				} else if (ballot.pbye) {
+				} else if (tmplabel.eventType !== 'speech'
+							&& tmplabel.eventType !== 'congress'
+							&& ballot.pbye
+				) {
 					judge.text = 'BYE';
 					judge.class = 'graytext semibold';
-				} else if (ballot.bye) {
+				} else if (tmplabel.eventType !== 'speech'
+							&& tmplabel.eventType !== 'congress'
+							&& ballot.bye
+				) {
 					if (!done[ballot.ballot]) {
 						if (judge.text) {
 							judge.text += `/`;
@@ -257,7 +268,10 @@ export const roundDecisionStatus = {
 						done[ballot.ballot] = true;
 					}
 					judge.class = 'graytext semibold';
-				} else if (ballot.forfeit) {
+				} else if (tmplabel.eventType !== 'speech'
+							&& tmplabel.eventType !== 'congress'
+							&& ballot.forfeit
+				) {
 					if (!done[ballot.ballot]) {
 						if (judge.text) {
 							judge.text += `/`;
@@ -273,7 +287,10 @@ export const roundDecisionStatus = {
 					judge.class = 'fa fa-sm fa-star greentext';
 				}
 
-			} else if (ballot.pbye) {
+			} else if (tmplabel.eventType !== 'speech'
+						&& tmplabel.eventType !== 'congress'
+						&& ballot.pbye
+			) {
 				round.panels[ballot.panel] = 10000;
 				judge.text = 'BYE';
 			} else if (ballot.winloss || ballot.rank || ballot.point || ballot.rubric ) {
