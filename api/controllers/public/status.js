@@ -1,10 +1,13 @@
 import os from 'os';
 import config from '../../../config/config.js';
+import { packageData } from '../../../config/json-loader.js';
 
 export const systemStatus = {
 	GET: async (req, res) => {
 		return res.status(200).json({
 			message  : 'OK',
+			name     : packageData.name,
+			version  : packageData.version,
 			webhost  : config.DOCKERHOST || config.HOST || 'undefined',
 			server   : os.hostname(),
 			load     : os.loadavg(),
@@ -18,6 +21,8 @@ export const systemStatus = {
 	POST: async (req, res) => {
 		return res.status(200).json({
 			message  : 'OK',
+			name     : packageData.name,
+			version  : packageData.version,
 			webhost  : config.DOCKERHOST || config.HOST || 'undefined',
 			server   : os.hostname(),
 			load     : os.loadavg(),

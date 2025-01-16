@@ -132,7 +132,8 @@ app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], as
 		req.session = await auth(req, res);
 
 		if (!req.session) {
-			return res.status(401).json('User: You are not logged in');
+			const cookie = req.cookies[req.config.COOKIE_NAME] || req.headers['x-tabroom-cookie'];
+			return res.status(401).json(`User: You are not logged in. Cookie is ${cookie}`);
 		}
 	} catch (err) {
 		next(err);

@@ -12,11 +12,14 @@
 		"test": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest watch",
 		"test-ci": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest --run",
 		"cover": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest --coverage",
-		"lint": "eslint --ignore-path .gitignore .",
+		"lint": "eslint .",
 		"prepare": "husky"
 	},
 	"extensionless": {
-		"lookFor": ["js", "json"],
+		"lookFor": [
+			"js",
+			"json"
+		],
 		"resolveDirs": true
 	},
 	"repository": {
@@ -43,7 +46,6 @@
 	},
 	"homepage": "https://www.tabroom.com/about",
 	"dependencies": {
-		"@alt3/sequelize-to-json-schemas": "^0.3.55",
 		"@aws-sdk/client-s3": "^3.397.0",
 		"@maxmind/geoip2-node": "^3.2.0",
 		"@speechanddebate/nsda-js-utils": "^1.0.15",
@@ -88,6 +90,7 @@
 		"xml2js": "^0.4.19"
 	},
 	"devDependencies": {
+		"@alt3/sequelize-to-json-schemas": "^0.3.55",
 		"@speechanddebate/eslint-config-nsda": "^1.0.26",
 		"@vitest/coverage-v8": "^0.34.6",
 		"chai": "^4.2.0",
@@ -116,7 +119,8 @@
 		"overrides": [
 			{
 				"files": [
-					"**/*.test.js"
+					"**/*.test.js",
+					".config/"
 				],
 				"extends": [
 					"@speechanddebate/eslint-config-nsda",
