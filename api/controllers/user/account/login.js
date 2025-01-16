@@ -1,8 +1,10 @@
 import { b64_sha512crypt as crypt } from 'sha512crypt-node';
 
-// This name is currently a misnomer, because this doesn't actually create a session, it just validates the username and password
-// Eventually, this should be expanded to create a session and return it
-const login = {
+// This name is currently a misnomer, because this doesn't actually create a
+// session, it just validates the username and password Eventually, this should
+// be expanded to create a session and return it
+
+export const login = {
 	POST: async (req, res) => {
 		const db = req.db;
 
@@ -56,7 +58,7 @@ const login = {
 		// On a student roster for a school with at least one tournament entry at a real tourn
 		const onStudentRoster = await db.sequelize.query(`
 			SELECT COUNT(*) AS 'count'
-			FROM student S
+				FROM student S
 			INNER JOIN chapter C ON C.id = S.chapter
 			INNER JOIN school SC ON SC.chapter = C.id
 			INNER JOIN tourn T ON T.id = SC.tourn
@@ -126,13 +128,47 @@ const login = {
 	},
 };
 
-login.POST.apiDoc = {
-	summary: 'Logs in and returns a session object',
-	operationId: 'login',
+export const findSession = {
+	POST: async (req, res) => {
+
+		const db = req.db;
+
+		const reqBody = JSON.parse(req.body);
+		const sessionKey = reqBody.sessionKey;
+
+		console.log(`Request inbound for session key ${sessionKey}`);
+
+		const session = await db.sequelize.query(`
+			select
+				session.id, session.defaults, session.su, session.push_notify,
+				session.userkey key,
+				person.id person,
+				person.first personFirst, person.middle personMiddle, person.last personLast,
+				person.email, person.site_admin, person.nsda
+
+			from person, session
+			where session.userkey = :sessionKey
+				and session.person = person.id
+		`, {
+			replacements: { sessionKey },
+			type: db.Sequelize.QueryTypes.SELECT,
+		});
+
+		if (session.length) {
+			return res.status(200).json(session[0]);
+		}
+
+		return res.status(401).json({ message: 'No active session found' });
+	},
+};
+
+findSession.POST.apiDoc = {
+	summary: 'Given a Session Key delivers the corresponding session and personal data',
+	operationId: 'findSession',
 	requestBody: {
-		description: 'The username and password to login',
+		description: 'The session key ID to login (sha256)',
 		required: true,
-		content: { '*/*': { schema: { $ref: '#/components/schemas/LoginRequest' } } },
+		content: { '*/*': { schema: { $ref: '#/components/schemas/findSession' } } },
 	},
 	responses: {
 		200: {

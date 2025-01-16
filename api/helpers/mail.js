@@ -2,11 +2,14 @@ import nodemailer from 'nodemailer';
 import { convert } from 'html-to-text';
 import config from '../../config/config.js';
 import { debugLogger } from './logger.js';
+import { inlineError } from './error.js';
 
 export const emailBlast = async (inputData) => {
 
 	const messageData = { ...inputData };
 	let transporter = {};
+
+	const promises = [];
 
 	if (messageData.share) {
 
@@ -27,12 +30,30 @@ export const emailBlast = async (inputData) => {
 			},
 		});
 
+	} else if (config.MAIL_TEST) {
+
+		transporter = nodemailer.createTransport({
+			host           : config.MAIL_SERVER,
+			port           : config.MAIL_PORT,
+			secure         : false,
+			pool           : true,
+			maxConnections : 400,
+			maxMessages    : 'Infinity',
+			tls            : {
+				secure             : false,
+				ignoreTLS          : true,
+				rejectUnauthorized : false,
+			},
+		});
+
 	} else {
 		transporter = nodemailer.createTransport({
-			host   : config.MAIL_SERVER,
-			port   : config.MAIL_PORT,
-			secure : false,
-			pool   : true,
+			host           : config.MAIL_SERVER,
+			port           : config.MAIL_PORT,
+			secure         : false,
+			pool           : true,
+			maxConnections : config.MAIL_POOL || 128,
+			maxMessages    : 'Infinity',
 		});
 	}
 
@@ -94,13 +115,17 @@ export const emailBlast = async (inputData) => {
 		});
 	}
 
-	let result = {};
-
-	if (process.env.NODE_ENV === 'production') {
+	if (
+		process.env.NODE_ENV === 'production'
+		|| config.MAIL_TEST
+	) {
 		try {
-			result =  await transporter.sendMail(messageData);
+			const result = transporter.sendMail(messageData);
+			promises.push(result);
 		} catch (err) {
-			return new Error(`Failed to send mail: ${err.message}`);
+			console.log(`Mail error on sending mail`);
+			inlineError(err, 'mail.js line 125');
+			console.log(err);
 		}
 	} else {
 		debugLogger.info(`Local: email not sending from ${messageData.from} to ${messageData.to} bcc ${messageData.bcc} `);
@@ -112,87 +137,18 @@ export const emailBlast = async (inputData) => {
 		debugLogger.info(`ReplyTo ${messageData.replyTo}`);
 	}
 
-	return {
-		error   : false,
-		count   : messageData.bcc?.length,
-		message : `Email sent to ${(messageData.bcc ? messageData.bcc.length : 0)} recipients`,
-		result,
-	};
-};
-
-export const phoneBlast = async () => {
-	return false;
-};
-
-export const adminBlast = async (inputData) => {
-
-	const messageData = { ...inputData };
-
-	const transporter = nodemailer.createTransport({
-		host   : config.MAIL_SERVER ? config.MAIL_SERVER : config.MAIL_SERVER,
-		port   : config.MAIL_PORT ? config.MAIL_PORT : config.MAIL_PORT,
-		secure : false,
+	const promise = new Promise( (resolve) => {
+		Promise.all(promises).then( () => {
+			resolve({
+				error   : false,
+				count   : messageData.bcc?.length,
+				message : `Email sent to ${(messageData.bcc ? messageData.bcc.length : 0)} recipients`,
+			});
+		});
 	});
 
-	if (!messageData.text && !messageData.html) {
-		return { error: true, count: 0, message: 'No message body; not sending' };
-	}
+	return promise;
 
-	if (messageData.html && !messageData.text) {
-		messageData.text = convert(messageData.html);
-	}
-
-	if (!messageData.email) {
-		return { error: true, count: 0, message: 'No desination addresses provided, not sent' };
-	}
-
-	if (!messageData.subject) {
-		messageData.subject = '[TAB] Admin Blast';
-	}
-
-	if (messageData.text) {
-		if (messageData.append) {
-			messageData.text += `\n\n${convert(messageData.append)}\n`;
-		}
-		messageData.text += '\n----------------------------\n';
-		messageData.text += 'Admin blast from https://www.tabroom.com\n';
-		messageData.text += 'To stop them, click No Emails from your profile on Tabroom.\n';
-	}
-
-	if (messageData.html) {
-		if (messageData.append) {
-			messageData.html += `<br /><p>${convert(messageData.append)}</p>`;
-		}
-		messageData.html += '<p>-----------------------------</p>';
-		messageData.html += '<p>Admin blast from Tabroom.  To stop them, visit ';
-		messageData.html += '<a href="https://www.tabroom.com/user/login/profile.mhtml">Your Profile</a>, ';
-		messageData.html += 'check off "No Emails", and save</p>';
-	}
-
-	messageData.from = messageData.from ? messageData.from : config.MAIL_FROM;
-
-	let result = {};
-
-	if (messageData.email) {
-		messageData.to = messageData.email;
-		if (process.env.NODE_ENV === 'production' || config.MAIL_SERVER === 'mail.in.speechanddebate.org') {
-			result = await transporter.sendMail(messageData);
-		} else {
-			debugLogger.info(`Local: Admin email not sending from ${messageData.from} to ${messageData.bcc}`);
-			debugLogger.info(`Subject ${messageData.subject}`);
-			debugLogger.info(`Text ${messageData.text}`);
-			debugLogger.info(`HTML ${messageData.html}`);
-			debugLogger.info(`From ${messageData.from}`);
-		}
-	}
-
-	return {
-		error   : false,
-		count   : messageData.to?.length,
-		to      : messageData.to,
-		message : `Administration blast message sent`,
-		result,
-	};
 };
 
 export default emailBlast;

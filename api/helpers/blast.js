@@ -34,16 +34,21 @@ export const notify = async (inputData) => {
 
 	inputData.ids = inputData.ids.filter(onlyUnique);
 
+	const promises = [];
+
 	if (!inputData.noEmail) {
-		pushReply.email = await emailNotify(inputData);
+		pushReply.email = emailNotify(inputData);
+		promises.push(pushReply.email);
 	}
 
 	if (!inputData.noWeb) {
-		pushReply.web = await webBlast(inputData);
+		pushReply.web = webBlast(inputData);
+		promises.push(pushReply.web);
 	}
 
 	if (!inputData.noInbox) {
-		pushReply.inbox = await inboxMessage(inputData);
+		pushReply.inbox = inboxMessage(inputData);
+		promises.push(pushReply.inbox);
 	}
 
 	let error = false;
@@ -52,22 +57,36 @@ export const notify = async (inputData) => {
 		error = true;
 	}
 
-	let message = '';
+	const returnPromise = new Promise( (resolve) => {
 
-	if (pushReply.web.message) {
-		message = ` ${pushReply.web.message}, ${pushReply.email.message} and ${pushReply.inbox.message}`;
-	} else {
-		message = `${pushReply.email.message} and ${pushReply.inbox.message}`;
-	}
+		Promise.all(promises).then( (values) => {
 
-	const reply = {
-		error,
-		message,
-		email   : pushReply.email,
-		web     : pushReply.web,
-	};
+			const reply = {
+				error,
+				message : 'Notifications sent',
+				email   : 0,
+				inbox   : 0,
+				web     : 0,
+			};
 
-	return reply;
+			for (const log of values) {
+				if (log.email > 0) {
+					reply.email += parseInt(log.email);
+				}
+
+				if (log.inbox > 0) {
+					reply.inbox += parseInt(log.inbox);
+				}
+
+				if (log.web > 0) {
+					reply.web += parseInt(log.web);
+				}
+			}
+			resolve(reply);
+		});
+	});
+
+	return returnPromise;
 };
 
 export const webBlast = async (inputData) => {
@@ -80,7 +99,7 @@ export const webBlast = async (inputData) => {
 		return {
 			error   : false,
 			message : `No recipients or message sent for push notifications`,
-			count   : inputData.ids.length,
+			web     : inputData.ids.length,
 		};
 	}
 
@@ -102,21 +121,16 @@ export const webBlast = async (inputData) => {
 		return {
 			error   : false,
 			message : `No web pushes active.`,
-			count   : 0,
+			web     : 0,
 		};
 	}
 
-	const targetPromise = recipients.map( (person) => {
+	let targetIds = recipients.map( (person) => {
 		if (person.id === 1) {
-			// it won't let you use 1 or 0 as user IDs which REALLY PISSED
-			// PALMER (UID = 1) OFF THAT I HAD TO WRITE A JANKY CODE EXCEPTION
-			// JUST FOR MYSELF.
 			return '100';
 		}
 		return `${person.id}`;
 	});
-
-	let targetIds = await Promise.all(targetPromise);
 
 	// If you are not running in production either send it only to the UID
 	// spec'd in config.js or to Palmer since let's be real that's almost
@@ -124,13 +138,17 @@ export const webBlast = async (inputData) => {
 	// TEST_USERID though, I will look for you. I will find you.  And I
 	// will....
 
-	if (process.env.NODE_ENV !== 'production' && config.MAIL_SERVER !== 'mail.in.speechanddebate.org') {
+	if (process.env.NODE_ENV !== 'production'
+		&& config.MAIL_SERVER !== 'mail.in.speechanddebate.org'
+	) {
 		targetIds = process.env.TEST_USERID || ['100'];
 	}
 
 	if (inputData.append) {
 		inputData.text += `\n${inputData.append}`;
 	}
+
+	const promises = [];
 
 	if (targetIds && targetIds.length > 0) {
 
@@ -146,7 +164,7 @@ export const webBlast = async (inputData) => {
 			target_channel  : 'push',
 		};
 
-		await axios.post(
+		const webPromise = axios.post(
 			`${config.ONESIGNAL.API_URL}/notifications`,
 			notification,
 			{
@@ -158,18 +176,21 @@ export const webBlast = async (inputData) => {
 			},
 		);
 
-		return {
-			error   : false,
-			message : `${targetIds ? targetIds.length : 0} web pushes sent.`,
-			count   : targetIds.length,
-		};
+		promises.push(webPromise);
+
 	}
 
-	return {
-		error   : false,
-		message : `No web pushes active.`,
-		count   : 0,
-	};
+	const returnPromise = new Promise( (resolve) => {
+		Promise.all(promises).then( () => {
+			resolve({
+				error   : false,
+				message : `${targetIds ? targetIds.length : 0} web pushes sent.`,
+				web   : targetIds.length,
+			});
+		});
+	});
+
+	return returnPromise;
 };
 
 export const emailNotify = async (inputData) => {
@@ -182,7 +203,7 @@ export const emailNotify = async (inputData) => {
 		return {
 			error   : false,
 			message : `No web pushes active.`,
-			count   : inputData.ids.length,
+			email   : inputData.ids.length,
 		};
 	}
 
@@ -207,19 +228,25 @@ export const emailNotify = async (inputData) => {
 		return person.email;
 	});
 
+	const promises = [];
+
 	if (inputData.email && inputData.email.length > 0) {
-		await emailBlast(inputData);
-		return {
-			error   : false,
-			message : `${inputData.email.length} emails sent.`,
-			count   : inputData.email.length,
-		};
+		const promise = emailBlast(inputData);
+		promises.push(promise);
 	}
 
-	return {
-		error   : false,
-		message : `No email addresses found`,
-	};
+	const returnPromise = new Promise( resolve => {
+		Promise.all(promises).then( () => {
+			resolve({
+				error   : false,
+				message : `${inputData.email.length} emails sent.`,
+				email   : inputData.email.length,
+			});
+		});
+	});
+
+	return returnPromise;
+
 };
 
 export const inboxMessage = async (inputData) => {
@@ -232,7 +259,7 @@ export const inboxMessage = async (inputData) => {
 		return {
 			error   : false,
 			message : `No receipients sent.`,
-			count   : inputData.ids.length,
+			inbox   : inputData.ids.length,
 		};
 	}
 
@@ -246,6 +273,7 @@ export const inboxMessage = async (inputData) => {
 		created_at    : new Date(),
 	};
 
+	// Tourn must exist, or otherwise be null
 	if (inputData.tourn) {
 		message.tourn = inputData.tourn;
 	}
@@ -284,7 +312,7 @@ export const inboxMessage = async (inputData) => {
 
 	return {
 		error   : false,
-		count   : inputData.ids.length,
+		inbox   : inputData.ids.length,
 		message : `${inputData.ids.length} Tabroom inbox messages delivered.`,
 	};
 };

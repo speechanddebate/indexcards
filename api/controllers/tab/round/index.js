@@ -112,12 +112,14 @@ export const roundDecisionStatus = {
 		const labels = await db.sequelize.query(`
 			select
 				SUBSTRING(aff_label.value, 1, 1) aff,
-				SUBSTRING(neg_label.value, 1, 1) neg
-			from event_setting aff_label, event_setting neg_label, round
+				SUBSTRING(neg_label.value, 1, 1) neg,
+				event.type eventType
+			from event_setting aff_label, event_setting neg_label, round, event
 
 			where round.id = :roundId
-				and round.event = aff_label.event
-				and round.event = neg_label.event
+				and round.event = event.id
+				and event.id = aff_label.event
+				and event.id = neg_label.event
 				and aff_label.tag = 'aff_label'
 				and neg_label.tag = 'neg_label'
 		`, {
@@ -174,6 +176,8 @@ export const roundDecisionStatus = {
 			byePanels : {},
 		};
 
+		const done = [];
+
 		rawBallots.forEach( (ballot) => {
 
 			if (!ballot.judge && !ballot.pbye) {
@@ -198,12 +202,15 @@ export const roundDecisionStatus = {
 
 					round.panels[ballot.panel] = 9000;
 
-				} else if (ballot.bye) {
-					already += ` &frac12; BYE`;
-					round.panels[ballot.panel] += 10;
-				} else if (ballot.forfeit) {
-					already += ` &frac12; FFT`;
-					round.panels[ballot.panel] += 10;
+				} else if (tmplabel.eventType !== 'speech' && tmplabel.eventType !== 'congress') {
+
+					if (ballot.bye) {
+						already += ` &frac12; BYE`;
+						round.panels[ballot.panel] += 10;
+					} else if (ballot.forfeit) {
+						already += ` &frac12; FFT`;
+						round.panels[ballot.panel] += 10;
+					}
 				}
 
 				round.byePanels[ballot.panel] = already;
@@ -215,15 +222,15 @@ export const roundDecisionStatus = {
 				round.judges[ballot.judge] = {};
 			}
 
-			if (!round.judges[ballot.judge][ballot.flight]) {
-				round.judges[ballot.judge][ballot.flight] = { panel: ballot.panel };
+			if (!round.judges[ballot.judge][ballot.panel]) {
+				round.judges[ballot.judge][ballot.panel] = { panel: ballot.panel };
 			}
 
 			if (!round.panels[ballot.panel]) {
 				round.panels[ballot.panel] = 0;
 			}
 
-			const judge = round.judges[ballot.judge][ballot.flight];
+			const judge = round.judges[ballot.judge][ballot.panel];
 
 			if (!round.out[ballot.flight]) {
 				round.out[ballot.flight] = {};
@@ -242,21 +249,36 @@ export const roundDecisionStatus = {
 						judge.text = label[ballot.side];
 						judge.class = 'greentext semibold';
 					}
-				} else if (ballot.pbye) {
+				} else if (tmplabel.eventType !== 'speech'
+							&& tmplabel.eventType !== 'congress'
+							&& ballot.pbye
+				) {
 					judge.text = 'BYE';
 					judge.class = 'graytext semibold';
-				} else if (ballot.bye) {
-					if (judge.text) {
-						judge.text += `/`;
+				} else if (tmplabel.eventType !== 'speech'
+							&& tmplabel.eventType !== 'congress'
+							&& ballot.bye
+				) {
+					if (!done[ballot.ballot]) {
+						if (judge.text) {
+							judge.text += `/`;
+						}
+						round.panels[ballot.panel] = 10000;
+						judge.text += `Bye`;
+						done[ballot.ballot] = true;
 					}
-					round.panels[ballot.panel] = 10000;
-					judge.text += `Bye`;
 					judge.class = 'graytext semibold';
-				} else if (ballot.forfeit) {
-					if (judge.text) {
-						judge.text += `/`;
+				} else if (tmplabel.eventType !== 'speech'
+							&& tmplabel.eventType !== 'congress'
+							&& ballot.forfeit
+				) {
+					if (!done[ballot.ballot]) {
+						if (judge.text) {
+							judge.text += `/`;
+						}
+						judge.text += `Fft`;
+						done[ballot.ballot] = true;
 					}
-					judge.text += `Fft`;
 					judge.class = 'graytext semibold';
 				} else if (ballot.rank) {
 					judge.text = 'in';
@@ -265,7 +287,10 @@ export const roundDecisionStatus = {
 					judge.class = 'fa fa-sm fa-star greentext';
 				}
 
-			} else if (ballot.pbye) {
+			} else if (tmplabel.eventType !== 'speech'
+						&& tmplabel.eventType !== 'congress'
+						&& ballot.pbye
+			) {
 				round.panels[ballot.panel] = 10000;
 				judge.text = 'BYE';
 			} else if (ballot.winloss || ballot.rank || ballot.point || ballot.rubric ) {
@@ -277,10 +302,12 @@ export const roundDecisionStatus = {
 				round.out[ballot.flight][ballot.judge] = true;
 				round.panels[ballot.panel] += 10;
 				const started = new Date(ballot.startTime);
+				const decimals = parseFloat(`.${started.getUTCHours()}${addZero(started.getUTCMinutes())}`);
+				round.panels[ballot.panel] += decimals;
 				judge.text = `${started.getUTCHours()}:${addZero(started.getUTCMinutes())}`;
 			} else {
 				round.out[ballot.flight][ballot.judge] = true;
-				delete round.judges[ballot.judge][ballot.flight];
+				delete round.judges[ballot.judge][ballot.panel];
 				round.panels[ballot.panel] += 1;
 			}
 		});
