@@ -139,7 +139,7 @@ export const roundDecisionStatus = {
 			2: tmplabel?.neg || 'N',
 		};
 
-		const eventType = tmplabel.eventType || 'debate';
+		const eventType = tmplabel?.eventType || 'debate';
 
 		const rawBallots = await db.sequelize.query(`
 			select
