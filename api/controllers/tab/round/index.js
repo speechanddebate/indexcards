@@ -132,6 +132,10 @@ export const roundDecisionStatus = {
 			type         : db.sequelize.QueryTypes.SELECT,
 		});
 
+		if (labels.length < 1) {
+			console.log(`Event type determination failed for round ${req.params.roundId}`);
+		}
+
 		const tmplabel = labels.shift();
 
 		const label = {
@@ -139,7 +143,7 @@ export const roundDecisionStatus = {
 			2: tmplabel?.neg || 'N',
 		};
 
-		const eventType = tmplabel.eventType || 'debate';
+		const eventType = tmplabel?.eventType || 'debate';
 
 		const rawBallots = await db.sequelize.query(`
 			select
