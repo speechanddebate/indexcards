@@ -24,6 +24,10 @@ const session = (sequelize, DataTypes) => {
 			type      : DataTypes.STRING(127),
 			allowNull : true,
 		},
+		push_active   : {
+			type      : DataTypes.DATE,
+			allowNull : true,
+		},
 		last_access   : {
 			type      : DataTypes.DATE,
 			allowNull : true,
