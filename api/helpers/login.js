@@ -30,9 +30,10 @@ const login = async (req) => {
 			const userkey = crypt(req.uuid, person.password);
 
 			const sessionTemplate = {
-				person     : person.id,
-				ip         : '127.0.0.1',
-				created_at : now.toJSON(),
+				person      : person.id,
+				ip          : '127.0.0.1',
+				created_at  : now.toJSON(),
+				push_notify : null,
 				userkey,
 			};
 
