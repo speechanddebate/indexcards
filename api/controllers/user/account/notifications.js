@@ -40,6 +40,11 @@ export const pushSubscribe = {
 
 	POST : async (req, res) => {
 
+		if (!req.params.subscriptionId) {
+			errorLogger.error(`No subscriptionID sent to the updater`);
+			return res.status(200).json('Session subscription disabled');
+		}
+
 		const subscription = {
 			// eslint-disable-next-line no-unneeded-ternary
 			enabled: (req.params.subStatus === 'true' ? true : false),
