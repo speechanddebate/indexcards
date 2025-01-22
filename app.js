@@ -132,7 +132,6 @@ app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], as
 		// /user/prefs/ID, check the perms against additional data
 
 		req.session = await auth(req, res);
-
 		if (!req.session) {
 			return res.status(401).json('User: You are not logged in');
 		}

@@ -111,7 +111,7 @@ export const webBlast = async (inputData) => {
 		where person.id IN (:personIds)
 			and person.id = session.person
 			and session.push_notify is NOT NULL
-			and session.last_access > DATE_SUB(NOW(), INTERVAL 7 DAY)
+			and session.last_access > DATE_SUB(NOW(), INTERVAL 60 DAY)
 	`, {
 		replacements: { personIds: inputData.ids },
 		type: db.sequelize.QueryTypes.SELECT,
@@ -165,7 +165,7 @@ export const webBlast = async (inputData) => {
 		};
 
 		const webPromise = axios.post(
-			`${config.ONESIGNAL.API_URL}/notifications`,
+			`https://api.onesignal.com/notifications?c=push`,
 			notification,
 			{
 				headers : {
@@ -182,6 +182,8 @@ export const webBlast = async (inputData) => {
 
 	const returnPromise = new Promise( (resolve) => {
 		Promise.all(promises).then( () => {
+
+			console.log(promises);
 			resolve({
 				error   : false,
 				message : `${targetIds ? targetIds.length : 0} web pushes sent.`,
