@@ -123,7 +123,7 @@ app.use(cookieParser());
 // Authentication.  Context depends on the sub-branch so that secondary
 // functions do not have to handle it in every call.
 
-app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
+app.all(['/v1/user', '/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
 
 	try {
 		// Everything under /user should be a logged in user; and all functions there
@@ -152,6 +152,7 @@ const tabRoutes = [
 ];
 
 app.all(tabRoutes, async (req, res, next) => {
+
 	try {
 		// Functions that require tabber or owner permissions to a tournament overall
 		req.session = await auth(req, res);
@@ -162,8 +163,11 @@ app.all(tabRoutes, async (req, res, next) => {
 
 		req.session = await tabAuth(req, res);
 
-		if (typeof req.session?.perms !== 'object') {
-			return res.status(401).json('You do not have access to that tournament area');
+		if (
+			typeof req.session?.perms !== 'object'
+			|| (!req.session?.perms?.tourn[req.params.tournId])
+		) {
+			return res.status(401).json('You do not have access to that tournament or area');
 		}
 
 	} catch (err) {
