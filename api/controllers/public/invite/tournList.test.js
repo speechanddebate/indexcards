@@ -25,6 +25,6 @@ describe('Tournament Front Listing', () => {
 		assert.typeOf(body[0].year , 'number' , 'Object contains valid year');
 		assert.typeOf(body[0].week , 'number' , 'Object contains valid week number');
 		assert.typeOf(body[0].name , 'string' , 'Object contains valid names');
-		assert.equal(body[0].webname, 'newengland', `The first listed should be the New England district tournament`);
+		assert.equal(body[0].webname, 'texasopen', `The first listed should be the Texas Open`);
 	});
 });
