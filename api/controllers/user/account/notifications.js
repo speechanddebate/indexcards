@@ -84,182 +84,36 @@ export const pushSync = {
 	POST : async (req, res) => {
 
 		const sessionId = req.body.sessionid || req.session.id;
+		const push_notify = req.body.subscriptionId || null;
+		const promises = [];
 
-		const erasePromise = req.db.session.update(
-			{
-				push_notify: null,
-				push_active: null,
-			},
-			{ where: {
-				id         : { [Op.ne]: sessionId },
-				push_notify : req.body.subscriptionId,
-			},
-			},
-		);
+		if (push_notify != null) {
+			const erasePromise = req.db.session.update(
+				{
+					push_notify: null,
+					push_active: null,
+				},
+				{ where: {
+					id         : { [Op.ne]: sessionId },
+					push_notify,
+				},
+				},
+			);
+			promises.push(erasePromise);
+		}
 
 		const updateSession = req.db.session.update(
 			{
-				push_notify: req.body.subscriptionId,
+				push_notify,
 				push_active: new Date(),
 				last_access: new Date(),
 			},
 			{ where: { id : sessionId } },
 		);
 
-		await Promise.all([updateSession, erasePromise]);
+		promises.push(updateSession);
+		await Promise.all(promises);
 		return res.status(200).json(`Push status saved and synced to session`);
-	},
-};
-
-export const enablePushNotifications = {
-
-	POST: async (req, res) => {
-
-		const db = req.db;
-		const oneSignalData = req.body;
-		let external_id = req.session.person;
-
-		if (external_id === 1) {
-			external_id = 100;
-		}
-
-		if (req.body.sessionId && req.body.id) {
-
-			const dbpromise =  db.sequelize.query(
-				` update session set push_notify = :id where id = :sessionId `,
-				{
-					type         : db.Sequelize.QueryTypes.UPDATE,
-					replacements : req.body,
-				}
-			);
-			const axpromise = axios.patch(
-				`${config.ONESIGNAL.URL}/subscriptions/${req.body.id}`,
-				{ subscription: { external_id } },
-				{ headers },
-			);
-
-			await Promise.all([axpromise, dbpromise]);
-			return res.status(200).json(`Subscription applied to user ${req.session.person}`);
-		}
-
-		if (!oneSignalData.currentSubscription) {
-			res.status(200).json({
-				error   : true,
-				message : 'No current subscription was found or registered',
-			});
-			return;
-		}
-
-		if (!req.session?.id) {
-			res.status(200).json({
-				error   : true,
-				message : 'You are not logged into Tabroom',
-			});
-			return;
-		}
-
-		const currentSubscription = {
-			id      : oneSignalData.currentSubscription?.id,
-			enabled : oneSignalData.currentSubscription?.optIn,
-		};
-
-		if (!req.session?.push_notify
-			|| req.session?.push_notify !== currentSubscription.id
-		) {
-			await db.session.update(
-				{ push_notify : currentSubscription.id },
-				{ where: { id : req.session.id } }
-			);
-		}
-
-		let pushNotify = await db.personSetting.findOne({
-			where: {
-				person : req.session.person,
-				tag    : 'push_notify',
-			},
-		});
-
-		if (pushNotify) {
-			pushNotify = await pushNotify.update({
-				value: oneSignalData.identity.onesignal_id,
-			});
-		} else {
-
-			try {
-				pushNotify = await db.personSetting.create({
-					person : req.session.person,
-					tag    : 'push_notify',
-					value  : oneSignalData.identity.onesignal_id,
-				});
-			} catch (err) {
-				errorLogger.info(`Push notify person setting was not created`);
-				errorLogger.info(err);
-			}
-		}
-
-		res.status(200).json({
-			error   : false,
-			message : 'You are subscribed to push notifications.  SMS texting is disabled',
-		});
-	},
-};
-
-export const disablePushNotifications = {
-
-	GET: async (req, res) => {
-		const db = req.db;
-
-		if (!req.session || !req.session?.person) {
-			res.status(200).json({
-				error   : true,
-				message : 'You are not currently logged into Tabroom',
-			});
-		}
-
-		await db.personSetting.destroy({
-			where: {
-				person : req.session.person,
-				tag    : 'push_notify',
-			},
-		});
-
-		res.status(200).json({
-			error   : false,
-			message : 'You are unsubscribed to push notifications.  SMS texting is re-enabled if you had it set up before',
-		});
-	},
-
-	POST: async (req, res) => {
-
-		const db = req.db;
-
-		if (req.session?.id) {
-
-			const pushNotify = req.params.subscriptionId || req.session.push_notify;
-
-			await axios.delete(
-				`${config.ONESIGNAL.URL}/subscriptions/${pushNotify}`,
-				{ headers },
-			);
-
-			await db.session.update({ push_notify: null }, {
-				where: {
-					id: req.session.id,
-				},
-			});
-
-			res.status(200).json({
-				error   : false,
-				message : `Invalid subscription ${pushNotify} removed from session ${req.session.id}`,
-			});
-
-		} else {
-
-			res.status(200).json({
-				error   : true,
-				message : `No current session found`,
-			});
-		}
 	},
 };
 
