@@ -58,8 +58,7 @@ export const pushSubscribe = {
 				{ headers },
 			);
 		} catch (err) {
-			errorLogger.error(`Subscription unsubscribe resulted in error ${err}`);
-			return res.status(201).json('Subscription change request failed');
+			return res.status(201).json('No such subscription was found');
 		}
 
 		if (req.params.subStatus === 'true') {
