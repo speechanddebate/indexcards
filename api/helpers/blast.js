@@ -164,26 +164,29 @@ export const webBlast = async (inputData) => {
 			target_channel  : 'push',
 		};
 
-		const webPromise = axios.post(
-			`https://api.onesignal.com/notifications?c=push`,
-			notification,
-			{
-				headers : {
-					Authorization  : `Basic ${config.ONESIGNAL.appKey}`,
-					'Content-Type' : 'application/json',
-					Accept         : 'application/json',
+		try {
+
+			const webPromise = axios.post(
+				`https://api.onesignal.com/notifications?c=push`,
+				notification,
+				{
+					headers : {
+						Authorization  : `Basic ${config.ONESIGNAL.appKey}`,
+						'Content-Type' : 'application/json',
+						Accept         : 'application/json',
+					},
 				},
-			},
-		);
+			);
 
-		promises.push(webPromise);
+			promises.push(webPromise);
 
+		} catch (err) {
+			errorLogger.info(`OneSignal once again produced a mysterious error message: ${JSON.stringify(err)}`);
+		}
 	}
 
 	const returnPromise = new Promise( (resolve) => {
 		Promise.all(promises).then( () => {
-
-			console.log(promises);
 			resolve({
 				error   : false,
 				message : `${targetIds ? targetIds.length : 0} web pushes sent.`,
