@@ -52,11 +52,12 @@ export const config = {
 		STUDENT_ENDPOINT	: '/services/apexrest/v.1/StudentServiceTabroom',
 		STA_ENDPOINT		: '/services/apexrest/v.1/STATabroomService',
 	},
-	ONE_SIGNAL    : {
-		app_id    : 'DefNot',
-		safari_id : 'LolzDoesNotEvenWork',
-		userKey   : 'IThinkNot',
-		appKey    : 'Naught',
+	ONESIGNAL    : {
+		API_URL  : 'https://onesignal.com/api/v1',
+		URL      : `https://api.onesignal.com/apps/someRandomUUID`,
+		appId    : 'YeahNO',
+		safariId : 'web.onesignal.auto.nothingmuchtoseeherefolks',
+		appKey   : 'cryHavocAndLetLooseTheDogsofWar!'
 	},
 	AWS_CREDENTIALS        : {
 		accessKeyId        : 'DefNo',
