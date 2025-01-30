@@ -64,7 +64,8 @@ export const postPayment = {
 			nco     : 0,
 		};
 
-		Object.entries(tourn.settings.store_carts).forEach( ([req, cart]) => {
+		Object.entries(tourn.settings.store_carts).forEach( (values) => {
+			const cart = values[1];
 			totals.tabroom += cart.tabroom;
 			totals.nco += cart.nco;
 			totals.nc += cart.nc;

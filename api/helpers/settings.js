@@ -38,6 +38,7 @@ export const getSettings = async (model, id, options = {} ) => {
 			} catch (err) {
 				errorLogger.info(`Unable to parse ${setting.tag} as valid JSON to an object`);
 				errorLogger.info(setting.value_text);
+				errorLogger.info(err);
 			}
 			if (jsonValue) {
 				settings[setting.tag] = jsonValue;

@@ -2,13 +2,13 @@ import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import rateLimiter from 'express-rate-limit';
-import pkg from 'uuid';
+import {v4 as uuid} from 'uuid';
 import expressWinston from 'express-winston';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import { initialize } from 'express-openapi';
 import swaggerUI from 'swagger-ui-express';
-import config from './config/config';
+import config from './config/config.js';
 import { barfPlease, systemStatus } from './api/controllers/public/status.js';
 import errorHandler from './api/helpers/error.js';
 import apiDoc from './api/routes/api-doc.js';
@@ -28,11 +28,10 @@ import {
 	coachAuth,
 	localAuth,
 } from './api/helpers/auth.js';
-import db from './api/helpers/db.js';
 
+import db from './api/helpers/db.js';
 import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger.js';
 
-const { v4: uuid } = pkg;
 const app = express();
 
 // Startup log message
@@ -311,7 +310,7 @@ const apiDocConfig = initialize({
 app.use(expressWinston.errorLogger({
 	winstonInstance : errorLogger,
 	meta            : true,
-	dynamicMeta: (req, res, next) => {
+	dynamicMeta: (req) => {
 		return {
 			logCorrelationId: req.uuid,
 		};
@@ -323,7 +322,7 @@ app.use(expressWinston.logger({
 	winstonInstance : requestLogger,
 	meta            : true,
 	env             : process.env.NODE_ENV,
-	dynamicMeta: (req, res) => {
+	dynamicMeta: (req) => {
 		return {
 			logCorrelationId: req.uuid,
 		};

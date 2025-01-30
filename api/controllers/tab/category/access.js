@@ -4,7 +4,7 @@ export const changeAccess = {
 
 	// Add permissions that are not there already
 	POST : async (req, res) => {
-
+		return res.status(400).json(`Stub because this feature not yet implemented`);
 	},
 
 	// Alter existing permissions

@@ -103,7 +103,7 @@ export const auth = async (req) => {
 	}
 };
 
-export const keyAuth = async (req, res) => {
+export const keyAuth = async (req) => {
 
 	if (!req.headers.authorization) {
 		return 'No valid Authorization header found. Access denied.';
@@ -223,7 +223,7 @@ export const tabAuth = async (req) => {
 	try {
 		tourn = await db.summon(db.tourn, tournId);
 	} catch (err) {
-		return;
+		return (err);
 	}
 
 	let perms = {};
@@ -589,7 +589,7 @@ export const coachAuth = async (req) => {
 	return 'You do not have access to that institution';
 };
 
-export const localAuth = async (req, res) => {
+export const localAuth = async (req) => {
 
 	// This one's a bit more of a pain because it handles several
 	// different types of request
@@ -626,7 +626,7 @@ export const localAuth = async (req, res) => {
 	return `You have no access permissions to that ${localType}`;
 };
 
-export const hostAuth = async (req, res) => {
+export const hostAuth = async (req) => {
 
 	// Request must originate from the local cron authorized hosts.
 	// otherwise, in theory someone could try to DDOS us or something here
@@ -728,7 +728,6 @@ export const checkPerms = async (req, res, query, replacements) => {
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
-		// eslint-disable-next-line no-restricted-syntax
 		for await (const event of okEvents) {
 			if (!permsData.event) {
 				permsData.event = {};

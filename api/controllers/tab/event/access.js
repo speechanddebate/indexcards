@@ -4,7 +4,7 @@ export const changeAccess = {
 
 	// Add permissions that are not there already
 	POST : async (req, res) => {
-
+		return res.status(200).json('This is a stub that has not been implemented');
 	},
 
 	// Alter existing permissions

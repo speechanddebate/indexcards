@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-escape */
 import moment from 'moment-timezone';
 import { getFollowers, getPairingFollowers } from '../../../helpers/followers.js';
 import { notify } from '../../../helpers/blast.js';

@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-escape */
 import { notify } from '../../../helpers/blast.js';
 import { debugLogger, errorLogger } from '../../../helpers/logger.js';
 import { sendPairingBlast, formatPairingBlast } from '../../../helpers/pairing.js';

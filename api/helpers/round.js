@@ -285,27 +285,27 @@ export const flightTimes = async (roundId) => {
 
 // Pulls the cache invalidator for the legacy Mason code for now
 export const invalidateCache = async (tournId, roundId) => {
-	// slow and a problem for another day
-	return false;
 
-	// eslint-disable-next-line no-unreachable
 	const urlPath = `/index/tourn/postings/round.mhtml?tourn_id=${tournId}&round_id=${roundId}&invalidate=1`;
+	const promises = [];
 
-	// This will just run asynchronously which is fine since I don't actually care about the output here.
-	for (let server = 1; server < 17; server++) {
+	for (let server = 1; server < 21; server++) {
 		const serverName = `tabweb${server}`;
+
 		try {
-			// eslint-disable-next-line no-await-in-loop
-			await fetch(
+			const promise = fetch(
 				`http://${serverName}:8001${urlPath}`,
 				{
 					Method: 'GET',
 				}
 			);
+			promises.push(promise);
 		} catch (err) {
 			errorLogger.info(err);
 		}
 	}
+
+	await Promise.all(promises);
 	return `Invalidated cache for ${roundId}`;
 };
 

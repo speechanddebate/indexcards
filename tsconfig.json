@@ -1,8 +1,8 @@
 {
-  "compilerOptions": {
-    "module"          : "nodenext",
-    "target"          : "es2022",
-    "rootDir"         : "./api",
-    "esModuleInterop" : true,
-  }
+	"compilerOptions": {
+		"module"          : "nodenext",
+		"target"          : "es2022",
+		"rootDir"         : "./api",
+		"esModuleInterop" : true
+	}
 }

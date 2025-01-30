@@ -68,7 +68,6 @@ export const changeAccess = {
 					} else {
 
 						description += `${perm.tag} level tournament permissions removed from ${targetPerson.email}`;
-						// eslint-disable-next-line no-await-in-loop
 
 						const promise = db.sequelize.query(`
 							delete permission.* from permission where permission.id = :permId

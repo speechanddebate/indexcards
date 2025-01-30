@@ -1,4 +1,3 @@
-/* eslint-disable jest/no-disabled-tests */
 import { assert } from 'chai';
 import request from 'supertest';
 import config from '../../../../config/config.js';

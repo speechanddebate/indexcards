@@ -36,7 +36,6 @@ const sendShareFile = {
 
 		for (const section of sections) {
 
-			// eslint-disable-next-line no-await-in-loop
 			const email = await getFollowers({
 				sectionId        : section.sectionId,
 				noFollowers      : true,

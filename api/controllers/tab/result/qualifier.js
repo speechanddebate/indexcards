@@ -1,4 +1,3 @@
-/* eslint-disable no-continue */
 export const circuitQualifiers = {
 	POST: async (req, res) => {
 		const db = req.db;
