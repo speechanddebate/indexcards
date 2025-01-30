@@ -779,6 +779,7 @@ db.summon = async (dbTable, objectId) => {
 							jsonOutput = JSON.parse(item.value_text);
 						} catch (err) {
 							errorLogger.info(item.tag);
+							errorLogger.info(err);
 						}
 						if (jsonOutput) {
 							dbData.settings[item.tag] = jsonOutput;

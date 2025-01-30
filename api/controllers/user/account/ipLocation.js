@@ -11,7 +11,7 @@ const ipLocation = {
 		try {
 			locationData = await findLocation(requestIP);
 		} catch (err) {
-			return res.status(200).json({ message: `No location data found for ${requestIP}` });
+			return res.status(200).json({ message: `No location data found for ${requestIP}.`, err });
 		}
 
 		try {
@@ -19,7 +19,7 @@ const ipLocation = {
 			locationData.isp = ispData?.isp;
 			locationData.ispData = ispData;
 		} catch (err) {
-			queryLogger.info(`IP ${requestIP} was not found in the ISP database`);
+			queryLogger.info({ message: `IP ${requestIP} was not found in the ISP database`, err });
 		}
 
 		if (locationData === undefined) {

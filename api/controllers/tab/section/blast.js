@@ -1,4 +1,3 @@
-/* eslint-disable no-useless-escape */
 import { getFollowers, getPairingFollowers } from '../../../helpers/followers.js';
 import { errorLogger } from '../../../helpers/logger.js';
 import { notify } from '../../../helpers/blast.js';

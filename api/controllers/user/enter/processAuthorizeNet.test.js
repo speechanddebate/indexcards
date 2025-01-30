@@ -2,7 +2,6 @@ import request from 'supertest';
 import { assert } from 'chai';
 import server from '../../../../app';
 
-// eslint-disable-next-line jest/no-disabled-tests
 describe.skip('Authorize.net', () => {
 	it('Processes an authorize.net payment', async () => {
 		const body = {

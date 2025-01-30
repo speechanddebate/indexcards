@@ -585,9 +585,9 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 		}
 	});
 
-	await Promise.all(promises);
+	const replies = await Promise.all(promises);
 
-	for await (const notifyResponse of promises) {
+	for await (const notifyResponse of replies) {
 		blastResponse.email += notifyResponse.email.count;
 		blastResponse.web += notifyResponse.web.count;
 
@@ -620,16 +620,22 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 			});
 
 		} else {
+
+			const blastPromises = [];
+
 			for (const round of blastData.rounds) {
-				// eslint-disable-next-line no-await-in-loop
-				await changeLog.create({
+				const promise = changeLog.create({
 					tag         : 'blast',
 					description : `Round pairings blasted. Message: ${req.body.message}`,
 					person      : blastData.sender || req.session?.person?.id,
 					count       : (blastResponse.web + blastResponse.email) || 0,
 					round       : round.id,
 				});
+
+				blastPromises.push(promise);
 			}
+
+			await Promise.all(blastPromises);
 		}
 
 		const browserResponse = {
