@@ -1,4 +1,9 @@
 {
+	"include": ["**/*.ts"],
+	"exclude": [
+		"../wwwroot/app",
+		"node_modules/*"
+	],
 	"compilerOptions": {
 		"module"          : "nodenext",
 		"target"          : "es2022",
