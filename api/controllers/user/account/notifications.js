@@ -32,8 +32,7 @@ export const pushSubscribe = {
 			return res.status(201).json({ message: 'No such subscription found', enabled: false });
 
 		} catch (err) {
-			errorLogger.error(`Subscription fetch requested failed with ${err}`);
-			return res.status(201).json('Subscription view request failed');
+			return res.status(201).json('Subscription view request failed; this user device is not subscribed.');
 		}
 
 	},
