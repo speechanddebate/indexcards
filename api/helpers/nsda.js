@@ -140,7 +140,7 @@ export const syncLearnResults = async (person) => {
 	}
 
 	return {
-		message : `I have updated ${results.new} new quizzes and ${results.updates} existing ones}`,
+		message : `I have updated ${results.new} new quizzes and ${results.updates} existing ones`,
 		...results,
 	};
 

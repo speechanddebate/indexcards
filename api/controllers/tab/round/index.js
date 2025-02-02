@@ -126,7 +126,6 @@ export const roundDecisionStatus = {
 
 			where round.id = :roundId
 				and round.event = event.id
-				and event.id = neg_label.event
 		`, {
 			replacements: { roundId: req.params.roundId },
 			type         : db.sequelize.QueryTypes.SELECT,

@@ -216,7 +216,7 @@ export const tabAuth = async (req) => {
 	// User request must have access to the tournament.  Figure out how!
 	const tournId = req.params.tournId;
 	const typeId  = req.params.typeId;
-	let subType = req.params.subType;
+	let subType   = req.params.subType;
 
 	let tourn = {};
 
@@ -254,11 +254,26 @@ export const tabAuth = async (req) => {
 		req.session.perms.category[categoryId] = perms.category[categoryId];
 	});
 
-	// Top level tournament access.  Things for checkers etc will go under /all,
-	// where fine grained permissions are managed locally.
+	// Top level tournament access.  Things for checkers etc will go under
+	// /all, where fine grained permissions are managed locally.
 
-	if (!subType) {
-		if (perms.tourn[tournId] === 'owner' || perms.tourn[tournId] === 'tabber') {
+	const permittedSubTypes = [
+		'section',
+		'panel',
+		'round',
+		'event',
+		'category',
+		'timeslot',
+		'judge',
+		'jpool',
+		'all',
+	];
+
+	if (!subType || !permittedSubTypes.includes(subType)) {
+
+		if (perms.tourn[tournId] === 'owner'
+			|| perms.tourn[tournId] === 'tabber'
+		) {
 			return req.session;
 		}
 		delete req.session.tourn;
@@ -270,8 +285,8 @@ export const tabAuth = async (req) => {
 		return req.session;
 	}
 
-	// If it's a section, then I check up the chain for a round, event and tourn that
-	// matches the parent.
+	// If it's a section, then I check up the chain for a round, event and
+	// tourn that matches the parent.
 
 	if (subType === 'section') {
 		if (subType === 'section') {

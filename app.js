@@ -28,6 +28,7 @@ import {
 	coachAuth,
 	localAuth,
 } from './api/helpers/auth.js';
+
 import db from './api/helpers/db.js';
 
 import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger.js';
@@ -61,7 +62,7 @@ app.get('/v1/ip', (request, response) => response.send(request.ip));
 // Rate limit all requests
 const limiter = rateLimiter({
 	windowMs : config.RATE_WINDOW || 15 * 60 * 1000 , // 15 minutes
-	max      : config.RATE_MAX || 10000             , // limit each IP to 100000 requests per windowMs
+	max      : config.RATE_MAX || 10000, // limit each IP to 100000 requests per windowMs
 });
 app.use(limiter);
 
@@ -123,32 +124,128 @@ app.use(cookieParser());
 // Authentication.  Context depends on the sub-branch so that secondary
 // functions do not have to handle it in every call.
 
-app.all(['/v1/user', '/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
+app.all([
+	'/v1/user/:dataType/:id/*',
+	'/v1/user/:dataType/:id',
+	'/v1/user/*',
+	'/v1/user',
+], async (req, res, next) => {
 
 	try {
-		// Everything under /user should be a logged in user; and all functions there
-		// apply only to the logged in user; no parameters allowed.
-		// For /user/judge/ID, /user/student/ID, /user/entry/ID, /user/checker/ID,
+
+		// Everything under /user should be a logged in user; and all functions
+		// there apply only to the logged in user; no parameters allowed. For
+		// /user/judge/ID, /user/student/ID, /user/entry/ID, /user/checker/ID,
 		// /user/prefs/ID, check the perms against additional data
 
 		req.session = await auth(req, res);
+
 		if (!req.session) {
 			return res.status(401).json('User: You are not logged in');
 		}
+
+		if (req.session.site_admin) {
+			return next();
+		}
+
+		if (req.params.dataType === 'judge') {
+
+			const judge = await req.db.summon(req.db.judge, req.params.id);
+
+			if (judge.person !== req.session.person) {
+				return res.status(401).json('User: You are not linked to that judge');
+			}
+
+		} else if (req.params.dataType === 'entry') {
+
+			const students = await req.db.sequelize.query(`
+				select student.id, student.person
+					from student, entry_student es
+				where es.entry = :entryId
+					and es.student = student.id
+			`, {
+				replacements: {  entryId: req.params.id  },
+				type: req.db.sequelize.QueryTypes.SELECT,
+			});
+
+			let ok = false;
+
+			for (const student of students) {
+				if (student.person === req.session.person) {
+					ok = true;
+				}
+			}
+
+			if (!ok) {
+				return res.status(401).json('User: You are not linked to that entry');
+			}
+
+		} else if (req.params.dataType === 'student') {
+
+			const student = await req.db.summon(req.db.student, req.params.id);
+
+			if (student.person !== req.session.person) {
+				return res.status(401).json('User: You are not linked to that student');
+			}
+
+		} else if (req.params.dataType === 'prefs') {
+
+			const prefs = await req.db.sequelize.query(`
+				select permission.id, permission.person
+					from permission
+				where permission.person = :personId
+					and permission.chapter = :chapterId
+					and permission.tag IN ('prefs', 'chapter')
+			`, {
+				replacements: { chapterId: req.params.id, personId: req.session.person },
+				type: req.db.sequelize.QueryTypes.SELECT,
+			});
+
+			if (prefs.length > 0 && prefs[0].person === req.session.person) {
+				return next();
+			}
+
+			return res.status(401).json('User: You are not linked to that entry');
+
+		} else if (req.params.dataType === 'checker') {
+
+			const prefs = await req.db.sequelize.query(`
+				select permission.id, permission.person
+					from permission
+				where permission.person = :personId
+					and permission.tourn = :tournId
+					and permission.tag IN ('owner', 'tabber', 'checker')
+			`, {
+				replacements: { tournId: req.params.id, personId: req.session.person },
+				type: req.db.sequelize.QueryTypes.SELECT,
+			});
+
+			if (prefs.length > 0 && prefs[0].person === req.session.person) {
+				return next();
+			}
+
+			return res.status(401).json('User: You are not linked to that entry');
+
+		} else {
+
+			return next();
+		}
+
 	} catch (err) {
 		next(err);
 	}
 
 	next();
+
 });
 
 const tabRoutes = [
-	'/v1/tab/:tournId',
-	'/v1/tab/:tournId/:subType',
 	'/v1/tab/:tournId/:subType/:typeId',
 	'/v1/tab/:tournId/:subType/:typeId/*',
 	'/v1/tab/:tournId/:subType/:typeId/*/*',
 	'/v1/tab/:tournId/:subType/:typeId/*/*/*',
+	'/v1/tab/:tournId/:subType',
+	'/v1/tab/:tournId',
 ];
 
 app.all(tabRoutes, async (req, res, next) => {
@@ -167,7 +264,10 @@ app.all(tabRoutes, async (req, res, next) => {
 			typeof req.session?.perms !== 'object'
 			|| (!req.session?.perms?.tourn[req.params.tournId])
 		) {
-			return res.status(401).json('You do not have access to that tournament or area');
+			const subType = req.params.subType;
+			return res
+				.status(401)
+				.json(`You do not have access to that tournament${subType ? `'s ${subType} functions` : ''}`);
 		}
 
 	} catch (err) {
@@ -234,7 +334,11 @@ app.all(localRoutes, async (req, res, next) => {
 	next();
 });
 
-app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async (req, res, next) => {
+app.all([
+	'/v1/ext/:area/:tournId/*',
+	'/v1/ext/:area/*',
+	'/v1/ext/:area',
+], async (req, res, next) => {
 
 	// All EXT requests are from external services and sources that do not
 	// necessarily hook into the Tabroom authentication methods.  They must
