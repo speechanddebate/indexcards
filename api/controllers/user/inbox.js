@@ -48,7 +48,6 @@ export const unreadCount = {
 		});
 
 		return res.status(201).json(unreads[0]?.unreadCount);
-
 	},
 };
 
