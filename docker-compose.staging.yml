@@ -1,0 +1,19 @@
+version: '3'
+services:
+  indexcards:
+    container_name: indexcards-staging
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: indexcards-staging:latest
+    restart: always
+    ports:
+        - 9001:3000
+    environment:
+      - NODE_ENV=staging
+    volumes:
+      - /etc/tabroom/indexcards.config.js:/indexcards/config/config.js:ro
+      - /var/log/indexcards:/var/log/indexcards:rw
+      - /var/lib/GeoIP:/geoip:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
