@@ -1,4 +1,3 @@
-version: '3'
 services:
   indexcards:
     container_name: indexcards-dev
