@@ -1,6 +1,4 @@
 #sudo docker compose -f docker-compose.staging.yml up --detach
-
-version: '3'
 services:
   indexcards:
     container_name: indexcards-staging
