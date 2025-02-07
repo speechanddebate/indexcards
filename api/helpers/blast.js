@@ -226,12 +226,14 @@ export const emailNotify = async (inputData) => {
 		if (inputData.ignoreNoEmail || (!person.no_email)) {
 			return person;
 		}
-
 		return null;
-
 	}).map( (person) => {
 		return person.email;
 	});
+
+	if (inputData.emailInclude) {
+		inputData.email.push(...inputData.emailInclude);
+	}
 
 	const promises = [];
 

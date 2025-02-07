@@ -255,6 +255,10 @@ const notifyCloudAdmins = async (req, log, subject) => {
 		subject : `Tabroom Cloud Change: ${subject}`,
 	};
 
+	if (config.LINODE.NOTIFY_SLACK) {
+		message.emailInclude = [config.LINODE.NOTIFY_SLACK];
+	}
+
 	const emailResponse = await notify(message);
 	return emailResponse;
 };
