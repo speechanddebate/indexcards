@@ -17,6 +17,7 @@ export const errorHandler = (err, req, res, next) => {
 			return res.status(err.status).json({
 				message          : `OpenAPI Validation error : ${err.message}`,
 				errors           : err.errors,
+				request          : req.originalUrl,
 				stack            : err.stack,
 				host             : config.DOCKERHOST,
 				logCorrelationId : req.uuid,
@@ -35,7 +36,12 @@ export const errorHandler = (err, req, res, next) => {
 	errorLogger.error(err, err.stack);
 
 	// Production bugs should find their way to Palmer
-	if (process.env.NODE_ENV === 'production') {
+	if (
+		process.env.NODE_ENV === 'production'
+		|| req.originalUrl === '/v1/glp/mailtest/error'
+	) {
+
+		console.log('Sending mail');
 
 		const messageData = {
 			from    : 'error-handler@tabroom.com',
@@ -44,6 +50,9 @@ export const errorHandler = (err, req, res, next) => {
 			text    : `
 Host
 ${config.DOCKERHOST}
+
+Request URL
+${req?.originalUrl}
 
 Stack
 ${err.stack}
@@ -75,6 +84,7 @@ ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
 		message          : err.message || 'Internal server error',
 		host             : config.DOCKERHOST,
 		logCorrelationId : req.uuid,
+		url              : req.originalUrl,
 		path             : req.path,
 		stack            : err.stack,
 		env              : process.env,

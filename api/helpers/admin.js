@@ -8,9 +8,9 @@ export const adminBlast = async (inputData) => {
 	const messageData = { ...inputData };
 
 	const transporter = nodemailer.createTransport({
-		host           : config.ADMINMAIL.SERVER || config.MAIL_SERVER || 'localhost',
-		port           : config.ADMINMAIL.PORT || config.MAIL_PORT || '25',
-		secure         : config.ADMINMAIL.SECURE || false,
+		host           : config.ADMINMAIL?.SERVER || config.MAIL_SERVER || 'localhost',
+		port           : config.ADMINMAIL?.PORT || config.MAIL_PORT || '25',
+		secure         : config.ADMINMAIL?.SECURE || false,
 		pool           : true,
 		maxConnections : config.MAIL_POOL || 64,
 		maxMessages    : 100,
@@ -65,7 +65,7 @@ export const adminBlast = async (inputData) => {
 			const result = transporter.sendMail(messageData);
 			promises.push(result);
 		} else {
-			debugLogger.info(`Local: Admin email not sending from ${messageData.from} to ${messageData.bcc}`);
+			debugLogger.info(`Local: Admin email not sending from ${messageData.from} to ${messageData.email}`);
 			debugLogger.info(`Subject ${messageData.subject}`);
 			debugLogger.info(`Text ${messageData.text}`);
 			debugLogger.info(`HTML ${messageData.html}`);
