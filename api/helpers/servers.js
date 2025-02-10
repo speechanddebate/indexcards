@@ -2,19 +2,27 @@ import axios from 'axios';
 import db from './db.js';
 import config from '../../config/config.js';
 import notify from './blast.js';
+import { errorLogger } from './logger.js';
 
 export const getLinodeInstances = async () => {
 
-	const existingMachines = await axios.get(
-		`${config.LINODE.API_URL}/instances`,
-		{
-			headers : {
-				Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
-				'Content-Type' : 'application/json',
-				Accept         : 'application/json',
+	let existingMachines = {};
+
+	try {
+		existingMachines = await axios.get(
+			`${config.LINODE.API_URL}/instances`,
+			{
+				headers : {
+					Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
+					'Content-Type' : 'application/json',
+					Accept         : 'application/json',
+				},
 			},
-		},
-	);
+		);
+	} catch (err) {
+		errorLogger.error(`Error from Linode when polling new instances`);
+		errorLogger.error(err);
+	}
 
 	const dbServers = await db.sequelize.query(`select * from server`,
 		{ type: db.sequelize.QueryTypes.SELECT }
@@ -210,7 +218,7 @@ export const increaseLinodeCount = async (whodunnit, countNumber) => {
 
 		} catch (err) {
 
-			console.log(`Error returned by creation request: ${JSON.stringify(err)} `);
+			errorLogger.error(`Error returned by creation request: ${JSON.stringify(err)} `);
 
 			return {
 				message: `Machine creation ${hostname} failed with response code ${err.response?.status} ${err.response?.statusText} and errors`,
