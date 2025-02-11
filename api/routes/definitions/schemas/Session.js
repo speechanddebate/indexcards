@@ -2,8 +2,11 @@
 const Session = {
 	type : 'object',
 	properties : {
-		person_id           : { type : 'integer' },
-		name                : { type : 'string'  },
+		person_id   : { type : 'integer' } ,
+		name        : { type : 'string'  } ,
+		defaults    : { type : 'object' }  ,
+		last_access : { type : Date }      ,
+
 	},
 };
 
