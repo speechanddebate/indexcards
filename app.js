@@ -131,8 +131,10 @@ app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], as
 		req.session = await auth(req, res);
 
 		if (!req.session) {
-			const cookie = req.cookies[req.config.COOKIE_NAME] || req.headers['x-tabroom-cookie'];
-			return res.status(401).json(`User: You are not logged in. Cookie is ${cookie}`);
+			return res.status(401).json({
+				error   : true,
+				message : `User: You are not logged in.`,
+			});
 		}
 	} catch (err) {
 		next(err);
@@ -156,7 +158,10 @@ app.all(tabRoutes, async (req, res, next) => {
 		req.session = await auth(req, res);
 
 		if (!req.session) {
-			return res.status(401).json('Tab: You are not logged in');
+			return res.status(401).json({
+				error   : true ,
+				message : `Tab You are not logged in.` ,
+			});
 		}
 
 		req.session = await tabAuth(req, res);
@@ -193,7 +198,10 @@ app.all(coachRoutes, async (req, res, next) => {
 			return res.status(401).json(`You do not have access to that institution`);
 		}
 	} else {
-		return res.status(401).json('Coach: You are not currently logged in to Tabroom');
+		return res.status(401).json({
+			error   : true                      ,
+			message : `Coach: You are not logged in.` ,
+		});
 	}
 
 	next();
@@ -220,7 +228,10 @@ app.all(localRoutes, async (req, res, next) => {
 				next();
 			}
 		} else {
-			return res.status(401).json('Local: You are not currently logged in to Tabroom');
+			return res.status(401).json({
+				error   : true,
+				message : `Local : You are not logged in.`,
+			});
 		}
 	} catch (err) {
 		next(err);
@@ -266,7 +277,10 @@ app.all('/v1/glp/*', async (req, res, next) => {
 		req.session = await auth(req, res);
 
 		if (!req.session) {
-			return res.status(401).json('GLP: You are not logged in');
+			return res.status(401).json({
+				error     : true,
+				message   : `GLP : You are not logged in.`,
+			});
 		}
 
 		if (!req.session?.site_admin) {
