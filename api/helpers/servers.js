@@ -22,6 +22,7 @@ export const getLinodeInstances = async () => {
 	} catch (err) {
 		errorLogger.error(`Error from Linode when polling new instances`);
 		errorLogger.error(err);
+		return {};
 	}
 
 	const dbServers = await db.sequelize.query(`select * from server`,
