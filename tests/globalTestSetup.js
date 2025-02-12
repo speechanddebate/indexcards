@@ -42,6 +42,7 @@ export const setup = async () => {
 		return;
 	}
 
+	console.log(`I ended up with ${tourncount?.[0]?.count} tournaments and should have had 10.`);
 	console.log(`Database ${config.DB_DATABASE} is not loaded with the proper test data `);
 	console.log(`Test data should live in a separate database connected via the ${config.MODE} env `);
 	console.log(`and loaded from /indexcards/test/test.sql.  Yes this is a lazy way to do it, but `);
