@@ -41,6 +41,7 @@ export const futureTourns = {
 				count(distinct school.id) as schoolcount,
 				YEAR(tourn.start) as year,
 				WEEK(tourn.start) as week,
+				CONCAT(YEAR(tourn.start), WEEK(tourn.start)) as sortweek,
 				( select GROUP_CONCAT(signup.abbr SEPARATOR ', ')
 						from category signup
 					where signup.tourn = tourn.id
@@ -135,6 +136,7 @@ export const futureTourns = {
 				count(distinct school.id) as schoolcount,
 				YEAR(weekend.start) as year,
 				WEEK(weekend.start) as week,
+				CONCAT(YEAR(tourn.start), WEEK(tourn.start)) as sortweek,
 				( select GROUP_CONCAT(signup.abbr SEPARATOR ', ')
 						from category signup
 					where signup.tourn = tourn.id
@@ -203,13 +205,14 @@ export const futureTourns = {
 
 		future.push(...futureDistricts);
 
-		const thisWeek = moment().subtract(11, 'days').weeks();
+		const thisYear = moment().year;
+		const thisWeek = parseInt(`${thisYear}${moment().subtract(11, 'days').weeks()}`);
 
 		future.sort( (a, b) => {
-			return (thisWeek > a.week) - (thisWeek > b.week)
-				|| a.year - b.year
-				|| a.week - b.week
-				|| b.schoolcount - a.schoolcount;
+			return (thisWeek > a.sortweek) - (thisWeek > b.sortweek)
+				|| a.sortweek - b.sortweek
+				|| b.schoolcount - a.schoolcount
+				|| b - a;
 		});
 
 		if (future.length > 256) {
