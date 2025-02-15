@@ -67,7 +67,6 @@ export const pushSubscribe = {
 		await req.db.session.update(
 			{
 				push_notify: null,
-				push_active: null,
 				last_access: new Date(),
 			},
 			{ where: { push_notify : req.params.subscriptionId } },
@@ -89,7 +88,6 @@ export const pushSync = {
 			const erasePromise = req.db.session.update(
 				{
 					push_notify: null,
-					push_active: null,
 				},
 				{ where: {
 					id         : { [Op.ne]: sessionId },
@@ -103,7 +101,6 @@ export const pushSync = {
 		const updateSession = req.db.session.update(
 			{
 				push_notify,
-				push_active: new Date(),
 				last_access: new Date(),
 			},
 			{ where: { id : sessionId } },
