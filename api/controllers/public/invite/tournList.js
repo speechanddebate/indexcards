@@ -5,6 +5,7 @@ export const futureTourns = {
 
 		const db = req.db;
 		let limit = '';
+		let endLimit = '';
 
 		let timeScope = ' DATE(NOW() - INTERVAL 2 DAY)';
 
@@ -26,6 +27,10 @@ export const futureTourns = {
 
 		if (typeof req.query.state === 'string' && req.query.state.length === 2) {
 			limit = ` and tourn.state = '${req.query.state.toUpperCase()}'`;
+		}
+
+		if (typeof req.query.limit === 'number') {
+			endLimit = ` limit ${req.query.limit} `;
 		}
 
 		const [future] = await db.sequelize.query(`
@@ -121,6 +126,7 @@ export const futureTourns = {
 			)
 			group by tourn.id
 			order by tourn.end, schoolcount DESC
+			${ endLimit }
 		`);
 
 		const [futureDistricts] = await db.sequelize.query(`
@@ -201,6 +207,7 @@ export const futureTourns = {
 
 			group by weekend.id
 			order by weekend.start
+			${ endLimit }
 		`);
 
 		future.push(...futureDistricts);
@@ -215,7 +222,11 @@ export const futureTourns = {
 				|| b - a;
 		});
 
-		if (future.length > 256) {
+		if (req.query.limit > 0) {
+			if (future.length > req.query.limit) {
+				future.length = req.query.limit;
+			}
+		} else if (future.length > 256) {
 			future.length = 256;
 		}
 
