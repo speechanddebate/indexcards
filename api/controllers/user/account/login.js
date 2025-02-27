@@ -21,6 +21,10 @@ const login = {
 			return res.status(400).json({ error: 'No user found for username' });
 		}
 
+		if (!req.body?.password) {
+			return res.status(400).json({ error: 'No password sent' });
+		}
+
 		const hash = crypt(req.body.password, person.password);
 
 		if (hash !== person.password) {
