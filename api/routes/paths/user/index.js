@@ -4,7 +4,7 @@
 import judge from './judge.js';
 import inbox from './inbox.js';
 import push from './push.js';
-import login from '../../../controllers/user/account/login.js'; // Except this one shouldn't require a logged in user or key
+import login from '../../../controllers/user/account/login.js';
 import getProfile from '../../../controllers/user/account/getProfile.js';
 import acceptPayPal from '../../../controllers/user/enter/acceptPayPal.js';
 import processAuthorizeNet from '../../../controllers/user/enter/processAuthorizeNet.js';
