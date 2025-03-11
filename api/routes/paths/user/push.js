@@ -1,4 +1,4 @@
-import { enablePushNotifications, disablePushNotifications } from '../../../controllers/user/account/notifications.js';
+import { enablePushNotifications, disablePushNotifications } from '../../../controllers/user/person/notifications.js';
 import pushMessage from '../../../controllers/user/blast.js';
 
 export default [
