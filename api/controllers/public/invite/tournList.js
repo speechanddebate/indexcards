@@ -34,7 +34,9 @@ export const futureTourns = {
 		}
 
 		const [future] = await db.sequelize.query(`
-			select tourn.id, tourn.webname, tourn.name, tourn.tz, tourn.hidden,
+			select
+				CONCAT(tourn.id, '-', '0') as id,
+				tourn.id tournId, tourn.webname, tourn.name, tourn.tz, tourn.hidden,
 				tourn.city as location, tourn.state, tourn.country,
 				CONVERT_TZ(tourn.start, '+00:00', tourn.tz) start,
 				CONVERT_TZ(tourn.end, '+00:00', tourn.tz) end,
@@ -131,9 +133,10 @@ export const futureTourns = {
 
 		const [futureDistricts] = await db.sequelize.query(`
 			select
-				tourn.id, tourn.webname, tourn.name, tourn.tz,
+				CONCAT(tourn.id, '-', weekend.id) as id,
+				tourn.id tournId, tourn.webname, tourn.name, tourn.tz,
 				weekend.id as districts,
-				weekend.name weekendName, weekend.city as location, weekend.state, tourn.country,
+				weekend.id weekendId, weekend.name weekendName, weekend.city as location, weekend.state, tourn.country,
 				site.name site,
 				CONVERT_TZ(weekend.start, '+00:00', tourn.tz) start,
 				CONVERT_TZ(weekend.end, '+00:00', tourn.tz) end,

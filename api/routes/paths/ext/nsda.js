@@ -3,7 +3,7 @@
 // Router controllers
 import getPersonHistory from '../../../controllers/ext/nsda/getPersonHistory.js';
 import { postPayment } from '../../../controllers/ext/nsda/payment.js';
-import ipLocation from '../../../controllers/user/account/ipLocation.js';
+import ipLocation from '../../../controllers/user/person/ipLocation.js';
 import { syncNatsAppearances, natsIndividualHonors } from '../../../controllers/ext/nsda/natsAppearances.js';
 
 export default [
