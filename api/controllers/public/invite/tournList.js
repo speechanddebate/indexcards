@@ -1,4 +1,4 @@
-import moment from 'moment-timezone';
+import { convertTZ, shortZone, getWeek, isSameDay } from '../../../helpers/dateTime.js';
 
 export const futureTourns = {
 	GET: async (req, res) => {
@@ -47,8 +47,9 @@ export const futureTourns = {
 				closed.value as closed,
 				count(distinct school.id) as schoolcount,
 				YEAR(tourn.start) as year,
-				WEEK(tourn.start) as week,
-				CONCAT(YEAR(tourn.start), WEEK(tourn.start)) as sortweek,
+				WEEK(CONVERT_TZ(tourn.start, '+00:00', tourn.tz), 3) as week,
+				GROUP_CONCAT(DISTINCT(event.abbr) SEPARATOR ', ') as events,
+				GROUP_CONCAT(DISTINCT(event.type) SEPARATOR ', ') as eventTypes,
 				( select GROUP_CONCAT(signup.abbr SEPARATOR ', ')
 						from category signup
 					where signup.tourn = tourn.id
@@ -102,7 +103,7 @@ export const futureTourns = {
 					and esh.tag = 'online_hybrid'
 				) as hybrid
 
-			from tourn
+			from (tourn, event)
 
 			left join tourn_setting closed
 				on closed.tourn = tourn.id
@@ -120,12 +121,23 @@ export const futureTourns = {
 		where 1=1
 			and tourn.hidden = 0
 			and tourn.end > ${timeScope}
+			and tourn.id = event.tourn
+
 			${limit}
 			and not exists (
 				select weekend.id
 				from weekend
 				where weekend.tourn = tourn.id
 			)
+
+			and exists (
+				select timeslot.id
+				from timeslot
+				where 1=1
+				and timeslot.tourn = tourn.id
+				and timeslot.end > ${timeScope}
+			)
+
 			group by tourn.id
 			order by tourn.end, schoolcount DESC
 			${ endLimit }
@@ -144,8 +156,9 @@ export const futureTourns = {
 				CONVERT_TZ(weekend.reg_start, '+00:00', tourn.tz) reg_start,
 				count(distinct school.id) as schoolcount,
 				YEAR(weekend.start) as year,
-				WEEK(weekend.start) as week,
-				CONCAT(YEAR(tourn.start), WEEK(tourn.start)) as sortweek,
+				WEEK(CONVERT_TZ(weekend.start, '+00:00', tourn.tz), 3) as week,
+				GROUP_CONCAT(DISTINCT(event.abbr) SEPARATOR ', ') as events,
+				GROUP_CONCAT(DISTINCT(event.type) SEPARATOR ', ') as eventTypes,
 				( select GROUP_CONCAT(signup.abbr SEPARATOR ', ')
 						from category signup
 					where signup.tourn = tourn.id
@@ -199,7 +212,7 @@ export const futureTourns = {
 					and esh.tag = 'online_hybrid'
 				) as hybrid
 
-			from (tourn, weekend)
+			from (tourn, weekend, event, event_setting ew)
 
 			left join site on weekend.site = site.id
 			left join school on tourn.id = school.tourn
@@ -208,6 +221,19 @@ export const futureTourns = {
 			and weekend.end > ${timeScope}
 			and weekend.tourn = tourn.id
 
+			and exists (
+				select timeslot.id
+				from timeslot
+				where 1=1
+				and timeslot.tourn = tourn.id
+				and timeslot.end > ${timeScope}
+			)
+
+			and event.tourn = tourn.id
+			and event.id = ew.event
+			and ew.tag = 'weekend'
+			and ew.value = weekend.id
+
 			group by weekend.id
 			order by weekend.start
 			${ endLimit }
@@ -215,15 +241,52 @@ export const futureTourns = {
 
 		future.push(...futureDistricts);
 
-		const thisYear = moment().year;
-		const thisWeek = parseInt(`${thisYear}${moment().subtract(11, 'days').weeks()}`);
+		const timeLimit = new Date();
+		timeLimit.setDate(timeLimit.getDate() - 3);
 
-		future.sort( (a, b) => {
-			return (thisWeek > a.sortweek) - (thisWeek > b.sortweek)
-				|| a.sortweek - b.sortweek
-				|| b.schoolcount - a.schoolcount
-				|| b - a;
+		const thisWeek = getWeek(timeLimit);
+		const shortOptions = {
+			month : 'numeric',
+			day   : 'numeric',
+		};
+
+		const formattedFuture = future.map( (tourn) => {
+
+			if (tourn.week < thisWeek) {
+				tourn.week = thisWeek;
+			}
+
+			const sortweek = `${tourn.year}-${tourn.week.toString().padStart(2, '0')}-${tourn.schoolcount.toString().padStart(9, '0')}`;
+			const sortnumeric = parseInt(`${tourn.year}${tourn.week.toString().padStart(2, '0')}${9999999 - tourn.schoolcount}`);
+
+			let dates = '';
+			const tournStart = convertTZ(tourn.start, tourn.tz);
+			const tournEnd = convertTZ(tourn.end, tourn.tz);
+			const tzCode = shortZone(tourn.tz);
+
+			if (isSameDay(tournStart, tournEnd)) {
+				dates = tournStart.toLocaleDateString('en-US', shortOptions);
+			} else {
+				dates = tournStart.toLocaleDateString('en-US', shortOptions);
+				dates += '-';
+				dates += tournEnd.toLocaleDateString('en-US', shortOptions);
+			}
+
+			return {
+				...tourn,
+				sortweek,
+				sortnumeric,
+				dates,
+				tzCode,
+			};
 		});
+
+		formattedFuture.sort( (a, b) => {
+			return a.sortnumeric - b.sortnumeric;
+		});
+
+		// I have to do this separately because I pull the Districts weekends
+		// as separate things from individual tournaments.
 
 		if (req.query.limit > 0) {
 			if (future.length > req.query.limit) {
@@ -233,14 +296,14 @@ export const futureTourns = {
 			future.length = 256;
 		}
 
-		return res.status(200).json(future);
+		return res.status(200).json(formattedFuture);
 	},
 };
 
 futureTourns.GET.apiDoc = {
-	summary: 'Returns the public listing of upcoming tournaments',
-	operationId: 'futureTourns',
-	parameters: [
+	summary     : 'Returns the public listing of upcoming tournaments',
+	operationId : 'futureTourns',
+	parameters  : [
 		{
 			in          : 'path',
 			name        : 'circuit',
