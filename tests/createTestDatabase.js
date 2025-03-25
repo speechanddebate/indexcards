@@ -630,6 +630,12 @@ const pruneDatabase = async () => {
 
 	pruners.push(entryPruner);
 
+	const adPruner = await db.sequelize.query(`
+		delete from ad where id > 2
+	`, { type: db.sequelize.QueryTypes.DELETE });
+
+	pruners.push(adPruner);
+
 	const coachPruner = await db.sequelize.query(`
 		update IGNORE chapter
 			set
