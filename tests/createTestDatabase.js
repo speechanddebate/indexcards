@@ -533,6 +533,102 @@ const pruneDatabase = async () => {
 		type : db.sequelize.QueryTypes.DELETE,
 	});
 
+	const pruners = [];
+
+	const personPruner = db.sequelize.query(`
+		update IGNORE person
+			set nsda = LEFT(UUID(), 8),
+				first = LEFT(MD5(RAND()), 8),
+				middle = LEFT(MD5(RAND()), 8),
+				last = LEFT(MD5(RAND()), 8),
+				email = LEFT(MD5(RAND()), 8),
+				phone = FLOOR(RAND() * 5121) + 10000,
+				gender = NULL,
+				street = NULL,
+				city = NULL,
+				state = 'MA'
+				country = 'US'
+	`, {
+		type: db.sequelize.QueryTypes.UPDATE,
+	});
+
+	pruners.push(personPruner);
+
+	const studentPruner = db.sequelize.query(`
+		update IGNORE student
+			set nsda           = LEFT(UUID(), 8),
+				first          = LEFT(MD5(RAND()), 8),
+				middle         = LEFT(MD5(RAND()), 8),
+				last           = LEFT(MD5(RAND()), 8),
+				phonetic       = LEFT(MD5(RAND()), 8),
+				grad_year      = '2030',
+				nsda           = NULL
+				gender         = NULL,
+				person_request = NULL
+	`, {
+		type: db.sequelize.QueryTypes.UPDATE,
+	});
+
+	pruners.push(studentPruner);
+
+	const judgePruner = db.sequelize.query(`
+		update IGNORE judge
+			set (
+				first          = LEFT(MD5(RAND()), 8),
+				middle         = LEFT(MD5(RAND()), 8),
+				last           = LEFT(MD5(RAND()), 8),
+				ada            = NULL,
+				gender         = NULL,
+				person_request = NULL
+			)
+	`, {
+		type: db.sequelize.QueryTypes.UPDATE,
+	});
+
+	pruners.push(judgePruner);
+
+	const chapterJudgePruner = db.sequelize.query(`
+		update IGNORE chapter_judge
+			set (
+				first          = LEFT(MD5(RAND()), 8),
+				middle         = LEFT(MD5(RAND()), 8),
+				last           = LEFT(MD5(RAND()), 8),
+				ada            = NULL,
+				phone          = NULL,
+				email          = NULL,
+				diet           = NULL,
+				person_request = NULL )
+	`, {
+		type: db.sequelize.QueryTypes.UPDATE,
+	});
+
+	pruners.push(chapterJudgePruner);
+
+	const schoolPruner = db.sequelize.query(`
+		update IGNORE school
+			set
+				name  = LEFT(MD5(RAND()), 8),
+				code  = LEFT(MD5(RAND()), 8),
+				state = LEFT(MD5(RAND()), 8),
+	`, {
+		type: db.sequelize.QueryTypes.UPDATE,
+	});
+
+	pruners.push(schoolPruner);
+
+	const entryPruner = await db.sequelize.query(`
+		update IGNORE entry
+			set
+				code = LEFT(MD5(RAND()), 8)
+				name = LEFT(MD5(RAND()), 8)
+	`, {
+		type: db.sequelize.QueryTypes.UPDATE,
+	});
+
+	pruners.push(entryPruner);
+
+	await Promise.all(pruners);
+
 };
 
 await pruneDatabase();
