@@ -6,7 +6,7 @@ export const updateLastAccess = {
 			return res.status(200).json('OK - Update skipped due to SU session');
 		}
 
-		const last = new Date(`${req.session.last_access}Z`);
+		const last = Date.parse(`${req.session.last_access}Z`);
 		const dateLimit  = new Date();
 		dateLimit.setHours(dateLimit.getHours() - 2 );
 
