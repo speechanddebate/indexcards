@@ -248,7 +248,10 @@ export const blastRoundPairing = {
 		promises.push(rmBlasted);
 
 		const mkBlasted = req.db.sequelize.query(
-			`insert into round_setting (tag, round, value_date, value) values ('blasted', :roundId, now(), 'date')`, {
+			`insert into round_setting (tag, round, value_date, value)
+				values ('blasted', :roundId, now(), 'date')
+				ON DUPLICATE KEY UPDATE value_date = now()
+		`, {
 				replacements : queryData.replacements,
 				type         : req.db.sequelize.QueryTypes.INSERT,
 			});

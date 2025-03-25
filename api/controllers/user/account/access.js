@@ -6,7 +6,7 @@ export const updateLastAccess = {
 			return res.status(200).json('OK - Update skipped due to SU session');
 		}
 
-		const last = Date.parse(`${req.session.last_access}Z`);
+		const last = new Date(`${req.session.last_access}Z`);
 		const dateLimit  = new Date();
 		dateLimit.setHours(dateLimit.getHours() - 2 );
 
@@ -16,6 +16,20 @@ export const updateLastAccess = {
 				where session.id = :sessionId
 			`, {
 				replacements: { sessionId: req.session.id },
+				type: req.db.sequelize.QueryTypes.UPDATE,
+			});
+		}
+
+		dateLimit.setHours(dateLimit.getHours() - 10 );
+		const personLast = new Date(`${req.session.Person.last_access}Z`);
+
+		if ( Number.isNaN(personLast) || personLast < dateLimit) {
+
+			req.db.sequelize.query(`
+				update person set last_access = NOW()
+				where person.id = :personId
+			`, {
+				replacements: { personId: req.session.person },
 				type: req.db.sequelize.QueryTypes.UPDATE,
 			});
 		}
