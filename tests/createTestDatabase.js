@@ -1,3 +1,6 @@
+// Run me by the command `NODE_ENV=test node createTestDatabase.js` when fresh
+// data has been loaded onto the test environment database
+
 import db from '../api/helpers/litedb.js';
 import config from '../config/config.js';
 
@@ -537,16 +540,17 @@ const pruneDatabase = async () => {
 
 	const personPruner = db.sequelize.query(`
 		update IGNORE person
-			set nsda = LEFT(UUID(), 8),
-				first = LEFT(MD5(RAND()), 8),
-				middle = LEFT(MD5(RAND()), 8),
-				last = LEFT(MD5(RAND()), 8),
-				email = LEFT(MD5(RAND()), 8),
-				phone = FLOOR(RAND() * 5121) + 10000,
-				gender = NULL,
-				street = NULL,
-				city = NULL,
-				state = 'MA'
+			set nsda    = LEFT(UUID(), 8),
+				first   = LEFT(MD5(RAND()), 8),
+				middle  = LEFT(MD5(RAND()), 8),
+				last    = LEFT(MD5(RAND()), 8),
+				email   = LEFT(MD5(RAND()), 8),
+				phone   = FLOOR(RAND() * 5121) + 10000,
+				gender  = NULL,
+				pronoun = "Test/Pronoun",
+				street  = NULL,
+				city    = NULL,
+				state   = 'MA',
 				country = 'US'
 	`, {
 		type: db.sequelize.QueryTypes.UPDATE,
@@ -562,7 +566,7 @@ const pruneDatabase = async () => {
 				last           = LEFT(MD5(RAND()), 8),
 				phonetic       = LEFT(MD5(RAND()), 8),
 				grad_year      = '2030',
-				nsda           = NULL
+				nsda           = NULL,
 				gender         = NULL,
 				person_request = NULL
 	`, {
@@ -573,14 +577,12 @@ const pruneDatabase = async () => {
 
 	const judgePruner = db.sequelize.query(`
 		update IGNORE judge
-			set (
+			set
 				first          = LEFT(MD5(RAND()), 8),
 				middle         = LEFT(MD5(RAND()), 8),
 				last           = LEFT(MD5(RAND()), 8),
 				ada            = NULL,
-				gender         = NULL,
 				person_request = NULL
-			)
 	`, {
 		type: db.sequelize.QueryTypes.UPDATE,
 	});
@@ -589,7 +591,7 @@ const pruneDatabase = async () => {
 
 	const chapterJudgePruner = db.sequelize.query(`
 		update IGNORE chapter_judge
-			set (
+			set
 				first          = LEFT(MD5(RAND()), 8),
 				middle         = LEFT(MD5(RAND()), 8),
 				last           = LEFT(MD5(RAND()), 8),
@@ -597,7 +599,7 @@ const pruneDatabase = async () => {
 				phone          = NULL,
 				email          = NULL,
 				diet           = NULL,
-				person_request = NULL )
+				person_request = NULL
 	`, {
 		type: db.sequelize.QueryTypes.UPDATE,
 	});
@@ -609,7 +611,7 @@ const pruneDatabase = async () => {
 			set
 				name  = LEFT(MD5(RAND()), 8),
 				code  = LEFT(MD5(RAND()), 8),
-				state = LEFT(MD5(RAND()), 8),
+				state = LEFT(MD5(RAND()), 8)
 	`, {
 		type: db.sequelize.QueryTypes.UPDATE,
 	});
@@ -619,13 +621,24 @@ const pruneDatabase = async () => {
 	const entryPruner = await db.sequelize.query(`
 		update IGNORE entry
 			set
-				code = LEFT(MD5(RAND()), 8)
-				name = LEFT(MD5(RAND()), 8)
+				code = LEFT(MD5(RAND()), 8),
+				name = LEFT(MD5(RAND()), 8),
+				ada  = NULL
 	`, {
 		type: db.sequelize.QueryTypes.UPDATE,
 	});
 
 	pruners.push(entryPruner);
+
+	const coachPruner = await db.sequelize.query(`
+		update IGNORE chapter
+			set
+				coaches = LEFT(MD5(RAND()), 8)
+	`, {
+		type: db.sequelize.QueryTypes.UPDATE,
+	});
+
+	pruners.push(coachPruner);
 
 	await Promise.all(pruners);
 
