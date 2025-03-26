@@ -350,11 +350,14 @@ app.all([
 	// super shady and I need to keep a specific eye on him.
 
 	try {
+
 		// Manually set an area for the login endpoint because it can't be intuited from the URL
 		if (req.path === '/v1/login') {
 			req.params.area = 'login';
 		}
+
 		req.session = await keyAuth(req, res);
+
 		if (!req.session?.person) {
 			req.session = await auth(req, res);
 			if (!req.session?.settings[`api_auth_${req.params.area}`]) {

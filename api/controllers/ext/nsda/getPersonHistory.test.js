@@ -9,9 +9,9 @@ describe('Person History', () => {
 
 	it('Returns history for a person', async () => {
 
-		// Victim of the day is Navya Simha
+		// Victim of the day!
 		const res = await request(server)
-			.get(`/v1/ext/nsda/history?person_id=10678964`)
+			.get(`/v1/ext/nsda/history?nsda_id=123456`)
 			.set('Accept', 'application/json')
 			.set('Authorization', `Basic ${authHeader}`)
 			.expect('Content-Type', /json/)
@@ -28,7 +28,7 @@ describe('Person History', () => {
 
 	it('Errors on a missing person id', async () => {
 		await request(server)
-			.get(`/v1/ext/nsda/history?person_id=999999999`)
+			.get(`/v1/ext/nsda/history?nsda_id=999999999`)
 			.set('Accept', 'application/json')
 			.set('Authorization', `Basic ${authHeader}`)
 			.expect('Content-Type', /json/)

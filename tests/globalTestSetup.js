@@ -24,6 +24,7 @@ export const setup = async () => {
 
 		secondPromises.push(db.person.create(testData.testUser));
 		secondPromises.push(db.person.create(testData.testAdmin));
+		secondPromises.push(db.ad.create(testData.testAd));
 
 		await Promise.all(secondPromises);
 
@@ -65,6 +66,7 @@ export const teardown = async () => {
 	await db.sequelize.query( `delete from campus_log where id < 100`);
 	await db.sequelize.query( `delete from campus_log where person > 3 and person < 100` );
 	await db.sequelize.query( `delete from person where id > 3 and id < 100` );
+	await db.sequelize.query( `delete from ad where id < 2 `);
 
 	console.log(`Cleanup done`);
 };

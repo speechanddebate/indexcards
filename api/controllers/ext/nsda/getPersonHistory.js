@@ -1,19 +1,40 @@
 export const getPersonHistory = {
 	GET: async (req, res) => {
+
 		const db = req.db;
 
-		const personId = await db.sequelize.query(`
-			SELECT DISTINCT P.id FROM person P
-			LEFT JOIN student S ON S.person = P.id
-			LEFT JOIN chapter_judge CJ ON CJ.person = P.id
-			WHERE P.nsda = ? OR S.nsda = ? OR CJ.nsda = ?
-		`, { replacements: [req.query.person_id, req.query.person_id, req.query.person_id] });
+		let person = {};
 
-		if (!personId?.[0]?.[0]?.id) {
+		try {
+
+			const persons = await db.sequelize.query(`
+				SELECT DISTINCT P.id FROM person P
+				LEFT JOIN student S ON S.person = P.id
+				WHERE
+					P.nsda = :nsdaId
+					OR S.nsda = :nsdaId
+			`, {
+				replacements : { nsdaId: req.query.nsda_id || req.query.person_id },
+				type         : db.Sequelize.QueryTypes.SELECT,
+			});
+
+			person = persons[0];
+
+		} catch (err) {
+			console.log(`Error condition recieved`);
+			console.log(err);
+		}
+
+		if (!person?.id) {
 			return res.status(400).json({ message: 'Person not found' });
 		}
 
-		const student = await db.sequelize.query(`
+		const replacements = {
+			nsdaId   : req.query.nsda_id || req.query.person_id,
+			personId : person.id,
+		};
+
+		const students = await db.sequelize.query(`
 			SELECT
 				T.name AS 'tournament',
 				T.state as 'state',
@@ -28,49 +49,58 @@ export const getPersonHistory = {
 				INNER JOIN entry_student ES ON ES.entry = E.id
 				INNER JOIN student ST ON ST.id = ES.student
 				INNER JOIN chapter C ON C.id = ST.chapter
-			WHERE ST.nsda = ?
+			WHERE (ST.nsda = :nsdaId OR ST.person = :personId)
 				AND T.hidden = 0
 			GROUP BY E.id
-		`, { replacements: [req.query.person_id] });
+		`, {
+			replacements,
+			type : db.Sequelize.QueryTypes.SELECT,
+		});
 
-		const judge = await db.sequelize.query(`
-			SELECT    
-				T.name AS 'tournament',    
-				T.state as 'state',    
-				T.start AS 'start',    
-				T.end AS 'end',    
-				S.name AS 'chapter',    
-				CAT.name AS 'category',    
-				COUNT(DISTINCT panel.id) as 'rounds_judged'    
-			FROM (tourn T, person P, judge J, category CAT)    
-				LEFT JOIN school S on J.school = S.id    
-				LEFT JOIN chapter C on C.id = S.chapter    
-				LEFT JOIN ballot on ballot.judge = J.id    
-				LEFT JOIN panel on panel.id = ballot.panel    
-			WHERE P.nsda = ?    
-				and P.id = J.person    
-				and J.category = CAT.id    
-				and CAT.tourn = T.id    
-				AND T.hidden = 0    
-			GROUP BY J.id    
-		`, { replacements: [req.query.person_id] });
+		const judges = await db.sequelize.query(`
+			SELECT
+				T.name AS 'tournament',
+				T.state as 'state',
+				T.start AS 'start',
+				T.end AS 'end',
+				S.name AS 'chapter',
+				CAT.name AS 'category',
+				COUNT(DISTINCT panel.id) as 'rounds_judged'
+			FROM (tourn T, person P, judge J, category CAT)
+				LEFT JOIN school S on J.school = S.id
+				LEFT JOIN chapter C on C.id = S.chapter
+				LEFT JOIN ballot on ballot.judge = J.id
+				LEFT JOIN panel on panel.id = ballot.panel
+			WHERE P.nsda = :nsdaId
+				and P.id = J.person
+				and J.category = CAT.id
+				and CAT.tourn = T.id
+				AND T.hidden = 0
+			GROUP BY J.id
+		`, {
+			replacements,
+			type : db.Sequelize.QueryTypes.SELECT,
+		});
 
 		const quizzes = await db.sequelize.query(`
-			SELECT    
+			SELECT
 				Q.label as 'quiz',
 				PQ.pending AS 'pending',
 				PQ.completed AS 'completed',
 				PQ.timestamp AS 'timestamp'
 			FROM person_quiz PQ
 			INNER JOIN quiz Q ON Q.id = PQ.quiz
-			WHERE PQ.person = ?    
-		`, { replacements: [personId[0][0].id] });
+			WHERE PQ.person = :personId
+		`, {
+			replacements,
+			type : db.Sequelize.QueryTypes.SELECT,
+		});
 
 		const history = {
-			personId: personId[0][0].id,
-			student: student[0],
-			judge: judge[0],
-			quizzes: quizzes[0],
+			personId : person.id,
+			student  : students,
+			judge    : judges,
+			quizzes,
 		};
 
 		return res.status(200).json(history);
@@ -78,13 +108,13 @@ export const getPersonHistory = {
 };
 
 getPersonHistory.GET.apiDoc = {
-	summary: 'Load history for a person ID',
+	summary: 'Load history for a NSDA membership ID',
 	operationId: 'getPersonHistory',
 	parameters: [
 		{
 			in          : 'query',
-			name        : 'person_id',
-			description : 'ID of person whose history you wish to access',
+			name        : 'nsda_id',
+			description : 'NSDA Membership ID of person whose history you wish to access',
 			required    : true,
 			schema      : {
 				type    : 'integer',

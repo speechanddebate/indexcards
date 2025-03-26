@@ -36,8 +36,8 @@ describe('User Profile Loader', () => {
 
 		assert.equal(
 			res.body.email,
-			'palmer@tabroom.com',
-			'Chris Palmer is user number 1'
+			'4fddeb03',
+			'4fddeb03 is user number 1'
 		);
 	});
 });
