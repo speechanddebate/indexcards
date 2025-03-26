@@ -159,15 +159,18 @@ app.all(tabRoutes, async (req, res, next) => {
 
 		if (!req.session) {
 			return res.status(401).json({
-				error   : true ,
-				message : `Tab You are not logged in.` ,
+				error   : true,
+				message : `Tab You are not logged in.`,
 			});
 		}
 
 		req.session = await tabAuth(req, res);
 
 		if (typeof req.session?.perms !== 'object') {
-			return res.status(401).json('You do not have access to that tournament area');
+			return res.status(401).json({
+				error   : true,
+				message : `You do not have access to that part of that tournament`,
+			});
 		}
 
 	} catch (err) {
@@ -195,12 +198,15 @@ app.all(coachRoutes, async (req, res, next) => {
 		if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
 			req.chapter = chapter;
 		} else {
-			return res.status(401).json(`You do not have access to that institution`);
+			return res.status(401).json({
+				error   : true,
+				message : `You do not have access to that part of that institution`,
+			});
 		}
 	} else {
 		return res.status(401).json({
-			error   : true                      ,
-			message : `Coach: You are not logged in.` ,
+			error   : true,
+			message : `Coach: You are not logged in.`,
 		});
 	}
 
@@ -255,12 +261,18 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 		if (!req.session?.person) {
 			req.session = await auth(req, res);
 			if (!req.session?.settings[`api_auth_${req.params.area}`]) {
-				return res.status(401).json(`That function is not accessible to your API credentials.  Key ${req.params.area} required`);
+				return res.status(401).json({
+					error   : true,
+					message : `That function is not accessible to your API credentials.  Key ${req.params.area} required`,
+				});
 			}
 		}
 
 		if (!req.session?.person) {
-			return res.status(401).json(`That function is not accessible to your API credentials.  Key ${req.params.area} required`);
+			return res.status(401).json({
+				error   : true,
+				message : `That function is not accessible to your API credentials.  Key ${req.params.area} required`,
+			});
 		}
 	} catch (err) {
 		return next(err);
@@ -284,7 +296,10 @@ app.all('/v1/glp/*', async (req, res, next) => {
 		}
 
 		if (!req.session?.site_admin) {
-			return res.status(401).json('That function is accessible to Tabroom site administrators only');
+			return res.status(401).json({
+				error   : true,
+				message : `That function is accessible to Tabroom site administrators only`,
+			});
 		}
 	} catch (err) {
 		next(err);

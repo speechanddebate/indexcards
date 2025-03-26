@@ -81,3 +81,31 @@ export const showDate = ({ date, format, tz, locale }) => {
 		return dt.toLocaleDateString(locale || 'en-US');
 	}
 };
+
+export const getPast = ({ days, months, years, hours, minutes }) => {
+
+	const today = new Date();
+	const lastWeek = new Date(
+		today.getFullYear() - (years || 0 ),
+		today.getMonth() - (months || 0),
+		today.getDate() - (days || 0),
+		today.getHours() - (hours || 0),
+		today.getMinutes() - (minutes || 0),
+	);
+	return lastWeek;
+};
+
+export const getFuture = ({ days, months, years, hours, minutes }) => {
+
+	const today = new Date();
+
+	const lastWeek = new Date(
+		today.getFullYear() + (years || 0),
+		today.getMonth() + (months || 0),
+		today.getDate() + (days || 0),
+		today.getHours() + (hours || 0),
+		today.getMinutes() + (minutes || 0),
+	);
+
+	return lastWeek;
+};

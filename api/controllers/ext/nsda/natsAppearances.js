@@ -65,7 +65,8 @@ export const syncNatsAppearances = {
 
 		const studentNats = await getNSDA('/reports/member-nats-appearances');
 		const existingStudents = multiObjectify(await req.db.sequelize.query(`
-			select student.id student, student.nsda id, ss.id ssid, ss.value
+			select
+				student.id student, student.nsda, ss.id ssid, ss.value
 			from student
 				left join student_setting ss
 					on ss.student = student.id
@@ -130,7 +131,7 @@ export const natsIndividualHonors = {
 		const db = req.db;
 
 		const studentResults = await db.sequelize.query(`
-			select 
+			select
 				student.id studentId, student.first, student.last, student.nsda studentNSDA,
 				school.id schoolId, school.name schoolName, chapter.nsda chapterNSDA,
 				result.rank, result.place,
@@ -139,7 +140,7 @@ export const natsIndividualHonors = {
 				tourn.name tournName, tourn.start tournDate
 
 			from (entry, result, result_set, entry_student es, student, event, tourn, tourn_setting ts, ballot, panel, round)
-				left join event_setting nsda_code 
+				left join event_setting nsda_code
 					on nsda_code.event = event.id
 					and nsda_code.tag = 'nsda_event_category'
 				left join school on entry.school = school.id

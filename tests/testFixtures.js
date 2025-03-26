@@ -1,5 +1,24 @@
+import {getPast, getFuture} from '../api/helpers/dateTime.js';
+
 // Some various snippets of data that tests can use to test against.
 const now = new Date();
+
+const lastWeek = getPast({days: 7});
+const nextWeek = getFuture({days: 7});
+
+export const testAd = {
+	id			: 1,
+	tag         : 'Renew',
+	filename    : 'TabroomAd_Renew.png',
+	url			: 'https://www.speechanddebate.org/signup/',
+	sort_order  : 0,
+	start       : lastWeek.toJSON(),
+	end         : nextWeek.toJSON(),
+	approved    : 1,
+	background  : '#FFFFFF',
+	person      : 1,
+	approved_by : 1,
+};
 
 const testPerson = {
 	id         : '69',
@@ -115,6 +134,7 @@ export const testStoreCartSetting = {
 };
 
 export default {
+	testAd,
 	testAdmin,
 	testUser,
 	testUserTournPerm,

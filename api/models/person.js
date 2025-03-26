@@ -34,24 +34,8 @@ const person = (sequelize, DataTypes) => {
 			allowNull: false,
 			defaultValue: '0',
 		},
-		street: {
-			type: DataTypes.STRING(127),
-			allowNull: true,
-		},
-		city: {
-			type: DataTypes.STRING(63),
-			allowNull: true,
-		},
 		state: {
 			type: DataTypes.CHAR(4),
-			allowNull: true,
-		},
-		zip: {
-			type: DataTypes.STRING(15),
-			allowNull: true,
-		},
-		postal: {
-			type: DataTypes.STRING(15),
 			allowNull: true,
 		},
 		country: {

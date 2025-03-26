@@ -3,28 +3,38 @@ export const getPersonHistory = {
 
 		const db = req.db;
 
-		const persons = await db.sequelize.query(`
-			SELECT
-				P.id id,
-				P.first first,
-				P.middle middle,
-				P.last last
-			FROM person P
-				LEFT JOIN student S ON S.person = P.id
-			WHERE P.nsda = :personId
-				OR S.nsda = :personId
-		`, {
-			replacements: { personId: req.query.person_id },
-			type: db.sequelize.QueryTypes.SELECT,
-		});
+		let person = {};
 
-		if (!persons || persons.length === 0) {
+		try {
+
+			const persons = await db.sequelize.query(`
+				SELECT DISTINCT P.id FROM person P
+				LEFT JOIN student S ON S.person = P.id
+				WHERE
+					P.nsda = :nsdaId
+					OR S.nsda = :nsdaId
+			`, {
+				replacements : { nsdaId: req.query.nsda_id },
+				type         : db.Sequelize.QueryTypes.SELECT,
+			});
+
+			person = persons[0];
+
+		} catch (err) {
+			console.log(`Error condition on person query`);
+			console.log(err);
+		}
+
+		if (!person?.id) {
 			return res.status(400).json({ message: 'Person not found' });
 		}
 
-		const person = persons.shift();
+		const replacements = {
+			nsdaId   : req.query.nsda_id,
+			personId : person.id,
+		};
 
-		const student = await db.sequelize.query(`
+		const students = await db.sequelize.query(`
 			SELECT
 				T.name AS 'tournament',
 				T.state as 'state',
@@ -39,15 +49,15 @@ export const getPersonHistory = {
 				INNER JOIN entry_student ES ON ES.entry = E.id
 				INNER JOIN student ST ON ST.id = ES.student
 				INNER JOIN chapter C ON C.id = ST.chapter
-			WHERE ST.nsda = :personId
+			WHERE (ST.nsda = :nsdaId OR ST.person = :personId)
 				AND T.hidden = 0
 			GROUP BY E.id
 		`, {
-			replacements: { personId: req.query.person_id },
-			type: db.sequelize.QueryTypes.SELECT,
+			replacements,
+			type : db.Sequelize.QueryTypes.SELECT,
 		});
 
-		const judge = await db.sequelize.query(`
+		const judges = await db.sequelize.query(`
 			SELECT
 				T.name AS 'tournament',
 				T.state as 'state',
@@ -61,15 +71,15 @@ export const getPersonHistory = {
 				LEFT JOIN chapter C on C.id = S.chapter
 				LEFT JOIN ballot on ballot.judge = J.id
 				LEFT JOIN panel on panel.id = ballot.panel
-			WHERE P.nsda = :personId
+			WHERE P.nsda = :nsdaId
 				and P.id = J.person
 				and J.category = CAT.id
 				and CAT.tourn = T.id
 				AND T.hidden = 0
 			GROUP BY J.id
 		`, {
-			replacements: { personId: req.query.person_id },
-			type: db.sequelize.QueryTypes.SELECT,
+			replacements,
+			type : db.Sequelize.QueryTypes.SELECT,
 		});
 
 		const quizzes = await db.sequelize.query(`
@@ -78,22 +88,18 @@ export const getPersonHistory = {
 				PQ.pending AS 'pending',
 				PQ.completed AS 'completed',
 				PQ.timestamp AS 'timestamp'
-			FROM (person_quiz PQ, person P)
+			FROM person_quiz PQ
 			INNER JOIN quiz Q ON Q.id = PQ.quiz
-			WHERE PQ.person = P.id
-				AND P.nsda = :personId
+			WHERE PQ.person = :personId
 		`, {
-			replacements: { personId: req.query.person_id },
-			type: db.sequelize.QueryTypes.SELECT,
+			replacements,
+			type : db.Sequelize.QueryTypes.SELECT,
 		});
 
 		const history = {
 			personId : person.id,
-			first    : person.first,
-			middle   : person.middle,
-			last     : person.last,
-			judge,
-			student,
+			student  : students,
+			judge    : judges,
 			quizzes,
 		};
 
@@ -102,13 +108,13 @@ export const getPersonHistory = {
 };
 
 getPersonHistory.GET.apiDoc = {
-	summary: 'Load history for a person ID',
+	summary: 'Load history for a NSDA membership ID',
 	operationId: 'getPersonHistory',
 	parameters: [
 		{
 			in          : 'query',
-			name        : 'person_id',
-			description : 'ID of person whose history you wish to access',
+			name        : 'nsda_id',
+			description : 'NSDA Membership ID of person whose history you wish to access',
 			required    : true,
 			schema      : {
 				type    : 'integer',

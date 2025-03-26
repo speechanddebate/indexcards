@@ -548,8 +548,6 @@ const pruneDatabase = async () => {
 				phone   = FLOOR(RAND() * 5121) + 10000,
 				gender  = NULL,
 				pronoun = "Test/Pronoun",
-				street  = NULL,
-				city    = NULL,
 				state   = 'MA',
 				country = 'US'
 	`, {
@@ -645,6 +643,14 @@ const pruneDatabase = async () => {
 	});
 
 	pruners.push(coachPruner);
+
+	const personDeepPruner = await db.sequelize.query(`
+		alter table person drop street,city,zip,postal
+	`, {
+		type: db.sequelize.QueryTypes.UPDATE,
+	});
+
+	pruners.push(personDeepPruner);
 
 	await Promise.all(pruners);
 
