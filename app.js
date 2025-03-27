@@ -137,6 +137,8 @@ app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], as
 			});
 		}
 	} catch (err) {
+		console.log(`Found an error on user session request`);
+		console.log(err);
 		next(err);
 	}
 
