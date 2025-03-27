@@ -38,6 +38,7 @@ export const futureTourns = {
 
 		if (typeof req.query.limit === 'number') {
 			endLimit = ` limit ${req.query.limit} `;
+			console.log(`Limiting to the top ${req.query.limit} tournaments`);
 		}
 
 		const [future] = await db.sequelize.query(`
