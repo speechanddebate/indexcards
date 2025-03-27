@@ -9,11 +9,18 @@ export const futureTourns = {
 
 		let timeScope = ' DATE(NOW() - INTERVAL 2 DAY)';
 
-		if (req.config.MODE === 'test') {
-			// the nine test suite tournaments are forever in the past.  This one
-			// excludes Nationals but not the other eight others.
+		const timeLimit = new Date();
+		timeLimit.setDate(timeLimit.getDate() - 3);
+		let thisWeek = getWeek(timeLimit);
 
+		if (
+			process.env.NODE_ENV === 'test'
+			|| req.config.MODE === 'test'
+		) {
+			// the nine test suite tournaments are forever in the past.  This one
+			// excludes the Nationals test but not the other eight others.
 			timeScope = `'2023-08-01 00:00:00'`;
+			thisWeek = 1;
 		}
 
 		if (typeof req.params.circuit === 'number') {
@@ -241,10 +248,6 @@ export const futureTourns = {
 
 		future.push(...futureDistricts);
 
-		const timeLimit = new Date();
-		timeLimit.setDate(timeLimit.getDate() - 3);
-
-		const thisWeek = getWeek(timeLimit);
 		const shortOptions = {
 			month : 'numeric',
 			day   : 'numeric',

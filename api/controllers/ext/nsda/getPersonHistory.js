@@ -2,7 +2,6 @@ export const getPersonHistory = {
 	GET: async (req, res) => {
 
 		const db = req.db;
-
 		let person = {};
 
 		try {

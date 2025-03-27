@@ -18,6 +18,7 @@ export const setup = async () => {
 		firstPromises.push(db.sequelize.query( `delete from campus_log where person > 3 and person < 100` ));
 		firstPromises.push(db.sequelize.query( `delete from person where id > 3 and id < 100` ));
 
+		// Prune before the recreation because of unique keys
 		await Promise.all(firstPromises);
 
 		const secondPromises = [];
@@ -25,6 +26,13 @@ export const setup = async () => {
 		secondPromises.push(db.person.create(testData.testUser));
 		secondPromises.push(db.person.create(testData.testAdmin));
 		secondPromises.push(db.ad.create(testData.testAd));
+		secondPromises.push(db.sequelize.query(`update person set nsda=123456 where id=123215`));
+		secondPromises.push(db.sequelize.query(`update school set name="Navy" where id=651034`));
+		secondPromises.push(db.sequelize.query(`update judge set first="Danielle", last="O'Gorman" where id=2155790`));
+		secondPromises.push(db.sequelize.query(`update entry set code="Navy XX" where id=5388933;`));
+
+		// Must pause here because a lot of the third batch relies on foreign
+		// keys in here.
 
 		await Promise.all(secondPromises);
 

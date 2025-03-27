@@ -41,7 +41,7 @@ describe('Attendee Search Function', () => {
 		assert.equal(lifePreserver.exactMatches[0].tag, 'school', 'Exact match tag is correct');
 
 		assert.equal(lifePreserver.partialMatches[0].id, 1400939, 'Exact match ID is correct');
-		assert.equal(lifePreserver.partialMatches[0].first, 'Jake', 'Partial match name is correct');
+		assert.equal(lifePreserver.partialMatches[0].first, '1c93c770', 'Partial match name is correct');
 		assert.equal(lifePreserver.partialMatches[0].tag, 'entry', 'Exact match tag is correct');
 
 		// Search for an individual in that same tournament and BONUS ROUND!
