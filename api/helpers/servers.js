@@ -195,6 +195,7 @@ export const increaseLinodeCount = async (whodunnit, countNumber) => {
 				},
 			],
 			depends_on       : [control[0].linode_id],
+			firewall_id      : config.LINODE.FIREWALL_ID,
 			stackscript_id   : config.LINODE.STACKSCRIPT_ID,
 			stackscript_data : {
 				hostname     : `${hostname}`,
