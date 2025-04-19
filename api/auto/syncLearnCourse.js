@@ -16,7 +16,6 @@ const syncAllLearn = async () => {
 	const promises = [];
 
 	courses.forEach( (course) => {
-		console.log(`Syncing ${course.label}`);
 		const promise = syncLearnByCourse(course);
 		promises.push(promise);
 	});
