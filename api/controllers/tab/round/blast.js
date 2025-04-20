@@ -174,7 +174,6 @@ export const scheduleAutoFlip = async (roundId, req) => {
 						tag        : `flip_${flight}`,
 						round      : round.id,
 						active_at  : flipAt[flight],
-						created_at : Date(),
 						created_by : req.body.sender || 0,
 					});
 					promises.push(promise);
@@ -183,7 +182,6 @@ export const scheduleAutoFlip = async (roundId, req) => {
 						tag        : `flip`,
 						round      : round.id,
 						active_at  : flipAt[flight],
-						created_at : Date(),
 						created_by : req.body.sender || 0,
 					});
 
@@ -306,9 +304,9 @@ export const blastRoundPairing = {
 
 				const logPromise = req.db.sequelize.query(`
 					insert into change_log
-						(tag, description, person, round, tourn, created_at)
+						(tag, description, person, round, tourn)
 					values
-						('tabbing', :description, :personId, :roundId, :tournId, NOW())
+						('tabbing', :description, :personId, :roundId, :tournId)
 				`, {
 					type : req.db.sequelize.QueryTypes.INSERT,
 					replacements,

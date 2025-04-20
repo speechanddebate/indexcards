@@ -277,7 +277,6 @@ export const inboxMessage = async (inputData) => {
 		sender_string : inputData.replyTo || inputData.from,
 		url           : inputData.url,
 		email         : inputData.emailId,
-		created_at    : new Date(),
 	};
 
 	// Tourn must exist, or otherwise be null

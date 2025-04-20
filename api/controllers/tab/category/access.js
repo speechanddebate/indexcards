@@ -56,9 +56,8 @@ export const changeAccess = {
 		await db.changeLog.create({
 			person     : req.session.person,
 			tourn      : req.params.tournId,
-			category      : targetCategory.id,
+			category   : targetCategory.id,
 			tag        : 'access',
-			created_at : Date(),
 			description,
 		});
 
@@ -102,9 +101,8 @@ export const changeAccess = {
 		const log = await db.changeLog.create({
 			person      : req.session.person,
 			tourn       : req.params.tournId,
-			category       : targetCategory.id,
+			category    : targetCategory.id,
 			tag         : 'access',
-			created_at  : Date(),
 			description : `${targetPerson.email} access removed from ${targetCategory.abbr}`,
 		});
 

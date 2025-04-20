@@ -33,7 +33,7 @@ const round = (sequelize, DataTypes) => {
 			type         : DataTypes.INTEGER(4),
 			allowNull    : true,
 		},
-		created_at: {
+		paired_at: {
 			type: DataTypes.DATE,
 			allowNull: true,
 		},

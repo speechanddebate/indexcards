@@ -147,8 +147,8 @@ export const scheduleFlips = async (roundId) => {
 					}
 
 					await db.sequelize.query(`
-						insert into autoqueue (tag, round, active_at, created_at)
-							values (:tag, :roundId, :activeAt, now())
+						insert into autoqueue (tag, round, active_at)
+							values (:tag, :roundId, :activeAt)
 					`, {
 						replacements: {
 							tag      : `flip_${flight}`,
@@ -166,8 +166,8 @@ export const scheduleFlips = async (roundId) => {
 			} else {
 
 				await db.sequelize.query(`
-					insert into autoqueue (tag, round, active_at, created_at)
-						values (:tag, :roundId, :activeAt, now())
+					insert into autoqueue (tag, round, active_at)
+						values (:tag, :roundId, :activeAt)
 				`, {
 					replacements: { tag: `flip`, roundId, activeAt: startDate },
 					type: db.Sequelize.QueryTypes.INSERT,
@@ -178,7 +178,7 @@ export const scheduleFlips = async (roundId) => {
 
 	await db.sequelize.query(`
 		insert into change_log
-			(tag, description, round, tourn, created_at)
+			(tag, description, round, tourn)
 		values
 			('blast', :description, :roundId, :tournId, NOW())
 	`, {
@@ -187,7 +187,6 @@ export const scheduleFlips = async (roundId) => {
 			roundId     : round.id,
 			tournId     : round.tourn_id,
 			description : message,
-			created_at  : new Date(),
 		},
 		type : db.sequelize.QueryTypes.INSERT,
 	});
