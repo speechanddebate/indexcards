@@ -152,7 +152,9 @@ app.all([
 
 			const judge = await req.db.summon(req.db.judge, req.params.id);
 
-			if (judge.person !== req.session.person) {
+			if (!judge) {
+				return res.status(401).json('User: no such judge exists in Tabroom');
+			} else if ( judge?.person !== req.session.person ) {
 				return res.status(401).json('User: You are not linked to that judge');
 			}
 
