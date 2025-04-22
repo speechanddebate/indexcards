@@ -89,12 +89,19 @@ export const futureTourns = {
 					where online.tourn = tourn.id
 					and online.id = eso.event
 					and eso.tag = 'online_mode'
+					and not exists (
+						select hybridno.id
+						from event_setting hybridno
+						where hybridno.event = online.id
+						and hybridno.tag = 'online_hybrid'
+					)
 				) as online,
 
 				( SELECT
 					count(in_person.id)
 					from event in_person
 					where in_person.tourn = tourn.id
+					and in_person.type != 'attendee'
 					and not exists (
 						select esno.id
 						from event_setting esno
@@ -198,18 +205,26 @@ export const futureTourns = {
 					where online.tourn = tourn.id
 					and online.id = eso.event
 					and eso.tag = 'online_mode'
+					and not exists (
+						select hybridno.id
+						from event_setting hybridno
+						where hybridno.event = online.id
+						and hybridno.tag = 'online_hybrid'
+					)
 				) as online,
 
 				( SELECT
 					count(in_person.id)
 					from event in_person
 					where in_person.tourn = tourn.id
+					and in_person.type != 'attendee'
 					and not exists (
 						select esno.id
 						from event_setting esno
 						where esno.event = in_person.id
 						and esno.tag = 'online_mode'
 					)
+
 				) as in_person,
 
 				( SELECT

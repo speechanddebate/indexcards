@@ -5,4 +5,8 @@ export const addZero = (i) => {
 	return i;
 };
 
+export const ucfirst = (lowered) => {
+	return String(lowered).charAt(0).toUpperCase() + String(lowered).slice(1);
+};
+
 export default addZero;
