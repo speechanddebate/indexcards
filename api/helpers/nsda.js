@@ -191,7 +191,7 @@ export const syncLearnByCourse = async (quiz) => {
 
 	const existingPQs = await db.sequelize.query(`
 		select person.id, person.email, person.nsda, person.first, person.last,
-			pq.id pq, pq.completed, pq.updated_at,
+			pq.id pq, pq.completed, pq.updated_at, pq.approved_by,
 			nsda_email.value nsda_email,
 			nsda_id.value nsda_id
 		from (person, person_quiz pq, quiz)
@@ -216,11 +216,15 @@ export const syncLearnByCourse = async (quiz) => {
 
 	for (const person of existingPQs) {
 
-		const existing = usersByEmail[person.email.toLowerCase()];
+		let existing = usersByEmail[person.email.toLowerCase()];
+
+		if (!existing && person.nsda_email) {
+			existing = usersByEmail[person.nsda_email.toLowerCase()];
+		}
 
 		if (
 			existing
-			&& person.email === existing.email
+			&& (person.email === existing.email || person.email === existing.nsda_email)
 			&& parseInt(person.nsda) !== parseInt(existing.person_id)
 			&& parseInt(person.nsda_id) !== parseInt(existing.person_id)
 		) {
@@ -307,14 +311,22 @@ export const syncLearnByCourse = async (quiz) => {
 			}
 		}
 
-		const nsdaExisting = usersByNsdaId[person.nsda];
+		let nsdaExisting = usersByNsdaId[person.nsda];
+
+		if (!nsdaExisting && person.nsda_id) {
+			nsdaExisting = usersByNsdaId[parseInt(person.nsda_id)];
+		}
 
 		if (
 			nsdaExisting
 			&& person.email !== nsdaExisting.email
-			&& parseInt(person.nsda) === parseInt(nsdaExisting.person_id)
+			&& (
+				parseInt(person.nsda) === parseInt(nsdaExisting.person_id)
+				|| parseInt(person.nsda_id) === parseInt(nsdaExisting.person_id)
+			)
 			&& ( !person.nsda_email || person.nsda_email !== nsdaExisting.email)
 		) {
+
 			logs.push(`${now}: Email Mismatch: NSDA ID: ${person.nsda} belongs to Tabroom email ${person.email} and NSDA email ${nsdaExisting.email}`);
 
 			const altEmail = {
@@ -339,9 +351,15 @@ export const syncLearnByCourse = async (quiz) => {
 			}
 		}
 
-		if (person.completed && person.approved_by) {
+		if (
+			nsdaExisting
+			&& nsdaExisting.completed
+			&& person.completed
+			&& person.approved_by
+		) {
 
 			delete usersByNsdaId[person.nsda];
+			delete usersByNsdaId[person.nsda_id];
 			delete usersByEmail[person.email.toLowerCase()];
 
 		} else {
@@ -385,10 +403,23 @@ export const syncLearnByCourse = async (quiz) => {
 	if (userIds.length > 0) {
 
 		const notExisting = await db.sequelize.query(`
-			select person.id, person.nsda, person.email, person.middle
+			select person.id, person.nsda, person.email, person.middle,
+				nsda_id.value nsda_id,
+				nsda_email.value nsda_email
 				from person
+				left join person_setting nsda_id on nsda_id.person = person.id and nsda_id.tag = 'nsda_id'
+				left join person_setting nsda_email on nsda_email.person = person.email and nsda_email.tag = 'nsda_email'
 			where 1=1
-			and person.nsda IN (:userIds)
+			and (
+				person.nsda IN (:userIds)
+				OR EXISTS (
+					select ps.id
+					from person_setting ps
+					where ps.person = person.id
+					and ps.tag='nsda_id'
+					and ps.value IN (:userIds)
+				)
+			)
 		`, {
 			replacements : { userIds },
 			type         : db.sequelize.QueryTypes.SELECT,
@@ -413,7 +444,11 @@ export const syncLearnByCourse = async (quiz) => {
 
 		for (const person of notExisting) {
 
-			const courseUser = usersByNsdaId[person.nsda];
+			let courseUser = usersByNsdaId[person.nsda];
+
+			if (!courseUser && person.nsda_id) {
+				courseUser = usersByNsdaId[person.nsda_id];
+			}
 
 			if (courseUser && courseUser.completed) {
 
@@ -427,6 +462,13 @@ export const syncLearnByCourse = async (quiz) => {
 
 				// I've already found this person by NSDA ID so I do not need to do by email
 				delete usersByEmail[person.email.toLowerCase()];
+				if (person.nsda_email) {
+					delete usersByNsdaId[person.nsda_email.toLowerCase()];
+				}
+				delete usersByNsdaId[person.nsda];
+				if (person.nsda_id) {
+					delete usersByNsdaId[person.nsda_id];
+				}
 			}
 		}
 
@@ -445,10 +487,21 @@ export const syncLearnByCourse = async (quiz) => {
 		let stillNotExisting = [];
 
 		stillNotExisting = await db.sequelize.query(`
-			select person.id, person.nsda, person.email, person.last
+			select person.id, person.nsda, person.email, person.last, nsda_email.value nsda_email
 				from person
+				left join person_setting nsda_email on nsda_email.tag = 'nsda_email' and nsda_email.person = person.id
 			where 1=1
-			and person.email IN (:userEmails)
+			and
+				(
+					person.email IN (:userEmails)
+					OR EXISTS (
+						select ps.id
+						from person_setting ps
+						where ps.person = person.id
+						and ps.tag='nsda_email'
+						and ps.value IN (:userEmails)
+					)
+				)
 		`, {
 			replacements : { userEmails },
 			type         : db.sequelize.QueryTypes.SELECT,
@@ -458,7 +511,15 @@ export const syncLearnByCourse = async (quiz) => {
 			delete pq.*
 				from person, person_quiz pq
 			where 1=1
-				and person.email IN (:userEmails)
+				and (person.email IN (:userEmails)
+					OR EXISTS (
+						select ps.id
+						from person_setting ps
+						where ps.person = person.id
+						and ps.tag='nsda_email'
+						and ps.value IN (:userEmails)
+					)
+				)
 				and person.id = pq.person
 				and pq.quiz = :quizId
 		`, {
@@ -471,13 +532,20 @@ export const syncLearnByCourse = async (quiz) => {
 
 		for (const person of stillNotExisting) {
 
-			const courseUser = usersByEmail[person.email.toLowerCase()];
+			let courseUser = usersByEmail[person.email.toLowerCase()];
+
+			if (!courseUser && person.nsda_email) {
+				courseUser = usersByEmail[person.nsda_email.toLowerCase()];
+			}
 
 			if (courseUser && courseUser.completed) {
 
-				if (person.nsda && courseUser.person_id !== person.nsda) {
+				if (
+					person.nsda && parseInt(courseUser.person_id) !== person.nsda
+					&& (!person.nsda_id || parseInt(person.nsda_id) !== courseUser.person_id)
+				) {
 
-					if (person.altNsda !== courseUser.person_id) {
+					if (person.nsda_id !== courseUser.person_id) {
 						logs.push(` ${now} NSDA ID Mismatch: Same email ${person.email}. Tabroom NSDA: ${person.nsda} and NSDA ID: ${courseUser.person_id}`);
 					}
 
@@ -504,6 +572,13 @@ export const syncLearnByCourse = async (quiz) => {
 				});
 
 				delete usersByEmail[person.email.toLowerCase()];
+				if (person.nsda_email) {
+					delete usersByEmail[person.nsda_email.toLowerCase()];
+				}
+				if (person.nsda) {
+					delete usersByNsdaId[person.nsda];
+				}
+				delete usersByNsdaId[courseUser.person_id];
 			}
 		}
 
@@ -513,6 +588,35 @@ export const syncLearnByCourse = async (quiz) => {
 	}
 
 	await Promise.resolve(allPromises);
+
+	const unmatchedResults = [];
+
+	for (const nsdaId of Object.keys(usersByNsdaId)) {
+		unmatchedResults.push( usersByNsdaId[nsdaId] );
+	}
+	for (const email of Object.keys(usersByEmail)) {
+		const result = usersByEmail[email];
+		if (!usersByNsdaId[result.person_id]) {
+			unmatchedResults.push(result);
+		}
+	}
+
+	const quizMisses = await db.tabroomSetting.findOne({ where: { tag: `quiz_misses_${quiz.id}` } });
+
+	if (quizMisses) {
+		quizMisses.value_text = JSON.stringify(unmatchedResults, null, );
+		await quizMisses.save();
+
+	} else {
+
+		await db.tabroomSetting.create({
+			tag        : `quiz_misses_${quiz.id}`,
+			value      : 'text',
+			person     : 3,
+			value_text : JSON.stringify(unmatchedResults, null, 4),
+		});
+	}
+
 	const quizLog = await db.tabroomSetting.findOne({ where: { tag: `quiz_log_${quiz.id}` } });
 
 	if (quizLog) {
