@@ -180,7 +180,7 @@ export const scheduleFlips = async (roundId) => {
 		insert into change_log
 			(tag, description, round, tourn)
 		values
-			('blast', :description, :roundId, :tournId, NOW())
+			('blast', :description, :roundId, :tournId)
 	`, {
 		replacements    : {
 			tag         : 'blast',
