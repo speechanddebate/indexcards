@@ -20,6 +20,7 @@ export const inboxList = {
 			where message.person = :personId
 				and message.person = person.id
 				and message.deleted_at IS NULL
+				and message.visible_at < NOW()
 			order by
 				message.created_at,
 				message.subject
@@ -42,6 +43,7 @@ export const unreadCount = {
 			where message.person = :personId
 				and message.read_at IS NULL
 				and message.deleted_at IS NULL
+				and message.visible_at < NOW()
 		`, {
 			replacements: { personId: req.session.person },
 			type: req.db.Sequelize.QueryTypes.SELECT,
@@ -60,6 +62,7 @@ export const markAllMessagesRead = {
 			set message.read_at = NOW()
 			where message.person = :personId
 				and message.read_at IS NULL
+				and message.visible_at < NOW()
 		`, {
 			replacements: { personId: req.session.person },
 			type: req.db.Sequelize.QueryTypes.UPDATE,

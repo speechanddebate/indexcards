@@ -20,8 +20,14 @@ export const shareRooms = async (roundId) => {
 	const sections = await db.sequelize.query(`
 		select
 			distinct panel.id id, panel.letter letter,
-			tourn.name tournName, round.label roundLabel, round.name roundName
+			tourn.name tournName, round.label roundLabel, round.name roundName,
+			auto_docshare.value autoShareEnabled
 		from (panel, round, event, tourn)
+
+			left join event_setting auto_docshare
+				on auto_docshare.tag = 'auto_docshare'
+				and auto_docshare.event = event.id
+
 		where panel.round = :roundId
 			and panel.bye = 0
 			and NOT EXISTS (
@@ -42,44 +48,49 @@ export const shareRooms = async (roundId) => {
 	let counter = 0;
 
 	sections.forEach(async (section) => {
-		const phrase = randomPhrase();
-		await db.sequelize.query(`
-			insert into panel_setting (panel, tag, value)
-			values (:sectionId, 'share', :phrase)
-			on duplicate key update
-			value = :phrase
-		`, {
-			replacements: { sectionId: section.id, phrase },
-			type: db.Sequelize.QueryTypes.INSERT,
-		});
 
-		const email = await getFollowers({
-			panelId        : section.id,
-			noFollowers    : true,
-			panelFollowers : true,
-			returnEmails   : true,
-		});
+		if (section.autoShareEnabled) {
 
-		let messageText = `Share speech documents for this round (10mb limit, docs only) by replying to`;
-		messageText += ` this email with a file attachment, or going to https://share.tabroom.com/${phrase} \n`;
+			const phrase = randomPhrase();
 
-		let messageHTML = `<p>Share speech documents for this round (10mb limit, docs only) by replying to`;
-		messageHTML += ` this email with a file attachment, or going to `;
-		messageHTML += `<a href="https://share.tabroom.com/${phrase}">https://share.tabroom.com/${phrase}</a></p>`;
+			await db.sequelize.query(`
+				insert into panel_setting (panel, tag, value)
+				values (:sectionId, 'share', :phrase)
+				on duplicate key update
+				value = :phrase
+			`, {
+				replacements: { sectionId: section.id, phrase },
+				type: db.Sequelize.QueryTypes.INSERT,
+			});
 
-		const messageData = {
-			to      : `${phrase}@share.tabroom.com`,
-			subject : `${section.tournName} ${section.roundLabel || `Round ${section.roundName}`} (${phrase}) - Speech Documents`,
-			text    : messageText,
-			html    : messageHTML,
-			share   : true,
-			email,
-		};
+			const email = await getFollowers({
+				panelId        : section.id,
+				noFollowers    : true,
+				panelFollowers : true,
+				returnEmails   : true,
+			});
 
-		if (messageData.email.length > 0) {
-			const dispatch = emailBlast(messageData);
-			counter += email.length;
-			emailPromises.push(dispatch.result);
+			let messageText = `Share speech documents for this round (10mb limit, docs only) by replying to`;
+			messageText += ` this email with a file attachment, or going to https://share.tabroom.com/${phrase} \n`;
+
+			let messageHTML = `<p>Share speech documents for this round (10mb limit, docs only) by replying to`;
+			messageHTML += ` this email with a file attachment, or going to `;
+			messageHTML += `<a href="https://share.tabroom.com/${phrase}">https://share.tabroom.com/${phrase}</a></p>`;
+
+			const messageData = {
+				to      : `${phrase}@share.tabroom.com`,
+				subject : `${section.tournName} ${section.roundLabel || `Round ${section.roundName}`} (${phrase}) - Speech Documents`,
+				text    : messageText,
+				html    : messageHTML,
+				share   : true,
+				email,
+			};
+
+			if (messageData.email.length > 0) {
+				const dispatch = emailBlast(messageData);
+				counter += email.length;
+				emailPromises.push(dispatch.result);
+			}
 		}
 	});
 
