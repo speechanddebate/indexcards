@@ -107,6 +107,7 @@ export const sideCounts = {
 export const roundDecisionStatus = {
 
 	GET: async (req, res) => {
+
 		const db = req.db;
 
 		const labels = await db.sequelize.query(`
@@ -238,7 +239,6 @@ export const roundDecisionStatus = {
 				}
 
 				round.byePanels[ballot.panel] = already;
-
 				return;
 			}
 
@@ -327,14 +327,13 @@ export const roundDecisionStatus = {
 				judge.text = '&frac12;';
 				judge.class = 'redtext';
 			} else if (ballot.rubricCount || judge.count) {
-
-				if (!judge.count) {
-					judge.count = 0;
-				}
-
+				round.out[ballot.flight][ballot.judge] = true;
 				if (typeof ballot.rubricCount === 'number') {
+					if (!judge.count) {
+						judge.count = 0;
+					}
 					judge.count += ballot.rubricCount;
-					judge.class = 'orangetext';
+					judge.class = 'bluetext italic';
 				}
 			} else if (ballot.startTime) {
 				round.out[ballot.flight][ballot.judge] = true;
@@ -355,7 +354,7 @@ export const roundDecisionStatus = {
 
 			if (judge &&
 				judge.count
-				&& (judge.text === '' || !judge.text)
+				&& (!ballot.winloss && !ballot.rank && !ballot.point)
 			) {
 				judge.text = judge.count.toString();
 			}
