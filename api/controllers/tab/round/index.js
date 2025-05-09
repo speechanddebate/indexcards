@@ -148,7 +148,7 @@ export const roundDecisionStatus = {
 			select
 				ballot.id ballot,
 				panel.id panel,
-				judge.id judge,
+				judge.id judge, judge.last judgeLast,
 				ballot.chair,
 				CONVERT_TZ(ballot.judge_started, '+00:00', tourn.tz) startTime,
 				ballot.audit,
@@ -163,11 +163,12 @@ export const roundDecisionStatus = {
 				rubric.content rubric
 
 			from (ballot, panel, round, event, tourn)
-				left join judge on ballot.judge = judge.id
-				left join score rank on rank.ballot = ballot.id and rank.tag = 'rank'
-				left join score point on point.ballot = ballot.id and point.tag = 'point'
+
+				left join judge on ballot.judge           = judge.id
+				left join score rank on rank.ballot       = ballot.id and rank.tag    = 'rank'
+				left join score point on point.ballot     = ballot.id and point.tag   = 'point'
 				left join score winloss on winloss.ballot = ballot.id and winloss.tag = 'winloss'
-				left join score rubric on rubric.ballot = ballot.id and rubric.tag = 'rubric'
+				left join score rubric on rubric.ballot   = ballot.id and rubric.tag  = 'rubric'
 
 			where round.id = :roundId
 				and panel.round = round.id
@@ -191,10 +192,19 @@ export const roundDecisionStatus = {
 
 		for (const ballot of rawBallots) {
 
+			if (ballot.rubric) {
+				ballot.rubricCount = 0;
+				const rubric = JSON.parse(ballot.rubric);
+				for (const rowCount of Object.keys(rubric)) {
+					if ( parseInt(rubric[rowCount].points) > 0) {
+						ballot.rubricCount++;
+					}
+				}
+			}
+
 			if (!ballot.judge && !ballot.pbye) {
 
 				round.panels[ballot.panel] = round.panels[ballot.panel] || 0;
-
 				let already = round.byePanels[ballot.panel] || '';
 
 				if (already) {
@@ -252,10 +262,6 @@ export const roundDecisionStatus = {
 
 			if (!judge.text) {
 				judge.text = '';
-			}
-
-			if (!judge.count) {
-				judge.count = 0;
 			}
 
 			if (ballot.audit) {
@@ -320,10 +326,16 @@ export const roundDecisionStatus = {
 				round.panels[ballot.panel] += 100;
 				judge.text = '&frac12;';
 				judge.class = 'redtext';
-			} else if (ballot.rubric) {
-				const rubric = JSON.parse(ballot.rubric);
-				judge.count += Object.keys(rubric).length;
-				judge.class = 'orangetext';
+			} else if (ballot.rubricCount || judge.count) {
+
+				if (!judge.count) {
+					judge.count = 0;
+				}
+
+				if (typeof ballot.rubricCount === 'number') {
+					judge.count += ballot.rubricCount;
+					judge.class = 'orangetext';
+				}
 			} else if (ballot.startTime) {
 				round.out[ballot.flight][ballot.judge] = true;
 				round.panels[ballot.panel] += 10;
@@ -340,6 +352,7 @@ export const roundDecisionStatus = {
 
 		for (const ballot of rawBallots) {
 			const judge = round.judges[ballot.judge][ballot.panel];
+
 			if (judge &&
 				judge.count
 				&& (judge.text === '' || !judge.text)
