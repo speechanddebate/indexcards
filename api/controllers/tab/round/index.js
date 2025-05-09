@@ -158,8 +158,9 @@ export const roundDecisionStatus = {
 				point.id point,
 				winloss.id winloss,
 				winloss.value winner,
-				rubric.id rubric,
-				panel.flight
+				rubric.id rubric_id,
+				panel.flight,
+				rubric.content rubric
 
 			from (ballot, panel, round, event, tourn)
 				left join judge on ballot.judge = judge.id
@@ -188,7 +189,7 @@ export const roundDecisionStatus = {
 
 		const done = [];
 
-		rawBallots.forEach( (ballot) => {
+		for (const ballot of rawBallots) {
 
 			if (!ballot.judge && !ballot.pbye) {
 
@@ -249,11 +250,15 @@ export const roundDecisionStatus = {
 				round.out[ballot.flight] = {};
 			}
 
-			if (ballot.audit) {
+			if (!judge.text) {
+				judge.text = '';
+			}
 
-				if (!judge.text) {
-					judge.text = '';
-				}
+			if (!judge.count) {
+				judge.count = 0;
+			}
+
+			if (ballot.audit) {
 
 				round.panels[ballot.panel] += 100;
 
@@ -310,11 +315,15 @@ export const roundDecisionStatus = {
 			) {
 				round.panels[ballot.panel] = 10000;
 				judge.text = 'BYE';
-			} else if (ballot.winloss || ballot.rank || ballot.point || ballot.rubric ) {
+			} else if (ballot.winloss || ballot.rank || ballot.point) {
 				round.out[ballot.flight][ballot.judge] = true;
 				round.panels[ballot.panel] += 100;
 				judge.text = '&frac12;';
 				judge.class = 'redtext';
+			} else if (ballot.rubric) {
+				const rubric = JSON.parse(ballot.rubric);
+				judge.count += Object.keys(rubric).length;
+				judge.class = 'orangetext';
 			} else if (ballot.startTime) {
 				round.out[ballot.flight][ballot.judge] = true;
 				round.panels[ballot.panel] += 10;
@@ -327,7 +336,17 @@ export const roundDecisionStatus = {
 				delete round.judges[ballot.judge][ballot.panel];
 				round.panels[ballot.panel] += 1;
 			}
-		});
+		}
+
+		for (const ballot of rawBallots) {
+			const judge = round.judges[ballot.judge][ballot.panel];
+			if (judge &&
+				judge.count
+				&& (judge.text === '' || !judge.text)
+			) {
+				judge.text = judge.count.toString();
+			}
+		}
 
 		res.status(200).json(round);
 	},
