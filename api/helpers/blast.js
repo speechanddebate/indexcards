@@ -292,8 +292,9 @@ export const inboxMessage = async (inputData) => {
 	const errors = [];
 
 	inputData.ids.forEach( async (id) => {
+
 		try {
-			const response = await db.message.create({
+			const response = db.message.create({
 				person: id,
 				...message,
 			});

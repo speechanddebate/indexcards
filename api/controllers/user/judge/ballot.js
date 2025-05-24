@@ -1,6 +1,30 @@
 import { checkJudgePerson } from '../../../helpers/auth.js';
 import { errorLogger } from '../../../helpers/logger.js';
 
+export const checkActive = {
+
+	GET: async (req, res) => {
+		const db = req.db;
+		const judgeId = parseInt(req.params.judgeId);
+
+		const judges = await db.sequelize.query(`
+			select
+			judge.active, judge.id, judge.person
+			from judge
+			where judge.id = :judgeId
+		`, {
+			replacements: {
+				judgeId,
+			},
+			type : db.Sequelize.QueryTypes.SELECT,
+		});
+
+		if (judges && judges[0].person === req.session.person) {
+			return (judges[0].active);
+		}
+	},
+};
+
 export const checkBallotAccess = {
 
 	POST: async (req, res) => {

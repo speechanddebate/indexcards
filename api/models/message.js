@@ -22,7 +22,7 @@ const message = (sequelize, DataTypes) => {
 		},
 		created_at: {
 			type      : DataTypes.DATE,
-			allowNull : false,
+			allowNull : true,
 		},
 		read_at: {
 			type      : DataTypes.DATE,
