@@ -1,5 +1,68 @@
 import moment from 'moment-timezone';
 
+export const thisWeek = {
+
+	GET: async (req, res) => {
+
+		const db = req.db;
+
+		const tourns = await db.sequelize.query(`
+			select
+				 tourn.id, tourn.name, tourn.webname, tourn.start, tourn.end, tourn.city, tourn.state, tourn.country, tourn.tz,
+				 count(distinct entry.id) as entries,
+				 count(distinct es.student) as competitors,
+				 count(distinct school.id) as schools,
+				 count(distinct judge.id) as judges
+			from (tourn, category)
+
+				left join school on school.tourn = tourn.id
+
+				left join entry on entry.school = school.id and entry.active = 1
+
+				left join entry_student es on es.entry = entry.id
+
+				left join judge on judge.category = category.id
+
+			where 1=1
+			  and tourn.hidden = 0
+			  and tourn.start < DATE_ADD(NOW(), INTERVAL 7 DAY)
+			  and tourn.end > DATE_SUB(NOW(), INTERVAL 1 DAY)
+			  and tourn.id = category.id
+
+			  and exists (
+				 select ts.id
+				 from timeslot ts, round
+				 where ts.tourn = tourn.id
+				 and ts.start < DATE_ADD(NOW(), INTERVAL 7 DAY)
+				 and ts.end > DATE_SUB(NOW(), INTERVAL 7 DAY)
+				 and ts.id = round.timeslot
+			 )
+
+			group by tourn.id
+		`, {
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		const totals = {
+			entries     : 0,
+			judges      : 0,
+			schools     : 0,
+			competitors : 0,
+			tourns,
+		};
+
+		for (const tourn of tourns) {
+			totals.entries += tourn.entries;
+			totals.judges += tourn.judges;
+			totals.schools += tourn.schools;
+			totals.competitors += tourn.competitors;
+		}
+
+		return res.status(200).json(totals);
+	},
+
+};
+
 export const futureTourns = {
 	GET: async (req, res) => {
 
@@ -206,10 +269,10 @@ export const futureTourns = {
 		future.push(...futureDistricts);
 
 		const thisYear = moment().year;
-		const thisWeek = parseInt(`${thisYear}${moment().subtract(11, 'days').weeks()}`);
+		const thisWeekDT = parseInt(`${thisYear}${moment().subtract(11, 'days').weeks()}`);
 
 		future.sort( (a, b) => {
-			return (thisWeek > a.sortweek) - (thisWeek > b.sortweek)
+			return (thisWeekDT > a.sortweek) - (thisWeekDT > b.sortweek)
 				|| a.sortweek - b.sortweek
 				|| b.schoolcount - a.schoolcount
 				|| b - a;
