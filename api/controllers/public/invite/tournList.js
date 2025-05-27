@@ -1,26 +1,81 @@
-import { convertTZ, shortZone, getWeek, isSameDay } from '../../../helpers/dateTime.js';
+import moment from 'moment-timezone';
+
+export const thisWeek = {
+
+	GET: async (req, res) => {
+
+		const db = req.db;
+
+		const tourns = await db.sequelize.query(`
+			select
+				 tourn.id, tourn.name, tourn.webname, tourn.start, tourn.end, tourn.city, tourn.state, tourn.country, tourn.tz,
+				 count(distinct entry.id) as entries,
+				 count(distinct es.student) as competitors,
+				 count(distinct school.id) as schools,
+				 count(distinct judge.id) as judges
+			from (tourn, category)
+
+				left join school on school.tourn = tourn.id
+
+				left join entry on entry.school = school.id and entry.active = 1
+
+				left join entry_student es on es.entry = entry.id
+
+				left join judge on judge.category = category.id
+
+			where 1=1
+			  and tourn.hidden = 0
+			  and tourn.start < DATE_ADD(NOW(), INTERVAL 7 DAY)
+			  and tourn.end > DATE_SUB(NOW(), INTERVAL 1 DAY)
+			  and tourn.id = category.id
+
+			  and exists (
+				 select ts.id
+				 from timeslot ts, round
+				 where ts.tourn = tourn.id
+				 and ts.start < DATE_ADD(NOW(), INTERVAL 7 DAY)
+				 and ts.end > DATE_SUB(NOW(), INTERVAL 7 DAY)
+				 and ts.id = round.timeslot
+			 )
+
+			group by tourn.id
+		`, {
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		const totals = {
+			entries     : 0,
+			judges      : 0,
+			schools     : 0,
+			competitors : 0,
+			tourns,
+		};
+
+		for (const tourn of tourns) {
+			totals.entries += tourn.entries;
+			totals.judges += tourn.judges;
+			totals.schools += tourn.schools;
+			totals.competitors += tourn.competitors;
+		}
+
+		return res.status(200).json(totals);
+	},
+
+};
 
 export const futureTourns = {
 	GET: async (req, res) => {
 
 		const db = req.db;
 		let limit = '';
-		let endLimit = '';
 
 		let timeScope = ' DATE(NOW() - INTERVAL 2 DAY)';
 
-		const timeLimit = new Date();
-		timeLimit.setDate(timeLimit.getDate() - 3);
-		let thisWeek = getWeek(timeLimit);
-
-		if (
-			process.env.NODE_ENV === 'test'
-			|| req.config.MODE === 'test'
-		) {
+		if (req.config.MODE === 'test') {
 			// the nine test suite tournaments are forever in the past.  This one
-			// excludes the Nationals test but not the other eight others.
+			// excludes Nationals but not the other eight others.
+
 			timeScope = `'2023-08-01 00:00:00'`;
-			thisWeek = 1;
 		}
 
 		if (typeof req.params.circuit === 'number') {
@@ -36,15 +91,8 @@ export const futureTourns = {
 			limit = ` and tourn.state = '${req.query.state.toUpperCase()}'`;
 		}
 
-		if (typeof req.query.limit === 'number') {
-			endLimit = ` limit ${req.query.limit} `;
-			console.log(`Limiting to the top ${req.query.limit} tournaments`);
-		}
-
 		const [future] = await db.sequelize.query(`
-			select
-				CONCAT(tourn.id, '-', '0') as id,
-				tourn.id tournId, tourn.webname, tourn.name, tourn.tz, tourn.hidden,
+			select tourn.id, tourn.webname, tourn.name, tourn.tz, tourn.hidden,
 				tourn.city as location, tourn.state, tourn.country,
 				CONVERT_TZ(tourn.start, '+00:00', tourn.tz) start,
 				CONVERT_TZ(tourn.end, '+00:00', tourn.tz) end,
@@ -55,9 +103,8 @@ export const futureTourns = {
 				closed.value as closed,
 				count(distinct school.id) as schoolcount,
 				YEAR(tourn.start) as year,
-				WEEK(CONVERT_TZ(tourn.start, '+00:00', tourn.tz), 3) as week,
-				GROUP_CONCAT(DISTINCT(event.abbr) SEPARATOR ', ') as events,
-				GROUP_CONCAT(DISTINCT(event.type) SEPARATOR ', ') as eventTypes,
+				WEEK(tourn.start) as week,
+				CONCAT(YEAR(tourn.start), WEEK(tourn.start)) as sortweek,
 				( select GROUP_CONCAT(signup.abbr SEPARATOR ', ')
 						from category signup
 					where signup.tourn = tourn.id
@@ -89,19 +136,12 @@ export const futureTourns = {
 					where online.tourn = tourn.id
 					and online.id = eso.event
 					and eso.tag = 'online_mode'
-					and not exists (
-						select hybridno.id
-						from event_setting hybridno
-						where hybridno.event = online.id
-						and hybridno.tag = 'online_hybrid'
-					)
 				) as online,
 
 				( SELECT
 					count(in_person.id)
 					from event in_person
 					where in_person.tourn = tourn.id
-					and in_person.type != 'attendee'
 					and not exists (
 						select esno.id
 						from event_setting esno
@@ -118,7 +158,7 @@ export const futureTourns = {
 					and esh.tag = 'online_hybrid'
 				) as hybrid
 
-			from (tourn, event)
+			from tourn
 
 			left join tourn_setting closed
 				on closed.tourn = tourn.id
@@ -136,34 +176,21 @@ export const futureTourns = {
 		where 1=1
 			and tourn.hidden = 0
 			and tourn.end > ${timeScope}
-			and tourn.id = event.tourn
-
 			${limit}
 			and not exists (
 				select weekend.id
 				from weekend
 				where weekend.tourn = tourn.id
 			)
-
-			and exists (
-				select timeslot.id
-				from timeslot
-				where 1=1
-				and timeslot.tourn = tourn.id
-				and timeslot.end > ${timeScope}
-			)
-
 			group by tourn.id
 			order by tourn.end, schoolcount DESC
-			${ endLimit }
 		`);
 
 		const [futureDistricts] = await db.sequelize.query(`
 			select
-				CONCAT(tourn.id, '-', weekend.id) as id,
-				tourn.id tournId, tourn.webname, tourn.name, tourn.tz,
+				tourn.id, tourn.webname, tourn.name, tourn.tz,
 				weekend.id as districts,
-				weekend.id weekendId, weekend.name weekendName, weekend.city as location, weekend.state, tourn.country,
+				weekend.name weekendName, weekend.city as location, weekend.state, tourn.country,
 				site.name site,
 				CONVERT_TZ(weekend.start, '+00:00', tourn.tz) start,
 				CONVERT_TZ(weekend.end, '+00:00', tourn.tz) end,
@@ -171,9 +198,8 @@ export const futureTourns = {
 				CONVERT_TZ(weekend.reg_start, '+00:00', tourn.tz) reg_start,
 				count(distinct school.id) as schoolcount,
 				YEAR(weekend.start) as year,
-				WEEK(CONVERT_TZ(weekend.start, '+00:00', tourn.tz), 3) as week,
-				GROUP_CONCAT(DISTINCT(event.abbr) SEPARATOR ', ') as events,
-				GROUP_CONCAT(DISTINCT(event.type) SEPARATOR ', ') as eventTypes,
+				WEEK(weekend.start) as week,
+				CONCAT(YEAR(tourn.start), WEEK(tourn.start)) as sortweek,
 				( select GROUP_CONCAT(signup.abbr SEPARATOR ', ')
 						from category signup
 					where signup.tourn = tourn.id
@@ -205,26 +231,18 @@ export const futureTourns = {
 					where online.tourn = tourn.id
 					and online.id = eso.event
 					and eso.tag = 'online_mode'
-					and not exists (
-						select hybridno.id
-						from event_setting hybridno
-						where hybridno.event = online.id
-						and hybridno.tag = 'online_hybrid'
-					)
 				) as online,
 
 				( SELECT
 					count(in_person.id)
 					from event in_person
 					where in_person.tourn = tourn.id
-					and in_person.type != 'attendee'
 					and not exists (
 						select esno.id
 						from event_setting esno
 						where esno.event = in_person.id
 						and esno.tag = 'online_mode'
 					)
-
 				) as in_person,
 
 				( SELECT
@@ -235,7 +253,7 @@ export const futureTourns = {
 					and esh.tag = 'online_hybrid'
 				) as hybrid
 
-			from (tourn, weekend, event, event_setting ew)
+			from (tourn, weekend)
 
 			left join site on weekend.site = site.id
 			left join school on tourn.id = school.tourn
@@ -244,85 +262,34 @@ export const futureTourns = {
 			and weekend.end > ${timeScope}
 			and weekend.tourn = tourn.id
 
-			and exists (
-				select timeslot.id
-				from timeslot
-				where 1=1
-				and timeslot.tourn = tourn.id
-				and timeslot.end > ${timeScope}
-			)
-
-			and event.tourn = tourn.id
-			and event.id = ew.event
-			and ew.tag = 'weekend'
-			and ew.value = weekend.id
-
 			group by weekend.id
 			order by weekend.start
-			${ endLimit }
 		`);
 
 		future.push(...futureDistricts);
 
-		const shortOptions = {
-			month : 'numeric',
-			day   : 'numeric',
-		};
+		const thisYear = moment().year;
+		const thisWeekDT = parseInt(`${thisYear}${moment().subtract(11, 'days').weeks()}`);
 
-		const formattedFuture = future.map( (tourn) => {
-
-			if (tourn.week < thisWeek) {
-				tourn.week = thisWeek;
-			}
-
-			const sortweek = `${tourn.year}-${tourn.week.toString().padStart(2, '0')}-${tourn.schoolcount.toString().padStart(9, '0')}`;
-			const sortnumeric = parseInt(`${tourn.year}${tourn.week.toString().padStart(2, '0')}${9999999 - tourn.schoolcount}`);
-
-			let dates = '';
-			const tournStart = convertTZ(tourn.start, tourn.tz);
-			const tournEnd = convertTZ(tourn.end, tourn.tz);
-			const tzCode = shortZone(tourn.tz);
-
-			if (isSameDay(tournStart, tournEnd)) {
-				dates = tournStart.toLocaleDateString('en-US', shortOptions);
-			} else {
-				dates = tournStart.toLocaleDateString('en-US', shortOptions);
-				dates += '-';
-				dates += tournEnd.toLocaleDateString('en-US', shortOptions);
-			}
-
-			return {
-				...tourn,
-				sortweek,
-				sortnumeric,
-				dates,
-				tzCode,
-			};
+		future.sort( (a, b) => {
+			return (thisWeekDT > a.sortweek) - (thisWeekDT > b.sortweek)
+				|| a.sortweek - b.sortweek
+				|| b.schoolcount - a.schoolcount
+				|| b - a;
 		});
 
-		formattedFuture.sort( (a, b) => {
-			return a.sortnumeric - b.sortnumeric;
-		});
-
-		// I have to do this separately because I pull the Districts weekends
-		// as separate things from individual tournaments.
-
-		if (req.query.limit > 0) {
-			if (future.length > req.query.limit) {
-				future.length = req.query.limit;
-			}
-		} else if (future.length > 256) {
+		if (future.length > 256) {
 			future.length = 256;
 		}
 
-		return res.status(200).json(formattedFuture);
+		return res.status(200).json(future);
 	},
 };
 
 futureTourns.GET.apiDoc = {
-	summary     : 'Returns the public listing of upcoming tournaments',
-	operationId : 'futureTourns',
-	parameters  : [
+	summary: 'Returns the public listing of upcoming tournaments',
+	operationId: 'futureTourns',
+	parameters: [
 		{
 			in          : 'path',
 			name        : 'circuit',
