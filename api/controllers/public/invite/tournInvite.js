@@ -4,9 +4,9 @@ export const getInvite = {
 		const db = req.db;
 		const invite = {};
 
-		if (req.params.tourn_id) {
+		if (req.params.tournId) {
 
-			const result = await db.tourn.findByPk(parseInt(req.params.tourn_id));
+			const result = await db.tourn.findByPk(parseInt(req.params.tournId));
 			invite.tourn = result.get({ plain: true });
 
 		} else if (req.params.webname) {
@@ -97,10 +97,10 @@ export const getRounds = {
 
 		let schemat = {};
 
-		if (parseInt(req.params.round_id)) {
+		if (parseInt(req.params.roundId)) {
 
 			schemat = await db.round.findByPk(
-				parseInt(req.params.round_id), {
+				parseInt(req.params.roundId), {
 					include: [
 						{ model: db.roundSetting, as: 'Settings' },
 						{ model: db.panel, as: 'Panels' },
@@ -134,7 +134,7 @@ getInvite.GET.apiDoc = {
 		},
 		{
 			in          : 'path',
-			name        : 'tourn_id',
+			name        : 'tournId',
 			description : 'Tournament ID of tournament to return',
 			required    : false,
 			schema      : { type: 'integer', minimum: 1 },
