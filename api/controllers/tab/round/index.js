@@ -132,10 +132,6 @@ export const roundDecisionStatus = {
 			type         : db.sequelize.QueryTypes.SELECT,
 		});
 
-		if (labels.length < 1) {
-			console.log(`Event type determination failed for round ${req.params.roundId}`);
-		}
-
 		const tmplabel = labels.shift();
 
 		const label = {
@@ -239,7 +235,9 @@ export const roundDecisionStatus = {
 				}
 
 				round.byePanels[ballot.panel] = already;
-				return;
+
+				/* eslint-disable no-continue */
+				continue;
 			}
 
 			if (!round.judges[ballot.judge]) {
