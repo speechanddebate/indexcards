@@ -294,6 +294,10 @@ app.all(coachRoutes, async (req, res, next) => {
 
 	req.session = await auth(req, res);
 
+	if (req.session.site_admin) {
+		return next();
+	}
+
 	if (req.session) {
 		const chapter = await coachAuth(req, res);
 		if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
