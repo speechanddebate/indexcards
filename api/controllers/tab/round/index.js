@@ -348,13 +348,15 @@ export const roundDecisionStatus = {
 		}
 
 		for (const ballot of rawBallots) {
-			const judge = round.judges[ballot.judge][ballot.panel];
+			if (ballot?.judge && ballot?.panel) {
+				const judge = round.judges[ballot.judge][ballot.panel];
 
-			if (judge &&
-				judge.count
-				&& (!ballot.winloss && !ballot.rank && !ballot.point)
-			) {
-				judge.text = judge.count.toString();
+				if (judge &&
+					judge.count
+					&& (!ballot.winloss && !ballot.rank && !ballot.point)
+				) {
+					judge.text = judge.count.toString();
+				}
 			}
 		}
 
