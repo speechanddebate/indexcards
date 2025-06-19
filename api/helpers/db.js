@@ -453,9 +453,10 @@ db.concessionOption.belongsToMany( db.concessionPurchase,
 	{ as: 'Purchases', foreignKey: 'concession_purchase', through: 'concession_purchase_option' }
 );
 
-db.email.belongsTo(db.person,  { as: 'Sender',  foreignKey: 'sender' });
-db.email.belongsTo(db.tourn,   { as: 'Tourn',   foreignKey: 'tourn' });
-db.email.belongsTo(db.circuit, { as: 'Circuit', foreignKey: 'circuit' });
+db.email.belongsTo(db.person  , { as : 'Person'  , foreignKey  : 'person' });
+db.email.belongsTo(db.person  , { as : 'Sender'  , foreignKey : 'sender' });
+db.email.belongsTo(db.tourn   , { as : 'Tourn'   , foreignKey : 'tourn' });
+db.email.belongsTo(db.circuit , { as : 'Circuit' , foreignKey : 'circuit' });
 
 db.file.belongsTo(db.tourn   , { as: 'Tourn'   , foreignKey: 'tourn' });
 db.file.belongsTo(db.school  , { as: 'School'  , foreignKey: 'school' });
@@ -571,6 +572,7 @@ db.resultValue.belongsTo(db.protocol  , { as: 'Protocol'  , foreignKey: 'protoco
 
 db.person.hasMany(db.student      , { as : 'Students'      , foreignKey : 'person' });
 db.person.hasMany(db.judge        , { as : 'Judges'        , foreignKey : 'person' });
+db.person.hasMany(db.email        , { as : 'Emails'        , foreignKey : 'person' });
 db.person.hasMany(db.chapterJudge , { as : 'ChapterJudges' , foreignKey : 'person' });
 db.person.hasMany(db.conflict     , { as : 'Conflicts'     , foreignKey : 'person' });
 db.person.hasMany(db.changeLog    , { as : 'ChangeLogs'    , foreignKey : 'person' });
@@ -612,7 +614,6 @@ db.person.belongsToMany(db.circuit, {
 	otherKey   : 'circuit',
 	through    : 'permission',
 });
-db.person.belongsTo(db.email, { as  : 'Person' , foreignKey     : 'person' });
 
 db.caseList.belongsTo(db.person, { as  : 'Person' , foreignKey     : 'person' });
 db.caseList.belongsTo(db.person, { as  : 'Partner', foreignKey     : 'partner' });

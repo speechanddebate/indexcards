@@ -603,6 +603,7 @@ CREATE TABLE `email` (
   `sender` int(11) DEFAULT NULL,
   `sender_raw` varchar(127) DEFAULT NULL,
   `hidden` tinyint(1) NOT NULL DEFAULT 0,
+  `person` int(11) DEFAULT NULL,
   `tourn` int(11) DEFAULT NULL,
   `circuit` int(11) DEFAULT NULL,
   `timestamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
