@@ -612,6 +612,7 @@ db.person.belongsToMany(db.circuit, {
 	otherKey   : 'circuit',
 	through    : 'permission',
 });
+db.person.belongsTo(db.email, { as  : 'Person' , foreignKey     : 'person' });
 
 db.caseList.belongsTo(db.person, { as  : 'Person' , foreignKey     : 'person' });
 db.caseList.belongsTo(db.person, { as  : 'Partner', foreignKey     : 'partner' });
