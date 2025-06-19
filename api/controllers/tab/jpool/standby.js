@@ -1,3 +1,10 @@
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc.js';
+import timezone from 'dayjs/plugin/timezone.js';
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+
 // This function will auto populate a pool with standby judges selected
 // for school/geographic diversity.
 
@@ -9,43 +16,77 @@ export const placeJudgesStandby = {
 
 		if (req.body.parentId && req.body.parentId !== 'NaN') {
 
-			const standbyJudgeQuery = `
+			let dayStart = '';
+			let dayEnd = '';
+
+			const times = await req.db.sequelize.query(`
 				select
-					judge.id, judge.school, region.id region,
-						count(distinct panel.id) ballots,
-						count(distinct standby.jpool) standbys,
-						count(distinct entry.id) entries
-				from (judge, jpool_judge jpj)
-
-					left join jpool_judge standby
-						on standby.judge = judge.id
-						AND EXISTS (
-							select jps.id
-							from jpool_setting jps
-							where jps.jpool = standby.jpool
-							and jps.tag = 'standby'
-						)
-
-					left join ballot on ballot.judge = judge.id
-					left join panel on panel.id = ballot.panel
-
-					left join school on judge.school = school.id
-					left join region on school.region = region.id
-					left join entry on entry.school = school.id
-						and entry.active = 1
-
-				where jpj.jpool = :parentId
-					and jpj.judge = judge.id
-				group by judge.id
-				order by standbys desc, ballots desc
-			`;
-
-			rawJudges = await req.db.sequelize.query(standbyJudgeQuery, {
-				replacements: { parentId: req.body.parentId },
+					timeslot.start, timeslot.end, tourn.tz
+				from timeslot, round, jpool_round jpr, tourn
+				where 1=1
+					and jpr.jpool      = :jpoolId
+					and jpr.round      = round.id
+					and round.timeslot = timeslot.id
+					and timeslot.tourn = tourn.id
+				order by timeslot.start
+			`, {
+				replacements: { jpoolId: req.body.parentId },
 				type: req.db.sequelize.QueryTypes.SELECT,
 			});
 
-			console.log(rawJudges);
+			if (times && times.length > 0) {
+
+				dayStart = dayjs(times[0].start)
+					.tz(times[0].tz)
+					.startOf('day')
+					.utc()
+					.format('YYYY-MM-DD HH:mm:ss');
+
+				dayEnd = dayjs(times[0].start)
+					.tz(times[0].tz)
+					.endOf('day')
+					.utc()
+					.format('YYYY-MM-DD HH:mm:ss');
+
+				const standbyJudgeQuery = `
+					select
+						judge.id, judge.last, judge.school, region.id region,
+							count(distinct panel.id) ballots,
+							count(distinct standby.jpool) standbys,
+							count(distinct entry.id) entries
+					from (judge, jpool_judge jpj)
+
+						left join jpool_judge standby
+							on standby.judge = judge.id
+							AND EXISTS (
+								select jps.id
+									from jpool_setting jps, timeslot
+								where jps.jpool = standby.jpool
+									and jps.tag = 'standby_timeslot'
+									and jps.value = timeslot.id
+									and timeslot.start > :dayStart
+									and timeslot.start < :dayEnd
+							)
+
+						left join ballot on ballot.judge = judge.id
+						left join panel on panel.id = ballot.panel
+
+						left join school on judge.school = school.id
+						left join region on school.region = region.id
+						left join entry on entry.school = school.id
+							and entry.active = 1
+
+					where jpj.jpool = :parentId
+						and jpj.judge = judge.id
+					group by judge.id
+					order by standbys desc, ballots desc
+				`;
+
+				rawJudges = await req.db.sequelize.query(standbyJudgeQuery, {
+					replacements: { parentId: req.body.parentId, dayStart, dayEnd },
+					type: req.db.sequelize.QueryTypes.SELECT,
+				});
+			}
 
 		} else if (req.body.categoryId) {
 
@@ -61,9 +102,10 @@ export const placeJudgesStandby = {
 						on standby.judge = judge.id
 						AND EXISTS (
 							select jps.id
-							from jpool_setting jps
+								from jpool_setting jps, timeslot
 							where jps.jpool = standby.jpool
-							and jps.tag = 'standby')
+								and jps.tag = 'standby_timeslot'
+						)
 
 					left join ballot on ballot.judge = judge.id
 					left join panel on panel.id = ballot.panel
@@ -85,8 +127,8 @@ export const placeJudgesStandby = {
 
 		const chosen = {};
 
-		for await (const judge of rawJudges) {
-			judge.score = (parseInt(judge.standbys) * 100);
+		for (const judge of rawJudges) {
+			judge.score = (parseInt(judge.standbys) * 1000);
 			judge.score += (parseInt(judge.ballots) * 10);
 			judge.score += parseInt(judge.entries);
 		}
@@ -94,6 +136,7 @@ export const placeJudgesStandby = {
 		let counter = req.body.targetCount;
 
 		while (counter > 0) {
+
 			counter--;
 			rawJudges.sort( (a, b) => parseInt(a.score) - parseInt(b.score));
 			const picked = rawJudges.shift();
