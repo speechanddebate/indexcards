@@ -103,11 +103,19 @@ export const getTabroomUsage = {
 			type: req.db.sequelize.QueryTypes.SELECT,
 		});
 
+		const totalUsers = (allJudges[0]?.count || 0) + (allStudents[0]?.count || 0);
+		let serverTarget = totalUsers / (config.LINODE.USERS_PER_SERVER || 1250);
+		if (serverTarget < 3) {
+			serverTarget = 3;
+		}
+
 		return res.status(200).json({
 			activeUsers : currentActiveUsers[0]?.count,
 			tournaments : tournamentCount[0]?.count,
 			judges      : allJudges[0]?.count,
 			students    : allStudents[0].count,
+			totalUsers  : (allJudges[0]?.count || 0) + (allStudents[0]?.count || 0),
+			serverTarget,
 		});
 	},
 };
