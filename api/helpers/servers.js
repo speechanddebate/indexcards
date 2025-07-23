@@ -4,7 +4,96 @@ import config from '../../config/config.js';
 import notify from './blast.js';
 import { errorLogger } from './logger.js';
 
-export const getLinodeInstances = async () => {
+export const showTabroomUsage = async () => {
+
+	const allStudents = await db.sequelize.query(`
+		select
+			count(distinct student.person) count
+		from student, entry_student es, entry, event, tourn
+		where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+			and tourn.end > NOW()
+			and tourn.id = event.tourn
+			and tourn.hidden != 1
+			and event.id = entry.event
+			and entry.active = 1
+			and entry.id = es.entry
+			and es.student = student.id
+			and exists (
+				select timeslot.id
+				from timeslot
+				where timeslot.tourn = tourn.id
+				and timeslot.start > CURRENT_TIMESTAMP
+				and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+			)
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	const allJudges = await db.sequelize.query(`
+		select
+			count(distinct judge.person) count
+		from judge, category, tourn
+		where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+			and tourn.end > CURRENT_TIMESTAMP
+			and tourn.id = category.tourn
+			and tourn.hidden != 1
+			and category.id = judge.category
+			and exists (
+				select timeslot.id
+				from timeslot
+				where timeslot.tourn = tourn.id
+				and timeslot.start > CURRENT_TIMESTAMP
+				and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+			)
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	const tournamentCount = await db.sequelize.query(`
+		select
+			count(distinct tourn.id) count
+		from tourn
+		where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+		and tourn.end > CURRENT_TIMESTAMP
+			and tourn.hidden != 1
+			and exists (
+				select timeslot.id
+				from timeslot
+				where timeslot.tourn = tourn.id
+				and timeslot.start > CURRENT_TIMESTAMP
+				and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+			)
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	const currentActiveUsers = await db.sequelize.query(`
+		select
+			count(distinct session.id) count
+		from session
+			where session.last_access > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	const totalUsers = (allJudges[0]?.count || 0) + (allStudents[0]?.count || 0);
+	let serverTarget = totalUsers / (config.LINODE.USERS_PER_SERVER || 1250);
+
+	if (serverTarget < (config.AUTOSCALE?.SCALE_MIN || 2)) {
+		serverTarget = (config.AUTOSCALE?.SCALE_MIN || 2);
+	}
+
+	return {
+		activeUsers : currentActiveUsers[0]?.count,
+		tournaments : tournamentCount[0]?.count,
+		judges      : allJudges[0]?.count,
+		students    : allStudents[0].count,
+		totalUsers  : (allJudges[0]?.count || 0) + (allStudents[0]?.count || 0),
+		serverTarget,
+	};
+};
+
+export const getLinodeInstances = async ( limit ) => {
 
 	let existingMachines = {};
 
@@ -21,7 +110,7 @@ export const getLinodeInstances = async () => {
 		);
 	} catch (err) {
 		errorLogger.error(`Error from Linode when polling new instances`);
-		errorLogger.error(err);
+		errorLogger.error(err.message);
 		return {};
 	}
 
@@ -39,14 +128,23 @@ export const getLinodeInstances = async () => {
 
 	const tabroomMachines = existingMachines.data.data.filter( machine => {
 
-		if (
-			machine.tags.includes('control')
-			|| machine.tags.includes('haproxy')
-			|| machine.tags.includes('tabroom-db')
-			|| machine.tags.includes('tabroom-replica')
-			|| machine.tags.includes(config.LINODE.WEBHOST_BASE)
-		) {
-			return machine;
+		if (limit) {
+			if (
+				machine.tags.includes(limit)
+			) {
+				return machine;
+			}
+		} else {
+
+			if (
+				machine.tags.includes('control')
+				|| machine.tags.includes('haproxy')
+				|| machine.tags.includes('tabroom-db')
+				|| machine.tags.includes('tabroom-replica')
+				|| machine.tags.includes(config.LINODE.WEBHOST_BASE)
+			) {
+				return machine;
+			}
 		}
 		return null;
 
@@ -122,7 +220,7 @@ export const getLinodeInstances = async () => {
 
 };
 
-export const increaseLinodeCount = async (whodunnit, countNumber) => {
+export const increaseLinodeCount = async (whodunnit, countNumber, silent) => {
 
 	if (countNumber < 1) {
 		return { message: 'You cannot change by zero, silly' };
@@ -259,18 +357,20 @@ export const increaseLinodeCount = async (whodunnit, countNumber) => {
 		description: resultMessages.join('\n'),
 	});
 
-	const emailResponse = await notifyCloudAdmins(whodunnit, resultMessages.join('<br />'), `${target} Machines Added`);
-
 	const response = {
-		emailResponse,
-		message : resultMessages.join('<br />'),
+		emailResponse : '',
+		message       : resultMessages.join('<br />'),
 	};
+
+	if (!silent) {
+		response.emailResponse = await notifyCloudAdmins(whodunnit, resultMessages.join('<br />'), `${target} Machines Added`);
+	}
 
 	return response;
 
 };
 
-export const decreaseLinodeCount = async (whodunnit, countNumber) => {
+export const decreaseLinodeCount = async (whodunnit, countNumber, silent) => {
 
 	if (countNumber < 1) {
 		return { message: 'You cannot change by zero, silly' };
@@ -356,13 +456,15 @@ export const decreaseLinodeCount = async (whodunnit, countNumber) => {
 		description: resultMessages.join('\n'),
 	});
 
-	const emailResponse = await notifyCloudAdmins(whodunnit, resultMessages.join(), `${target} Machines Removed`);
-
 	const response = {
-		delete  : destroyMe,
-		message : resultMessages.join('<br />'),
-		emailResponse,
+		delete        : destroyMe,
+		message       : resultMessages.join('<br />'),
+		emailResponse : '',
 	};
+
+	if (!silent) {
+		response.emailResponse = await notifyCloudAdmins(whodunnit, resultMessages.join(), `${target} Machines Removed`);
+	}
 
 	return response;
 };

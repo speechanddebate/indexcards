@@ -2,11 +2,19 @@ import axios from 'axios';
 import notify from '../../helpers/blast.js';
 import config from '../../../config/config.js';
 import { errorLogger } from '../../helpers/logger.js';
-import { getLinodeInstances, getProxyStatus, increaseLinodeCount, decreaseLinodeCount } from '../../helpers/servers.js';
+import {
+	getLinodeInstances,
+	getProxyStatus,
+	increaseLinodeCount,
+	decreaseLinodeCount,
+	showTabroomUsage,
+} from '../../helpers/servers.js';
 
 // Moved the actual logic to a helper script so that these can be invoked on
 // the command line from api/auto via node scaleServers.js increase 3 or
 // node scaleServers show etc.
+
+// Shows the instances that are currently alive according to the Linode API
 
 export const getInstances = {
 
@@ -15,6 +23,9 @@ export const getInstances = {
 		return res.status(200).json(tabroomMachines);
 	},
 };
+
+// Shows CPU and memory load data from the machines themselves, as well as
+// up/down data from the haproxy JSON dump.
 
 export const getInstanceStatus = {
 
@@ -29,96 +40,23 @@ export const getInstanceStatus = {
 	},
 };
 
+// Returns data about the current 24 hour period's projected tabroom usage.
+
 export const getTabroomUsage = {
 
 	GET: async (req, res) => {
 
-		const allStudents = await req.db.sequelize.query(`
-			select
-				count(distinct student.person) count
-			from student, entry_student es, entry, event, tourn
-			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-				and tourn.end > NOW()
-				and tourn.id = event.tourn
-				and tourn.hidden != 1
-				and event.id = entry.event
-				and entry.active = 1
-				and entry.id = es.entry
-				and es.student = student.id
-				and exists (
-					select timeslot.id
-					from timeslot
-					where timeslot.tourn = tourn.id
-					and timeslot.start > CURRENT_TIMESTAMP
-					and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-				)
-		`, {
-			type: req.db.sequelize.QueryTypes.SELECT,
-		});
+		// Moved function to a stub so that the auto api cron processes can
+		// also access it.  I know, I hate this sort of sixteen-nested-files
+		// thing, too.
 
-		const allJudges = await req.db.sequelize.query(`
-			select
-				count(distinct judge.person) count
-			from judge, category, tourn
-			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-				and tourn.end > CURRENT_TIMESTAMP
-				and tourn.id = category.tourn
-				and tourn.hidden != 1
-				and category.id = judge.category
-				and exists (
-					select timeslot.id
-					from timeslot
-					where timeslot.tourn = tourn.id
-					and timeslot.start > CURRENT_TIMESTAMP
-					and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-				)
-		`, {
-			type: req.db.sequelize.QueryTypes.SELECT,
-		});
-
-		const tournamentCount = await req.db.sequelize.query(`
-			select
-				count(distinct tourn.id) count
-			from tourn
-			where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-				and tourn.end > CURRENT_TIMESTAMP
-				and tourn.hidden != 1
-				and exists (
-					select timeslot.id
-					from timeslot
-					where timeslot.tourn = tourn.id
-					and timeslot.start > CURRENT_TIMESTAMP
-					and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-				)
-		`, {
-			type: req.db.sequelize.QueryTypes.SELECT,
-		});
-
-		const currentActiveUsers = await req.db.sequelize.query(`
-			select
-				count(distinct session.id) count
-			from session
-				where session.last_access > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-		`, {
-			type: req.db.sequelize.QueryTypes.SELECT,
-		});
-
-		const totalUsers = (allJudges[0]?.count || 0) + (allStudents[0]?.count || 0);
-		let serverTarget = totalUsers / (config.LINODE.USERS_PER_SERVER || 1250);
-		if (serverTarget < 3) {
-			serverTarget = 3;
-		}
-
-		return res.status(200).json({
-			activeUsers : currentActiveUsers[0]?.count,
-			tournaments : tournamentCount[0]?.count,
-			judges      : allJudges[0]?.count,
-			students    : allStudents[0].count,
-			totalUsers  : (allJudges[0]?.count || 0) + (allStudents[0]?.count || 0),
-			serverTarget,
-		});
+		const usageData = await showTabroomUsage();
+		return res.status(200).json(usageData);
 	},
 };
+
+// Show data about an individual machine; this is useful mostly in bringing up
+// machines.
 
 export const getTabroomInstance = {
 	GET: async (req, res) => {
@@ -141,6 +79,8 @@ export const getTabroomInstance = {
 		return res.status(200).json(linodeData.data);
 	},
 };
+
+// API facing functions that will bring up or destroy machines.
 
 export const changeInstanceCount = {
 
