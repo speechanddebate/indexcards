@@ -4,17 +4,20 @@ export const getInvite = {
 		const db = req.db;
 		const invite = {};
 
-		if (req.params.tournId) {
+		if (! isNaN(parseInt(req.params.tournId))) {
 
 			const result = await db.tourn.findByPk(parseInt(req.params.tournId));
 			invite.tourn = result.get({ plain: true });
 
-		} else if (req.params.webname) {
+		} else if (req.params.tournId) {
+
+			const webname = req.params.tournId.replace(/\W/g, '');
 
 			try {
+				// Find the most recent tournament that answers to that name.
 
 				const result = await db.tourn.findOne({
-					where : { webname: req.params.webname },
+					where : { webname, hidden: 0 },
 					order : [['start', 'desc']],
 					limit : 1,
 				});
@@ -26,66 +29,118 @@ export const getInvite = {
 			}
 		}
 
-		// I included theses as "includes" from sequelize but the sql it
-		// generated was amazingly inefficient and did not deliver the proper
-		// tourn when asked by webname.
-
-		if (invite.tourn?.id) {
-
-			invite.tourn.webpages = await db.webpage.findAll({
-				where: {
-					tourn     : invite.tourn.id,
-					published : 1,
-				},
-				raw: true,
-				order: ['page_order'],
-			});
-
-			invite.tourn.files = await db.file.findAll({
-				where: {
-					tourn     : invite.tourn.id,
-					published : 1,
-				},
-				raw: true,
-				order: ['tag', 'label'],
-			});
-
-			const rawEvents = await db.event.findAll({
-				where: {
-					tourn : invite.tourn.id,
-				},
-				include: ['Settings'],
-				order: ['type', 'abbr'],
-			});
-
-			invite.tourn.events = [];
-			const settingsFilter = ['dumb_half_async_thing', 'no_autopair', 'honors_weight'];
-
-			for (const rawEvent of rawEvents) {
-
-				const event = rawEvent.get({ plain: true });
-				event.settings = {};
-
-				for ( const setting of event.Settings ) {
-
-					if (!settingsFilter.includes(setting.tag)) {
-						if (setting.value === 'date') {
-							event.settings[setting.tag] = new Date(setting.value_date);
-						} else if (setting.value === 'json' && setting.value_text) {
-							event.settings[setting.tag] = JSON.parse(setting.value_text);
-						} else if (setting.value === 'text') {
-							event.settings[setting.tag] = setting.value_text;
-						} else {
-							event.settings[setting.tag] = setting.value;
-						}
-					}
-
-				}
-
-				delete event.Settings;
-				invite.tourn.events.push(event);
-			}
+		if (!invite.tourn?.id || invite.tourn?.hidden) {
+			return res.status(404).json({message: 'No such tournament found'});
 		}
+
+		invite.pages = await db.webpage.findAll({
+			where: {
+				tourn     : invite.tourn.id,
+				published : 1,
+			},
+			raw: true,
+			order: ['page_order'],
+		});
+
+		invite.files = await db.file.findAll({
+			where: {
+				tourn     : invite.tourn.id,
+				published : 1,
+			},
+			raw: true,
+			order: ['tag', 'label'],
+		});
+
+		invite.events = await db.sequelize.query(`
+			select
+				event.id, event.abbr, event.name, event.fee, event.type,
+				cap.value cap,
+				school_cap.value schoolCap,
+				topic.source topicSource, topic.event_type topicEventType, topic.tag topicTag,
+				topic.topic_text topicText,
+				field_report.value fieldReport,
+				description.value_text description
+
+			from (event, tourn)
+
+				left join event_setting cap
+					on cap.event = event.id
+					and cap.tag = 'cap'
+
+				left join event_setting school_cap
+					on school_cap.event = event.id
+					and school_cap.tag = 'school_cap'
+
+				left join event_setting field_report
+					on field_report.event = event.id
+					and field_report.tag = 'field_report'
+
+				left join event_setting description
+					on description.event = event.id
+					and description.tag = 'description'
+
+				left join event_setting topic_id
+					on topic_id.event = event.id
+					and topic_id.tag = 'topic'
+
+				left join topic on topic.id = topic_id.value
+
+			where 1=1
+				and tourn.id = :tournId
+				and event.tourn = tourn.id
+				and event.type != 'attendee'
+				and tourn.hidden = 0
+		`, {
+			replacements : { tournId: invite.tourn.id },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+
+		invite.rounds = await db.sequelize.query(`
+			select
+				round.id, round.label, round.name,
+				event.id eventId, event.abbr eventAbbr, event.name eventName,
+				publish_entry_list.value entryList
+
+			from (event, round)
+
+				left join round_setting publish_entry_list
+					on publish_entry_list.round = round.id
+					and publish_entry_list.tag = 'publish_entry_list'
+
+			where 1=1
+				and event.tourn = :tournId
+				and event.id = round.event
+				and (round.published > 0
+					OR EXISTS
+						(select rs.id
+						from round_setting rs
+						where rs.round = round.id
+						and rs.tag = 'publish_entry_list'
+					)
+				)
+		`, {
+			replacements : { tournId: invite.tourn.id },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+
+		invite.contacts = await db.sequelize.query(`
+			select
+				person.id, person.first, person.middle, person.last, person.email
+
+			from (person, permission)
+
+			where 1=1
+				and permission.tourn  = :tournId
+				and permission.tag    = 'contact'
+				and permission.person = person.id
+		`, {
+			replacements : { tournId: invite.tourn.id },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+
+		const promises = [];
+		promises.push(invite.events);
+		await Promise.all(promises);
 
 		return res.status(200).json(invite);
 	},
@@ -120,6 +175,98 @@ export const getRounds = {
 	},
 };
 
+export const getPages = {
+	GET: async (req, res) => {
+		const db = req.db;
+		const pages = await db.sequelize.query(`
+			select
+				id, title, slug, content, published, sitewide, special, page_order, parent, sidebar
+			from (webpage page, tourn)
+			where 1=1
+				and page.published = 1
+				and page.tourn = tourn.id
+				and tourn.id = :tournId
+				and tourn.hidden = 0
+		`, {
+			replacements : { tournId: req.params.tournId },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+		res.status(200).json(pages);
+	},
+};
+
+export const getFiles = {
+	GET: async (req, res) => {
+		const db = req.db;
+		const files = await db.sequelize.query(`
+			select
+				id, tag, type, label, filename, published, coach, page_order,
+				parent, webpage, timestamp
+			from (file, tourn)
+			where 1=1
+				and file.published = 1
+				and file.tourn = tourn.id
+				and tourn.id = :tournId
+				and tourn.hidden = 0
+		`, {
+			replacements : { tournId: req.params.tournId },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+		res.status(200).json(files);
+	},
+};
+
+export const getEvents = {
+	GET: async (req, res) => {
+		const db = req.db;
+		const events = await db.sequelize.query(`
+			select
+				event.id, event.abbr, event.name, event.fee, event.type,
+				cap.value cap,
+				school_cap.value school_cap,
+				topic.source topic_source, topic.event_type topic_event_type, topic.tag topic_tag,
+				topic.text topic_text,
+				field_report.value field_report,
+				description.value_text description
+
+			from (event, tourn)
+
+				left join event_setting cap
+					on cap.event = event.id
+					and cap.tag = 'cap'
+
+				left join event_setting school_cap
+					on school_cap.event = event.id
+					and school_cap.tag = 'school_cap'
+
+				left join event_setting field_report
+					on field_report.event = event.id
+					and field_report.tag = 'field_report'
+
+				left join event_setting description
+					on description.event = event.id
+					and event_description.tag = 'description'
+
+				left join event_setting topic_id
+					on topic_id.event = event.id
+					and topic_id.tag = 'topic'
+
+				left join topic on topic.id = topic_id.value
+
+			from event
+			where 1=1
+				and event.type != 'attendee'
+				and event.tourn = tourn.id
+				and tourn.id = :tournId
+				and tourn.hidden = 0
+		`, {
+			replacements : { tournId: req.params.tournId },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+		res.status(200).json(events);
+	},
+};
+
 getInvite.GET.apiDoc = {
 
 	summary     : 'Returns the public pages for a tournament',
@@ -127,17 +274,10 @@ getInvite.GET.apiDoc = {
 	parameters  : [
 		{
 			in          : 'path',
-			name        : 'webname',
-			description : 'Public webname of the tournament to return',
-			required    : false,
-			schema      : { type: 'string', minimum: 1 },
-		},
-		{
-			in          : 'path',
 			name        : 'tournId',
 			description : 'Tournament ID of tournament to return',
 			required    : false,
-			schema      : { type: 'integer', minimum: 1 },
+			schema      : { type: 'string', minimum: 1 },
 		},
 	],
 	responses: {

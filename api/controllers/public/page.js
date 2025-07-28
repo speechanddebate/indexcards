@@ -7,7 +7,7 @@ export const getPageBySlug = {
 
 		const page = await db.sequelize.query(`
 			select
-				id, title, slug, content, published, sitewide, special, page_order
+				id, title, slug, content, published, sitewide, special, page_order, sidebar
 			from webpage page
 			where 1=1
 				and page.sitewide = 1
@@ -30,7 +30,7 @@ export const getAllPages = {
 
 		const publicPages = await db.sequelize.query(`
 			select
-				id, title, slug, content, published, sitewide, special, page_order
+				id, title, slug, content, published, sitewide, special, page_order, sidebar
 			from webpage page
 			where 1=1
 				and page.sitewide = 1
@@ -45,14 +45,10 @@ export const getAllPages = {
 export const getPagesByTourn = {
 
 	GET: async (req, res) => {
-
 		const db = req.db;
-
-		console.log(req.params);
-
 		const pages = await db.sequelize.query(`
 			select
-				id, title, slug, content, published, sitewide, special, page_order, parent
+				id, title, slug, content, published, sitewide, special, page_order, parent, sidebar
 			from webpage page
 			where 1=1
 				and page.published = 1
@@ -61,10 +57,6 @@ export const getPagesByTourn = {
 			replacements : { tournId: req.params.tournId },
 			type         : db.sequelize.QueryTypes.SELECT,
 		});
-
-		console.log(`here`);
-		console.log(pages);
-
 		res.status(200).json(pages);
 	},
 };

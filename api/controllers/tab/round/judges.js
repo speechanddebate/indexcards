@@ -442,4 +442,204 @@ export const roundJudgeConflicts = {
 	},
 };
 
+export const placeJudges = {
+
+	POST : async (req, res) => {
+
+		const db = req.db;
+		const [round] = await db.sequelize.query(`
+			select
+				round.id, round.name, round.type, round.flighted,
+				event.id eventId, event.type eventType,
+				event.tourn tournId,
+				num_judges.value num_judges,
+				tab_ratings_priority.value ratings_priority,
+				category.id categoryId,
+				GROUP_CONCAT(jpool.id) as jpoolIds,
+				timeslot.id timeslotId, timeslot.start timeslotStart, timeslot.end timeslotEnd
+
+			from (round, event, category, timeslot)
+
+				left join jpool_round jpr
+					on jpr.round = round.id
+					and jpr.jpool = jpool.id
+
+				left join jpool on jpr.jpool = jpool.id
+
+			where 1=1
+				and round.id = :roundId
+				and round.event = event.id
+				and event.category = category.id
+				and round.timeslot = timeslot.id
+		`, {
+			replacements: { roundId: req.params.roundId },
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		if (round) {
+			return res.status(404).json({message: 'No such round found'});
+		}
+
+		const sections = db.sequelize.query(`
+			select
+				panel.id, panel.letter, panel.flight, panel.room,
+				GROUP_CONCAT(ballot.judge) as judges,
+				GROUP_CONCAT(entry.id) as entries,
+				GROUP_CONCAT(school.id) as schools,
+				GROUP_CONCAT(region.id) as regions,
+				GROUP_CONCAT(district.id) as districts,
+
+			from (entry, school, ballot, panel)
+
+				left join region on school.region = region.id
+				left join district on school.district = district.id
+
+			where 1=1
+				and panel.round = :roundId
+				and panel.id = ballot.panel
+				and ballot.entry = entry.id
+				and ballot.bye != 1
+				and ballot.forefit != 1
+				and panel.bye != 1
+			group by panel.id
+		`, {
+			replacements: { roundId: req.params.roundId },
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		let judgeFields = '';
+		let judgeLimit = '';
+
+		if (round.jpools) {
+			judgeFields = ' judge, jpool_judge jpj';
+			judgeLimit  = ' and jpj.jpool in (:jpoolIds) and jpj.judge = judge.id ';
+		} else {
+			judgeFields = ' judge ';
+			judgeLimit  = ' and judge.category = :categoryId ';
+		}
+
+		const judges = db.sequelize.query(`
+			select judge.id, judge.obligation, judge.hired,
+				school.id as schoolId,
+				region.id as regionId,
+				district.id as districtId,
+				COUNT(distinct panel.id) as panels,
+				GROUP_CONCAT(ballot.entry) as entries,
+				GROUP_CONCAT(round.event) as events
+
+			from (${judgeFields})
+				left join school on school.id = judge.school
+				left join region on region.id = school.region
+				left join district on district.id = school.district
+				left join ballot on ballot.judge = judge.id
+				left join panel on ballot.panel =  panel.id
+				left join round on panel.round = round.id
+
+			where 1=1
+				${judgeLimit}
+				and judge.active = 1
+
+				AND NOT EXISTS (
+					select bt.id
+						from ballot bt, panel pt, round rt, timeslot t2
+					where bt.judge = judge.id
+						and bt.panel = pt.id
+						and pt.round = rt.id
+						and rt.timeslot = t2.id
+						and t2.start <= :timeslotEnd
+						and t2.end >= :timeslotStart
+						and t2.tourn = :tournId
+					limit 1
+				)
+		`, {
+			replacements : round,
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		const strikes = db.sequelize.query(`
+			select
+				strike.*
+			from (strike, ${judgeFields})
+			where 1=1
+				${judgeLimit}
+				and judge.id = strike.judge
+		`, {
+			replacements : round,
+			type: db.sequelize.QueryTypes.SELECT,
+		});
+
+		const judgeById = {};
+
+		// Pulls the judges and creates arrays of the Forbidden Constraints.
+		for (const judge of judges) {
+			judge.schools = [judge.schoolId];
+			judge.regions = [judge.regionId];
+			judge.districts = [judge.districtId];
+			judgeById[judge.id] = judge;
+		}
+
+		// Process the strikes and dump whatever is struck/constrained against
+		// into the judges object as forbidden.
+		for (const strike of strikes) {
+
+			if (judgeById[strike.judge]) {
+
+				// Time based strikes pull me out of the pool altogether
+				if (strike.start) {
+
+					const strikeStart = new Date(strike.start);
+					const strikeEnd = new Date(strike.end);
+
+					if (!round.roundStart) {
+						round.roundStart = new Date(round.timeslotStart);
+						round.roundEnd = new Date(round.timeslotEnd);
+					}
+
+					if (strike.type === 'departure') {
+						if (strikeStart < round.roundEnd) {
+							delete judgeById[strike.judge];
+						}
+					} else {
+						if (
+							strikeStart < round.roundEnd
+							&& strikeEnd > round.roundStart
+						) {
+							delete judgeById[strike.judge];
+						}
+					}
+				}
+
+				// Event based strikes pull me out of the pool unless it's specific to prelims.
+				if (strike.event) {
+					if (strike.type === 'elim') {
+						if (round.type !== 'elim' && round.type !== 'final') {
+							delete judgeById[strike.judge];
+						}
+					} else {
+						delete judgeById[strike.judge];
+					}
+				}
+
+				if (strike.entry) {
+					judgeById[strike.judge].entries.push(strike.entry);
+				}
+				if (strike.school) {
+					judgeById[strike.judge].schools.push(strike.school);
+				}
+				if (strike.district) {
+					judgeById[strike.judge].districts.push(strike.district);
+				}
+				if (strike.region) {
+					judgeById[strike.judge].regions.push(strike.region);
+				}
+			}
+		}
+
+		for (const section of sections) {
+			// hush, linter, I am working on it.
+			console.log(section);
+		}
+	},
+};
+
 export default roundAvailableJudges;

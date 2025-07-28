@@ -5,6 +5,10 @@ const webpage = (sequelize, DataTypes) => {
 			allowNull: false,
 			defaultValue: '',
 		},
+		slug: {
+			type: DataTypes.STRING(63),
+			allowNull: true,
+		},
 		content: {
 			type: DataTypes.TEXT,
 			allowNull: true,
