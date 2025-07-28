@@ -5,6 +5,11 @@ const chapter = (sequelize, DataTypes) => {
 			allowNull: false,
 			defaultValue: '',
 		},
+		formal: {
+			type: DataTypes.STRING(127),
+			allowNull: false,
+			defaultValue: '',
+		},
 		street: {
 			type: DataTypes.STRING(255),
 			allowNull: true,

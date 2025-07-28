@@ -29,10 +29,21 @@ const autoScale = async () => {
 		cpus    : 0,
 	};
 
+	const servers = [];
+	let database = {};
+
 	for (const server of serverList) {
-		loadNumbers.cpus += parseInt(server.specs.vcpus);
-		loadNumbers.one += parseFloat(server.loadOne);
-		loadNumbers.fifteen += parseFloat(server.loadFifteen);
+		if (server.tags.includes('tabroom-db')) {
+			database = server;
+			database.cpus += parseInt(server.specs.vcpus);
+			database.one = (database.cpus / parseInt(server.loadOne)) * 100;
+			database.fifteen = (database.cpus / parseInt(server.loadFifteen)) * 100;
+		} else {
+			loadNumbers.cpus += parseInt(server.specs.vcpus);
+			loadNumbers.one += parseFloat(server.loadOne);
+			loadNumbers.fifteen += parseFloat(server.loadFifteen);
+			servers.push(server);
+		}
 	}
 
 	const onePercentage =  ( loadNumbers.one / loadNumbers.cpus ) * 100;
@@ -43,18 +54,59 @@ const autoScale = async () => {
 		&& fifteenPercentage > (loadThresholds.SCALE_15_THRESHOLD  || 100)
 	) {
 
-		let alert = `<p>Load levels are over capacity.  Adding another ${loadNumbers.SCALE_INCREMENT} servers</p>`;
+		let addTo = loadThresholds.SCALE_INCREMENT;
 
-		if (serverList.length >= config.LINODE.SCALE_MAX) {
+		if (servers.length >= config.LINODE.SCALE_MAX) {
 			alert += `<h3>SERVER CLUSTER AT CAPACITY.</h3>`;
-		} else if (loadThresholds?.ENABLED) {
-			const response = await increaseLinodeCount(user, loadNumbers.SCALE_INCREMENT, true);
-			alert += '<pre>';
-			alert += JSON.stringify(response);
-			alert += '</pre>';
+			addTo = 0;
+		} else if ( (servers.length + addTo) > config.LINODE.SCALE_MAX) {
+			addTo = config.LINODE.SCALE_MAX - servers.length;
 		}
 
-		await notifyCloudAdmins(alert, 'AutoScaling UP');
+		let alert = '';
+
+		if (addTo > 0) {
+
+			alert = `<p>Load levels are over capacity.  Adding another ${loadThresholds.SCALE_INCREMENT} servers for the next few hours</p>`;
+
+			if (loadThresholds?.ENABLED) {
+
+				await db.sequelize.query(`
+					delete ts.* from tabroom_setting ts where ts.tag = 'min_servers'
+				`, {
+					type: db.sequelize.DELETE,
+				});
+
+				await db.sequelize.query(`
+					insert into tabroom_setting (tag, value, value_date, person)
+						values ('min_servers', :numServers, DATE_ADD(now(), INTERVAL 6 HOUR), 2)
+				`, {
+					type         : db.sequelize.INSERT,
+					replacements : {
+						numServers: (addTo + servers.length),
+					},
+				});
+
+				const response = await increaseLinodeCount(user, loadThresholds.SCALE_INCREMENT, true);
+
+				alert += '<pre>';
+				alert += JSON.stringify(response);
+				alert += '</pre>';
+			} else {
+				alert += '<p>Test Run Complete.  Autoscaler not enabled to actually take action.</p>';
+			}
+
+		} else {
+			alert += '<h4>WARNING: LOAD IS HIGH AND WE ARE AT OUR MACHINE MAXIMUM COUNT. IF YOU ARE NOT PALMER OR HARDY';
+			alert += 'GET IN TOUCH WITH ONE OF THEM. IF YOU ARE, SCALE MACHINE TYPES UP OR OMG OMG PANIK PANIK OMG!!!!</h4>';
+		}
+
+		if (database.one > 110 || database.fifteen > 100) {
+			alert += `<h5>Database server load is also high.  Possible issue there: ${database.one} 1m load, ${database.fifteen} 15m.</h5>`;
+			await notifyCloudAdmins(alert, 'AutoScaling UP.  DB Server Load Also High.');
+		} else {
+			await notifyCloudAdmins(alert, 'AutoScaling UP');
+		}
 		return;
 	}
 
@@ -63,17 +115,28 @@ const autoScale = async () => {
 	if (onePercentage > (loadThresholds.ALERT_THRESHOLD || 80)
 		&& fifteenPercentage > (loadThresholds.ALERT_15_THRESHOLD  || 60)
 	) {
-
 		let alert = `<p>Load levels are approaching capacity</p>`;
 		alert += `<p>One minute load average across tabweb machines is ${onePercentage}</p>`;
 		alert += `<p>One minute load average across tabweb machines is ${fifteenPercentage}</p>`;
-		await notifyCloudAdmins(alert, 'AutoScaling May Be Required');
+
+		if (!loadThresholds?.ENABLED) {
+			alert += `<h5>Autoscaling is NOT CURRENTLY ENABLED.  System will not scale automatically</h5>`;
+		}
+
+		if (database.one > (loadThresholds.ALERT_THRESHOLD || 80)
+			&& database.fifteen > (loadThresholds.ALERT_15_THRESHOLD  || 60)
+		) {
+			alert += `<h5>Database server load is also high.  Possible issue there: ${database.one} 1m load, ${database.fifteen} 15m.</h5>`;
+			await notifyCloudAdmins(alert, 'AutoScaling May Be Required.  DB Server Load Also High.');
+		} else {
+			await notifyCloudAdmins(alert, 'AutoScaling May Be Required');
+		}
 		return;
 	}
 
 	// Check if we are under the estimated count for servers right now.
-	if (usageData.serverTarget > serverList.length) {
-		const needed = usageData.serverTarget - serverList.length;
+	if (usageData.serverTarget > servers.length) {
+		const needed = usageData.serverTarget - servers.length;
 		let alert = `<p>Under forecasted needs. Spinning up ${needed} machines</p>`;
 
 		if (loadThresholds?.ENABLED) {
@@ -81,6 +144,8 @@ const autoScale = async () => {
 			alert += '<pre>';
 			alert += JSON.stringify(response);
 			alert += '</pre>';
+		} else {
+			alert += '<h5>Test Run Complete.  Autoscaler not enabled to actually take action.</h5>';
 		}
 		await notifyCloudAdmins(alert, 'Scaled Up Based on Anticipated Capacity');
 		return;
@@ -89,13 +154,16 @@ const autoScale = async () => {
 	// Check if we are over our estimated count.  If we are, check load average
 	// first to be sure we're under 20% before shrinking the world.
 
-	if (usageData.serverTarget < serverList.length) {
+	if (usageData.serverTarget < servers.length) {
 
-		const needed = serverList.length - usageData.serverTarget;
-		let alert = `<p>Over forecasted needs. Checking load levels to ensure extra capacity</p>`;
+		const needed = servers.length - usageData.serverTarget;
+		let alert = `<p>Over forecasted needs. Usage data of ${usageData.totalUsers} requires just ${usageData.serverCount} machines</p>`;
+		alert += `<p>Checking load levels to ensure extra capacity</p>`;
 
-		if (onePercentage < 20 && fifteenPercentage < 20) {
+		if (onePercentage < 20 && fifteenPercentage < 30) {
 			alert += `<p>Low load confirmed. ${onePercentage}% of capacity in active use. Destroying ${needed} machines</p>`;
+		} else {
+			alert += `<p>Load too high to adjust. ${onePercentage}% of capacity in active use. 15 minute load is ${fifteenPercentage} </p>`;
 		}
 
 		if (loadThresholds?.ENABLED) {
@@ -103,11 +171,12 @@ const autoScale = async () => {
 			alert += '<pre>';
 			alert += JSON.stringify(response);
 			alert += '</pre>';
+		} else {
+			alert += '<h5>Test Run Complete.  Autoscaler not enabled to actually take action.</h5>';
 		}
 
 		await notifyCloudAdmins(alert, 'Scaled Down Based on Anticipated Capacity');
 	}
-
 };
 
 const notifyCloudAdmins = async (log, subject) => {

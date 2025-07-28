@@ -79,6 +79,32 @@ export const showTabroomUsage = async () => {
 	const totalUsers = (allJudges[0]?.count || 0) + (allStudents[0]?.count || 0);
 	let serverTarget = totalUsers / (config.LINODE.USERS_PER_SERVER || 1250);
 
+	const overrides = await db.sequelize.query(`
+		select
+			setting.*
+		from tabroom_setting setting
+		where 1=1
+			and setting.tag IN ('min_servers', 'max_servers')
+			and value_date > CURRENT_TIMESTAMP
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	for (const override of overrides) {
+
+		if (
+			override.tag === 'min_servers'
+			&& override.value > serverTarget
+		) {
+			serverTarget = override.value;
+		} else if (
+			override.tag === 'max_servers'
+			&& override.value < serverTarget
+		) {
+			serverTarget = override.value;
+		}
+	}
+
 	if (serverTarget < (config.AUTOSCALE?.SCALE_MIN || 2)) {
 		serverTarget = (config.AUTOSCALE?.SCALE_MIN || 2);
 	}
@@ -88,7 +114,7 @@ export const showTabroomUsage = async () => {
 		tournaments : tournamentCount[0]?.count,
 		judges      : allJudges[0]?.count,
 		students    : allStudents[0].count,
-		totalUsers  : (allJudges[0]?.count || 0) + (allStudents[0]?.count || 0),
+		totalUsers,
 		serverTarget,
 	};
 };
@@ -131,6 +157,7 @@ export const getLinodeInstances = async ( limit ) => {
 		if (limit) {
 			if (
 				machine.tags.includes(limit)
+				|| machine.tags.includes('tabroom-db')
 			) {
 				return machine;
 			}
