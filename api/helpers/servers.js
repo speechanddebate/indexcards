@@ -77,7 +77,7 @@ export const showTabroomUsage = async () => {
 	});
 
 	const totalUsers = (allJudges[0]?.count || 0) + (allStudents[0]?.count || 0);
-	let serverTarget = totalUsers / (config.LINODE.USERS_PER_SERVER || 1250);
+	let serverTarget = Math.ceil(totalUsers / (config.LINODE.USERS_PER_SERVER || 1250));
 
 	const overrides = await db.sequelize.query(`
 		select
