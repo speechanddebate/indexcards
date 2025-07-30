@@ -2,7 +2,7 @@ NODE_ENV=production
 TZ=UTC
 
 #AutoScaler
-*/10 * * * * cd /indexcards && /usr/local/bin/node /indexcards/api/auto/autoScale.js >> /var/log/cron.log 2>&1
+*/5 * * * * cd /indexcards && /usr/local/bin/node /indexcards/api/auto/autoScale.js >> /var/log/cron.log 2>&1
 
 # Monitoring of server deployment status
 * * * * * cd /indexcards && /usr/local/bin/node /indexcards/api/auto/serverStatus.js >> /var/log/cron.log 2>&1
