@@ -16,10 +16,10 @@ const autoScale = async () => {
 	const serverList = await getLinodeInstances(config.LINODE.WEBHOST_BASE);
 
 	const user = {
-		id       : 2,
-		name     : 'Jon Bruschke',
-		email    : 'jbruschke@gmail.com',
-		greeting : 'Duuuuuude!',
+		id       : 5,
+		name     : 'Autoscale Daemon',
+		email    : 'autoscaler@tabroom.com',
+		greeting : 'Greetings, Human!',
 	};
 
 	// Calculate load figures
@@ -89,9 +89,9 @@ const autoScale = async () => {
 
 				const response = await increaseLinodeCount(user, loadThresholds.SCALE_INCREMENT, true);
 
-				alert += '<pre>';
+				alert += '<code>';
 				alert += JSON.stringify(response);
-				alert += '</pre>';
+				alert += '</code>';
 			} else {
 				alert += '<p>Test Run Complete.  Autoscaler not enabled to actually take action.</p>';
 			}
