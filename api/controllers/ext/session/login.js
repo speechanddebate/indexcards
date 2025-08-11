@@ -1,8 +1,9 @@
-import { b64_sha512crypt as crypt } from 'sha512crypt-node';
+/* eslint-disable-next-line import/no-unresolved */
+import { verify } from 'unixcrypt';
 
-// This name is currently a misnomer, because this doesn't actually create a
-// session, it just validates the username and password Eventually, this should
-// be expanded to create a session and return it
+// This function name is currently a misnomer, because this doesn't actually
+// create a session, it just validates the username and password. Eventually,
+// this should be expanded to create a session and return it
 
 export const login = {
 	POST: async (req, res) => {
@@ -23,9 +24,9 @@ export const login = {
 			return res.status(400).json({ error: 'No user found for username' });
 		}
 
-		const hash = crypt(req.body.password, person.password);
+		const verified = verify(req.body.password, person.password);
 
-		if (hash !== person.password) {
+		if (!verified) {
 			return res.status(400).json({ error: 'Incorrect password' });
 		}
 

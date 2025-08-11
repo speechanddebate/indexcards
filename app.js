@@ -132,7 +132,7 @@ app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], as
 
 		if (!req.session) {
 			return res.status(401).json({
-				error   : true,
+				error   : false,
 				message : `User: You are not logged in.`,
 			});
 		}

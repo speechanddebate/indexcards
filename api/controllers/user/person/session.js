@@ -61,7 +61,7 @@ export const getSession = {
 			return res.status(200).json(session);
 		}
 
-		return res.status(401).json({ error: true,message: 'No active session found' });
+		return res.status(200).json({ error: false, message: 'No active session found' });
 	},
 };
 
