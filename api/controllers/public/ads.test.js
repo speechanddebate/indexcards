@@ -2,7 +2,7 @@ import { assert } from 'chai';
 import request from 'supertest';
 import server from '../../../app';
 
-describe('Curent ads', () => {
+describe('Current ads', () => {
 	it('returns a list of ads', async () => {
 
 		const res = await request(server)
@@ -13,8 +13,8 @@ describe('Curent ads', () => {
 
 		assert.typeOf(res.body, 'array', 'Array returned');
 
-		assert.typeOf(res.body[0].id, 'number', 'id of ad is a string');
-		assert.typeOf(res.body[0].filename, 'string', 'filename of ad is a string');
-		assert.typeOf(res.body[0].url, 'string', 'url of ad is a string');
+		assert.typeOf(res.body[0].id       , 'number' , 'ID of ad is a number');
+		assert.typeOf(res.body[0].filename , 'string' , 'filename of ad is a string');
+		assert.typeOf(res.body[0].url      , 'string' , 'URL of ad is a string');
 	});
 });

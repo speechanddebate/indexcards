@@ -157,22 +157,19 @@ export const getLinodeInstances = async ( limit ) => {
 		if (limit) {
 			if (
 				machine.tags.includes(limit)
-				|| machine.tags.includes('tabroom-db')
+				|| machine.tags.includes('tab-db')
 			) {
 				return machine;
 			}
 		} else {
 
-			if (
-				machine.tags.includes('control')
-				|| machine.tags.includes('haproxy')
-				|| machine.tags.includes('tabroom-db')
-				|| machine.tags.includes('tabroom-replica')
-				|| machine.tags.includes(config.LINODE.WEBHOST_BASE)
-			) {
-				return machine;
+			for (const tag in [config.LINODE.WEBHOST_BASE, ...config.LINODE.MONITOR_TARGETS]) {
+				if ( machine.tags.includes(tag) ) {
+					return machine;
+				}
 			}
 		}
+
 		return null;
 
 	}).map( machine => {
