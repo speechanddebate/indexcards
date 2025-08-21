@@ -156,15 +156,15 @@ export const getLinodeInstances = async ( limit ) => {
 
 		if (limit) {
 			if (
-				machine.tags.includes(limit)
-				|| machine.tags.includes('tab-db')
+				machine.tags.includes(limit) || machine.tags.includes('tab-db')
 			) {
 				return machine;
 			}
 		} else {
 
-			for (const tag in [config.LINODE.WEBHOST_BASE, ...config.LINODE.MONITOR_TARGETS]) {
-				if ( machine.tags.includes(tag) ) {
+			for (const tag of [config.LINODE.WEBHOST_BASE, ...config.LINODE.MONITOR_TARGETS]) {
+
+				if (machine.tags.includes(tag) ) {
 					return machine;
 				}
 			}
