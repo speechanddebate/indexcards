@@ -33,7 +33,7 @@ const autoScale = async () => {
 	let database = {};
 
 	for (const server of serverList) {
-		if (server.tags.includes('tabroom-db')) {
+		if (server.tags.includes('tab-db')) {
 			database = server;
 			database.cpus += parseInt(server.specs.vcpus);
 			database.one = (database.cpus / parseInt(server.loadOne)) * 100;

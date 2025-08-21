@@ -35,7 +35,7 @@ if (mode === 'show') {
 		tabroomMachines.forEach( (machine) => {
 
 			let label = machine.label;
-			if (label !== 'tabroom-replica' && label !== 'tabroom-db') {
+			if (label !== 'tab-replica' && label !== 'tab-db') {
 				label = `${machine.label}\t`;
 			}
 
