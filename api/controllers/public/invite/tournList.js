@@ -97,9 +97,10 @@ export const futureTourns = {
 			limit = ` and tourn.state = '${req.query.state.toUpperCase()}'`;
 		}
 
-		if (typeof req.query.limit === 'number') {
+		const queryLimit = parseInt(req.query.limit);
+
+		if (!isNaN(queryLimit)) {
 			endLimit = ` limit ${req.query.limit} `;
-			console.log(`Limiting to the top ${req.query.limit} tournaments`);
 		}
 
 		const [future] = await db.sequelize.query(`
