@@ -109,8 +109,6 @@ export const showTabroomUsage = async () => {
 		serverTarget = (config.AUTOSCALE?.SCALE_MIN || 2);
 	}
 
-	console.log(`ServerTarget is ${serverTarget} and SCALE_MIN is ${config.AUTOSCALE.SCALE_MIN}`);
-
 	return {
 		activeUsers : currentActiveUsers[0]?.count,
 		tournaments : tournamentCount[0]?.count,
