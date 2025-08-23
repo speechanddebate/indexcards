@@ -35,7 +35,8 @@ if (mode === 'show') {
 		tabroomMachines.forEach( (machine) => {
 
 			let label = machine.label;
-			if (label !== 'tab-replica' && label !== 'tab-db') {
+
+			if (label !== config.DB_HOST && label !== config.DB_REPLICA) {
 				label = `${machine.label}\t`;
 			}
 

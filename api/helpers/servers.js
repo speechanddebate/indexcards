@@ -158,7 +158,7 @@ export const getLinodeInstances = async ( limit ) => {
 
 		if (limit) {
 			if (
-				machine.tags.includes(limit) || machine.tags.includes('tab-db')
+				machine.tags.includes(limit) || machine.tags.includes(config.DB_HOST)
 			) {
 				return machine;
 			}
@@ -178,7 +178,7 @@ export const getLinodeInstances = async ( limit ) => {
 
 		const status = serverByLinodeId[machine.id]?.status || machine.status;
 
-		if (machine.tags.includes('tabweb') && (!serverByLinodeId[machine.id])) {
+		if (machine.tags.includes(config.LINODE.WEBHOST_BASE) && (!serverByLinodeId[machine.id])) {
 			databaseSyncs.push(machine);
 		}
 
@@ -300,7 +300,7 @@ export const increaseLinodeCount = async (whodunnit, countNumber, silent) => {
 			label           : `${hostname}`,
 			type            : config.LINODE.INSTANCE_TYPE,
 			region          : config.LINODE.REGION,
-			tags            : ['tabweb'],
+			tags            : [config.LINODE.WEBHOST_BASE],
 			has_user_data   : false,
 			disk_encryption : 'disabled',
 			swap_size       : config.LINODE.SWAP_SIZE,
