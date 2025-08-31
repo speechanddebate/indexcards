@@ -157,7 +157,7 @@ const autoScale = async () => {
 	if (usageData.serverTarget < servers.length) {
 
 		const needed = servers.length - usageData.serverTarget;
-		let alert = `<p>Over forecasted needs. Usage data of ${usageData.totalUsers} requires just ${usageData.serverCount} machines</p>`;
+		let alert = `<p>Over forecasted needs. Usage data of ${usageData.totalUsers} requires just ${usageData.serverTarget} machines</p>`;
 		alert += `<p>Checking load levels to ensure extra capacity</p>`;
 
 		if (onePercentage < 20 && fifteenPercentage < 30) {
