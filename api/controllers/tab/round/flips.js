@@ -130,12 +130,12 @@ export const scheduleFlips = async (roundId) => {
 				}
 
 				startDate = new Date(startDate.getTime() - round.beforeStart * 60000);
-				message += ` Flips scheduled to happen at ${startDate.toLocaleTimeString} UTC`;
+				message += ` Flips scheduled to happen at ${startDate.toLocaleTimeString()} UTC`;
 
 			} else if (round.autoPublish) {
 
 				startDate = new Date(startDate.getTime() + round.autoPublish * 60000);
-				message += ` Flips scheduled at ${startDate.toLocaleTimeString} UTC`;
+				message += ` Flips scheduled at ${startDate.toLocaleTimeString()} UTC`;
 			}
 
 			if (round.flighted > 1 && round.flightOffset && round.splitFlights) {
@@ -143,7 +143,7 @@ export const scheduleFlips = async (roundId) => {
 				for (let flight = 1; flight <= round.flighted; flight++) {
 
 					if (flight > 1) {
-						message += ` Flight ${flight} flips scheduled at ${startDate.toLocaleDateString} UTC`;
+						message += ` Flight ${flight} flips scheduled at ${startDate.toLocaleDateString()} UTC`;
 					}
 
 					await db.sequelize.query(`
