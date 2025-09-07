@@ -29,6 +29,35 @@ export const showTabroomUsage = async () => {
 		type: db.sequelize.QueryTypes.SELECT,
 	});
 
+	const onlineStudents = await db.sequelize.query(`
+		select
+			count(distinct student.person) count
+		from student, entry_student es, entry, event, tourn
+		where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+			and tourn.end > NOW()
+			and tourn.id = event.tourn
+			and tourn.hidden != 1
+			and event.id = entry.event
+			and entry.active = 1
+			and entry.id = es.entry
+			and es.student = student.id
+			and exists (
+				select event_setting online
+				on online.event = event.id
+				and online.tag = 'online_mode'
+				and online.value != 'async'
+			)
+			and exists (
+				select timeslot.id
+				from timeslot
+				where timeslot.tourn = tourn.id
+				and timeslot.start > CURRENT_TIMESTAMP
+				and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+			)
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
 	const allJudges = await db.sequelize.query(`
 		select
 			count(distinct judge.person) count
@@ -76,7 +105,10 @@ export const showTabroomUsage = async () => {
 		type: db.sequelize.QueryTypes.SELECT,
 	});
 
-	const totalUsers = (allJudges[0]?.count || 0) + (allStudents[0]?.count || 0);
+	const totalUsers = (allJudges[0]?.count || 0)
+		+ (allStudents[0]?.count || 0)
+		+ (onlineStudents[0]?.count || 0);
+
 	let serverTarget = Math.ceil(totalUsers / (config.LINODE.USERS_PER_SERVER || 1250));
 
 	const overrides = await db.sequelize.query(`
@@ -110,10 +142,11 @@ export const showTabroomUsage = async () => {
 	}
 
 	return {
-		activeUsers : currentActiveUsers[0]?.count,
-		tournaments : tournamentCount[0]?.count,
-		judges      : allJudges[0]?.count,
-		students    : allStudents[0].count,
+		activeUsers    : currentActiveUsers[0]?.count,
+		tournaments    : tournamentCount[0]?.count,
+		judges         : allJudges[0]?.count,
+		students       : allStudents[0].count,
+		onlineStudents : onlineStudents[0].count,
 		totalUsers,
 		serverTarget,
 	};
