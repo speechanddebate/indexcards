@@ -41,12 +41,15 @@ export const showTabroomUsage = async () => {
 			and entry.active = 1
 			and entry.id = es.entry
 			and es.student = student.id
-			and exists (
-				select event_setting online
-				on online.event = event.id
-				and online.tag = 'online_mode'
-				and online.value != 'async'
-			)
+            and exists (
+                select online.id
+					from event_setting online
+				where 1=1
+					and online.event = event.id
+					and online.tag = 'online_mode'
+					and online.value != 'async'
+            )
+
 			and exists (
 				select timeslot.id
 				from timeslot
