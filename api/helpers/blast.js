@@ -214,7 +214,7 @@ export const emailNotify = async (inputData) => {
 
 	const recipients = await db.sequelize.query(`
 		select
-			person.id, person.first, person.last, person.email
+			person.id, person.first, person.last, person.email, person.no_email
 		from person
 		where person.id IN (:personIds)
 	`, {
