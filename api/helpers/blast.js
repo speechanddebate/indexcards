@@ -284,7 +284,7 @@ export const inboxMessage = async (inputData) => {
 		message.tourn = inputData.tourn;
 	}
 
-	if (message.email) {
+	if (message.email && !inputData.append) {
 		delete message.body;
 	}
 
