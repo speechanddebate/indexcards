@@ -146,6 +146,55 @@ export const getInvite = {
 	},
 };
 
+export const getPublicRounds = {
+
+	GET: async (req, res) => {
+
+		const db = req.db;
+
+		const publicRounds = await db.sequelize.query(`
+			select
+				event.id eventId, event.abbr eventAbbr, event.name eventName,
+				event.type eventType,
+				round.id roundId, round.name roundName, round.label roundLabel,
+				round.type roundType
+
+			from event, round
+			where 1=1
+				and event.tourn = :tournId
+				and event.id = round.event
+				and round.published IN (1,2,3)
+			order by event.type, event.abbr, round.name
+		`, {
+			replacements : { tournId: req.params.tournId },
+			queryType    : db.sequelize.QueryTypes.SELECT,
+		});
+
+		const events = {};
+
+		for (const round of publicRounds) {
+			if (!events[round.eventId]) {
+				events[round.eventId] = {
+					id   : round.eventId,
+					abbr : round.eventAbbr,
+					name : round.eventName,
+					type : round.eventType,
+					rounds: {},
+				};
+			}
+
+			events[round.eventId].rounds.push({
+				id     : round.roundId,
+				number : round.roundName,
+				name   : round.roundLabel || `Round ${round.roundName}`,
+				type   : round.roundType,
+			});
+		}
+
+		return res.status(200).json(events);
+	},
+};
+
 export const getRounds = {
 	GET: async (req, res) => {
 		const db = req.db;
