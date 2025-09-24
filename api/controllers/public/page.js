@@ -42,25 +42,6 @@ export const getAllPages = {
 	},
 };
 
-export const getPagesByTourn = {
-
-	GET: async (req, res) => {
-		const db = req.db;
-		const pages = await db.sequelize.query(`
-			select
-				id, title, slug, content, published, sitewide, special, page_order, parent, sidebar
-			from webpage page
-			where 1=1
-				and page.published = 1
-				and page.tourn = :tournId
-		`, {
-			replacements : { tournId: req.params.tournId },
-			type         : db.sequelize.QueryTypes.SELECT,
-		});
-		res.status(200).json(pages);
-	},
-};
-
 export default getAllPages;
 
 getAllPages.GET.apiDoc = {

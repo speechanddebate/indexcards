@@ -3,7 +3,7 @@ const coach = (sequelize, DataTypes) => {
 		nsda: {
 			type         : DataTypes.INTEGER(15),
 			allowNull    : false,
-			defaultValue : '',
+			defaultValue : 0,
 		},
 		created_at: {
 			type      : DataTypes.DATE,

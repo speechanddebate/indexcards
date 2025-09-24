@@ -70,6 +70,20 @@ export const testAdminSession = {
 	person  : '70',
 };
 
+export const testUserChapterPerm = {
+	chapter : 130737,
+	person  : 69,
+	tag     : 'chapter',
+};
+
+export const testUserSchoolContact = {
+	school   : 694009,
+	person   : 69,
+	official : 1,
+	onsite   : 1,
+	email    : 1,
+};
+
 export const testUserTournPerm = {
 	id     : 1,
 	tourn  : '29595',
@@ -145,4 +159,6 @@ export default {
 	testCampusLogs,
 	testUserAPIKey,
 	testUserAPIPerms,
+	testUserChapterPerm,
+	testUserSchoolContact,
 };

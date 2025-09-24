@@ -10,6 +10,7 @@ import updateLearnCourses from '../../../controllers/user/person/learnCourse.js'
 import judge from './judge.js';
 import inbox from './inbox.js';
 import push from './push.js';
+import chapter from './chapter.js';
 
 export default [
 	{ path : '/user/session'                , module : getSession }          ,
@@ -21,6 +22,7 @@ export default [
 	{ path : '/user/updateLearn'            , module : updateLearnCourses }  ,
 	{ path : '/user/updateLearn/{personId}' , module : updateLearnCourses }  ,
 	...push                                 ,
+	...chapter                              ,
 	...judge                                ,
 	...inbox                                ,
 ];
