@@ -1,4 +1,4 @@
-export const getInvite = {
+export const getTournInvite = {
 	GET: async (req, res) => {
 
 		const db = req.db;
@@ -101,7 +101,7 @@ export const getInvite = {
 				event.id eventId, event.abbr eventAbbr, event.name eventName,
 				publish_entry_list.value entryList
 
-			from (event, round)
+			from (event, round, tourn)
 
 				left join round_setting publish_entry_list
 					on publish_entry_list.round = round.id
@@ -110,6 +110,8 @@ export const getInvite = {
 			where 1=1
 				and event.tourn = :tournId
 				and event.id = round.event
+				and tourn.id = event.tourn
+				and tourn.hidden   = 0
 				and (round.published > 0
 					OR EXISTS
 						(select rs.id
@@ -127,12 +129,14 @@ export const getInvite = {
 			select
 				person.id, person.first, person.middle, person.last, person.email
 
-			from (person, permission)
+			from (person, permission, tourn)
 
 			where 1=1
 				and permission.tourn  = :tournId
 				and permission.tag    = 'contact'
 				and permission.person = person.id
+				and permission.tourn  = tourn.id
+				and tourn.hidden      = 0
 		`, {
 			replacements : { tournId: invite.tourn.id },
 			type         : db.sequelize.QueryTypes.SELECT,
@@ -146,56 +150,34 @@ export const getInvite = {
 	},
 };
 
-export const getPublicRounds = {
+getTournInvite.GET.apiDoc = {
 
-	GET: async (req, res) => {
-
-		const db = req.db;
-
-		const publicRounds = await db.sequelize.query(`
-			select
-				event.id eventId, event.abbr eventAbbr, event.name eventName,
-				event.type eventType,
-				round.id roundId, round.name roundName, round.label roundLabel,
-				round.type roundType
-
-			from event, round
-			where 1=1
-				and event.tourn = :tournId
-				and event.id = round.event
-				and round.published IN (1,2,3)
-			order by event.type, event.abbr, round.name
-		`, {
-			replacements : { tournId: req.params.tournId },
-			queryType    : db.sequelize.QueryTypes.SELECT,
-		});
-
-		const events = {};
-
-		for (const round of publicRounds) {
-			if (!events[round.eventId]) {
-				events[round.eventId] = {
-					id   : round.eventId,
-					abbr : round.eventAbbr,
-					name : round.eventName,
-					type : round.eventType,
-					rounds: {},
-				};
-			}
-
-			events[round.eventId].rounds.push({
-				id     : round.roundId,
-				number : round.roundName,
-				name   : round.roundLabel || `Round ${round.roundName}`,
-				type   : round.roundType,
-			});
-		}
-
-		return res.status(200).json(events);
+	summary     : 'Returns the public pages for a tournament',
+	operationId : 'getTournInvite',
+	parameters  : [
+		{
+			in          : 'path',
+			name        : 'tournId',
+			description : 'Tournament ID of tournament to return',
+			required    : false,
+			schema      : { type: 'string', minimum: 1 },
+		},
+	],
+	responses: {
+		200: {
+			description: 'Invitational & General Tournament Info',
+			content: { '*/*': { schema: { $ref: '#/components/schemas/Invite' } } },
+		},
+		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
+	tags: ['invite', 'public'],
 };
 
-export const getRounds = {
+export const getRound = {
+
+	// Replace this with a more comprehensive pull of schematics in another
+	// file I think -- CLP
+
 	GET: async (req, res) => {
 		const db = req.db;
 
@@ -224,27 +206,7 @@ export const getRounds = {
 	},
 };
 
-export const getPages = {
-	GET: async (req, res) => {
-		const db = req.db;
-		const pages = await db.sequelize.query(`
-			select
-				id, title, slug, content, published, sitewide, special, page_order, parent, sidebar
-			from (webpage page, tourn)
-			where 1=1
-				and page.published = 1
-				and page.tourn = tourn.id
-				and tourn.id = :tournId
-				and tourn.hidden = 0
-		`, {
-			replacements : { tournId: req.params.tournId },
-			type         : db.sequelize.QueryTypes.SELECT,
-		});
-		res.status(200).json(pages);
-	},
-};
-
-export const getFiles = {
+export const getTournPublishedFiles = {
 	GET: async (req, res) => {
 		const db = req.db;
 		const files = await db.sequelize.query(`
@@ -254,9 +216,9 @@ export const getFiles = {
 			from (file, tourn)
 			where 1=1
 				and file.published = 1
-				and file.tourn = tourn.id
-				and tourn.id = :tournId
-				and tourn.hidden = 0
+				and file.tourn     = tourn.id
+				and tourn.id       = :tournId
+				and tourn.hidden   = 0
 		`, {
 			replacements : { tournId: req.params.tournId },
 			type         : db.sequelize.QueryTypes.SELECT,
@@ -265,7 +227,7 @@ export const getFiles = {
 	},
 };
 
-export const getEvents = {
+export const getTournEvents = {
 	GET: async (req, res) => {
 		const db = req.db;
 		const events = await db.sequelize.query(`
@@ -316,25 +278,144 @@ export const getEvents = {
 	},
 };
 
-getInvite.GET.apiDoc = {
-
-	summary     : 'Returns the public pages for a tournament',
-	operationId : 'getInvite',
+getTournEvents.GET.apiDoc = {
+	summary     : 'Returns an array of events in a tournament',
+	operationId : 'getTournEvents',
 	parameters  : [
 		{
 			in          : 'path',
 			name        : 'tournId',
-			description : 'Tournament ID of tournament to return',
+			description : 'Tournament ID to return events for',
 			required    : false,
 			schema      : { type: 'string', minimum: 1 },
 		},
 	],
 	responses: {
 		200: {
-			description: 'Invitational & General Tournament Info',
-			content: { '*/*': { schema: { $ref: '#/components/schemas/Invite' } } },
+			description: 'Array of events',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'array',
+					},
+				},
+			},
 		},
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
-	tags: ['invite', 'public'],
+	tags: ['invite', 'public', 'rounds'],
+};
+
+export const getTournPublishedRounds = {
+	GET: async (req, res) => {
+
+		const db = req.db;
+		const rounds = await db.sequelize.query(`
+			select
+				round.id roundId, round.name roundName, round.label roundLabel, round.type roundType,
+					round.published,
+					round.post_primary roundPostPrimary,
+					round.post_secondary roundPostSecondary,
+					round.post_feedback roundPostFeedback,
+				event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType
+			from (round, event, tourn)
+			where 1=1
+				and event.tourn = :tournId
+				and event.id = round.event
+				and round.published IS NOT NULL
+				and round.published > 0
+				and event.tourn = tourn.id
+				and tourn.hidden   = 0
+			order by event.type, event.abbr, round.name
+		`, {
+			replacements: { tournId: req.params.tournId },
+			type: db.Sequelize.QueryTypes.SELECT,
+		});
+
+		return res.status(200).json(rounds);
+	},
+};
+
+getTournPublishedRounds.GET.apiDoc = {
+	summary     : 'Returns an array of published rounds for a tournament',
+	operationId : 'getTournPublishedRounds',
+	parameters  : [
+		{
+			in          : 'path',
+			name        : 'tournId',
+			description : 'Tournament ID to return rounds from',
+			required    : false,
+			schema      : { type: 'string', minimum: 1 },
+		},
+	],
+	responses: {
+		200: {
+			description: 'Array of rounds which are published in any way',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'array',
+					},
+				},
+			},
+		},
+		default: { $ref: '#/components/responses/ErrorResponse' },
+	},
+	tags: ['invite', 'public', 'rounds'],
+};
+
+export const getTournPublishedResults = {
+	GET: async (req, res) => {
+		const db = req.db;
+		const results = await db.sequelize.query(`
+			select
+				result_set.id, result_set.label name, result_set.bracket, result_set.generated,
+				event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
+				sweep_set.id sweepSetId, sweep_set.name sweepSetName,
+				sweep_award.id sweepAwardId, sweep_award.name sweepAwardName
+
+			from (result_set, tourn)
+				left join event on result_set.event = event.id
+				left join sweep_set on result_set.sweep_set = sweep_set.id
+				left join sweep_award on sweep_award.id = sweep_set.sweep_award
+
+			where 1=1
+				and result_set.tourn = :tournId
+				and tourn.id = result_set.tourn
+				and tourn.hidden = 0
+		`, {
+			replacements : { tournId: req.params.tournId },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+
+		res.status(200).json(results);
+	},
+};
+
+getTournPublishedResults.GET.apiDoc = {
+	summary     : 'Returns an array of result_sets that are published in a tournament',
+	operationId : 'getTournPublishedResults',
+	parameters  : [
+		{
+			in          : 'path',
+			name        : 'tournId',
+			description : 'Tournament ID to return events for',
+			required    : false,
+			schema      : { type: 'string', minimum: 1 },
+		},
+	],
+	responses: {
+		200: {
+			description: 'Array of events',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'array',
+					},
+				},
+			},
+		},
+		default: { $ref: '#/components/responses/ErrorResponse' },
+	},
+	tags: ['invite', 'public', 'results'],
 };

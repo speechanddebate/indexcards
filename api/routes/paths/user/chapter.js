@@ -5,6 +5,6 @@
 import { userChaptersByTourn, userChapters } from '../../../controllers/user/chapter/index.js';
 
 export default [
-	{ path : '/user/chapter'           , module   : userChapters }        ,
-	{ path : '/user/chapter/byTourn/{tournId}' , module   : userChaptersByTourn } ,
+	{ path : '/user/chapter'                   , module : userChapters } ,
+	{ path : '/user/chapter/byTourn/{tournId}' , module : userChaptersByTourn }  ,
 ];

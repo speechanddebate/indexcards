@@ -1,6 +1,6 @@
 import { convertTZ, shortZone, getWeek, isSameDay } from '../../../helpers/dateTime.js';
 
-export const thisWeek = {
+export const getThisWeekTourns = {
 
 	GET: async (req, res) => {
 
@@ -61,7 +61,7 @@ export const thisWeek = {
 	},
 };
 
-export const futureTourns = {
+export const getFutureTourns = {
 	GET: async (req, res) => {
 
 		const db = req.db;
@@ -381,9 +381,9 @@ export const futureTourns = {
 	},
 };
 
-futureTourns.GET.apiDoc = {
+getFutureTourns.GET.apiDoc = {
 	summary     : 'Returns the public listing of upcoming tournaments',
-	operationId : 'futureTourns',
+	operationId : 'getFutureTourns',
 	parameters  : [
 		{
 			in          : 'path',
@@ -396,27 +396,27 @@ futureTourns.GET.apiDoc = {
 	responses: {
 		200: {
 			description: 'List of public upcoming tournaments',
-			content: { '*/*': { schema: { $ref: '#/components/schemas/futureTourns' } } },
+			content: { '*/*': { schema: { $ref: '#/components/schemas/Tourn' } } },
 		},
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
 	tags: ['futureTourns', 'invite', 'public'],
 };
 
-thisWeek.GET.apiDoc = {
+getThisWeekTourns.GET.apiDoc = {
 	summary     : 'Returns the public listing of upcoming tournaments in this week',
-	operationId : 'thisWeek',
+	operationId : 'listWeeksTourns',
 	parameters  : [
 	],
 	responses: {
 		200: {
 			description: "List of this week's tournaments, with some stats",
-			content: { '*/*': { schema: { $ref: '#/components/schemas/thisWeek' } } },
+			content: { '*/*': { schema: { $ref: '#/components/schemas/tourn' } } },
 		},
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
 	tags: ['thisWeek', 'invite', 'public'],
 };
 
-export default futureTourns;
+export default getFutureTourns;
 
