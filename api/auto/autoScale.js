@@ -161,15 +161,16 @@ const autoScale = async () => {
 		alert += `<p>Checking load levels to ensure extra capacity</p>`;
 
 		if (onePercentage < 20 && fifteenPercentage < 30) {
-			alert += `<p>Low load confirmed. ${onePercentage}% of capacity in active use. Destroying ${needed} machines</p>`;
+			alert += `<p>Low load confirmed. ${onePercentage.toFixed(2)}% of capacity in active use.</p>`;
+			alert += `<p>Destroying ${needed} machines</p>`;
 		} else {
-			alert += `<p>Load too high to adjust. ${onePercentage}% of capacity in active use. 15 minute load is ${fifteenPercentage} </p>`;
+			alert += `<p>Load too high to adjust. ${onePercentage.toFixed(2)}% of capacity in active use. 15 minute load is ${fifteenPercentage.toFixed(2)} </p>`;
 		}
 
 		if (loadThresholds?.ENABLED) {
 			const response = await decreaseLinodeCount(user, needed, true);
 			alert += '<pre>';
-			alert += JSON.stringify(response);
+			alert += JSON.stringify(response, null, 2);
 			alert += '</pre>';
 		} else {
 			alert += '<h5>Test Run Complete.  Autoscaler not enabled to actually take action.</h5>';

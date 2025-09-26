@@ -10,8 +10,10 @@ export const showTabroomUsage = async () => {
 		select
 			count(distinct student.person) count
 		from student, entry_student es, entry, event, tourn
-		where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-			and tourn.end > NOW()
+		where 1=1
+			and tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+			and tourn.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
+
 			and tourn.id = event.tourn
 			and tourn.hidden != 1
 			and event.id = entry.event
@@ -20,10 +22,11 @@ export const showTabroomUsage = async () => {
 			and es.student = student.id
 			and exists (
 				select timeslot.id
-				from timeslot
-				where timeslot.tourn = tourn.id
-				and timeslot.start > CURRENT_TIMESTAMP
-				and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+					from timeslot
+				where 1=1
+					and timeslot.tourn = tourn.id
+					and timeslot.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+					and timeslot.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
 			)
 	`, {
 		type: db.sequelize.QueryTypes.SELECT,
@@ -33,8 +36,9 @@ export const showTabroomUsage = async () => {
 		select
 			count(distinct student.person) count
 		from student, entry_student es, entry, event, tourn
-		where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-			and tourn.end > NOW()
+		where 1=1
+			and tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+			and tourn.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
 			and tourn.id = event.tourn
 			and tourn.hidden != 1
 			and event.id = entry.event
@@ -52,10 +56,11 @@ export const showTabroomUsage = async () => {
 
 			and exists (
 				select timeslot.id
-				from timeslot
-				where timeslot.tourn = tourn.id
-				and timeslot.start > CURRENT_TIMESTAMP
-				and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+					from timeslot
+				where 1=1
+					and timeslot.tourn = tourn.id
+					and timeslot.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+					and timeslot.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
 			)
 	`, {
 		type: db.sequelize.QueryTypes.SELECT,
@@ -65,17 +70,19 @@ export const showTabroomUsage = async () => {
 		select
 			count(distinct judge.person) count
 		from judge, category, tourn
-		where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-			and tourn.end > CURRENT_TIMESTAMP
+		where 1=1
+			and tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+			and tourn.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
 			and tourn.id = category.tourn
 			and tourn.hidden != 1
 			and category.id = judge.category
 			and exists (
 				select timeslot.id
-				from timeslot
-				where timeslot.tourn = tourn.id
-				and timeslot.start > CURRENT_TIMESTAMP
-				and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+					from timeslot
+				where 1=1
+					and timeslot.tourn = tourn.id
+					and timeslot.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+					and timeslot.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
 			)
 	`, {
 		type: db.sequelize.QueryTypes.SELECT,
@@ -85,15 +92,17 @@ export const showTabroomUsage = async () => {
 		select
 			count(distinct tourn.id) count
 		from tourn
-		where tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
-		and tourn.end > CURRENT_TIMESTAMP
+		where 1=1
+			and tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+			and tourn.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
 			and tourn.hidden != 1
 			and exists (
 				select timeslot.id
-				from timeslot
-				where timeslot.tourn = tourn.id
-				and timeslot.start > CURRENT_TIMESTAMP
-				and timeslot.end < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+					from timeslot
+				where 1=1
+					and timeslot.tourn = tourn.id
+					and timeslot.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+					and timeslot.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
 			)
 	`, {
 		type: db.sequelize.QueryTypes.SELECT,
@@ -103,7 +112,7 @@ export const showTabroomUsage = async () => {
 		select
 			count(distinct session.id) count
 		from session
-			where session.last_access > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 DAY)
+			where session.last_access > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR)
 	`, {
 		type: db.sequelize.QueryTypes.SELECT,
 	});

@@ -15,9 +15,6 @@ export const getAds = {
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
-		console.log(`What the hell?`);
-		console.log(currentAds);
-
 		return res.status(200).json(currentAds);
 	},
 };
