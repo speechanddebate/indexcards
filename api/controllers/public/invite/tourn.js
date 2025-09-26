@@ -179,31 +179,134 @@ export const getRound = {
 	// file I think -- CLP
 
 	GET: async (req, res) => {
+
 		const db = req.db;
 
-		let schemat = {};
+		const roundData = await db.sequelize.query(`
+			select
+				round.id roundId, round.name roundName, round.label roundLabel, round.type roundType,
+				round.published, round.post_results,
+				event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
+				online.value online, field_report.value fieldReport, anonymous_public anonymousPublic,
+				no_anon_dashboard noAnonymousDashboard, no_public_rooms.value noPublicRooms
+			from (round, event)
 
-		if (parseInt(req.params.roundId)) {
+				left join event_setting online_mode
+					on online_mode.event = event.id
+					and online_mode.tag  = 'online_mode'
 
-			schemat = await db.round.findByPk(
-				parseInt(req.params.roundId), {
-					include: [
-						{ model: db.roundSetting, as: 'Settings' },
-						{ model: db.panel, as: 'Panels' },
-					],
-				});
+				left join event_setting field_report
+					on field_report.event = event.id
+					and field_report.tag  = 'field_report'
 
-			if (schemat && schemat.published === 0) {
-				schemat = { message: 'Round is not published' };
-			}
+				left join event_setting no_public_rooms
+					on no_public_rooms.event = event.id
+					and no_public_rooms.tag  = 'no_public_rooms'
 
-			if (schemat == null) {
-				schemat = { message: 'Round is not published' };
-			}
+				left join event_setting anonymous_rooms
+					on anonymous_public.event = event.id
+					and anonymous_public.tag  = 'anonymous_public'
+
+				left join event_setting noAnonymousDashboard
+					on noAnonymousDashboard.event = event.id
+					and noAnonymousDashboard.tag  = 'noAnonymousDashboard'
+
+			where 1=1
+				and round.id = :roundId
+				and round.event = event.id
+				and round.published > 0
+		`, {
+			replacements : { roundId : req.params.roundId },
+			type         : db.Sequelize.QueryTypes.SELECT,
+		});
+
+		if (roundData.length < 1) {
+			return res.status(404).json({ message: `No round found with ID ${req.params.roundID}`});
 		}
 
-		return res.status(200).json(schemat);
+		const round = roundData[0];
+
+		const schemats = db.sequelize.query(`
+			select
+				panel.id panelId, panel.letter panelLetter, panel.flight, panel.bye,
+				room.id roomId, room.name roomName,
+				entry.id entryId, entry.code entryCode, entry.name entryName,
+				ballot.side side, ballot.speakerorder speakerOrder,
+				judge.id judgeId,
+				judge.first judgeFirst, judge.last judgeLast, judge.middle judgeMiddle,
+				judge.code judgeCode
+
+			from (panel, ballot, entry)
+				left join room on panel.room = room.id
+				left join judge on ballot.judge = judge.id
+
+			where 1=1
+				and panel.round  = :roundId
+				and panel.id     = ballot.panel
+				and ballot.entry = entry.id
+
+			group by ballot.id
+			order by panel.flight, panel.letter
+		`, {
+			replacements : { roundId : round.id },
+			type         : db.Sequelize.QueryTypes.SELECT,
+		});
+
+		if (round.anonymousPublic) {
+			schemats.forEach( (section) => {
+				delete section.entryName;
+				delete section.entryId,
+				delete section.judgeFirst;
+				delete section.judgeMiddle;
+				delete section.judgeLast;
+				delete section.judgeId;
+
+			});
+		}
+
+		if (round.noPublicRooms) {
+			schemats.forEach( (section) => {
+				delete section.roomId;
+				delete section.roomName;
+			});
+		}
+
+		return res.status(200).json(schemats);
 	},
+};
+
+getRound.GET.apiDoc = {
+	summary     : 'Returns an schematic of a requested round so long as it is public',
+	operationId : 'getRound',
+	parameters  : [
+		{
+			in          : 'path',
+			name        : 'tournId',
+			description : 'Tournament ID to return events for',
+			required    : false,
+			schema      : { type: 'number', minimum: 1 },
+		}, {
+			in          : 'path',
+			name        : 'roundId',
+			description : 'Round ID to return schematics for',
+			required    : false,
+			schema      : { type: 'number', minimum: 1 },
+		},
+	],
+	responses: {
+		200: {
+			description: 'Array of panels with judges and students',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'array',
+					},
+				},
+			},
+		},
+		default: { $ref: '#/components/responses/ErrorResponse' },
+	},
+	tags: ['invite', 'public', 'schematics', 'rounds', 'pairings'],
 };
 
 export const getTournPublishedFiles = {
@@ -370,6 +473,7 @@ export const getTournPublishedResults = {
 		const results = await db.sequelize.query(`
 			select
 				result_set.id, result_set.label name, result_set.bracket, result_set.generated,
+				result_set.published, result_set.coach,
 				event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
 				sweep_set.id sweepSetId, sweep_set.name sweepSetName,
 				sweep_award.id sweepAwardId, sweep_award.name sweepAwardName
@@ -381,6 +485,7 @@ export const getTournPublishedResults = {
 
 			where 1=1
 				and result_set.tourn = :tournId
+				and result_set.published = 1
 				and tourn.id = result_set.tourn
 				and tourn.hidden = 0
 		`, {
