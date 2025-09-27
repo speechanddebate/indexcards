@@ -175,9 +175,6 @@ getTournInvite.GET.apiDoc = {
 
 export const getRound = {
 
-	// Replace this with a more comprehensive pull of schematics in another
-	// file I think -- CLP
-
 	GET: async (req, res) => {
 
 		const db = req.db;
@@ -185,10 +182,13 @@ export const getRound = {
 		const roundData = await db.sequelize.query(`
 			select
 				round.id roundId, round.name roundName, round.label roundLabel, round.type roundType,
-				round.published, round.post_results,
+				round.published, round.post_primary, round.post_secondary, round.post_feedback,
 				event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
-				online.value online, field_report.value fieldReport, anonymous_public anonymousPublic,
-				no_anon_dashboard noAnonymousDashboard, no_public_rooms.value noPublicRooms
+				online_mode.value online,
+				field_report.value fieldReport,
+				anonymous_public.value anonymousPublic,
+				no_anon_dashboard.value noAnonymousDashboard,
+				no_public_rooms.value noPublicRooms
 			from (round, event)
 
 				left join event_setting online_mode
@@ -203,13 +203,13 @@ export const getRound = {
 					on no_public_rooms.event = event.id
 					and no_public_rooms.tag  = 'no_public_rooms'
 
-				left join event_setting anonymous_rooms
+				left join event_setting anonymous_public
 					on anonymous_public.event = event.id
 					and anonymous_public.tag  = 'anonymous_public'
 
-				left join event_setting noAnonymousDashboard
-					on noAnonymousDashboard.event = event.id
-					and noAnonymousDashboard.tag  = 'noAnonymousDashboard'
+				left join event_setting no_anon_dashboard
+					on no_anon_dashboard.event = event.id
+					and no_anon_dashboard.tag  = 'no_anon_dashboard'
 
 			where 1=1
 				and round.id = :roundId
@@ -226,7 +226,35 @@ export const getRound = {
 
 		const round = roundData[0];
 
-		const schemats = db.sequelize.query(`
+		const translator = {
+			0 : 'none',
+			1 : 'full',
+			2 : 'no_judges',
+			3 : 'entry_list',
+			5 : 'room_assignments',
+		};
+
+		if (!round.published) {
+			round.published = 'none';
+		} else if (translator[round.published]) {
+			round.published = translator[round.published] || 'none';
+		}
+
+		const resultsTranslator = {
+			0 : 'none',
+			1 : 'coaches',
+			2 : 'entries',
+		};
+
+		['post_primary', 'post_secondary', 'post_feedback'].forEach( (tag) => {
+			if (!round[tag]) {
+				round[tag] = 'none';
+			} else if (resultsTranslator[round[tag]]) {
+				round[tag] = resultsTranslator[round[tag]] || 'none';
+			}
+		});
+
+		const schemats = await db.sequelize.query(`
 			select
 				panel.id panelId, panel.letter panelLetter, panel.flight, panel.bye,
 				room.id roomId, room.name roomName,
@@ -248,7 +276,7 @@ export const getRound = {
 			group by ballot.id
 			order by panel.flight, panel.letter
 		`, {
-			replacements : { roundId : round.id },
+			replacements : { roundId : round.roundId },
 			type         : db.Sequelize.QueryTypes.SELECT,
 		});
 

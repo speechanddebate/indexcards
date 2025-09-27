@@ -15,13 +15,13 @@ import {
 } from '../../../controllers/public/invite/list.js';
 
 export default [
-	{ path: '/public/invite/:tournId'          , module : getTournInvite }           ,
-	{ path: '/public/invite/:tournId/events'   , module : getTournEvents }           ,
-	{ path: '/public/invite/:tournId/files'    , module : getTournPublishedFiles }   ,
-	{ path: '/public/invite/:tournId/rounds'   , module : getTournPublishedRounds }  ,
-	{ path: '/public/invite/:tournId/results'  , module : getTournPublishedResults } ,
-	{ path: '/public/invite/round/:roundId'    , module : getRound }                 ,
-	{ path: '/public/invite/upcoming'          , module : getFutureTourns }          ,
-	{ path: '/public/invite/upcoming/:circuit' , module : getFutureTourns }          ,
-	{ path: '/public/invite/thisweek'          , module : getThisWeekTourns }        ,
+	{ path: '/public/invite/:tournId'                , module : getTournInvite }           ,
+	{ path: '/public/invite/:tournId/events'         , module : getTournEvents }           ,
+	{ path: '/public/invite/:tournId/files'          , module : getTournPublishedFiles }   ,
+	{ path: '/public/invite/:tournId/rounds'         , module : getTournPublishedRounds }  ,
+	{ path: '/public/invite/:tournId/results'        , module : getTournPublishedResults } ,
+	{ path: '/public/invite/:tournId/round/:roundId' , module : getRound }                 ,
+	{ path: '/public/invite/upcoming'                , module : getFutureTourns }          ,
+	{ path: '/public/invite/upcoming/:circuit'       , module : getFutureTourns }          ,
+	{ path: '/public/invite/thisweek'                , module : getThisWeekTourns }        ,
 ];
