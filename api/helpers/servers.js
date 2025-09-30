@@ -610,7 +610,7 @@ export const getProxyStatus = async(existingMachines) => {
 		return `Could not connect to HAProxy.  Try again later.`;
 	}
 
-	allStatus.haproxyData = haproxyData;
+	allStatus.haproxyData = haproxyData.data;
 
 	// HAproxy's export format is so convoluted I swear Jon Bruschke designed
 	// it. Parse it down to a key value store organized by host that an actual
