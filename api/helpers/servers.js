@@ -758,8 +758,8 @@ export const getProxyStatus = async(existingMachines) => {
 
 		if (machine.label.includes('admin')) {
 
-			const masonHost = `mason-admin`;
-			const masonId = haproxyKey[masonHost];
+			const masonHost = `mason-admin1`;
+			const masonId   = haproxyKey[masonHost];
 
 			machineStatus.mason = {
 				1: {
@@ -771,7 +771,7 @@ export const getProxyStatus = async(existingMachines) => {
 				},
 			};
 
-			const indexcardsHost = `indexcards-admin`;
+			const indexcardsHost = `indexcards-admin1`;
 			const indexcardsId = haproxyKey[indexcardsHost];
 
 			machineStatus.indexcards = {
@@ -784,7 +784,7 @@ export const getProxyStatus = async(existingMachines) => {
 				},
 			};
 
-			machineStatus.masonID = haproxyKey[masonHost];
+			machineStatus.masonID      = haproxyKey[masonHost];
 			machineStatus.indexcardsID = haproxyKey[indexcardsHost];
 		}
 
