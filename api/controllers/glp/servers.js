@@ -121,7 +121,12 @@ export const rebootInstance = {
 		req.returnToSender = true;
 		const machine = await getTabroomInstance.GET(req, res);
 
-		if (!machine || !machine?.tags?.includes(config.LINODE.WEBHOST_BASE)) {
+		if (!machine
+			|| (
+				!machine?.tags?.includes(config.LINODE.WEBHOST_BASE)
+				&& !machine?.tags?.includes('tab-admin')
+			)
+		) {
 			return res.status(200).json({
 				message: `Only active tabweb instances can be rebooted with this interface.  Please try again with another host.`,
 			});

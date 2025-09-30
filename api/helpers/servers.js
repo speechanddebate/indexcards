@@ -308,9 +308,9 @@ export const increaseLinodeCount = async (whodunnit, countNumber, silent) => {
 	const hostnames = tabwebs.map( (machine) => machine.label );
 	const target = parseInt(countNumber) || 0;
 
-	if ((target + tabwebs.length) > (config.TABWEB_CAP || 20))  {
+	if ((target + tabwebs.length) > (config.TABWEB_CAP || 24))  {
 		return {
-			message: `This process only allows for ${config.TABWEB_CAP || 20} machines to exist at one time.`,
+			message: `This process only allows for ${config.TABWEB_CAP || 24} machines to exist at one time.`,
 		};
 	}
 
@@ -751,6 +751,35 @@ export const getProxyStatus = async(existingMachines) => {
 					downtime    : parsedProxyData[masonId]?.downtime || 0,
 				};
 			}
+		}
+
+		if (machine.label.includes('tab-admin')) {
+
+			const masonHost = `mason-admin`;
+			const masonId = haproxyKey[masonHost];
+
+			machineStatus.mason = {
+				1: {
+					id          : masonId,
+					status      : parsedProxyData[masonId]?.status,
+					checkStatus : parsedProxyData[masonId]?.check_status,
+					checkCode   : parsedProxyData[masonId]?.check_code,
+					downtime    : parsedProxyData[masonId]?.downtime || 0,
+				},
+			};
+
+			const indexcardsHost = `indexcards-admin`;
+			const indexcardsId = haproxyKey[indexcardsHost];
+
+			machineStatus.indexcards = {
+				1: {
+					id          : indexcardsId,
+					status      : parsedProxyData[indexcardsId]?.status,
+					checkStatus : parsedProxyData[masonId]?.check_status,
+					checkCode   : parsedProxyData[masonId]?.check_code,
+					downtime    : parsedProxyData[masonId]?.downtime || 0,
+				},
+			};
 		}
 
 		allStatus[machine.label] = machineStatus;
