@@ -629,6 +629,7 @@ export const getProxyStatus = async(existingMachines) => {
 				}
 
 				parsedProxyData[rowId][row.field.name] = row.value.value;
+				console.log(`proxy key for machine is ${row.value.value}`);
 
 				if (row.field?.name === 'svname') {
 					haproxyKey[row.value.value] = rowId;
@@ -753,7 +754,7 @@ export const getProxyStatus = async(existingMachines) => {
 			}
 		}
 
-		if (machine.label.includes('tab-admin')) {
+		if (machine.label.includes('admin')) {
 
 			const masonHost = `mason-admin`;
 			const masonId = haproxyKey[masonHost];
