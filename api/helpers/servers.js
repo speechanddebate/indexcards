@@ -631,7 +631,6 @@ export const getProxyStatus = async(existingMachines) => {
 				}
 
 				parsedProxyData[rowId][row.field.name] = row.value.value;
-				console.log(`proxy key for machine is ${row.value.value}`);
 
 				if (row.field?.name === 'svname') {
 					haproxyKey[row.value.value] = rowId;
@@ -705,7 +704,6 @@ export const getProxyStatus = async(existingMachines) => {
 		) / 60 / 60 / 24;
 
 		// Figure out the HAProxy round robin status of the expected containers on this machine
-
 		if (machine.label.includes('tabweb')) {
 
 			const machineNumber = machine.label.replace(/\D/g,'');
@@ -756,7 +754,7 @@ export const getProxyStatus = async(existingMachines) => {
 			}
 		}
 
-		if (machine.label.includes('admin')) {
+		if (machine.label.includes('tab-admin')) {
 
 			const masonHost = `mason-admin1`;
 			const masonId   = haproxyKey[masonHost];
