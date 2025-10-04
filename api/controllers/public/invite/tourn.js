@@ -256,50 +256,105 @@ export const getRound = {
 
 		const schemats = await db.sequelize.query(`
 			select
-				panel.id panelId, panel.letter panelLetter, panel.flight, panel.bye,
+				section.id sectionId, section.letter letter, section.flight, section.bye,
 				room.id roomId, room.name roomName,
 				entry.id entryId, entry.code entryCode, entry.name entryName,
 				ballot.side side, ballot.speakerorder speakerOrder,
 				judge.id judgeId,
 				judge.first judgeFirst, judge.last judgeLast, judge.middle judgeMiddle,
-				judge.code judgeCode
+				ballot.chair chair, judge.code judgeCode
 
-			from (panel, ballot, entry)
-				left join room on panel.room = room.id
+			from (panel section, ballot, entry)
+				left join room on section.room = room.id
 				left join judge on ballot.judge = judge.id
 
 			where 1=1
-				and panel.round  = :roundId
-				and panel.id     = ballot.panel
+				and section.round  = :roundId
+				and section.id     = ballot.panel
 				and ballot.entry = entry.id
 
 			group by ballot.id
-			order by panel.flight, panel.letter
+			order by section.flight, section.letter
 		`, {
 			replacements : { roundId : round.roundId },
 			type         : db.Sequelize.QueryTypes.SELECT,
 		});
 
-		if (round.anonymousPublic) {
-			schemats.forEach( (section) => {
-				delete section.entryName;
-				delete section.entryId,
-				delete section.judgeFirst;
-				delete section.judgeMiddle;
-				delete section.judgeLast;
-				delete section.judgeId;
+		const sections = {};
 
-			});
-		}
+		schemats.forEach( (section) => {
 
-		if (round.noPublicRooms) {
-			schemats.forEach( (section) => {
-				delete section.roomId;
-				delete section.roomName;
-			});
-		}
+			if (!sections[section.letter]) {
 
-		return res.status(200).json(schemats);
+				const sectionRecord = {
+					id       : section.sectionId,
+					flight   : section.flight,
+					bye      : section.bye,
+					roomId   : section.roomId,
+					roomName : section.roomName,
+					judges   : [],
+					judgeIds : {},
+					entries  : [],
+					entryIds : {},
+				};
+
+				if (round.noPublicRooms) {
+					delete sectionRecord.roomId;
+					delete sectionRecord.roomName;
+				}
+
+				sections[section.letter] = sectionRecord;
+			}
+
+			if (!sections[section.letter].judgeIds[section.judgeId]) {
+
+				const judge = {
+					id     : section.judgeId,
+					code   : section.judgeCode,
+					name   : `${section.judgeLast}, ${section.judgeFirst}${section.judgeMiddle ? ` ${section.judgeMiddle}` : ''}`,
+					first  : section.judgeFirst,
+					last   : section.judgeLast,
+					middle : section.judgeMiddle,
+					chair  : section.chair ? true : false,
+				};
+
+				if (round.anonymousPublic) {
+					delete judge.first;
+					delete judge.middle;
+					delete judge.last;
+					delete judge.name;
+				}
+
+				sections[section.letter].judgeIds[section.judgeId] = true;
+				sections[section.letter].judges.push(judge);
+			}
+
+			if (!sections[section.letter].entryIds[section.entryId]) {
+				const entry = {
+					id    : section.entryId,
+					code  : section.entryCode,
+					name  : section.entryName,
+					side  : section.side,
+					order : section.speakerOrder,
+				};
+
+				if (!entry.side) {
+					delete entry.side;
+				}
+				if (!entry.order) {
+					delete entry.order;
+				}
+
+				if (round.anonymousPublic) {
+					delete entry.name;
+				}
+
+				sections[section.letter].entryIds[section.entryId] = true;
+				sections[section.letter].entries.push(entry);
+			}
+		});
+
+		return res.status(200).json(sections);
 	},
 };
 
@@ -323,7 +378,7 @@ getRound.GET.apiDoc = {
 	],
 	responses: {
 		200: {
-			description: 'Array of panels with judges and students',
+			description: 'Array of sections with judges and students',
 			content: {
 				'application/json': {
 					schema: {
@@ -451,12 +506,12 @@ export const getTournPublishedRounds = {
 				event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType
 			from (round, event, tourn)
 			where 1=1
-				and event.tourn = :tournId
-				and event.id = round.event
+				and event.tourn  = :tournId
+				and event.id     = round.event
+				and event.tourn  = tourn.id
+				and tourn.hidden = 0
 				and round.published IS NOT NULL
 				and round.published > 0
-				and event.tourn = tourn.id
-				and tourn.hidden   = 0
 			order by event.type, event.abbr, round.name
 		`, {
 			replacements: { tournId: req.params.tournId },
@@ -540,6 +595,100 @@ getTournPublishedResults.GET.apiDoc = {
 	responses: {
 		200: {
 			description: 'Array of events',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'array',
+					},
+				},
+			},
+		},
+		default: { $ref: '#/components/responses/ErrorResponse' },
+	},
+	tags: ['invite', 'public', 'results'],
+};
+
+export const getResults = {
+
+	GET: async (req, res) => {
+
+		const db = req.db;
+
+		const resultSetData = await db.sequelize.query(`
+			select
+				rs.id rsId, rs.label rsName, rs.bracket rsBracket, rs.generated rsGenerated,
+				rs.tag rsTag, rs.code rsCode, rs.qualifier rsQualifier,
+				tourn.id tournId, tourn.name tournName, tourn.start tournStart,
+				event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
+				circuit.id circuitId, circuit.name circuitName, circuit.abbr circuitAbbr
+			from (result_set rs, tourn)
+				left join event on rs.event = event.id
+				left join circuit on rs.circuit = circuit.id
+				left join sweep_set on rs.sweep_set = sweep_set.id
+				left join sweep_award on rs.sweep_award = sweep_award.id
+			where 1=1
+				and rs.id = :rsId
+				and rs.tourn = tourn.id
+				and rs.published > 0
+		`, {
+			replacements : { roundId : req.params.resultSetId },
+			type         : db.Sequelize.QueryTypes.SELECT,
+		});
+
+		if (resultSetData.length < 1) {
+			return res.status(404).json({ message: `No result set found with ID ${req.params.resultSetID}`});
+		}
+
+		const resultSet = resultSetData[0];
+
+		resultSet.results = await db.sequelize.query(`
+			select
+				result.id, result.rank, result.place, result.percentile,
+				result.details details, result.raw_scores rawScores,
+				entry.id entryId, entry.code entryCode, entry.name entryName,
+				student.id studentId, student.first studentFirst, student.middle studentMiddle, student.last studentLast,
+				school.id schoolId, school.chapter chapterId, school.name schoolName,
+				chapter.id chapterId, chapter.formal formalName
+
+			from (result)
+
+				left join entry on entry.id         = result.entry
+				left join student on student.id     = result.student
+				left join school on school.id       = result.school
+				left join chapter on school.chapter = chapter.id
+
+			where 1=1
+				and result.result_set = :resultSetId
+		`, {
+			replacements : { roundId : req.params.resultSetId },
+			type         : db.Sequelize.QueryTypes.SELECT,
+		});
+
+		res.status(200).json(resultSet);
+	},
+};
+
+getResults.GET.apiDoc = {
+	summary     : 'Returns a result set for display as long as it is public',
+	operationId : 'getResults',
+	parameters  : [
+		{
+			in          : 'path',
+			name        : 'tournId',
+			description : 'Tournament ID to return events for',
+			required    : false,
+			schema      : { type: 'number', minimum: 1 },
+		}, {
+			in          : 'path',
+			name        : 'resultSetId',
+			description : 'Result Set ID to return results for',
+			required    : false,
+			schema      : { type: 'number', minimum: 1 },
+		},
+	],
+	responses: {
+		200: {
+			description: 'Results JSON format for parsing into a table',
 			content: {
 				'application/json': {
 					schema: {

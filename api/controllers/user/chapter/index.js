@@ -42,7 +42,9 @@ export const userChaptersByTourn = {
 		});
 
 		const chapterIds = chapters.map( (chapter) => chapter.id );
+
 		if (chapterIds.length < 1) {
+			// Avoids null error below. There is no chapter 1.
 			chapterIds.push(1);
 		}
 
@@ -71,7 +73,28 @@ export const userChaptersByTourn = {
 		});
 
 		chapters.push(...dashboards);
-		return res.status(200).json(chapters);
+
+		const schoolIds = chapters.map( (chapter) => chapter.schoolId );
+
+		const events = await req.db.sequelize.query(`
+			select
+				event.id, event.type, event.name, event.abbr
+			from event, entry
+			where 1=1
+				and event.tourn = :tournId
+				and event.id = entry.event
+				and entry.active = 1
+				and entry.school IN ( :schoolIds )
+			order by event.type, event.abbr
+		`, {
+			replacements : {schoolIds, tournId: req.params.tournId },
+			type: req.db.Sequelize.QueryTypes.SELECT,
+		});
+
+		return res.status(200).json({
+			chapters,
+			events,
+		});
 	},
 };
 
