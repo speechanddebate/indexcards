@@ -11,6 +11,7 @@ import judge from './judge.js';
 import inbox from './inbox.js';
 import push from './push.js';
 import chapter from './chapter.js';
+import tourn from './tourn.js';
 
 export default [
 	{ path : '/user/session'                , module : getSession }          ,
@@ -25,4 +26,5 @@ export default [
 	...chapter                              ,
 	...judge                                ,
 	...inbox                                ,
+	...tourn,
 ];
