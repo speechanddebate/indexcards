@@ -5,28 +5,40 @@ export const circuitQualifiers = {
 
 		let events = [];
 
-		if (req.body.qualifying_target) {
-
-			events = await db.event.findByPk(req.body.qualifying_target);
-
+		if (req.body.name === 'qualifying_target') {
+			const event = await db.event.findByPk(req.body.property_value);
+			events.push(event);
 		} else {
 			events = await db.event.findAll(
 				{ where: { tourn: req.params.tournId } }
 			);
 		}
 
-		events.forEach( async (event) => {
+		let msg = '';
+
+		for (const event of events) {
 			if (req.body.eventId && req.body.eventId !== event.id) {
 				return;
 			}
-			await saveEventResult(req.db, event.id);
-		});
+			const eventSave = await saveEventResult(req.db, event.id);
+			console.log(`Event Save is ${JSON.stringify(eventSave, null, 2)}` );
+			if (typeof eventSave === 'string') {
+				msg += eventSave;
+			}
+		}
 
-		res.status(200).json({
-			error   : false,
-			message : `Tournament qualifying data posted.`,
-			refresh : true,
-		});
+		if (msg) {
+			res.status(200).json({
+				error   : true,
+				message : `Tournament qualifying data posted for ${events.length} events.  ${msg}`,
+			});
+		} else {
+			res.status(200).json({
+				error   : false,
+				message : `Tournament qualifying data posted for ${events.length} events.`,
+				refresh : true,
+			});
+		}
 	},
 };
 
@@ -83,10 +95,6 @@ export const saveEventResult = async (db, eventId) => {
 	});
 
 	let message = '';
-	if (eventsWithQualifiers) {
-		const event = eventsWithQualifiers[0];
-		message = `${event.circuitAbbr} qualifying results in ${event.eventCode} have been generated`;
-	}
 
 	eventsWithQualifiers.forEach( async (event) => {
 
@@ -144,6 +152,9 @@ export const saveEventResult = async (db, eventId) => {
 		}
 
 		if (!qualRuleSet || Object.keys(qualRuleSet).length < 1) {
+			message = `Event ${event.abbr} had ${event.entryCount} entries compete `;
+			message += ` from ${event.schoolCount} schools, `;
+			message += ` which did not meet the threshold for qualifications.`;
 			return;
 		}
 
@@ -164,6 +175,8 @@ export const saveEventResult = async (db, eventId) => {
 			code      : event.eventCode,
 			generated : new Date(),
 		});
+
+		console.log(`I am here 5!`);
 
 		// Get final results set for the rankings
 
@@ -191,6 +204,8 @@ export const saveEventResult = async (db, eventId) => {
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
+		console.log(`I am here 6! Final results length is ${finalResults.length}`);
+
 		if (finalResults.length < 1) {
 			return;
 		}
@@ -204,6 +219,8 @@ export const saveEventResult = async (db, eventId) => {
 		}
 
 		// Get last round participated data
+		//
+		console.log(`I am here 7!`);
 
 		const lastRoundQuery = `
 			select entry.id entry, max(round.name) roundname
@@ -231,6 +248,8 @@ export const saveEventResult = async (db, eventId) => {
 		if (lastRound.length < 1) {
 			return;
 		}
+
+		console.log(`I am here 8!`);
 
 		const entriesByLastRound = {};
 
@@ -288,6 +307,8 @@ export const saveEventResult = async (db, eventId) => {
 				}
 			}
 		}
+
+		console.log(`I am here 9!`);
 
 		if (eventRules.individuals) {
 
