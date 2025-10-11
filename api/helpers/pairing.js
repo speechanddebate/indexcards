@@ -67,9 +67,14 @@ export const formatPairingBlast = async (queryData, req) => {
 			flip_at.value_date flip_at,
 			aff_label.value aff_label,
 			neg_label.value neg_label,
-			tourn.tz
+			tourn.tz,
+			limit_info.value limitInfo
 
 		from (tourn, event, round, panel section)
+
+			left join tourn_setting limit_info
+				on limit_info.tourn = tourn.id
+				and limit_info.tag = 'limit_info'
 
 			left join room on room.id = section.room
 
@@ -147,8 +152,10 @@ export const formatPairingBlast = async (queryData, req) => {
 	const roundData = await processRounds(rawRoundData);
 
 	for (const entry of rawEntries) {
+
 		const section = roundData[entry.roundid].sections[entry.sectionid];
-		section.entries.push({
+
+		const entryLimit = {
 			id         : entry.id,
 			code       : entry.code,
 			name       : entry.name,
@@ -157,12 +164,19 @@ export const formatPairingBlast = async (queryData, req) => {
 			side       : entry.side,
 			speaker    : entry.speakerorder,
 			pronoun    : entry.pronoun,
-		});
+		};
+
+		if (roundData[entry.roundid].limitInfo) {
+			delete entryLimit.pronoun;
+		}
+		section.entries.push(entryLimit);
 	}
 
 	for (const judge of rawJudges) {
+
 		const section = roundData[judge.roundid].sections[judge.sectionid];
-		section.judges.push({
+
+		const judgeLimit = {
 			id         : judge.id,
 			code       : judge.code,
 			first      : judge.first,
@@ -172,7 +186,13 @@ export const formatPairingBlast = async (queryData, req) => {
 			schoolName : judge.schoolname,
 			chair      : judge.chair,
 			pronoun    : judge.pronoun,
-		});
+		};
+
+		if (roundData[judge.roundid].limitInfo) {
+			delete judgeLimit.pronoun;
+		}
+
+		section.judges.push(judgeLimit);
 	}
 
 	// Now format round and section messages for each recipient.
@@ -672,6 +692,7 @@ const processRounds = async (rawRounds) => {
 				eventName      : rawRound.eventname,
 				eventAbbr      : rawRound.eventabbr,
 				eventType      : rawRound.eventtype,
+				limitInfo      : rawRound.limitInfo,
 				flip           : false,
 				start          : {},
 				shortstart     : {},
@@ -683,7 +704,8 @@ const processRounds = async (rawRounds) => {
 				sidelocks      : {},
 			};
 
-			const settingTags = ['include_room_notes',
+			const settingTags = [
+				'include_room_notes',
 				'use_normal_rooms',
 				'anonymous_public',
 				'online_mode',
@@ -710,10 +732,10 @@ const processRounds = async (rawRounds) => {
 				}
 			}
 
-			// Every time I look for "the easy way to do something" that
-			// was like 4 characters in Perl the answer ends up being
-			// something like this monstrosity. 'Twas foreach (1 ... n) {}.
-			// Progress! Sigh.
+			// Every time I look for "the easy way to do something" that was
+			// like 4 characters in Perl the answer ends up being something
+			// like this monstrosity. 'Twas foreach (1 ... n) {}. Progress!
+			// Sigh.
 
 			for (const tick of [...Array(round.flights).keys()]) {
 				const flight = tick + 1;
