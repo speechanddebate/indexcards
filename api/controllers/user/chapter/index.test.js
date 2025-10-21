@@ -46,16 +46,18 @@ describe('User Chapter', () => {
 			.expect('Content-Type', /json/)
 			.expect(200);
 
-		assert.isArray(res.body, 'Response is an array');
+		assert.isObject(res.body, 'Response is an object');
+		assert.isArray(res.body.chapters, 'Response object has an array of chapters');
+		assert.isArray(res.body.events, 'Response object has an array of events');
 
 		assert.equal(
-			res.body[1].name,
+			res.body.chapters[1].name,
 			'University School of Nashville',
 			'Correct school delivered with dashboard access'
 		);
 
 		assert.equal(
-			res.body[1].permission,
+			res.body.chapters[1].permission,
 			'dashboard',
 			'Correct school delivered with dashboard access'
 		);
