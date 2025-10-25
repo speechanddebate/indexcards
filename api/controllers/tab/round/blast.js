@@ -331,4 +331,29 @@ export const blastRoundPairing = {
 	},
 };
 
+export const roundBlastStatus = {
+
+	GET: async (req, res) => {
+
+		const publish = await req.db.sequelize.query(`
+			select
+				aq.id,
+				aq.tag, aq.message,
+				person.id personId, person.email, person.first, person.last,
+				aq.active_at activeAt,
+				aq.created_at createdAt
+			from (autoqueue aq, round)
+				left join person on person.id = aq.created_by
+			where 1=1
+				and round.id  = :roundId
+				and round.id = aq.round
+		`, {
+			replacements : { roundId: req.params.roundId },
+			type         : req.db.sequelize.QueryTypes.SELECT,
+		});
+
+		return res.status(200).json([...publish]); // always deliver an array, even when blank
+	},
+};
+
 export default blastRoundMessage;

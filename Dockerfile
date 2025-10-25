@@ -1,4 +1,4 @@
-FROM node:18.17.1 AS base
+FROM node:22.21.0 AS base
 WORKDIR /indexcards
 COPY ./ ./
 
