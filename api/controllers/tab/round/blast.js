@@ -347,6 +347,7 @@ export const roundBlastStatus = {
 			where 1=1
 				and round.id  = :roundId
 				and round.id = aq.round
+				and aq.tag IN ('blast', 'publish', 'blast_publish')
 		`, {
 			replacements : { roundId: req.params.roundId },
 			type         : req.db.sequelize.QueryTypes.SELECT,
