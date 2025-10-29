@@ -1,3 +1,5 @@
+import { shortZone } from '../../../helpers/dateTime.js';
+
 export const getTournInvite = {
 	GET: async (req, res) => {
 
@@ -145,6 +147,20 @@ export const getTournInvite = {
 		const promises = [];
 		promises.push(invite.events);
 		await Promise.all(promises);
+
+		if (invite.tourn.city === 'NSDA Campus'
+			|| invite.tourn.city === 'Online'
+		) {
+			const tournTZ = shortZone(invite.tourn.tz, new Date(invite.tourn.start));
+			invite.tourn.location = `${invite.tourn.city} (${tournTZ})`;
+		} else {
+			invite.tourn.location = `${invite.tourn.city}`;
+			if (invite.tourn.state) {
+				invite.tourn.location += `${invite.tourn.state}`;
+			} else {
+				invite.tourn.location += `${invite.tourn.country}`;
+			}
+		}
 
 		return res.status(200).json(invite);
 	},
