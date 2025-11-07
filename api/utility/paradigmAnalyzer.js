@@ -45,6 +45,12 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 
 	const results = [];
 
+	const metadata = {
+		promptTokenCount: 0,
+		candidatesTokenCount: 0,
+		totalTokenCount: 0,
+	};
+
 	for (const p of paradigms) {
 		console.log(`Analyzing paradigm for person ${p.person}...\n`);
 
@@ -69,6 +75,12 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 
 			const result = JSON.parse(response.text);
 			results.push({ ...result, person: p.person });
+
+			if (response.usageMetadata) {
+				metadata.promptTokenCount += response.usageMetadata.promptTokenCount || 0;
+				metadata.candidatesTokenCount += response.usageMetadata.candidatesTokenCount || 0;
+				metadata.totalTokenCount += response.usageMetadata.totalTokenCount || 0;
+			}
 		} catch (err) {
 			console.error(`Error analyzing paradigm for person ${p.person}:`, err);
 		}
@@ -83,7 +95,12 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 
 	const outputPath = path.join(process.cwd(), 'paradigm_analysis.csv');
 	fs.writeFileSync(outputPath, csv, 'utf8');
+
 	console.log(`\nDone. CSV file written to: ${outputPath}`);
+	console.log('\nUsage statistics:');
+	console.log(`\nPrompt Tokens: ${metadata.promptTokenCount}`);
+	console.log(`\nOutput Tokens: ${metadata.candidatesTokenCount}`);
+	console.log(`\nTotal Tokens: ${metadata.totalTokenCount}`);
 };
 
 await paradigmAnalyzer();
