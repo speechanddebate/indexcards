@@ -15,6 +15,7 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 		select person, value_text as 'paradigm'
 		from person_setting
 		where tag = 'paradigm'
+		and timestamp > '2025-01-01'
 		limit ${limit ?? 10}
 	`, {
 		type : db.sequelize.QueryTypes.SELECT,
@@ -51,8 +52,33 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 		totalTokenCount: 0,
 	};
 
-	for (const p of paradigms) {
-		console.log(`Analyzing paradigm for person ${p.person}...\n`);
+	// Gemini rate limits are 4K/RPM, but be conservative, and also avoid tokens/minute limits
+	const MAX_REQUESTS_PER_MINUTE = 200;
+	const MAX_CONCURRENT = Math.min(50, MAX_REQUESTS_PER_MINUTE);
+	const RATE_LIMIT_WINDOW = 60000;
+
+	let requestCount = 0;
+	let windowStart = Date.now();
+
+	const processParadigm = async (p) => {
+		const now = Date.now();
+		if (now - windowStart >= RATE_LIMIT_WINDOW) {
+			requestCount = 0;
+			windowStart = now;
+		}
+
+		if (requestCount >= MAX_REQUESTS_PER_MINUTE) {
+			const waitTime = RATE_LIMIT_WINDOW - (now - windowStart);
+			console.log(`Rate limit reached, waiting ${Math.ceil(waitTime / 1000)}s...`);
+			// eslint-disable-next-line no-promise-executor-return
+			await new Promise(resolve => setTimeout(resolve, waitTime));
+			requestCount = 0;
+			windowStart = Date.now();
+		}
+
+		requestCount++;
+
+		console.log(`Analyzing paradigm for person ${p.person}... (${requestCount}/${MAX_REQUESTS_PER_MINUTE} this minute)`);
 
 		try {
 			const response = await ai.models.generateContent({
@@ -74,17 +100,43 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 			});
 
 			const result = JSON.parse(response.text);
-			results.push({ ...result, person: p.person });
 
 			if (response.usageMetadata) {
 				metadata.promptTokenCount += response.usageMetadata.promptTokenCount || 0;
 				metadata.candidatesTokenCount += response.usageMetadata.candidatesTokenCount || 0;
 				metadata.totalTokenCount += response.usageMetadata.totalTokenCount || 0;
 			}
+
+			return { ...result, person: p.person };
 		} catch (err) {
 			console.error(`Error analyzing paradigm for person ${p.person}:`, err);
+			return null;
 		}
-	}
+	};
+
+	const processInBatches = async (items, concurrency) => {
+		const res = [];
+		const executing = [];
+
+		for (const item of items) {
+			const promise = processParadigm(item).then(result => {
+				executing.splice(executing.indexOf(promise), 1);
+				return result;
+			});
+
+			res.push(promise);
+			executing.push(promise);
+
+			if (executing.length >= concurrency) {
+				await Promise.race(executing);
+			}
+		}
+
+		return Promise.all(res);
+	};
+
+	const allResults = await processInBatches(paradigms, MAX_CONCURRENT);
+	results.push(...allResults.filter(r => r !== null));
 
 	// Should probably use a CSV library for this but whatever
 	let csv = `person,biased,biasScore,biasType,biasDetails\n`;
