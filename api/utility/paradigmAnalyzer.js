@@ -1,4 +1,4 @@
-// Invoke with e.g.: node api/utility/paradigmAnalyzer.js
+// Invoke with e.g.: node api/utility/paradigmAnalyzer.js > paradigm.log 2>&1 &
 import { GoogleGenAI, Type } from '@google/genai';
 import fs, { createWriteStream } from 'fs';
 import path from 'path';
