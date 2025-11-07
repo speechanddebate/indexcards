@@ -1,6 +1,6 @@
 // Invoke with e.g.: node api/utility/paradigmAnalyzer.js
 import { GoogleGenAI, Type } from '@google/genai';
-import fs from 'fs';
+import fs, { createWriteStream } from 'fs';
 import path from 'path';
 
 import config from '../../config/config.js';
@@ -44,8 +44,6 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 
 	console.log(`Starting paradigm analysis of ${paradigms.length} paradigms...\n`);
 
-	const results = [];
-
 	const metadata = {
 		promptTokenCount: 0,
 		candidatesTokenCount: 0,
@@ -60,6 +58,13 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 	let requestCount = 0;
 	let windowStart = Date.now();
 
+	// Should probably use a CSV library for this but whatever
+	const outputPath = path.join(process.cwd(), 'paradigm_analysis.csv');
+	const writeStream = createWriteStream(outputPath);
+	writeStream.write(`person,biased,biasScore,biasType,biasDetails\n`);
+
+	let processed = 0;
+
 	const processParadigm = async (p) => {
 		const now = Date.now();
 		if (now - windowStart >= RATE_LIMIT_WINDOW) {
@@ -69,7 +74,6 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 
 		if (requestCount >= MAX_REQUESTS_PER_MINUTE) {
 			const waitTime = RATE_LIMIT_WINDOW - (now - windowStart);
-			console.log(`Rate limit reached, waiting ${Math.ceil(waitTime / 1000)}s...`);
 			// eslint-disable-next-line no-promise-executor-return
 			await new Promise(resolve => setTimeout(resolve, waitTime));
 			requestCount = 0;
@@ -100,6 +104,14 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 			});
 
 			const result = JSON.parse(response.text);
+
+			const biasDetails = result.biasDetails ? result.biasDetails.replace(/"/g, '""').replace(/\n/g, ' ') : '';
+			writeStream.write(`${p.person},${result.biased ? 'true' : 'false'},${result.biasScore},${result.biasType},"${biasDetails}"\n`);
+
+			processed++;
+			if (processed % 1000 === 0) {
+				console.log(`Processed ${processed}/${paradigms.length}`);
+			}
 
 			if (response.usageMetadata) {
 				metadata.promptTokenCount += response.usageMetadata.promptTokenCount || 0;
@@ -135,18 +147,8 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 		return Promise.all(res);
 	};
 
-	const allResults = await processInBatches(paradigms, MAX_CONCURRENT);
-	results.push(...allResults.filter(r => r !== null));
-
-	// Should probably use a CSV library for this but whatever
-	let csv = `person,biased,biasScore,biasType,biasDetails\n`;
-	for (let i = 0; i < results.length; i++) {
-		const biasDetails = results[i].biasDetails ? results[i].biasDetails.replace(/"/g, '""').replace(/\n/g, ' ') : '';
-		csv += `${results[i].person},${results[i].biased ? 'true' : 'false'},${results[i].biasScore},${results[i].biasType},"${biasDetails}"\n`;
-	}
-
-	const outputPath = path.join(process.cwd(), 'paradigm_analysis.csv');
-	fs.writeFileSync(outputPath, csv, 'utf8');
+	await processInBatches(paradigms, MAX_CONCURRENT);
+	writeStream.end();
 
 	console.log(`\nDone. CSV file written to: ${outputPath}`);
 	console.log('\nUsage statistics:');
