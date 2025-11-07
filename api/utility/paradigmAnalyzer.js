@@ -61,7 +61,7 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 						biasType: { type: Type.STRING },
 						biasDetails: { type: Type.STRING },
 					},
-					required: ['biased', 'biasScore'],
+					required: ['biased', 'biasScore', 'biasType'],
 				},
 			},
 		});

@@ -9,13 +9,13 @@ You will output a JSON object in this form:
 {
     "biased": boolean,
     "biasScore": integer (1-5),
-    "biasType": "left" | "right" | "both" | "non-political" | null
+    "biasType": "left" | "right" | "both" | "standards" | "none"
     "biasDetails": string (optional)
 }
 ```
 * "biased" - a boolean flag that indicates whether you detected bias or not. It should be true if you detect any bias or indications of non-neutrality, and false otherwise.
 * "biasScore" - an integer from 1 to 5, where 1 is completely neutral and not biased at all, 2 is slightly biased, 3 is moderately biased, 4 is very biased, and 5 is extremely biased.
-* "biasType" - a string describing the type of bias detected. It should be "left" if a left-wing bias is detected, "right" if a right-wing bias is detected, "both" if both left-wing and right-wing bias are present simultaneously, or "non-political" if a non-political violation of general paradigm standards is found. If no bias is found, it should be null. If both a political bias and a non-political bias are found, default to the political bias type.
+* "biasType" - a string describing the type of bias detected. It should be "left" if a left-wing bias is detected, "right" if a right-wing bias is detected, "both" if both left-wing and right-wing bias are present simultaneously, or "standards" if a non-political violation of general paradigm standards is found. If no bias is found, it should be "none". If both a political bias and a non-political bias are found, default to the political bias type.
 * "biasDetails" - a string that explains what you found, why you consider the paradigm biased, and includes excerpts from the paradigm that demonstrate bias.
 
 # Detecting Left Wing Bias
