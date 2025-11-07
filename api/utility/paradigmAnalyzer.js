@@ -48,26 +48,30 @@ export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) 
 	for (const p of paradigms) {
 		console.log(`Analyzing paradigm for person ${p.person}...\n`);
 
-		const response = await ai.models.generateContent({
-			model: 'gemini-2.0-flash-lite',
-			contents: `${prompt}\n\n# Paradigm to Analayze\n\n${p.paradigm}`,
-			config: {
-				responseMimeType: 'application/json',
-				responseSchema: {
-					type: Type.OBJECT,
-					properties: {
-						biased: { type: Type.BOOLEAN },
-						biasScore: { type: Type.NUMBER, minimum: 1, maximum: 5 },
-						biasType: { type: Type.STRING },
-						biasDetails: { type: Type.STRING },
+		try {
+			const response = await ai.models.generateContent({
+				model: 'gemini-2.0-flash-lite',
+				contents: `${prompt}\n\n# Paradigm to Analayze\n\n${p.paradigm}`,
+				config: {
+					responseMimeType: 'application/json',
+					responseSchema: {
+						type: Type.OBJECT,
+						properties: {
+							biased: { type: Type.BOOLEAN },
+							biasScore: { type: Type.NUMBER, minimum: 1, maximum: 5 },
+							biasType: { type: Type.STRING },
+							biasDetails: { type: Type.STRING },
+						},
+						required: ['biased', 'biasScore', 'biasType'],
 					},
-					required: ['biased', 'biasScore', 'biasType'],
 				},
-			},
-		});
+			});
 
-		const result = JSON.parse(response.text);
-		results.push({ ...result, person: p.person });
+			const result = JSON.parse(response.text);
+			results.push({ ...result, person: p.person });
+		} catch (err) {
+			console.error(`Error analyzing paradigm for person ${p.person}:`, err);
+		}
 	}
 
 	// Should probably use a CSV library for this but whatever
