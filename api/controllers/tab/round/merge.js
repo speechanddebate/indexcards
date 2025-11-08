@@ -110,19 +110,26 @@ export const unmergeTimeslotRounds = {
 		try {
 			await db.sequelize.query(`
 				delete * from round_setting
-				(round, tag, value)
-				values (:roundId, 'timeslot_merge', 1)
+				where round.id = :roundId
+				and round.tag = 'timeslot_merge'
 			`, {
 				replacements : { roundId },
 				type         : db.sequelize.QueryTypes.DELETE,
 			});
-		} finally {
+
+		} catch (err) {
+
 			res.status(200).json({
-				refresh : true,
-				error   : false,
-				message : `All rounds have been restored to their original event.`,
+				error   : true,
+				message : `Error occurred on merge: ${err}`,
 			});
 		}
+
+		res.status(200).json({
+			refresh : true,
+			error   : false,
+			message : `All rounds have been restored to their original event.`,
+		});
 	},
 };
 
