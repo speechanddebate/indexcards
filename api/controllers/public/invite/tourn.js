@@ -1,5 +1,76 @@
 import { shortZone } from '../../../helpers/dateTime.js';
 
+export const getTournIdByWebname = {
+	GET: async (req, res) => {
+
+		const webname = req.params.webname.replace(/\W/g, '');
+		const reply = {
+			tournId: 0,
+			webname: '',
+			multiYear: false,
+		};
+
+		// Find the most recent tournament that answers to that name.
+
+		const results = await req.db.sequelize.query(`
+			select
+				tourn.id, tourn.webname
+			from tourn
+			where 1=1
+				and (tourn.webname = :webname OR tourn.id = :webname)
+			ORDER BY tourn.start DESC
+			LIMIT 1
+		`, {
+			replacements: {webname},
+			type         : req.db.sequelize.QueryTypes.SELECT,
+		});
+
+		if (results.length > 0) {
+
+			const tourn = results[0];
+
+			// If I'm searching by ID number, find the webname
+			if (tourn.webname !== webname) {
+				const nameCheck = await req.db.sequelize.query(`
+					select
+						tourn.id, tourn.webname
+					from tourn
+					where 1=1
+						and tourn.webname = :webname
+					ORDER BY tourn.start DESC
+					LIMIT 1
+				`, {
+					replacements: {webname: tourn.webname},
+					type         : req.db.sequelize.QueryTypes.SELECT,
+				});
+
+				if (nameCheck[0].id !== tourn.id) {
+					// I am the current instance of webname
+					reply.webname = tourn.webname;
+					reply.tournId = tourn.id;
+				} else {
+					// I am not the current instance of webname, so all URLs must be ID encoded
+					reply.webname = tourn.id.toString();
+					reply.tournId = tourn.id;
+				}
+
+				if (nameCheck.length > 1) {
+					reply.multiYear = true;
+				}
+
+			} else {
+				// If I'm searching by webname, deliver the current ID number
+				reply.webname = tourn.webname;
+				reply.tournId = tourn.id;
+				if (results.length > 1) {
+					reply.multiYear = true;
+				}
+			}
+		}
+		return res.status(200).json(reply);
+	},
+};
+
 export const getTournInvite = {
 	GET: async (req, res) => {
 
@@ -16,8 +87,8 @@ export const getTournInvite = {
 			const webname = req.params.tournId.replace(/\W/g, '');
 
 			try {
-				// Find the most recent tournament that answers to that name.
 
+				// Find the most recent tournament that answers to that name.
 				const result = await db.tourn.findOne({
 					where : { webname, hidden: 0 },
 					order : [['start', 'desc']],
@@ -61,6 +132,8 @@ export const getTournInvite = {
 				topic.source topicSource, topic.event_type topicEventType, topic.tag topicTag,
 				topic.topic_text topicText,
 				field_report.value fieldReport,
+				anonymous_public.value anonymousPublic,
+				live_updates.value liveUpdates,
 				description.value_text description
 
 			from (event, tourn)
@@ -77,6 +150,14 @@ export const getTournInvite = {
 					on field_report.event = event.id
 					and field_report.tag = 'field_report'
 
+				left join event_setting live_updates
+					on live_updates.event = event.id
+					and live_updates.tag = 'live_updates'
+
+				left join event_setting anonymous_public
+					on anonymous_public.event = event.id
+					and anonymous_public.tag = 'anonymous_public'
+
 				left join event_setting description
 					on description.event = event.id
 					and description.tag = 'description'
@@ -92,36 +173,6 @@ export const getTournInvite = {
 				and event.tourn = tourn.id
 				and event.type != 'attendee'
 				and tourn.hidden = 0
-		`, {
-			replacements : { tournId: invite.tourn.id },
-			type         : db.sequelize.QueryTypes.SELECT,
-		});
-
-		invite.rounds = await db.sequelize.query(`
-			select
-				round.id, round.label, round.name,
-				event.id eventId, event.abbr eventAbbr, event.name eventName,
-				publish_entry_list.value entryList
-
-			from (event, round, tourn)
-
-				left join round_setting publish_entry_list
-					on publish_entry_list.round = round.id
-					and publish_entry_list.tag = 'publish_entry_list'
-
-			where 1=1
-				and event.tourn = :tournId
-				and event.id = round.event
-				and tourn.id = event.tourn
-				and tourn.hidden   = 0
-				and (round.published > 0
-					OR EXISTS
-						(select rs.id
-						from round_setting rs
-						where rs.round = round.id
-						and rs.tag = 'publish_entry_list'
-					)
-				)
 		`, {
 			replacements : { tournId: invite.tourn.id },
 			type         : db.sequelize.QueryTypes.SELECT,
@@ -509,6 +560,7 @@ getTournEvents.GET.apiDoc = {
 };
 
 export const getTournPublishedRounds = {
+
 	GET: async (req, res) => {
 
 		const db = req.db;
@@ -519,8 +571,16 @@ export const getTournPublishedRounds = {
 					round.post_primary roundPostPrimary,
 					round.post_secondary roundPostSecondary,
 					round.post_feedback roundPostFeedback,
-				event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType
+				event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
+				event.level eventLevel,
+				nsda_event_category.value eventNSDACode
+
 			from (round, event, tourn)
+
+				left join event_setting nsda_event_category
+					on nsda_event_category.tag = 'nsda_event_category'
+					and nsda_event_category.event = event.id
+
 			where 1=1
 				and event.tourn  = :tournId
 				and event.id     = round.event
@@ -528,13 +588,44 @@ export const getTournPublishedRounds = {
 				and tourn.hidden = 0
 				and round.published IS NOT NULL
 				and round.published > 0
-			order by event.type, event.abbr, round.name
+				and event.type != 'attendee'
+
+			order by event.type,
+				event.level,
+				event.abbr,
+				round.name DESC
 		`, {
 			replacements: { tournId: req.params.tournId },
 			type: db.Sequelize.QueryTypes.SELECT,
 		});
 
 		return res.status(200).json(rounds);
+	},
+};
+
+export const getTournSchedule = {
+
+	GET: async (req, res) => {
+
+		const schedule = await req.db.sequelize.query(`
+			select
+				round.id, round.name, round.label, round.type, round.start_time startTime,
+				event.id eventId, event.abbr eventAbbr,
+				round.published,
+				timeslot.id timeslotId, timeslot.start timeslotStart
+			from (round, event, timeslot)
+			where 1=1
+				and event.tourn = :tournId
+				and event.id = round.event
+				and round.timeslot = timeslot.id
+				and event.type != 'attendee'
+			order by event.abbr, round.name, timeslot.start
+		`, {
+			replacements: { tournId: req.params.tournId },
+			type: req.db.Sequelize.QueryTypes.SELECT,
+		});
+
+		return res.status(200).json(schedule);
 	},
 };
 
@@ -578,7 +669,7 @@ export const getTournPublishedResults = {
 				sweep_award.id sweepAwardId, sweep_award.name sweepAwardName
 
 			from (result_set, tourn)
-				left join event on result_set.event = event.id
+				left join event on result_set.event = event.id and event.type != 'attendee'
 				left join sweep_set on result_set.sweep_set = sweep_set.id
 				left join sweep_award on sweep_award.id = sweep_set.sweep_award
 

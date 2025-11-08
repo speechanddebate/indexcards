@@ -109,9 +109,10 @@ export const unmergeTimeslotRounds = {
 
 		try {
 			await db.sequelize.query(`
-				delete * from round_setting
-				(round, tag, value)
-				values (:roundId, 'timeslot_merge', 1)
+				delete rs.*
+				from round_setting rs
+				where rs.round = :roundId
+				and rs.tag = 'timeslot_merge'
 			`, {
 				replacements : { roundId },
 				type         : db.sequelize.QueryTypes.DELETE,

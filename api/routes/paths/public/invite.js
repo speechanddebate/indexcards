@@ -7,6 +7,8 @@ import {
 	getTournPublishedFiles,
 	getTournPublishedRounds,
 	getTournPublishedResults,
+	getTournIdByWebname,
+	getTournSchedule,
 } from '../../../controllers/public/invite/tourn.js';
 
 import {
@@ -15,8 +17,10 @@ import {
 } from '../../../controllers/public/invite/list.js';
 
 export default [
+	{ path: '/public/invite/webname/:webname'        , module : getTournIdByWebname}       ,
 	{ path: '/public/invite/:tournId'                , module : getTournInvite }           ,
-	{ path: '/public/invite/:tournId/events'         , module : getTournEvents }           ,
+	{ path: '/public/invite/:tournId/events'         , module : getTournEvents }         ,
+	{ path: '/public/invite/:tournId/schedule'       , module : getTournSchedule }           ,
 	{ path: '/public/invite/:tournId/files'          , module : getTournPublishedFiles }   ,
 	{ path: '/public/invite/:tournId/rounds'         , module : getTournPublishedRounds }  ,
 	{ path: '/public/invite/:tournId/results'        , module : getTournPublishedResults } ,
