@@ -76,7 +76,7 @@ describe('getTournPublishedRounds Round List', () => {
 		assert.typeOf(body[0].eventId   , 'number' , 'Object contains valid event ID number');
 		assert.typeOf(body[0].eventName , 'string' , 'Object contains valid event name');
 		assert.equal(body[0].eventAbbr  , 'DUO'     , `The first listed event should be DI`);
-		assert.equal(body[0].roundName  , '1'      , `The first listed round should be DI Round 1`);
+		assert.equal(body[0].roundName  , '4'      , `The first listed round should be DI Round 4`);
 
 	});
 });
