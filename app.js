@@ -120,28 +120,23 @@ app.use(cookieParser());
 // Authentication.  Context depends on the sub-branch so that secondary
 // functions do not have to handle it in every call.
 
-app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
-
+app.use( async (req, res, next) => {
 	try {
-		// Everything under /user should be a logged in user; and all functions there
-		// apply only to the logged in user; no parameters allowed.
-		// For /user/judge/ID, /user/student/ID, /user/entry/ID, /user/checker/ID,
-		// /user/prefs/ID, check the perms against additional data
-
 		req.session = await auth(req, res);
-
-		if (!req.session) {
-			return res.status(401).json({
-				error   : false,
-				message : `User: You are not logged in.`,
-			});
-		}
 	} catch (err) {
-		console.log(`Found an error on user session request`);
-		console.log(err);
 		next(err);
 	}
 
+	next();
+});
+
+app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
+	if (!req.session) {
+		return res.status(401).json({
+			error   : false,
+			message : `User: You are not logged in.`,
+		});
+	}
 	next();
 });
 
@@ -155,28 +150,21 @@ const tabRoutes = [
 ];
 
 app.all(tabRoutes, async (req, res, next) => {
-	try {
-		// Functions that require tabber or owner permissions to a tournament overall
-		req.session = await auth(req, res);
 
-		if (!req.session) {
-			return res.status(401).json({
-				error   : true,
-				message : `Tab You are not logged in.`,
-			});
-		}
+	if (!req.session) {
+		return res.status(401).json({
+			error   : false,
+			message : `Tab: You are not logged in.`,
+		});
+	}
 
-		req.session = await tabAuth(req, res);
+	req.session = await tabAuth(req, res);
 
-		if (typeof req.session?.perms !== 'object') {
-			return res.status(401).json({
-				error   : true,
-				message : `You do not have access to that part of that tournament`,
-			});
-		}
-
-	} catch (err) {
-		next(err);
+	if (typeof req.session?.perms !== 'object') {
+		return res.status(401).json({
+			error   : true,
+			message : `You do not have access to that part of that tournament`,
+		});
 	}
 
 	next();
@@ -193,22 +181,21 @@ app.all(coachRoutes, async (req, res, next) => {
 	// access is in the /user/prefs directory because it's such a bizarre
 	// one off
 
-	req.session = await auth(req, res);
+	if (!req.session) {
+		return res.status(401).json({
+			error   : false,
+			message : `Coach: You are not logged in.`,
+		});
+	}
 
-	if (req.session) {
-		const chapter = await coachAuth(req, res);
-		if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
-			req.chapter = chapter;
-		} else {
-			return res.status(401).json({
-				error   : true,
-				message : `You do not have access to that part of that institution`,
-			});
-		}
+	const chapter = await coachAuth(req, res);
+
+	if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
+		req.chapter = chapter;
 	} else {
 		return res.status(401).json({
 			error   : true,
-			message : `Coach: You are not logged in.`,
+			message : `You do not have access to that part of that institution`,
 		});
 	}
 
@@ -225,24 +212,24 @@ app.all(localRoutes, async (req, res, next) => {
 	// apis related to administrators of districts (the committee), or a
 	// region, or an NCFL diocese, or a circuit.
 
-	try {
-		req.session = await auth(req, res);
+	if (!req.session) {
+		return res.status(401).json({
+			error   : false,
+			message : `Admin: You are not logged in.`,
+		});
+	}
 
-		if (req.session) {
-			const response = await localAuth(req, res);
-			if (typeof answer === 'object') {
-				req[req.params.localType] = response.local;
-				req.session.perms = { ...req.session.perms, ...response.perms };
-				next();
-			}
-		} else {
-			return res.status(401).json({
-				error   : true,
-				message : `Local : You are not logged in.`,
-			});
-		}
-	} catch (err) {
-		next(err);
+	const response = await localAuth(req, res);
+
+	if (typeof answer === 'object') {
+		req[req.params.localType] = response.local;
+		req.session.perms = { ...req.session.perms, ...response.perms };
+		next();
+	} else {
+		return res.status(401).json({
+			error   : true,
+			message : `Admin : You do not have the access required.`,
+		});
 	}
 
 	next();
@@ -253,58 +240,50 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 	// All EXT requests are from external services and sources that do not
 	// necessarily hook into the Tabroom authentication methods.  They must
 	// have instead a basic authentication header with a Tabroom ID and
-	// corresponding api_key setting for an account in person_settings.
-	// Certain endpoints might be authorized to only some person accounts, such
-	// as site admins for internal NSDA purposes, or Hardy because that guy is
-	// super shady and I need to keep a specific eye on him.
+	// corresponding api_key setting for an account in person_settings. Certain
+	// endpoints might be authorized to only some person accounts, such as site
+	// admins for internal NSDA purposes, or Hardy because that guy is super
+	// shady and I need to keep a specific eye on him.
 
-	try {
-		req.session = await keyAuth(req, res);
-		if (!req.session?.person) {
-			req.session = await auth(req, res);
-			if (!req.session?.settings[`api_auth_${req.params.area}`]) {
-				return res.status(401).json({
-					error   : true,
-					message : `That function is not accessible to your API credentials.  Key ${req.params.area} required`,
-				});
-			}
-		}
-
-		if (!req.session?.person) {
+	if (!req.session) {
+		try {
+			req.session = await keyAuth(req, res);
+		} catch(err) {
 			return res.status(401).json({
 				error   : true,
-				message : `That function is not accessible to your API credentials.  Key ${req.params.area} required`,
+				message : `Key API authentication failed: ${err}`,
 			});
+
 		}
-	} catch (err) {
-		return next(err);
+	}
+
+	if (!req.session?.settings[`api_auth_${req.params.area}`]) {
+		return res.status(401).json({
+			error   : true,
+			message : `That function is not accessible to your API credentials.  Key ${req.params.area} required`,
+		});
 	}
 
 	next();
+
 });
 
 app.all('/v1/glp/*', async (req, res, next) => {
 
 	// GLP are Godlike Powers; aka site administrators
 
-	try {
-		req.session = await auth(req, res);
+	if (!req.session) {
+		return res.status(401).json({
+			error     : true,
+			message   : `GLP : You are not logged in.`,
+		});
+	}
 
-		if (!req.session) {
-			return res.status(401).json({
-				error     : true,
-				message   : `GLP : You are not logged in.`,
-			});
-		}
-
-		if (!req.session?.site_admin) {
-			return res.status(401).json({
-				error   : true,
-				message : `That function is accessible to Tabroom site administrators only`,
-			});
-		}
-	} catch (err) {
-		next(err);
+	if (!req.session?.site_admin) {
+		return res.status(401).json({
+			error   : true,
+			message : `That function is accessible to Tabroom site administrators only`,
+		});
 	}
 
 	next();

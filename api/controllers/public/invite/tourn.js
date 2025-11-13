@@ -207,9 +207,9 @@ export const getTournInvite = {
 		} else {
 			invite.tourn.location = `${invite.tourn.city}`;
 			if (invite.tourn.state) {
-				invite.tourn.location += `${invite.tourn.state}`;
-			} else {
-				invite.tourn.location += `${invite.tourn.country}`;
+				invite.tourn.location += `, ${invite.tourn.state}`;
+			} else if (invite.tourn.country) {
+				invite.tourn.location += `, ${invite.tourn.country}`;
 			}
 		}
 
