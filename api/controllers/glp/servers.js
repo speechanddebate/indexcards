@@ -17,7 +17,6 @@ import {
 // Shows the instances that are currently alive according to the Linode API
 
 export const getInstances = {
-
 	GET: async (req, res) => {
 		const tabroomMachines = await getLinodeInstances();
 		return res.status(200).json(tabroomMachines);
@@ -28,7 +27,6 @@ export const getInstances = {
 // up/down data from the haproxy JSON dump.
 
 export const getInstanceStatus = {
-
 	GET: async (req, res) => {
 		const proxyMachineStatus = await getProxyStatus([]);
 		return res.status(200).json(proxyMachineStatus);
@@ -43,9 +41,7 @@ export const getInstanceStatus = {
 // Returns data about the current 24 hour period's projected tabroom usage.
 
 export const getTabroomUsage = {
-
 	GET: async (req, res) => {
-
 		// Moved function to a stub so that the auto api cron processes can
 		// also access it.  I know, I hate this sort of sixteen-nested-files
 		// thing, too.
@@ -77,6 +73,30 @@ export const getTabroomInstance = {
 		}
 
 		return res.status(200).json(linodeData.data);
+	},
+};
+
+// Simple counter of how many servers are currently running to display in the
+// header of cloud service administrators.
+
+export const getTabroomInstanceCounts = {
+
+	GET: async (req, res) => {
+
+		const tabwebCount = await req.db.sequelize.query(`
+			select
+				count(distinct id) as count
+			from server
+				where 1=1
+				and hostname like 'tabweb%'
+				and status = 'running'
+		`, {
+			type: req.db.Sequelize.QueryTypes.SELECT,
+		});
+
+		if (tabwebCount && tabwebCount.length > 0) {
+			return res.status(200).json({ ...tabwebCount[0] });
+		}
 	},
 };
 
