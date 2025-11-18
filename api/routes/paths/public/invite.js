@@ -21,18 +21,23 @@ import {
 	getFutureTourns,
 } from '../../../controllers/public/invite/list.js';
 
+import {
+	getEntryFieldByEvent,
+} from '../../../controllers/public/invite/event.js';
+
 export default [
-	{ path: '/public/invite/webname/:webname'        , module : getTournIdByWebname}       ,
-	{ path: '/public/invite/:tournId'                , module : getTournInvite }           ,
-	{ path: '/public/invite/:tournId/myschools'      , module : getMySchoolsByTourn }      ,
-	{ path: '/public/invite/:tournId/nonschools'     , module : getMyChaptersNonTourn }    ,
-	{ path: '/public/invite/:tournId/events'         , module : getTournEvents }           ,
-	{ path: '/public/invite/:tournId/schedule'       , module : getTournSchedule }         ,
-	{ path: '/public/invite/:tournId/files'          , module : getTournPublishedFiles }   ,
-	{ path: '/public/invite/:tournId/rounds'         , module : getTournPublishedRounds }  ,
-	{ path: '/public/invite/:tournId/results'        , module : getTournPublishedResults } ,
-	{ path: '/public/invite/:tournId/round/:roundId' , module : getRound }                 ,
-	{ path: '/public/invite/upcoming'                , module : getFutureTourns }          ,
-	{ path: '/public/invite/upcoming/:circuit'       , module : getFutureTourns }          ,
-	{ path: '/public/invite/thisweek'                , module : getThisWeekTourns }        ,
+	{ path: '/public/invite/webname/:webname'                 , module : getTournIdByWebname}       ,
+	{ path: '/public/invite/:tournId'                         , module : getTournInvite }           ,
+	{ path: '/public/invite/:tournId/myschools'               , module : getMySchoolsByTourn }      ,
+	{ path: '/public/invite/:tournId/nonschools'              , module : getMyChaptersNonTourn }    ,
+	{ path: '/public/invite/:tournId/events'                  , module : getTournEvents }           ,
+	{ path: '/public/invite/:tournId/events/:eventAbbr/field' , module : getEntryFieldByEvent }     ,
+	{ path: '/public/invite/:tournId/files'                   , module : getTournPublishedFiles }   ,
+	{ path: '/public/invite/:tournId/rounds'                  , module : getTournPublishedRounds }  ,
+	{ path: '/public/invite/:tournId/results'                 , module : getTournPublishedResults } ,
+	{ path: '/public/invite/:tournId/round/:roundId'          , module : getRound }                 ,
+	{ path: '/public/invite/:tournId/schedule'                , module : getTournSchedule }         ,
+	{ path: '/public/invite/upcoming'                         , module : getFutureTourns }          ,
+	{ path: '/public/invite/upcoming/:circuit'                , module : getFutureTourns }          ,
+	{ path: '/public/invite/thisweek'                         , module : getThisWeekTourns }        ,
 ];
