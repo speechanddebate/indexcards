@@ -1,11 +1,12 @@
-version: '3'
 services:
   indexcards:
     container_name: indexcards-dev
     build:
       context: .
+      target: dev
       dockerfile: Dockerfile
     image: indexcards-dev:latest
+    pull_policy: never #always build the local container
     restart: always
     ports:
         - 9001:3000
