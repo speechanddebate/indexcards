@@ -5,103 +5,6 @@ import db from './db.js';
 import { errorLogger } from './logger.js';
 import { config } from '../../config/config.js';
 
-export const auth = async (req) => {
-
-	if (req.session && req.session.id) {
-		return req.session;
-	}
-
-	const cookie = req.cookies[req.config.COOKIE_NAME] || req.headers['x-tabroom-cookie'];
-
-	if (cookie) {
-
-		let session = await db.session.findOne({
-			where: {
-				userkey: cookie,
-			},
-			include : [
-				{ model: db.person, as: 'Person' },
-				{ model: db.person, as: 'Su' },
-			],
-		});
-
-		if (session) {
-
-			session.Su = await session.getSu();
-
-			if (session.defaults) {
-				try {
-					session.defaults = JSON.parse(session.defaults);
-				} catch (err) {
-					errorLogger.info(`JSON parsing of defaults failed: ${err}`);
-				}
-			} else {
-				session.defaults = {};
-			}
-
-			if (session.agent) {
-				try {
-					session.agent = JSON.parse(session.agent);
-				} catch (err) {
-					errorLogger.info(`JSON parsing of agent failed: ${err}`);
-				}
-			} else {
-				session.agent = {};
-			}
-
-			if (session.Su)  {
-
-				let realname = session.Person.first;
-				if (session.Person.middle) {
-					realname += session.Person.middle;
-				}
-				realname +=  session.Person.last;
-				realname = `${session.Su.first} ${session.Su.last} as ${realname}`;
-
-				session = {
-					person      : session.Person.id,
-					site_admin  : session.Person.site_admin,
-					email       : session.Person.email,
-					name        : realname,
-					id          : session.id,
-					su          : session.Su.id,
-					...session.get({ raw: true }),
-				};
-
-				session.settings = await getSettings(
-					'person',
-					session.person,
-					{ skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] },
-				);
-
-			} else if (session.Person) {
-
-				let realname = session.Person.first;
-
-				if (session.Person.middle) {
-					realname += ` ${session.Person.middle}`;
-				}
-				realname += ` ${session.Person.last}`;
-				session = {
-					id          : session.id,
-					person      : session.Person.id,
-					site_admin  : session.Person.site_admin,
-					email       : session.Person.email,
-					name        : realname,
-					...session.get({ raw: true }),
-				};
-
-				session.settings = await getSettings(
-					'person',
-					session.person,
-					{ skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] },
-				);
-			}
-			return session;
-		}
-	}
-};
-
 export const keyAuth = async (req) => {
 
 	if (!req.headers.authorization) {
@@ -934,5 +837,3 @@ export const categoryCheck = async (req, res, categoryId) => {
 	const replacements = { categoryId };
 	return checkPerms(req, res, categoryQuery, replacements);
 };
-
-export default auth;

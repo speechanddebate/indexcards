@@ -21,8 +21,10 @@ import publicPaths from './api/routes/paths/public/index.js';
 import tabPaths from './api/routes/paths/tab/index.js';
 import userPaths from './api/routes/paths/user/index.js';
 
+//Middlewares
+import { useAuthentication } from './api/middleware/authentication.js';
+
 import {
-	auth,
 	keyAuth,
 	tabAuth,
 	coachAuth,
@@ -117,18 +119,8 @@ if (process.env.NODE_ENV === 'development') {
 // Parse cookies and add them to the session
 app.use(cookieParser());
 
-// Authentication.  Context depends on the sub-branch so that secondary
-// functions do not have to handle it in every call.
-
-app.use( async (req, res, next) => {
-	try {
-		req.session = await auth(req, res);
-	} catch (err) {
-		next(err);
-	}
-
-	next();
-});
+// Authentication middleware to populate req.session ONLY HANDLES AUTHENTICATION NOT AUTHORIZATION
+app.use(useAuthentication);
 
 app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
 	if (!req.session) {
@@ -235,6 +227,7 @@ app.all(localRoutes, async (req, res, next) => {
 	next();
 });
 
+//TODO : Refactor all of these to a single  authentication middleware with a map of requirements
 app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async (req, res, next) => {
 
 	// All EXT requests are from external services and sources that do not
