@@ -1,7 +1,7 @@
 // Parse the Tabroom cookies and determine whether there's an active session
 import basic from 'basic-auth';
 import getSettings from './settings.js';
-import db from './db.js';
+import db from '../data/db.js';
 import { errorLogger } from './logger.js';
 import { config } from '../../config/config.js';
 

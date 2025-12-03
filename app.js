@@ -29,7 +29,7 @@ import {
 	localAuth,
 } from './api/helpers/auth.js';
 
-import db from './api/helpers/db.js';
+import db from './api/data/db.js';
 import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger.js';
 
 const app = express();

@@ -1,4 +1,4 @@
-import db from '../api/helpers/db';
+import db from '../api/data/db.js';
 import config from '../config/config.js';
 import testData from './testFixtures';
 

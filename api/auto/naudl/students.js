@@ -2,7 +2,7 @@ import { getAllSalesforceStudents, getOneSalesforceStudent, getSalesforceStudent
 import { errorLogger, autoemailLogger } from '../../helpers/logger.js';
 import { notify } from '../../helpers/blast.js';
 import db from '../../helpers/litedb.js';
-import studentSetting from '../../models/studentSetting.js';
+import studentSetting from '../../data/models/student_setting.js';
 
 db.studentSetting = studentSetting( db.sequelize, db.Sequelize.DataTypes);
 

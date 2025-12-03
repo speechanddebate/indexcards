@@ -1,4 +1,4 @@
-import db from './db.js';
+import db from '../data/db.js';
 import { errorLogger } from './logger.js';
 
 export const getSettings = async (model, id, options = {} ) => {
