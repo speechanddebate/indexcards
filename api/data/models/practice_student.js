@@ -31,6 +31,10 @@ export default class practiceStudent extends Model {
       allowNull: false,
       defaultValue: Sequelize.Sequelize.fn('current_timestamp')
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     created_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -39,7 +43,7 @@ export default class practiceStudent extends Model {
   }, {
     sequelize,
     tableName: 'practice_student',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

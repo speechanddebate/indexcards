@@ -39,6 +39,10 @@ export default class regionSetting extends Model {
       allowNull: false,
       defaultValue: Sequelize.Sequelize.fn('current_timestamp')
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     setting: {
       type: DataTypes.INTEGER,
       allowNull: true
@@ -50,7 +54,7 @@ export default class regionSetting extends Model {
   }, {
     sequelize,
     tableName: 'region_setting',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

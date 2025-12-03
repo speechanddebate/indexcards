@@ -62,6 +62,11 @@ export default class session extends Model {
       type: DataTypes.TEXT,
       allowNull: true
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: Sequelize.Sequelize.fn('current_timestamp')
+    },
     timestamp: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -70,7 +75,7 @@ export default class session extends Model {
   }, {
     sequelize,
     tableName: 'session',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

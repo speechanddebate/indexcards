@@ -31,11 +31,15 @@ export default class entryStudent extends Model {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: Sequelize.Sequelize.fn('current_timestamp')
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'entry_student',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

@@ -54,6 +54,10 @@ export default class contact extends Model {
       type: DataTypes.STRING(15),
       allowNull: true
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     timestamp: {
       type: DataTypes.DATE,
       allowNull: true
@@ -69,7 +73,7 @@ export default class contact extends Model {
   }, {
     sequelize,
     tableName: 'contact',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

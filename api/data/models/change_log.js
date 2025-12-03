@@ -86,11 +86,15 @@ export default class changeLog extends Model {
     deleted: {
       type: DataTypes.BOOLEAN,
       allowNull: true
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'change_log',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

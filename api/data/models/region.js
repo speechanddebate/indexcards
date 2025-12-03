@@ -46,11 +46,15 @@ export default class region extends Model {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: Sequelize.Sequelize.fn('current_timestamp')
+    },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
     }
   }, {
     sequelize,
     tableName: 'region',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

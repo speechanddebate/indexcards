@@ -42,6 +42,10 @@ export default class entry extends Model {
       allowNull: false,
       defaultValue: 0
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     tourn: {
       type: DataTypes.INTEGER,
       allowNull: true
@@ -71,7 +75,7 @@ export default class entry extends Model {
     sequelize,
     tableName: 'entry',
     hasTrigger: true,
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

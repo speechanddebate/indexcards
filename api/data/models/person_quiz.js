@@ -33,6 +33,10 @@ export default class personQuiz extends Model {
       type: DataTypes.TEXT,
       allowNull: true
     },
+    updated_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     person: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -57,7 +61,7 @@ export default class personQuiz extends Model {
   }, {
     sequelize,
     tableName: 'person_quiz',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

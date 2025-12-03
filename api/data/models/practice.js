@@ -40,6 +40,10 @@ export default class practice extends Model {
       allowNull: false,
       defaultValue: Sequelize.Sequelize.fn('current_timestamp')
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     created_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -48,7 +52,7 @@ export default class practice extends Model {
   }, {
     sequelize,
     tableName: 'practice',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

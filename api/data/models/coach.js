@@ -43,6 +43,10 @@ export default class coach extends Model {
       allowNull: false,
       defaultValue: 0
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     created_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -59,7 +63,7 @@ export default class coach extends Model {
   }, {
     sequelize,
     tableName: 'coach',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

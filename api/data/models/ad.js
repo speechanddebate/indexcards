@@ -51,6 +51,10 @@ export default class ad extends Model {
       type: DataTypes.INTEGER,
       allowNull: false
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     timestamp: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -59,7 +63,7 @@ export default class ad extends Model {
   }, {
     sequelize,
     tableName: 'ad',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

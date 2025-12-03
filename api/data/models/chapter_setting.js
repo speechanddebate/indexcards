@@ -39,6 +39,10 @@ export default class chapterSetting extends Model {
       allowNull: false,
       defaultValue: Sequelize.Sequelize.fn('current_timestamp')
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     setting: {
       type: DataTypes.INTEGER,
       allowNull: true
@@ -46,7 +50,7 @@ export default class chapterSetting extends Model {
   }, {
     sequelize,
     tableName: 'chapter_setting',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

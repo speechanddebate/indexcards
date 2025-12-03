@@ -36,6 +36,10 @@ export default class fine extends Model {
       allowNull: false,
       defaultValue: 0
     },
+    deleted_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     deleted_by: {
       type: DataTypes.INTEGER,
       allowNull: true
@@ -81,7 +85,6 @@ export default class fine extends Model {
     sequelize,
     tableName: 'fine',
     timestamps: false,
-    paranoid: true,
     indexes: [
       {
         name: "PRIMARY",

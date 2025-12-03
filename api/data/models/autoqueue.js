@@ -35,6 +35,10 @@ export default class autoqueue extends Model {
       allowNull: false,
       defaultValue: Sequelize.Sequelize.fn('current_timestamp')
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     created_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -43,7 +47,7 @@ export default class autoqueue extends Model {
   }, {
     sequelize,
     tableName: 'autoqueue',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

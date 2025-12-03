@@ -78,6 +78,10 @@ export default class strike extends Model {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     dioregion: {
       type: DataTypes.INTEGER,
       allowNull: true
@@ -90,7 +94,7 @@ export default class strike extends Model {
   }, {
     sequelize,
     tableName: 'strike',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

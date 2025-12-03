@@ -50,7 +50,15 @@ export default class message extends Model {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     read_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    deleted_at: {
       type: DataTypes.DATE,
       allowNull: true
     },
@@ -61,8 +69,7 @@ export default class message extends Model {
   }, {
     sequelize,
     tableName: 'message',
-    timestamps: true,
-    paranoid: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

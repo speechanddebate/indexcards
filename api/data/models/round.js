@@ -42,6 +42,10 @@ export default class round extends Model {
       type: DataTypes.TINYINT,
       allowNull: true
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     start_time: {
       type: DataTypes.DATE,
       allowNull: true
@@ -78,7 +82,7 @@ export default class round extends Model {
   }, {
     sequelize,
     tableName: 'round',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

@@ -79,6 +79,10 @@ export default class quiz extends Model {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     timestamp: {
       type: DataTypes.DATE,
       allowNull: false,
@@ -87,7 +91,7 @@ export default class quiz extends Model {
   }, {
     sequelize,
     tableName: 'quiz',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

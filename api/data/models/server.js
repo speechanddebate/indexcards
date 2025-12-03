@@ -23,6 +23,11 @@ export default class server extends Model {
       allowNull: true,
       unique: "uk_linode_id"
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: Sequelize.Sequelize.fn('current_timestamp')
+    },
     timestamp: {
       type: DataTypes.DATE,
       allowNull: true,
@@ -31,7 +36,7 @@ export default class server extends Model {
   }, {
     sequelize,
     tableName: 'server',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",

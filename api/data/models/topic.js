@@ -39,6 +39,10 @@ export default class topic extends Model {
       allowNull: false,
       defaultValue: Sequelize.Sequelize.fn('current_timestamp')
     },
+    created_at: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
     created_by: {
       type: DataTypes.INTEGER,
       allowNull: false,
@@ -47,7 +51,7 @@ export default class topic extends Model {
   }, {
     sequelize,
     tableName: 'topic',
-    timestamps: true,
+    timestamps: false,
     indexes: [
       {
         name: "PRIMARY",
