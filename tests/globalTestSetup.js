@@ -3,7 +3,6 @@ import config from '../config/config.js';
 import testData from './testFixtures';
 
 export const setup = async () => {
-			return;
 	const tourncount = await db.sequelize.query(
 		`select count(id) as count from tourn`,
 		{ type: db.sequelize.QueryTypes.SELECT },
