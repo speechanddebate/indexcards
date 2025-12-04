@@ -1,7 +1,8 @@
 // Parse the Tabroom cookies and determine whether there's an active session
 import basic from 'basic-auth';
-import getSettings from './settings.js';
 import db from '../data/db.js';
+import sessionRepo from '../repos/sessionRepo.js';
+import personRepo from '../repos/personRepo.js';
 import { errorLogger } from './logger.js';
 import { config } from '../../config/config.js';
 
@@ -15,88 +16,28 @@ export const auth = async (req) => {
 
 	if (cookie) {
 
-		let session = await db.session.findOne({
-			where: {
-				userkey: cookie,
-			},
-			include : [
-				{ model: db.person, as: 'Person' },
-				{ model: db.person, as: 'Su' },
-			],
-		});
-
+		let session = await sessionRepo.findByUserKey(cookie);
 		if (session) {
-
-			session.Su = await session.getSu();
-
-			if (session.defaults) {
-				try {
-					session.defaults = JSON.parse(session.defaults);
-				} catch (err) {
-					errorLogger.info(`JSON parsing of defaults failed: ${err}`);
-				}
-			} else {
-				session.defaults = {};
+			//build real name
+			let realname = session.person.first;
+			if (session.person.middle) {
+				realname += ` ${session.person.middle}`;
+			}
+			realname += ` ${session.person.last}`;
+			if (session.su) {
+				realname = `${session.su.first} ${session.su.last} as ${realname}`;
 			}
 
-			if (session.agent) {
-				try {
-					session.agent = JSON.parse(session.agent);
-				} catch (err) {
-					errorLogger.info(`JSON parsing of agent failed: ${err}`);
-				}
-			} else {
-				session.agent = {};
-			}
+			session = {
+				id          : session.id,
+				person      : session.person.id,
+				site_admin  : session.person.siteAdmin, //should rename to siteAdmin but i dont want to find all references right now
+				email       : session.person.email,
+				name        : realname,
+				su          : session.su ? session.su.id : null,
+				settings    : await personRepo.getPersonSettings(session.person.id,{ skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] }),
+			};
 
-			if (session.Su)  {
-
-				let realname = session.Person.first;
-				if (session.Person.middle) {
-					realname += session.Person.middle;
-				}
-				realname +=  session.Person.last;
-				realname = `${session.Su.first} ${session.Su.last} as ${realname}`;
-
-				session = {
-					person      : session.Person.id,
-					site_admin  : session.Person.site_admin,
-					email       : session.Person.email,
-					name        : realname,
-					id          : session.id,
-					su          : session.Su.id,
-					...session.get({ raw: true }),
-				};
-
-				session.settings = await getSettings(
-					'person',
-					session.person,
-					{ skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] },
-				);
-
-			} else if (session.Person) {
-
-				let realname = session.Person.first;
-
-				if (session.Person.middle) {
-					realname += ` ${session.Person.middle}`;
-				}
-				realname += ` ${session.Person.last}`;
-				session = {
-					id          : session.id,
-					person      : session.Person.id,
-					site_admin  : session.Person.site_admin,
-					email       : session.Person.email,
-					name        : realname,
-					...session.get({ raw: true }),
-				};
-
-				session.settings = await getSettings(
-					'person',
-					session.person,
-					{ skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] },
-				);
-			}
 			return session;
 		}
 	}
@@ -117,7 +58,7 @@ export const keyAuth = async (req) => {
 			req.query?.[keyTag] === hash
 			|| req.body?.[keyTag] === hash
 		) {
-			const person = db.summon(db.Person, 3);
+			const person = personRepo.getPersonById(3); // Hardy's person ID
 			req.session = { person };
 			return req.session;
 		}
@@ -158,11 +99,7 @@ export const keyAuth = async (req) => {
 		return 'No valid Authorization header found. Access denied.';
 	}
 
-	person.settings = await getSettings(
-		'person',
-		person.id,
-		{ skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] },
-	);
+	person.settings = await personRepo.getPersonSettings(person.id, { skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] });
 
 	// The area determines whether the user has access to external API functions
 	// in question; which has to be granted by a site admin.  So the caselist functions
@@ -189,7 +126,7 @@ export const keyAuth = async (req) => {
 		const authTag = `api_auth_${req.params.area}`;
 
 		if (authTag && person.settings?.[authTag]) {
-			req.session = { person };
+			req.session = person;
 			return req.session;
 		}
 		return `No user with a valid API key found for area ${authTag}`;

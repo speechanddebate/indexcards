@@ -13,6 +13,9 @@ const sequelize = new Sequelize(
 // initalize all models created by sequelize-auto
 const db = initModels(sequelize);
 
+//TODO for some reason this realationship isn't created in init-models. need to investigate later
+db.session.belongsTo(db.person, { as: 'su_person', foreignKey: 'su' });
+
 // By default Sequelize wants you to try...catch every single database call
 // for Reasons?  Otherwise all your database errors just go unprinted and you
 // get a random unfathomable 500 error.  Yeah, because that's great.  This will
@@ -40,13 +43,24 @@ errorsPlease.forEach((dingbat) => {
 db.summon = async (dbTable, objectId) => {
 
 	const options = {};
+	let settingsAlias = null;
 
-	// automatically include settings if the model has them.
-	if (dbTable?.associations?.Settings) {
-		options.include = 'Settings';
-	}
+	if (dbTable?.associations) {
+    for (const assocName in dbTable.associations) {
+        const assoc = dbTable.associations[assocName];
+
+        if (assoc.as?.toLowerCase().includes("_setting")) {
+			const settingModelName = dbTable.tableName + 'Setting';   // e.g. "personSetting"
+			const settingModel = db[settingModelName];   
+            options.include = [{model: settingModel, as: assoc.as }];
+			settingsAlias = assoc.as;
+            break;
+        }
+    }
+}
 
 	let dbObject = {};
+
 
 	try {
 		dbObject = await dbTable.findByPk(
@@ -64,12 +78,14 @@ db.summon = async (dbTable, objectId) => {
 	}
 
 	const dbData = dbObject.get({ plain: true });
-	dbData.table = dbTable.name;
+	dbData.table = dbTable.tableName;
 
-	if (dbData.Settings) {
+	const settings = settingsAlias ? dbData[settingsAlias] : null;
+
+	if (settings) {
 		dbData.settings = {};
 
-		dbData.Settings
+		settings
 			.sort((a, b) => { return (a.tag > b.tag) ? 1 : -1; })
 			.forEach( (item) => {
 				if (item.tag === 'nsda_membership') {
@@ -100,7 +116,7 @@ db.summon = async (dbTable, objectId) => {
 				}
 			});
 
-		delete dbData.Settings;
+		delete dbData[settingsAlias];
 	}
 
 	return dbData;

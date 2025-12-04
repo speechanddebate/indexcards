@@ -1,58 +1,41 @@
+import personRepo from '../../../repos/personRepo';
+
 export const getProfile = {
 	GET: async (req, res) => {
 
 		if (!req.session) {
-			return res.status(201).json({ message: 'You have no active user session' });
+			return res.status(401).json({ message: 'You have no active user session' });
 		}
 		let person;
 
 		if (req.params.personId && req.session.site_admin) {
-			person = await req.db.person.findByPk(
-				req.params.personId,
-				{
-					include: [{
-						model: req.db.personSetting,
-						as: 'Settings',
-					}],
-				}
-			);
+			person = await personRepo.getPersonByIdWithSettings(req.params.personId);
 
 		} else if (req.params.personId ) {
-			return res.status(201).json({ message: 'Only admin staff may access another profile' });
+			return res.status(401).json({ message: 'Only admin staff may access another profile' });
 		} else if (req.session.person) {
-			person = await req.db.person.findByPk(req.session.person,
-				{
-					include: [{
-						model: req.db.personSetting,
-						as: 'Settings',
-					}],
-				},
-			);
+			person = await personRepo.getPersonByIdWithSettings(req.session.person);
 		}
 
-		if (person.count < 1) {
+		if (!person) {
 			return res.status(400).json({ message: 'User does not exist' });
 		}
 
-		const personData = person.dataValues;
-		personData.settings = {};
-
-		for (const set of personData.Settings) {
+		for (const set of person.settings) {
 			const setting = set.dataValues;
 
 			if (setting.value === 'text' || setting.value === 'json') {
-				personData.settings[setting.tag] = setting.alue_text;
+				person.settings[setting.tag] = setting.value_text;
 			} else if (setting.value === 'date') {
-				personData.settings[setting.tag] = setting.value_date;
+				person.settings[setting.tag] = setting.value_date;
 			} else if (setting.value) {
-				personData.settings[setting.tag] = setting.value;
+				person.settings[setting.tag] = setting.value;
 			}
 		}
 
-		delete personData.Settings;
-		delete personData.password;
+		delete person.settings;
 
-		return res.status(200).json(personData);
+		return res.status(200).json(person);
 	},
 };
 

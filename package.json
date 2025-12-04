@@ -17,7 +17,7 @@
 		"format": "prettier --write .",
 		"format-check": "prettier --check .",
 		"prepare": "husky",
-		"models:gen": "sequelize-auto -o ./api/data/models -h localhost -d tabroom -u root -x -p 3306 -e mariadb -l esm --caseModel c -a ./config/sequelize-auto.config.json"
+		"models:gen": "sequelize-auto -o ./api/data/models -h localhost -d tabroom -u root -x -p 3307 -e mariadb -l esm --caseModel c -a ./config/sequelize-auto.config.json"
 	},
 	"extensionless": {
 		"lookFor": [

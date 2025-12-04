@@ -1,6 +1,5 @@
 import { assert } from 'chai';
 import config from '../../config/config';
-import db from './db';
 import { auth, tabAuth } from './auth';
 import userData from '../../tests/testFixtures';
 
@@ -9,7 +8,6 @@ describe('Authentication Functions', () => {
 	it('Ignores the database if there is already a session', async () => {
 
 		const req = {
-			db,
 			config,
 			session : {
 				id  : 69,
@@ -24,7 +22,6 @@ describe('Authentication Functions', () => {
 	it('Finds a session for an ordinary user', async () => {
 
 		const req = {
-			db,
 			config,
 			cookies : {
 				[config.COOKIE_NAME]: userData.testUserSession.userkey,
@@ -44,7 +41,6 @@ describe('Authentication Functions', () => {
 		const testTourn = userData.testUserTournPerm.tourn;
 
 		const req = {
-			db,
 			config,
 			params: {
 				tournId : testTourn,
@@ -69,7 +65,6 @@ describe('Authentication Functions', () => {
 		const testNotTourn = '9700';
 
 		const req = {
-			db,
 			config,
 			params: {
 				tournId : testNotTourn,
@@ -88,7 +83,6 @@ describe('Authentication Functions', () => {
 
 	it('Finds a session for an GLP Admin user', async () => {
 		const req = {
-			db,
 			config,
 			cookies : {
 				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
@@ -108,7 +102,6 @@ describe('Authentication Functions', () => {
 		const testNotTourn = '9700';
 
 		const req = {
-			db,
 			config,
 			params: {
 				tournId : testNotTourn,
