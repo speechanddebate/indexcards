@@ -39,12 +39,19 @@ export default class strike extends Model {
     },
     tourn: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'tourn',
+        key: 'id'
+      }
     },
     judge: {
       type: DataTypes.INTEGER,
-      allowNull: false,
-      defaultValue: 0
+      allowNull: true,
+      references: {
+        model: 'judge',
+        key: 'id'
+      }
     },
     event: {
       type: DataTypes.INTEGER,
@@ -52,7 +59,11 @@ export default class strike extends Model {
     },
     entry: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'entry',
+        key: 'id'
+      }
     },
     school: {
       type: DataTypes.INTEGER,

@@ -52,7 +52,11 @@ export default class student extends Model {
     },
     chapter: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'chapter',
+        key: 'id'
+      }
     },
     person: {
       type: DataTypes.INTEGER,

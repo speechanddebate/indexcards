@@ -12,11 +12,19 @@ export default class tournIgnore extends Model {
     },
     tourn: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'tourn',
+        key: 'id'
+      }
     },
     person: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'person',
+        key: 'id'
+      }
     },
     timestamp: {
       type: DataTypes.DATE,

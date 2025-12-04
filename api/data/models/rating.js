@@ -14,11 +14,6 @@ export default class rating extends Model {
       type: DataTypes.ENUM('school','entry','coach'),
       allowNull: true
     },
-    draft: {
-      type: DataTypes.BOOLEAN,
-      allowNull: false,
-      defaultValue: 0
-    },
     entered: {
       type: DataTypes.DATE,
       allowNull: true
@@ -32,17 +27,13 @@ export default class rating extends Model {
       type: DataTypes.DECIMAL(8,2),
       allowNull: true
     },
-    tourn: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    school: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
     entry: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'entry',
+        key: 'id'
+      }
     },
     rating_tier: {
       type: DataTypes.INTEGER,
@@ -51,7 +42,11 @@ export default class rating extends Model {
     },
     judge: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'judge',
+        key: 'id'
+      }
     },
     rating_subset: {
       type: DataTypes.INTEGER,
@@ -65,10 +60,6 @@ export default class rating extends Model {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: Sequelize.Sequelize.fn('current_timestamp')
-    },
-    sheet: {
-      type: DataTypes.INTEGER,
-      allowNull: true
     }
   }, {
     sequelize,
@@ -84,23 +75,13 @@ export default class rating extends Model {
         ]
       },
       {
-        name: "uk_entry_rating",
+        name: "judge_entry",
         unique: true,
         using: "BTREE",
         fields: [
-          { name: "judge" },
           { name: "entry" },
-          { name: "sheet" },
-        ]
-      },
-      {
-        name: "uk_school_rating",
-        unique: true,
-        using: "BTREE",
-        fields: [
           { name: "judge" },
-          { name: "school" },
-          { name: "sheet" },
+          { name: "side" },
         ]
       },
       {
@@ -118,10 +99,10 @@ export default class rating extends Model {
         ]
       },
       {
-        name: "tourn",
+        name: "rating_tier",
         using: "BTREE",
         fields: [
-          { name: "tourn" },
+          { name: "rating_tier" },
         ]
       },
     ]

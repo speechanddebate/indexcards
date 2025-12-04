@@ -43,6 +43,10 @@ export default class schoolSetting extends Model {
       allowNull: false,
       defaultValue: Sequelize.Sequelize.fn('current_timestamp')
     },
+    last_changed: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     chapter: {
       type: DataTypes.INTEGER,
       allowNull: true

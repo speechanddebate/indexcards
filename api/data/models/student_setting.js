@@ -76,6 +76,14 @@ export default class studentSetting extends Model {
           { name: "student" },
         ]
       },
+      {
+        name: "sstag",
+        using: "BTREE",
+        fields: [
+          { name: "tag" },
+          { name: "student" },
+        ]
+      },
     ]
   });
   }

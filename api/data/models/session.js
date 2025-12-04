@@ -59,13 +59,20 @@ export default class session extends Model {
       allowNull: true
     },
     push_notify: {
-      type: DataTypes.TEXT,
+      type: DataTypes.STRING(127),
+      allowNull: true
+    },
+    push_active: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    last_access: {
+      type: DataTypes.DATE,
       allowNull: true
     },
     created_at: {
       type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: Sequelize.Sequelize.fn('current_timestamp')
+      allowNull: true
     },
     timestamp: {
       type: DataTypes.DATE,

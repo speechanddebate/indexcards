@@ -12,11 +12,19 @@ export default class rpoolRoom extends Model {
     },
     rpool: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'rpool',
+        key: 'id'
+      }
     },
     room: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'room',
+        key: 'id'
+      }
     },
     timestamp: {
       type: DataTypes.DATE,

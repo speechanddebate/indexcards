@@ -12,11 +12,19 @@ export default class sweepInclude extends Model {
     },
     parent: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'sweep_set',
+        key: 'id'
+      }
     },
     child: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'sweep_set',
+        key: 'id'
+      }
     },
     timestamp: {
       type: DataTypes.DATE,
@@ -34,6 +42,20 @@ export default class sweepInclude extends Model {
         using: "BTREE",
         fields: [
           { name: "id" },
+        ]
+      },
+      {
+        name: "fk_sweepinclude_parent",
+        using: "BTREE",
+        fields: [
+          { name: "parent" },
+        ]
+      },
+      {
+        name: "fk_sweepinclude_child",
+        using: "BTREE",
+        fields: [
+          { name: "child" },
         ]
       },
     ]

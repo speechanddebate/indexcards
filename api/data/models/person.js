@@ -57,15 +57,7 @@ export default class person extends Model {
       type: DataTypes.BIGINT,
       allowNull: true
     },
-    provider: {
-      type: DataTypes.STRING(63),
-      allowNull: true
-    },
     site_admin: {
-      type: DataTypes.BOOLEAN,
-      allowNull: true
-    },
-    diversity: {
       type: DataTypes.BOOLEAN,
       allowNull: true
     },
@@ -75,6 +67,18 @@ export default class person extends Model {
     },
     password: {
       type: DataTypes.STRING(128),
+      allowNull: true
+    },
+    accesses: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    last_access: {
+      type: DataTypes.DATE,
+      allowNull: true
+    },
+    pass_timestamp: {
+      type: DataTypes.DATE,
       allowNull: true
     },
     timestamp: {

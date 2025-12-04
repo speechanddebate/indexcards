@@ -11,12 +11,16 @@ export default class rpool extends Model {
       primaryKey: true
     },
     name: {
-      type: DataTypes.STRING(31),
+      type: DataTypes.STRING(63),
       allowNull: true
     },
     tourn: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'tourn',
+        key: 'id'
+      }
     },
     timestamp: {
       type: DataTypes.DATE,

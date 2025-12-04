@@ -37,7 +37,11 @@ export default class shift extends Model {
     },
     category: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'category',
+        key: 'id'
+      }
     },
     timestamp: {
       type: DataTypes.DATE,
@@ -55,6 +59,13 @@ export default class shift extends Model {
         using: "BTREE",
         fields: [
           { name: "id" },
+        ]
+      },
+      {
+        name: "fk_shift_category",
+        using: "BTREE",
+        fields: [
+          { name: "category" },
         ]
       },
     ]

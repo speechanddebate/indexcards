@@ -16,7 +16,11 @@ export default class sweepSet extends Model {
     },
     tourn: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'tourn',
+        key: 'id'
+      }
     },
     sweep_award: {
       type: DataTypes.INTEGER,

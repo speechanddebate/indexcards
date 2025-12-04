@@ -24,7 +24,11 @@ export default class roomStrike extends Model {
     },
     room: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'room',
+        key: 'id'
+      }
     },
     event: {
       type: DataTypes.INTEGER,

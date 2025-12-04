@@ -20,7 +20,11 @@ export default class tournFee extends Model {
     },
     tourn: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'tourn',
+        key: 'id'
+      }
     },
     amount: {
       type: DataTypes.DECIMAL(8,2),

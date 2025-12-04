@@ -20,11 +20,19 @@ export default class studentVote extends Model {
     },
     panel: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'panel',
+        key: 'id'
+      }
     },
     entry: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'entry',
+        key: 'id'
+      }
     },
     voter: {
       type: DataTypes.INTEGER,

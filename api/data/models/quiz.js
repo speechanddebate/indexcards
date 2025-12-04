@@ -79,6 +79,10 @@ export default class quiz extends Model {
       type: DataTypes.INTEGER,
       allowNull: true
     },
+    nsda_course: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
     created_at: {
       type: DataTypes.DATE,
       allowNull: true

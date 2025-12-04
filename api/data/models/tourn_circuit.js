@@ -18,12 +18,20 @@ export default class tournCircuit extends Model {
     tourn: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0
+      defaultValue: 0,
+      references: {
+        model: 'tourn',
+        key: 'id'
+      }
     },
     circuit: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      defaultValue: 0
+      defaultValue: 0,
+      references: {
+        model: 'circuit',
+        key: 'id'
+      }
     },
     timestamp: {
       type: DataTypes.DATE,

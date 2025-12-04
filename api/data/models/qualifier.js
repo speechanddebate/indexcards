@@ -20,7 +20,11 @@ export default class qualifier extends Model {
     },
     entry: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'entry',
+        key: 'id'
+      }
     },
     tourn: {
       type: DataTypes.INTEGER,

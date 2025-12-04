@@ -12,11 +12,19 @@ export default class rpoolRound extends Model {
     },
     rpool: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'rpool',
+        key: 'id'
+      }
     },
     round: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: false,
+      references: {
+        model: 'round',
+        key: 'id'
+      }
     },
     timestamp: {
       type: DataTypes.DATE,

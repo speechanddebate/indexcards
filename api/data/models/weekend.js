@@ -48,7 +48,11 @@ export default class weekend extends Model {
     },
     tourn: {
       type: DataTypes.INTEGER,
-      allowNull: false
+      allowNull: true,
+      references: {
+        model: 'tourn',
+        key: 'id'
+      }
     },
     site: {
       type: DataTypes.INTEGER,

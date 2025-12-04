@@ -81,6 +81,13 @@ export default class tourn extends Model {
           { name: "start" },
         ]
       },
+      {
+        name: "end",
+        using: "BTREE",
+        fields: [
+          { name: "end" },
+        ]
+      },
     ]
   });
   }

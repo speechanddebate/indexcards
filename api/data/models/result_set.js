@@ -32,6 +32,10 @@ export default class resultSet extends Model {
       type: DataTypes.DATE,
       allowNull: true
     },
+    cache: {
+      type: DataTypes.TEXT,
+      allowNull: true
+    },
     tourn: {
       type: DataTypes.INTEGER,
       allowNull: true,

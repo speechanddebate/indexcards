@@ -38,7 +38,11 @@ export default class webpage extends Model {
     },
     tourn: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'tourn',
+        key: 'id'
+      }
     },
     parent: {
       type: DataTypes.INTEGER,
@@ -71,6 +75,13 @@ export default class webpage extends Model {
         using: "BTREE",
         fields: [
           { name: "tourn" },
+        ]
+      },
+      {
+        name: "sitewide",
+        using: "BTREE",
+        fields: [
+          { name: "sitewide" },
         ]
       },
     ]

@@ -47,7 +47,11 @@ export default class ratingTier extends Model {
     },
     category: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'category',
+        key: 'id'
+      }
     },
     rating_subset: {
       type: DataTypes.INTEGER,
@@ -69,6 +73,13 @@ export default class ratingTier extends Model {
         using: "BTREE",
         fields: [
           { name: "id" },
+        ]
+      },
+      {
+        name: "fk_rating_tier_category",
+        using: "BTREE",
+        fields: [
+          { name: "category" },
         ]
       },
     ]

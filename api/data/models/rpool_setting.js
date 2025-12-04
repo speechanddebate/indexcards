@@ -10,16 +10,12 @@ export default class rpoolSetting extends Model {
       allowNull: false,
       primaryKey: true
     },
-    type: {
-      type: DataTypes.STRING(32),
-      allowNull: false
-    },
     tag: {
-      type: DataTypes.STRING(32),
-      allowNull: false
+      type: DataTypes.STRING(31),
+      allowNull: true
     },
     value: {
-      type: DataTypes.STRING(64),
+      type: DataTypes.STRING(63),
       allowNull: true
     },
     value_text: {
@@ -58,6 +54,15 @@ export default class rpoolSetting extends Model {
         using: "BTREE",
         fields: [
           { name: "id" },
+        ]
+      },
+      {
+        name: "uk_rpool",
+        unique: true,
+        using: "BTREE",
+        fields: [
+          { name: "rpool" },
+          { name: "tag" },
         ]
       },
       {

@@ -20,7 +20,11 @@ export default class sweepEvent extends Model {
     },
     event: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'event',
+        key: 'id'
+      }
     },
     event_type: {
       type: DataTypes.ENUM('all','congress','debate','speech','wsdc','wudc'),

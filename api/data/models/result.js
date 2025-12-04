@@ -36,15 +36,27 @@ export default class result extends Model {
     },
     entry: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'entry',
+        key: 'id'
+      }
     },
     student: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'student',
+        key: 'id'
+      }
     },
     school: {
       type: DataTypes.INTEGER,
-      allowNull: true
+      allowNull: true,
+      references: {
+        model: 'school',
+        key: 'id'
+      }
     },
     round: {
       type: DataTypes.INTEGER,
@@ -98,6 +110,13 @@ export default class result extends Model {
         using: "BTREE",
         fields: [
           { name: "round" },
+        ]
+      },
+      {
+        name: "fk_school",
+        using: "BTREE",
+        fields: [
+          { name: "school" },
         ]
       },
     ]
