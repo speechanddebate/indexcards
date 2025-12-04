@@ -4,9 +4,8 @@ import { errorLogger } from '../helpers/logger.js';
 
 //code for authentiocating a user, runs on every request
 export async function useAuthentication(req, res, next) {
-
 	//if already authenticated, skip
-	if (!req.session || !req.session.id) {
+	if (req.session && req.session.id) {
 		try {
 			const cookie =
             req.cookies[req.config.COOKIE_NAME] ||
@@ -103,8 +102,6 @@ export async function useAuthentication(req, res, next) {
 			}
 			//attach session to req object
 			req.session = session;
-
-			console.log(`Session is ${req.session}`);
 
 		} catch (err) {
 			return next(err);
