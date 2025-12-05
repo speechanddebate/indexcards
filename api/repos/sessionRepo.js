@@ -1,6 +1,9 @@
 import db from '../data/db.js';
 import { mapPerson } from './personRepo.js';
 import { safeParseJson } from '../helpers/json.js';
+import { baseRepo } from './baseRepo.js';
+
+const base = baseRepo(db.session, mapSession);
 
 async function findByUserKey(key) {
 	const s = await db.session.findOne({
@@ -34,5 +37,6 @@ export function mapSession(sessionInstance) {
 
 // export the  data functions NOT the mappers
 export default {
+	...base,
 	findByUserKey,
 };

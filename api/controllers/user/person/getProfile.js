@@ -21,20 +21,6 @@ export const getProfile = {
 			return res.status(400).json({ message: 'User does not exist' });
 		}
 
-		for (const set of person.settings) {
-			const setting = set.dataValues;
-
-			if (setting.value === 'text' || setting.value === 'json') {
-				person.settings[setting.tag] = setting.value_text;
-			} else if (setting.value === 'date') {
-				person.settings[setting.tag] = setting.value_date;
-			} else if (setting.value) {
-				person.settings[setting.tag] = setting.value;
-			}
-		}
-
-		delete person.settings;
-
 		return res.status(200).json(person);
 	},
 };

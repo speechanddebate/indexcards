@@ -46,21 +46,20 @@ db.summon = async (dbTable, objectId) => {
 	let settingsAlias = null;
 
 	if (dbTable?.associations) {
-    for (const assocName in dbTable.associations) {
-        const assoc = dbTable.associations[assocName];
+		for (const assocName in dbTable.associations) {
+			const assoc = dbTable.associations[assocName];
 
-        if (assoc.as?.toLowerCase().includes("_setting")) {
-			const settingModelName = dbTable.tableName + 'Setting';   // e.g. "personSetting"
-			const settingModel = db[settingModelName];   
-            options.include = [{model: settingModel, as: assoc.as }];
-			settingsAlias = assoc.as;
-            break;
-        }
-    }
-}
+			if (assoc.as?.toLowerCase().includes('_setting')) {
+				const settingModelName = dbTable.tableName + 'Setting';   // e.g. "personSetting"
+				const settingModel = db[settingModelName];
+				options.include = [{model: settingModel, as: assoc.as }];
+				settingsAlias = assoc.as;
+				break;
+			}
+		}
+	}
 
 	let dbObject = {};
-
 
 	try {
 		dbObject = await dbTable.findByPk(

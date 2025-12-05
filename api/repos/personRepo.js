@@ -1,24 +1,15 @@
 import db from '../data/db.js';
-import getSettings from '../helpers/settings.js';
-async function getPersonById(personId, options = {settings: false} ) {
-	//call findByPk with settings if requested
-	var p = await db.person.findByPk(
-		personId,
-        options.settings ? { include: [{ model: db.personSetting, as: 'person_settings'}] } : {}
-	);
+import { baseRepo } from './baseRepo.js';
+import getSettings, { flattenSettings } from '../helpers/settings.js';
 
-	if (!p) return null;
-	return {
-		...mapPerson(p),
-		settings: options.settings ? p.person_settings : undefined,
-	};
-}
+const base = baseRepo(db.person, mapPerson);
 
 //simple wrapper to get person by id including settings
 async function getPersonByIdWithSettings(personId) {
-	return getPersonById(personId, {settings: true});
+	return base.getById(personId, {settings: true});
 }
 
+//eventually get rid of this and just use the with settings version but auth needs it now
 async function getPersonSettings(personId, options = {} ) {
 	return getSettings('person', personId,options);
 }
@@ -45,12 +36,14 @@ export function mapPerson(personInstance) {
 		lastAccess: personInstance.last_access,
 		passTimestamp: personInstance.pass_timestamp,
 		timestamp: personInstance.timestamp,
+		settings: personInstance.person_settings ?
+			flattenSettings(personInstance.person_settings) : undefined,
 	};
 }
 
 // export the  data functions NOT the mappers
 export default {
-	getPersonById,
+	...base,
 	getPersonByIdWithSettings,
 	getPersonSettings,
 };

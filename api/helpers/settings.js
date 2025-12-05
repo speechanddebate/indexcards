@@ -1,6 +1,22 @@
 import db from '../data/db.js';
 import { errorLogger } from './logger.js';
 
+export function flattenSettings(arr) {
+	const out = {};
+	for (const s of arr) {
+		const setting = s.dataValues || s;
+
+		if (setting.value === 'text' || setting.value === 'json') {
+			out[setting.tag] = setting.value_text;
+		} else if (setting.value === 'date') {
+			out[setting.tag] = setting.value_date;
+		} else {
+			out[setting.tag] = setting.value; // default
+		}
+	}
+	return out;
+}
+
 export const getSettings = async (model, id, options = {} ) => {
 
 	if (!id) {
