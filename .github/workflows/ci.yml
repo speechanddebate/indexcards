@@ -2,6 +2,9 @@ name: CI
 
 on:
     push:
+      branches:
+        - main
+        - schemat-backend
     pull_request:
 
 jobs:
