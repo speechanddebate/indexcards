@@ -2,7 +2,7 @@ import request from 'supertest';
 import { assert } from 'chai';
 import config from '../../../../config/config';
 import server from '../../../../app';
-import db from '../../../helpers/db';
+import db from '../../../data/db';
 import { testUserChapterPerm, testUserSchoolContact, testUserSession } from '../../../../tests/testFixtures';
 
 describe('User Chapter', () => {

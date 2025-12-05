@@ -1,4 +1,4 @@
-import db from '../../../helpers/db.js';
+import db from '../../../data/db.js';
 
 // The purpose of this function is to deliver a complete list of "things I care
 // about" at a tournament. That will help sorting the relevant judges, entries,

@@ -29,7 +29,7 @@ import {
 	localAuth,
 } from './api/helpers/auth.js';
 
-import db from './api/helpers/db.js';
+import db from './api/data/db.js';
 import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger.js';
 
 const app = express();
@@ -257,7 +257,7 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 		}
 	}
 
-	if (!req.session?.settings[`api_auth_${req.params.area}`]) {
+	if (!req.session?.settings?.[`api_auth_${req.params.area}`]) {
 		return res.status(401).json({
 			error   : true,
 			message : `That function is not accessible to your API credentials.  Key ${req.params.area} required`,

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import db from './db.js';
+import db from '../data/db.js';
 import config from '../../config/config.js';
 import notify from './blast.js';
 
