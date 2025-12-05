@@ -55,5 +55,8 @@ jobs:
       run: cp ./config/config.js.sample ./config/config.js
 
     - name: Tests
+      env:
+        LOG_PATH: $RUNNER_TEMP
+        DB_PASS: tabroom
       run: npm run test-ci
 
