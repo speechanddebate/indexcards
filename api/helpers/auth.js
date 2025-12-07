@@ -4,7 +4,6 @@ import db from '../data/db.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import personRepo from '../repos/personRepo.js';
 import { errorLogger } from './logger.js';
-import { config } from '../../config/config.js';
 
 export const auth = async (req) => {
 
@@ -49,21 +48,6 @@ export const keyAuth = async (req) => {
 		return 'No valid Authorization header found. Access denied.';
 	}
 
-	// Legacy support for the Hardy Hacky Keys
-	if (config.LEGACY_KEYS?.[req.params?.area?.toUpperCase()]?.KEY) {
-		const hash = crypto.createHash('sha256').update(config[req.params.area.toUpperCase()].KEY).digest('hex');
-		const keyTag = `${req.params.area}_key`;
-
-		if (
-			req.query?.[keyTag] === hash
-			|| req.body?.[keyTag] === hash
-		) {
-			const person = personRepo.getPersonById(3); // Hardy's person ID
-			req.session = { person };
-			return req.session;
-		}
-	}
-
 	const authHeader = basic(req);
 
 	if (!authHeader) {
@@ -77,17 +61,69 @@ export const keyAuth = async (req) => {
 		return 'No valid Authorization header found. Access denied.  Name must be a Tabroom ID number.';
 	}
 
-	const persons = await db.sequelize.query(`
-		select * from person where id = :personId
-		and exists (
-			select ps.id from person_setting ps
-			where ps.person = person.id
-			and ps.value = :key
-		)
-	`, {
-		replacements: { personId, key },
-		type: db.sequelize.QueryTypes.SELECT,
-	});
+	let persons = [];
+
+	if (req.params.area === 'tourn' && req.params.tournId) {
+
+		persons = await db.sequelize.query(`
+			select
+				person.*,
+				permission.tag tournTag
+			from person, permission
+			where 1=1
+				and person.id        = :personId
+				and person.id       = permission.person
+				and permission.tourn = :tournId
+				and permission.tag IN ('owner', 'tabber')
+				and exists (
+					select ps.id
+						from person_setting ps
+					where 1=1
+						and ps.tag = 'api_key'
+						and ps.person = person.id
+						and ps.value = :key
+				)
+		`, {
+			replacements: {
+				personId,
+				key,
+				tournId: req.params.tournId,
+			},
+			type: db.Sequelize.QueryTypes.SELECT,
+		});
+
+	} else {
+
+	person.settings = await personRepo.getPersonSettings(person.id, { skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] });
+
+		const authTag = `api_auth_${req.params.area}`;
+
+		persons = await db.sequelize.query(`
+			select
+				person.*,
+				api_area.tag apiTag
+			from person, person_setting api_area
+			where 1=1
+				and person.id = :personId
+				and person.id = api_area.person
+				and api_area.tag = :authTag
+				and exists (
+					select ps.id
+						from person_setting ps
+					where 1=1
+						and ps.tag = 'api_key'
+						and ps.person = person.id
+						and ps.value = :key
+				)
+		`, {
+			replacements: {
+				personId,
+				key,
+				authTag,
+			},
+			type: db.Sequelize.QueryTypes.SELECT,
+		});
+	}
 
 	if (persons.length < 1) {
 		return 'No valid Authorization header found. Access denied.';
@@ -95,44 +131,23 @@ export const keyAuth = async (req) => {
 
 	const person = persons.shift();
 
-	if (!person && !person.id) {
-		return 'No valid Authorization header found. Access denied.';
-	}
-
-	person.settings = await personRepo.getPersonSettings(person.id, { skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] });
-
-	// The area determines whether the user has access to external API functions
-	// in question; which has to be granted by a site admin.  So the caselist functions
-	// require a user with an API key who also has a person_setting named api_auth_caselist.
-
-	// Unless the area is a tournament related one, in which case the person just needs
-	// top level access to the tournament.
-
-	if (req.params.area === 'tourn' && req.params.tournId) {
-
-		const perms = await tournPerms(req.params.tournId, req.session.person);
-		if ( perms.tourn[req.params.tournId] === 'owner'
-			|| perms.tourn[req.params.tournId] === 'tabber'
-		) {
-			req.session.person = person;
-			req.session.perms = perms;
-
-			return req.session;
+	if (person && person.id) {
+		req.session = { person };
+		if (person.apiTag) {
+			req.session.settings = {
+				[person.apiTag]: true,
+			};
 		}
 
-	} else {
-
-		// Check the requested area parameter to determine whether the user has access
-		const authTag = `api_auth_${req.params.area}`;
-
-		if (authTag && person.settings?.[authTag]) {
-			req.session = person;
-			return req.session;
+		if (person.tournTag) {
+			req.session.permissions = {
+				[req.params.tournId] : person.tournTag,
+			};
 		}
-		return `No user with a valid API key found for area ${authTag}`;
+		return req.session;
 	}
 
-	return false;
+	return 'No valid Authorization header found. Access denied.';
 };
 
 export const tabAuth = async (req) => {
