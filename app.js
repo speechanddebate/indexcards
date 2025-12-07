@@ -126,7 +126,6 @@ app.use( async (req, res, next) => {
 	} catch (err) {
 		next(err);
 	}
-
 	next();
 });
 
@@ -166,7 +165,6 @@ app.all(tabRoutes, async (req, res, next) => {
 			message : `You do not have access to that part of that tournament`,
 		});
 	}
-
 	next();
 });
 
@@ -245,6 +243,15 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 	// admins for internal NSDA purposes, or Hardy because that guy is super
 	// shady and I need to keep a specific eye on him.
 
+	if (req.session) {
+		if (req.params.area === 'tourn') {
+			req.session = await tabAuth(req, res);
+		} else if (!req.session?.settings[`api_auth_${req.params.area}`]) {
+			// Give the keyAuth a chance to work
+			delete req.session;
+		}
+	}
+
 	if (!req.session) {
 		try {
 			req.session = await keyAuth(req, res);
@@ -253,11 +260,10 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 				error   : true,
 				message : `Key API authentication failed: ${err}`,
 			});
-
 		}
 	}
 
-	if (!req.session?.settings[`api_auth_${req.params.area}`]) {
+	if (!req.session || !req.session.person) {
 		return res.status(401).json({
 			error   : true,
 			message : `That function is not accessible to your API credentials.  Key ${req.params.area} required`,
@@ -265,7 +271,6 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 	}
 
 	next();
-
 });
 
 app.all('/v1/glp/*', async (req, res, next) => {
