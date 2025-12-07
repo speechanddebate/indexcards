@@ -1,4 +1,4 @@
-import personRepo from '../../../repos/personRepo';
+import personRepo from '../../../repos/personRepo.js';
 
 export const getProfile = {
 	GET: async (req, res) => {
