@@ -1,40 +1,10 @@
 import { assert } from 'chai';
+import { Authenticate } from '../middleware/authentication.js';
 import config from '../../config/config';
-import { auth, tabAuth } from './auth';
+import { tabAuth } from './auth';
 import userData from '../../tests/testFixtures';
 
-describe('Authentication Functions', () => {
-
-	it('Ignores the database if there is already a session', async () => {
-
-		const req = {
-			config,
-			session : {
-				id  : 69,
-			},
-		};
-
-		const session = await auth(req);
-		assert.typeOf(session, 'object');
-		assert.equal(session.id, '69');
-	});
-
-	it('Finds a session for an ordinary user', async () => {
-
-		const req = {
-			config,
-			cookies : {
-				[config.COOKIE_NAME]: userData.testUserSession.userkey,
-			},
-		};
-
-		const session = await auth(req);
-
-		assert.typeOf(session, 'object');
-		assert.equal(session.person, '69');
-		assert.equal(session.site_admin, false);
-		assert.equal(session.email, 'i.am.test@speechanddebate.org');
-	});
+describe('Authorization Functions', () => {
 
 	it('Permits an ordinary user access to a tournament it is admin for', async () => {
 
@@ -49,8 +19,15 @@ describe('Authentication Functions', () => {
 				[config.COOKIE_NAME]: userData.testUserSession.userkey,
 			},
 		};
+		const res = {};
+		// Call the middleware to set req.session
+		await new Promise((resolve, reject) => {
+			Authenticate(req, res, (err) => {
+				if (err) reject(err);
+				else resolve();
+			});
+		});
 
-		req.session = await auth(req);
 		req.session = await tabAuth(req);
 
 		assert.typeOf(req.session, 'object');
@@ -74,7 +51,14 @@ describe('Authentication Functions', () => {
 			},
 		};
 
-		req.session = await auth(req);
+		const res = {};
+		// Call the middleware to set req.session
+		await new Promise((resolve, reject) => {
+			Authenticate(req, res, (err) => {
+				if (err) reject(err);
+				else resolve();
+			});
+		});
 		req.session = await tabAuth(req);
 
 		assert.typeOf(req.session, 'object');
@@ -89,7 +73,16 @@ describe('Authentication Functions', () => {
 			},
 		};
 
-		const session = await (auth(req));
+		const res = {};
+		// Call the middleware to set req.session
+		await new Promise((resolve, reject) => {
+			Authenticate(req, res, (err) => {
+				if (err) reject(err);
+				else resolve();
+			});
+		});
+
+		const session = req.session;
 
 		assert.typeOf(session, 'object');
 		assert.equal(session.person, '70');
@@ -111,7 +104,14 @@ describe('Authentication Functions', () => {
 			},
 		};
 
-		req.session = await auth(req);
+		const res = {};
+		// Call the middleware to set req.session
+		await new Promise((resolve, reject) => {
+			Authenticate(req, res, (err) => {
+				if (err) reject(err);
+				else resolve();
+			});
+		});
 		req.session = await tabAuth(req);
 
 		assert.typeOf(req.session, 'object');

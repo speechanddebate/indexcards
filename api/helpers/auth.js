@@ -1,154 +1,71 @@
-// Parse the Tabroom cookies and determine whether there's an active session
-import basic from 'basic-auth';
 import db from '../data/db.js';
-import sessionRepo from '../repos/sessionRepo.js';
-import personRepo from '../repos/personRepo.js';
 import { errorLogger } from './logger.js';
 
-export const auth = async (req) => {
+// export async function keyAuth(req, res, next) {
+// 	let persons = [];
+// 	const personId = req.user.id;
+// 	/**
+// 	 * if area is tourn and tournId is set, check for tournament level permissions
+// 	 */
+// 	if (req.params.area === 'tourn' && req.params.tournId) {
 
-	if (req.session && req.session.id) {
-		return req.session;
-	}
+// 		persons = await db.sequelize.query(`
+// 			select
+// 				person.*,
+// 				permission.tag tournTag
+// 			from person, permission
+// 			where 1=1
+// 				and person.id        = :personId
+// 				and person.id       = permission.person
+// 				and permission.tourn = :tournId
+// 				and permission.tag IN ('owner', 'tabber')
+// 				and exists (
+// 					select ps.id
+// 						from person_setting ps
+// 					where 1=1
+// 						and ps.tag = 'api_key'
+// 						and ps.person = person.id
+// 						and ps.value = :key
+// 				)
+// 		`, {
+// 			replacements: {
+// 				personId,
+// 				key,
+// 				tournId: req.params.tournId,
+// 			},
+// 			type: db.Sequelize.QueryTypes.SELECT,
+// 		});
 
-	const cookie = req.cookies[req.config.COOKIE_NAME] || req.headers['x-tabroom-cookie'];
+// 	} else {
+// 		if(personRepo.hasAreaAccess(personId, req.params.area)){
+// 			person.add(await personRepo.getById(personId));
+// 		}
+// 	}
 
-	if (cookie) {
+// 	if (persons.length < 1) {
+// 		return 'No valid Authorization header found. Access denied.';
+// 	}
 
-		let session = await sessionRepo.findByUserKey(cookie);
-		if (session) {
-			//build real name
-			let realname = session.person.first;
-			if (session.person.middle) {
-				realname += ` ${session.person.middle}`;
-			}
-			realname += ` ${session.person.last}`;
-			if (session.su) {
-				realname = `${session.su.first} ${session.su.last} as ${realname}`;
-			}
+// 	const person = persons.shift();
 
-			session = {
-				id          : session.id,
-				person      : session.person.id,
-				site_admin  : session.person.siteAdmin, //should rename to siteAdmin but i dont want to find all references right now
-				email       : session.person.email,
-				name        : realname,
-				su          : session.su ? session.su.id : null,
-				settings    : await personRepo.getPersonSettings(session.person.id,{ skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] }),
-			};
+// 	if (person && person.id) {
+// 		req.session = { person };
+// 		if (person.apiTag) {
+// 			req.session.settings = {
+// 				[person.apiTag]: true,
+// 			};
+// 		}
 
-			return session;
-		}
-	}
-};
+// 		if (person.tournTag) {
+// 			req.session.permissions = {
+// 				[req.params.tournId] : person.tournTag,
+// 			};
+// 		}
+// 		return req.session;
+// 	}
 
-export const keyAuth = async (req) => {
-
-	if (!req.headers.authorization) {
-		return 'No valid Authorization header found. Access denied.';
-	}
-
-	const authHeader = basic(req);
-
-	if (!authHeader) {
-		return 'No authentication header sent.';
-	}
-
-	const personId = parseInt(authHeader.name);
-	const key = authHeader.pass;
-
-	if (Number.isNaN(personId)) {
-		return 'No valid Authorization header found. Access denied.  Name must be a Tabroom ID number.';
-	}
-
-	let persons = [];
-
-	if (req.params.area === 'tourn' && req.params.tournId) {
-
-		persons = await db.sequelize.query(`
-			select
-				person.*,
-				permission.tag tournTag
-			from person, permission
-			where 1=1
-				and person.id        = :personId
-				and person.id       = permission.person
-				and permission.tourn = :tournId
-				and permission.tag IN ('owner', 'tabber')
-				and exists (
-					select ps.id
-						from person_setting ps
-					where 1=1
-						and ps.tag = 'api_key'
-						and ps.person = person.id
-						and ps.value = :key
-				)
-		`, {
-			replacements: {
-				personId,
-				key,
-				tournId: req.params.tournId,
-			},
-			type: db.Sequelize.QueryTypes.SELECT,
-		});
-
-	} else {
-
-	person.settings = await personRepo.getPersonSettings(person.id, { skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] });
-
-		const authTag = `api_auth_${req.params.area}`;
-
-		persons = await db.sequelize.query(`
-			select
-				person.*,
-				api_area.tag apiTag
-			from person, person_setting api_area
-			where 1=1
-				and person.id = :personId
-				and person.id = api_area.person
-				and api_area.tag = :authTag
-				and exists (
-					select ps.id
-						from person_setting ps
-					where 1=1
-						and ps.tag = 'api_key'
-						and ps.person = person.id
-						and ps.value = :key
-				)
-		`, {
-			replacements: {
-				personId,
-				key,
-				authTag,
-			},
-			type: db.Sequelize.QueryTypes.SELECT,
-		});
-	}
-
-	if (persons.length < 1) {
-		return 'No valid Authorization header found. Access denied.';
-	}
-
-	const person = persons.shift();
-
-	if (person && person.id) {
-		req.session = { person };
-		if (person.apiTag) {
-			req.session.settings = {
-				[person.apiTag]: true,
-			};
-		}
-
-		if (person.tournTag) {
-			req.session.permissions = {
-				[req.params.tournId] : person.tournTag,
-			};
-		}
-		return req.session;
-	}
-
-	return 'No valid Authorization header found. Access denied.';
-};
+// 	return 'No valid Authorization header found. Access denied.';
+// };
 
 export const tabAuth = async (req) => {
 
@@ -886,5 +803,3 @@ export const categoryCheck = async (req, res, categoryId) => {
 	const replacements = { categoryId };
 	return checkPerms(req, res, categoryQuery, replacements);
 };
-
-export default auth;
