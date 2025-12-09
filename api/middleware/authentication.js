@@ -30,6 +30,9 @@ export async function Authenticate(req, res, next) {
 			if(req.headers.authorization.startsWith('Basic ')){
 				//BASIC AUTHENTICATION
 				const credentials = basic.parse(req.headers.authorization);
+				if (!credentials || !credentials.name || !credentials.pass) {
+					return res.status(400).json({ message: 'Invalid authorization header format' });
+				}
 				person = await personRepo.getPersonByApiKey(credentials.name, credentials.pass);
 				if (!person) {
 					return res.status(401).json({ message: 'Invalid API key credentials' });
@@ -38,7 +41,6 @@ export async function Authenticate(req, res, next) {
 			else{
 				return res.status(400).json({ message: 'Invalid authorization header format' });
 			}
-
 		}
 
 		//parse and format the session object. This object is attaches to all requests and is what later functions use to determine user access

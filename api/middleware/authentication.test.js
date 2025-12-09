@@ -1,9 +1,10 @@
-import { describe } from "vitest";
+import { describe, it } from "vitest";
 import config from "../../config/config.js";
 import sessionRepo from '../repos/sessionRepo.js';
 import personRepo from '../repos/personRepo.js';
 import { Authenticate } from "./authentication.js";
 import userData from '../../tests/testFixtures';
+import { error } from "winston";
 
 describe("Authentication Middleware", () => {
     let req, res, next;
@@ -99,6 +100,20 @@ describe("Authentication Middleware", () => {
             expect(next).toHaveBeenCalled();
             expect(req.session).toBeNull();
         });
+        it('calls next(err) on sessionRepo error', async () => {
+
+            req.cookies[config.COOKIE_NAME] = 'somecookie';
+
+            vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async (userkey) => {
+                throw new Error('Database error');
+            });
+
+            //Act
+            await Authenticate(req, res, next);
+
+            //Assert
+            expect(next).toHaveBeenCalledWith(expect.any(Error));
+        });
     });
 
     describe("Basic Auth", () => {
@@ -136,6 +151,24 @@ describe("Authentication Middleware", () => {
             expect(personRepo.getPersonByApiKey).toHaveBeenCalledWith("123", "invalidapikey");
 
             expect(res.status).toHaveBeenCalledWith(401);
+            expect(next).not.toHaveBeenCalled();
+        });
+        it("returns 400 when Authorization header is malformed", async () => {
+            req.headers.authorization = `Basic malformedheader`;
+
+            await Authenticate(req, res, next);
+
+            // Assertions
+            expect(res.status).toHaveBeenCalledWith(400);
+            expect(next).not.toHaveBeenCalled();
+        });
+        it("returns 400 when Authorization header uses unsupported scheme", async () => {
+            req.headers.authorization = `NotBasic sometoken`;
+
+            await Authenticate(req, res, next);
+
+            // Assertions
+            expect(res.status).toHaveBeenCalledWith(400);
             expect(next).not.toHaveBeenCalled();
         });
     });

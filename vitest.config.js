@@ -6,6 +6,7 @@ export default defineConfig({
 		globals: true,
 		globalSetup: './tests/globalTestSetup.js',
 		coverage: {
+			enabled: true,
 			reporter: ['text', 'html'],
 			exclude: [
 				'node_modules/',

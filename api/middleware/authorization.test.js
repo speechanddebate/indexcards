@@ -1,4 +1,5 @@
 import { describe } from "vitest";
+import { assert } from 'chai';
 import personRepo from '../repos/personRepo.js';
 import { requireAreaAccess } from "./authorization.js";
 import userData from '../../tests/testFixtures';
@@ -31,6 +32,7 @@ describe("Authorization Middleware", () => {
             // Act
             await requireAreaAccess(req, res, next);
             // Assert
+            
             expect(res.status).toHaveBeenCalledWith(401);
             expect(res.json).toHaveBeenCalledWith({ message: 'User not authenticated' });
         });
