@@ -3,18 +3,18 @@ import personRepo from '../../../repos/personRepo.js';
 export const getProfile = {
 	GET: async (req, res) => {
 
-		if (!req.session) {
+		if (!req.person) {
 			return res.status(401).json({ message: 'You have no active user session' });
 		}
 		let person;
 
-		if (req.params.personId && req.session.site_admin) {
+		if (req.params.personId && req.person.siteAdmin) {
 			person = await personRepo.getPersonByIdWithSettings(req.params.personId);
 
 		} else if (req.params.personId ) {
 			return res.status(401).json({ message: 'Only admin staff may access another profile' });
-		} else if (req.session.person) {
-			person = await personRepo.getPersonByIdWithSettings(req.session.person);
+		} else if (req.person) {
+			person = await personRepo.getPersonByIdWithSettings(req.person.id);
 		}
 
 		if (!person) {

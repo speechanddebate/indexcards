@@ -12,7 +12,8 @@ import config from './config/config.js';
 import { barfPlease, systemStatus } from './api/controllers/public/status.js';
 import errorHandler from './api/helpers/error.js';
 import apiDoc from './api/routes/api-doc.js';
-
+import { Authenticate } from './api/middleware/authentication.js';
+import { requireAreaAccess } from './api/middleware/authorization.js';
 import coachPaths from './api/routes/paths/coach/index.js';
 import extPaths from './api/routes/paths/ext/index.js';
 import glpPaths from './api/routes/paths/glp/index.js';
@@ -22,8 +23,6 @@ import tabPaths from './api/routes/paths/tab/index.js';
 import userPaths from './api/routes/paths/user/index.js';
 
 import {
-	auth,
-	keyAuth,
 	tabAuth,
 	coachAuth,
 	localAuth,
@@ -117,20 +116,11 @@ if (process.env.NODE_ENV === 'development') {
 // Parse cookies and add them to the session
 app.use(cookieParser());
 
-// Authentication.  Context depends on the sub-branch so that secondary
-// functions do not have to handle it in every call.
-
-app.use( async (req, res, next) => {
-	try {
-		req.session = await auth(req, res);
-	} catch (err) {
-		next(err);
-	}
-	next();
-});
+// Authenticate all requests and set req.person if valid
+app.use(Authenticate);
 
 app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
-	if (!req.session) {
+	if (!req.person) {
 		return res.status(401).json({
 			error   : false,
 			message : `User: You are not logged in.`,
@@ -150,7 +140,7 @@ const tabRoutes = [
 
 app.all(tabRoutes, async (req, res, next) => {
 
-	if (!req.session) {
+	if (!req.person) {
 		return res.status(401).json({
 			error   : false,
 			message : `Tab: You are not logged in.`,
@@ -179,7 +169,7 @@ app.all(coachRoutes, async (req, res, next) => {
 	// access is in the /user/prefs directory because it's such a bizarre
 	// one off
 
-	if (!req.session) {
+	if (!req.person) {
 		return res.status(401).json({
 			error   : false,
 			message : `Coach: You are not logged in.`,
@@ -210,7 +200,7 @@ app.all(localRoutes, async (req, res, next) => {
 	// apis related to administrators of districts (the committee), or a
 	// region, or an NCFL diocese, or a circuit.
 
-	if (!req.session) {
+	if (!req.person) {
 		return res.status(401).json({
 			error   : false,
 			message : `Admin: You are not logged in.`,
@@ -233,7 +223,7 @@ app.all(localRoutes, async (req, res, next) => {
 	next();
 });
 
-app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async (req, res, next) => {
+app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'],requireAreaAccess, async (req, res, next) => {
 
 	// All EXT requests are from external services and sources that do not
 	// necessarily hook into the Tabroom authentication methods.  They must
@@ -243,32 +233,32 @@ app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'], async 
 	// admins for internal NSDA purposes, or Hardy because that guy is super
 	// shady and I need to keep a specific eye on him.
 
-	if (req.session) {
-		if (req.params.area === 'tourn') {
-			req.session = await tabAuth(req, res);
-		} else if (!req.session?.settings[`api_auth_${req.params.area}`]) {
-			// Give the keyAuth a chance to work
-			delete req.session;
-		}
-	}
+	// if (req.session) {
+	// 	if (req.params.area === 'tourn') {
+	// 		req.session = await tabAuth(req, res);
+	// 	} else if (!req.session?.settings[`api_auth_${req.params.area}`]) {
+	// 		// Give the keyAuth a chance to work
+	// 		delete req.session;
+	// 	}
+	// }
 
-	if (!req.session) {
-		try {
-			req.session = await keyAuth(req, res);
-		} catch(err) {
-			return res.status(401).json({
-				error   : true,
-				message : `Key API authentication failed: ${err}`,
-			});
-		}
-	}
+	// if (!req.session) {
+	// 	try {
+	// 		await keyAuth(req, res);
+	// 	} catch(err) {
+	// 		return res.status(401).json({
+	// 			error   : true,
+	// 			message : `Key API authentication failed: ${err}`,
+	// 		});
+	// 	}
+	// }
 
-	if (!req.session || !req.session.person) {
-		return res.status(401).json({
-			error   : true,
-			message : `That function is not accessible to your API credentials.  Key ${req.params.area} required`,
-		});
-	}
+	// if (!req.session || !req.session.person) {
+	// 	return res.status(401).json({
+	// 		error   : true,
+	// 		message : `That function is not accessible to your API credentials.  Key ${req.params.area} required`,
+	// 	});
+	// }
 
 	next();
 });
@@ -277,14 +267,14 @@ app.all('/v1/glp/*', async (req, res, next) => {
 
 	// GLP are Godlike Powers; aka site administrators
 
-	if (!req.session) {
+	if (!req.person) {
 		return res.status(401).json({
 			error     : true,
 			message   : `GLP : You are not logged in.`,
 		});
 	}
 
-	if (!req.session?.site_admin) {
+	if (!req.person?.siteAdmin) {
 		return res.status(401).json({
 			error   : true,
 			message : `That function is accessible to Tabroom site administrators only`,
