@@ -116,11 +116,11 @@ if (process.env.NODE_ENV === 'development') {
 // Parse cookies and add them to the session
 app.use(cookieParser());
 
-// Authenticate all requests and set req.session if valid
+// Authenticate all requests and set req.person if valid
 app.use(Authenticate);
 
 app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
-	if (!req.session) {
+	if (!req.person) {
 		return res.status(401).json({
 			error   : false,
 			message : `User: You are not logged in.`,
@@ -140,7 +140,7 @@ const tabRoutes = [
 
 app.all(tabRoutes, async (req, res, next) => {
 
-	if (!req.session) {
+	if (!req.person) {
 		return res.status(401).json({
 			error   : false,
 			message : `Tab: You are not logged in.`,
@@ -169,7 +169,7 @@ app.all(coachRoutes, async (req, res, next) => {
 	// access is in the /user/prefs directory because it's such a bizarre
 	// one off
 
-	if (!req.session) {
+	if (!req.person) {
 		return res.status(401).json({
 			error   : false,
 			message : `Coach: You are not logged in.`,
@@ -200,7 +200,7 @@ app.all(localRoutes, async (req, res, next) => {
 	// apis related to administrators of districts (the committee), or a
 	// region, or an NCFL diocese, or a circuit.
 
-	if (!req.session) {
+	if (!req.person) {
 		return res.status(401).json({
 			error   : false,
 			message : `Admin: You are not logged in.`,
@@ -267,14 +267,14 @@ app.all('/v1/glp/*', async (req, res, next) => {
 
 	// GLP are Godlike Powers; aka site administrators
 
-	if (!req.session) {
+	if (!req.person) {
 		return res.status(401).json({
 			error     : true,
 			message   : `GLP : You are not logged in.`,
 		});
 	}
 
-	if (!req.session?.site_admin) {
+	if (!req.person?.siteAdmin) {
 		return res.status(401).json({
 			error   : true,
 			message : `That function is accessible to Tabroom site administrators only`,

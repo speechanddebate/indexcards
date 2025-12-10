@@ -69,8 +69,8 @@ import { errorLogger } from './logger.js';
 
 export const tabAuth = async (req) => {
 
-	if (!req.session || !req.session.person) {
-		return;
+	if (!req.person || !req.person.id) {
+		return req.session;
 	}
 
 	if (!req.session.perms || !req.session.perms?.tourn) {
@@ -96,7 +96,7 @@ export const tabAuth = async (req) => {
 
 	let perms = {};
 
-	if (req.session.site_admin) {
+	if (req.person.siteAdmin) {
 
 		req.session.perms.tourn[tournId] = 'owner';
 		req.session.tourn = tourn;
@@ -427,7 +427,7 @@ export const coachAuth = async (req) => {
 	const chapterId = req.params.chapterId;
 	let chapterAccess = false;
 
-	if (req.session.site_admin) {
+	if (req.session.siteAdmin) {
 		chapterAccess = true;
 	} else {
 		const perms = await db.sequelize.query(`
@@ -510,7 +510,7 @@ export const checkJudgePerson = async (req, judgeId) => {
 		return false;
 	}
 
-	if (req.session.site_admin) {
+	if (req.session.siteAdmin) {
 		return true;
 	}
 

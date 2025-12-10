@@ -38,7 +38,7 @@ describe("Authorization Middleware", () => {
         });
         it("deny access when no area access", async () => {
             // Arrange
-            req.user = { id: 1 };
+            req.person = { id: 1 };
             req.params = { area: 'caselist' };
 
             vi.spyOn(personRepo, 'hasAreaAccess').mockResolvedValueOnce(false);
@@ -52,7 +52,7 @@ describe("Authorization Middleware", () => {
         });
         it("allow access when has area access", async () => {
             // Arrange
-            req.user = { id: 1 };
+            req.person = { id: 1 };
             req.params = { area: 'caselist' };
 
             vi.spyOn(personRepo, 'hasAreaAccess').mockResolvedValueOnce(true);

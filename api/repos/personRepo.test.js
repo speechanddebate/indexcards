@@ -1,4 +1,4 @@
-import { describe, it, expect  } from "vitest";
+import { describe, it, expect } from "vitest";
 import db from "../data/db.js";
 import personRepo from "./personRepo.js";
 

@@ -1,10 +1,10 @@
 import personRepo from '../repos/personRepo.js';
 export async function requireAreaAccess(req, res, next) {
-	if (!req.user) {
+	if (!req.person) {
 		return res.status(401).json({ message: 'User not authenticated' });
 	}
 
-	const personId = req.user.id;
+	const personId = req.person.id;
 	const area = req.params.area;
 
 	try {

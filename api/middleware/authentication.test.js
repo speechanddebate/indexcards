@@ -28,7 +28,7 @@ describe("Authentication Middleware", () => {
     });
 
     describe("No Auth", () => {
-        it("calls next() and no req.session when no auth provided", async () => {
+        it("calls next() and no req.person when no auth provided", async () => {
             // Arrange
 
             // Act
@@ -36,26 +36,12 @@ describe("Authentication Middleware", () => {
 
             // Assert
             expect(next).toHaveBeenCalled();
-            expect(req.session).toBeNull();
+            expect(req.person).not.toBeDefined();
         });
     });
 
     describe("Cookie Auth", () => {
-        it('Ignores the database if there is already a session', async () => {
-            //Arrange
-            req.session = {
-                id  : 69,
-            };
-
-            //Act
-            await Authenticate(req, res, next);
-
-            //Assert
-            expect(next).toHaveBeenCalled();
-            expect(req.session.id).toBe(69);
-
-        });
-        it('sets req.session when valid cookie', async () => {
+        it('sets req.session and req.person when valid cookie', async () => {
 
             req.cookies[config.COOKIE_NAME] = userData.testUserSession.userkey;
             vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async (userkey) => {
@@ -84,8 +70,9 @@ describe("Authentication Middleware", () => {
             expect(next).toHaveBeenCalled();
             expect(req.session).toBeDefined();
             expect(req.session.person).toBe(69);
+            expect(req.person).toBeDefined();
         });
-        it('does not set req.session when invalid cookie', async () => {
+        it('does not set req.session or req.person when invalid cookie', async () => {
 
             req.cookies[config.COOKIE_NAME] = 'invalidcookie';
 
@@ -98,7 +85,8 @@ describe("Authentication Middleware", () => {
 
             //Assert
             expect(next).toHaveBeenCalled();
-            expect(req.session).toBeNull();
+            expect(req.session).not.toBeDefined();
+            expect(req.person).not.toBeDefined();
         });
         it('calls next(err) on sessionRepo error', async () => {
 
@@ -117,7 +105,7 @@ describe("Authentication Middleware", () => {
     });
 
     describe("Basic Auth", () => {
-        it("sets req.user with valid token", async () => {
+        it("sets req.person with valid token", async () => {
             // base64("myuserkey:myapikey")
             const encoded = Buffer.from("123:myapikey").toString("base64");
 
@@ -133,8 +121,8 @@ describe("Authentication Middleware", () => {
             // Assertions
             expect(personRepo.getPersonByApiKey).toHaveBeenCalledWith("123", "myapikey");
 
-            expect(req.user).toBeDefined();
-            expect(req.user.id).toBe(123);
+            expect(req.person).toBeDefined();
+            expect(req.person.id).toBe(123);
             expect(next).toHaveBeenCalledOnce();
         });
         it("returns 401 when API key is invalid", async () => {

@@ -11,6 +11,9 @@ describe('Authorization Functions', () => {
 		const testTourn = userData.testUserTournPerm.tourn;
 
 		const req = {
+			person: {
+				id: userData.testUserSession.person
+			},
 			config,
 			params: {
 				tournId : testTourn,
@@ -18,6 +21,7 @@ describe('Authorization Functions', () => {
 			cookies : {
 				[config.COOKIE_NAME]: userData.testUserSession.userkey,
 			},
+			clearCookie: vi.fn()
 		};
 		const res = {};
 		// Call the middleware to set req.session
@@ -49,6 +53,7 @@ describe('Authorization Functions', () => {
 			cookies : {
 				[config.COOKIE_NAME]: userData.testUserSession.userkey,
 			},
+			clearCookie: vi.fn()
 		};
 
 		const res = {};
@@ -67,10 +72,14 @@ describe('Authorization Functions', () => {
 
 	it('Finds a session for an GLP Admin user', async () => {
 		const req = {
+			person: {
+				id: userData.testAdminSession.person
+			},
 			config,
 			cookies : {
 				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
 			},
+			clearCookie: vi.fn()
 		};
 
 		const res = {};
@@ -86,7 +95,7 @@ describe('Authorization Functions', () => {
 
 		assert.typeOf(session, 'object');
 		assert.equal(session.person, '70');
-		assert.equal(session.site_admin, true);
+		assert.equal(session.siteAdmin, true);
 		assert.equal(session.email, 'i.am.god@speechanddebate.org');
 	});
 
@@ -102,6 +111,7 @@ describe('Authorization Functions', () => {
 			cookies : {
 				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
 			},
+			clearCookie: vi.fn()
 		};
 
 		const res = {};
