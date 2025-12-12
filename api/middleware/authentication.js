@@ -2,6 +2,7 @@ import basic from 'basic-auth';
 import config from '../../config/config.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import personRepo from '../repos/personRepo.js';
+import { BadRequest, Unauthorized } from '../helpers/problem.js';
 export async function Authenticate(req, res, next) {
 	try {
 		let session = null;
@@ -40,15 +41,15 @@ export async function Authenticate(req, res, next) {
 				//BASIC AUTHENTICATION
 				const credentials = basic.parse(req.headers.authorization);
 				if (!credentials || !credentials.name || !credentials.pass) {
-					return res.status(400).json({ message: 'Invalid authorization header format' });
+					return BadRequest(res, 'The Authorization header is malformed. Expected format: Basic base64(user:key).');
 				}
 				person = await personRepo.getPersonByApiKey(credentials.name, credentials.pass);
 				if (!person) {
-					return res.status(401).json({ message: 'Invalid API key credentials' });
+					return Unauthorized(res,'Invalid API key');
 				}
 			}
 			else{
-				return res.status(400).json({ message: 'Invalid authorization header format' });
+				return BadRequest(res, 'The Authorization header uses an unrecognized authentication scheme.');
 			}
 		}
 

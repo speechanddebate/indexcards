@@ -10,6 +10,9 @@ describe("Authentication Middleware", () => {
     let req, res, next;
 
     beforeEach(() => {
+
+        vi.restoreAllMocks();
+        
         req = {
             headers: {},
             cookies: {},
@@ -18,13 +21,12 @@ describe("Authentication Middleware", () => {
 
         res = {
             status: vi.fn(() => res),
+            type: vi.fn().mockReturnThis(),
             json: vi.fn().mockReturnThis(),
             clearCookie: vi.fn(),
         };
 
         next = vi.fn();
-
-        vi.restoreAllMocks();
     });
 
     describe("No Auth", () => {
