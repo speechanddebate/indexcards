@@ -7,7 +7,7 @@
 	"scripts": {
 		"start": "NODE_ENV='production' NODE_OPTIONS='--max_old_space_size=200 --experimental-vm-modules --experimental-specifier-resolution=node' node --use-strict app.js",
 		"production": "NODE_ENV='production' NODE_OPTIONS='--max_old_space_size=200' pm2 -i 16 start app.js --name indexcards --node-args='--experimental-specifier-resolution=node --use_strict' -e /var/log/indexcards/error.log",
-		"s<F12>taging": "NODE_ENV='staging' NODE_OPTIONS='--max_old_space_size=1000' pm2 -i 4 start app.js --name indexcards --node-args='--experimental-specifier-resolution=node --use_strict' -o /var/log/indexcards/output.log -e /var/log/indexcards/error.log ",
+		"staging": "NODE_ENV='staging' NODE_OPTIONS='--max_old_space_size=1000' pm2 -i 4 start app.js --name indexcards --node-args='--experimental-specifier-resolution=node --use_strict' -o /var/log/indexcards/output.log -e /var/log/indexcards/error.log ",
 		"dev": "TZ='UTC' NODE_ENV='development' NODE_OPTIONS='--experimental-vm-modules --experimental-specifier-resolution=node' nodemon --use-strict app.js",
 		"test": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest watch",
 		"test-ci": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest --watch false --run",
@@ -16,7 +16,8 @@
 		"lint-fix": "eslint --fix .",
 		"format": "prettier --write .",
 		"format-check": "prettier --check .",
-		"prepare": "husky"
+		"prepare": "husky",
+		"models:gen": "sequelize-auto -o ./api/data/models -h localhost -d tabroom -u root -x -p 3307 -e mariadb -l esm --caseModel c -a ./config/sequelize-auto.config.json"
 	},
 	"extensionless": {
 		"lookFor": [
@@ -98,6 +99,7 @@
 		"@types/luxon": "^3.7.1",
 		"@vitest/coverage-v8": "^3.2.4",
 		"@vitest/eslint-plugin": "^1.1.25",
+		"@vitest/ui": "^3.2.4",
 		"chai": "^4.2.0",
 		"eslint": "^9.18.0",
 		"eslint-config-prettier": "^10.0.1",
@@ -110,6 +112,7 @@
 		"node-mocks-http": "^1.10.1",
 		"nodemon": "^3.1.10",
 		"nyc": "^17.1.0",
+		"sequelize-auto": "^0.8.8",
 		"supertest": "^4.0.2",
 		"ts-node": "^10.9.1",
 		"tsx": "^4.19.2",

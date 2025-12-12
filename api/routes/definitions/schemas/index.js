@@ -1,4 +1,4 @@
-import Err from './Err.js';
+import * as Problem from './Problem.js';
 import Person from './Person.js';
 import LoginRequest from './LoginRequest.js';
 import Session from './Session.js';
@@ -12,10 +12,10 @@ import CaselistLink from './CaselistLink.js';
 import Share from './Share.js';
 import Search from './Search.js';
 import Invite from './Invite.js';
-import Ad from './Ad.js';
+import * as Ad from './Ad.js';
 
 export default {
-	Err,
+	...Problem,
 	Person,
 	LoginRequest,
 	Session,
@@ -29,5 +29,5 @@ export default {
 	Share,
 	Search,
 	Invite,
-	Ad,
+	...Ad,
 };

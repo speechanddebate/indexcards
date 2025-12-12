@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { assert } from 'chai';
-import db from '../../../helpers/db';
+import db from '../../../data/db';
 import server from '../../../../app';
 import { testUserAPIKey } from '../../../../tests/testFixtures';
 

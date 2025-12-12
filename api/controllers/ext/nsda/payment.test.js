@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import request from 'supertest';
 import config from '../../../../config/config.js';
-import db from '../../../helpers/db';
+import db from '../../../data/db';
 import server from '../../../../app';
 import { testUserAPIKey, testStoreCartSetting } from '../../../../tests/testFixtures';
 

@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import { v4 as uuidv4 } from 'uuid';
 import config from '../../config/config';
-import db from './db';
+import db from '../data/db';
 import login from './login';
 import userData from '../../tests/testFixtures';
 

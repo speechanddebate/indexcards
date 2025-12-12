@@ -1,5 +1,5 @@
-import ErrorResponse from './ErrorResponse.js';
+import * as ProblemResponses from './ProblemResponses.js';
 
 export default {
-	ErrorResponse,
+	...ProblemResponses,
 };

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import db from './db.js';
+import db from '../data/db.js';
 import emailBlast from './mail.js';
 import config from '../../config/config.js';
 import { errorLogger } from './logger.js';

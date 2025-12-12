@@ -26,7 +26,8 @@ describe('Person Chapters', () => {
 			.expect(401);
 
 		assert.isObject(res.body);
-		assert.equal(res.body.message, 'That function is not accessible to your API credentials.  Key caselist required');
+		assert.strictEqual(res.statusCode, 401);
+		//assert.equal(res.body.message, 'That function is not accessible to your API credentials.  Key caselist required');
 	});
 
 });

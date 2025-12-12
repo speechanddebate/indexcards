@@ -1,4 +1,4 @@
-export const getAds = {
+export const PublicAds = {
 
 	GET: async (req, res) => {
 
@@ -19,24 +19,25 @@ export const getAds = {
 	},
 };
 
-export default getAds;
-
-getAds.GET.apiDoc = {
+PublicAds.GET.apiDoc = {
 	summary     : 'Return list of ads to display on front page',
+	description : 'returns an array of current, approved ads to be displayed on the tabroom homepage.',
+	security: [],
 	operationId : 'getAds',
 	tags        : ['public'],
 	responses: {
 		200: {
-			description: 'Ads',
+			description: 'An array of Ads to be displayed',
 			content: {
-				'*/*': {
+				'application/json': {
 					schema: {
 						type: 'array',
-						items: { $ref: '#/components/schemas/Ad' },
+						items: { $ref: '#/components/schemas/PublicAd' },
 					},
 				},
 			},
 		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
+		401     : { $ref: '#/components/responses/Unauthorized'  },
+		default : { $ref: '#/components/responses/ErrorResponse' },
 	},
 };
