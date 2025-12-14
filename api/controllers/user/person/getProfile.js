@@ -1,58 +1,27 @@
+import personRepo from '../../../repos/personRepo.js';
+
 export const getProfile = {
 	GET: async (req, res) => {
 
-		if (!req.session) {
-			return res.status(201).json({ message: 'You have no active user session' });
+		if (!req.person) {
+			return res.status(401).json({ message: 'You have no active user session' });
 		}
 		let person;
 
-		if (req.params.personId && req.session.site_admin) {
-			person = await req.db.person.findByPk(
-				req.params.personId,
-				{
-					include: [{
-						model: req.db.personSetting,
-						as: 'Settings',
-					}],
-				}
-			);
+		if (req.params.personId && req.person.siteAdmin) {
+			person = await personRepo.getPersonByIdWithSettings(req.params.personId);
 
 		} else if (req.params.personId ) {
-			return res.status(201).json({ message: 'Only admin staff may access another profile' });
-		} else if (req.session.person) {
-			person = await req.db.person.findByPk(req.session.person,
-				{
-					include: [{
-						model: req.db.personSetting,
-						as: 'Settings',
-					}],
-				},
-			);
+			return res.status(401).json({ message: 'Only admin staff may access another profile' });
+		} else if (req.person) {
+			person = await personRepo.getPersonByIdWithSettings(req.person.id);
 		}
 
-		if (person.count < 1) {
+		if (!person) {
 			return res.status(400).json({ message: 'User does not exist' });
 		}
 
-		const personData = person.dataValues;
-		personData.settings = {};
-
-		for (const set of personData.Settings) {
-			const setting = set.dataValues;
-
-			if (setting.value === 'text' || setting.value === 'json') {
-				personData.settings[setting.tag] = setting.alue_text;
-			} else if (setting.value === 'date') {
-				personData.settings[setting.tag] = setting.value_date;
-			} else if (setting.value) {
-				personData.settings[setting.tag] = setting.value;
-			}
-		}
-
-		delete personData.Settings;
-		delete personData.password;
-
-		return res.status(200).json(personData);
+		return res.status(200).json(person);
 	},
 };
 

@@ -3,7 +3,7 @@ import { ordinalize } from '@speechanddebate/nsda-js-utils';
 import { notify } from './blast.js';
 import { sidelocks } from './round.js';
 import { config } from '../../config/config.js';
-import changeLogModel from '../models/changeLog.js';
+import changeLogModel from '../data/models/change_log.js';
 
 // Functions related to creating pairing blasts for each section.
 // formatBlast pulls the sql paramters from the blastSection/Round/Timeslot
