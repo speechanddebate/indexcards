@@ -113,10 +113,12 @@ export const getMySchoolsByTourn = {
 
 			const tournJudges = await req.db.sequelize.query(`
 				select
-					judge.id, judge.first, judge.last, judge.school
-				from judge
+					judge.id, judge.first, judge.last, judge.school,
+					category.id categoryId, category.abbr categoryAbbr, category.name categoryName
+				from (judge, category)
 				where 1=1
 					and judge.school IN (:schoolIds)
+					and judge.category = category.id
 			`, {
 				replacements: {
 					schoolIds,

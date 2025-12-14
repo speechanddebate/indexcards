@@ -589,7 +589,7 @@ export const getTournPublishedRounds = {
 	GET: async (req, res) => {
 
 		const db = req.db;
-		const rounds = await db.sequelize.query(`
+		const rawRounds = await db.sequelize.query(`
 			select
 				round.id roundId, round.name roundName, round.label roundLabel, round.type roundType,
 					round.published,
@@ -622,6 +622,13 @@ export const getTournPublishedRounds = {
 		`, {
 			replacements: { tournId: req.params.tournId },
 			type: db.Sequelize.QueryTypes.SELECT,
+		});
+
+		const rounds = rawRounds.map( (round) => {
+			if (round.eventType === 'wsdc') {
+				round.eventType = 'debate';
+			}
+			return round;
 		});
 
 		return res.status(200).json(rounds);
