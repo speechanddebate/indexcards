@@ -27,11 +27,11 @@ export function mapSession(sessionInstance) {
 	if (!sessionInstance) return null;
 
 	return {
-		id: sessionInstance.id,
-		userkey: sessionInstance.userkey,
-		siteAdmin: sessionInstance.siteAdmin,
-		defaults: sessionInstance.defaults ? safeParseJson(sessionInstance.defaults) : null,
-		agentData: sessionInstance.agent_data ? safeParseJson(sessionInstance.agent_data) : null,
+		id        : sessionInstance.id,
+		userkey   : sessionInstance.userkey,
+		siteAdmin : sessionInstance.siteAdmin,
+		defaults  : sessionInstance.defaults ? safeParseJson(sessionInstance.defaults)     : null,
+		agentData : sessionInstance.agent_data ? safeParseJson(sessionInstance.agent_data) : null,
 	};
 }
 

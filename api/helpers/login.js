@@ -48,6 +48,8 @@ const login = async (req) => {
 			session.site_admin = person.site_admin;
 			session.name = `${person.first} ${person.last}`;
 			session.email = person.email;
+			session.first = person.first;
+			session.email = person.email;
 
 			return session;
 
