@@ -1,6 +1,6 @@
 import { describe } from "vitest";
 import personRepo from '../repos/personRepo.js';
-import { requireAreaAccess } from "./authorization.js";
+import {requireAreaAccess, requireSiteAdmin} from "./authorization.js";
 import { createContext } from "../../tests/httpMocks.js";
 
 describe("Authorization Middleware", () => {
@@ -49,6 +49,43 @@ describe("Authorization Middleware", () => {
             await requireAreaAccess(req, res, next);
 
             // Assert
+            expect(next).toHaveBeenCalled();
+        });
+    });
+    describe('requireSiteAdmin', () => {
+        it('deny when unauthenticated', () => {
+            const {req, res, next} = createContext();
+
+            requireSiteAdmin(req,res,next);
+
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(next).not.toHaveBeenCalled();
+        });
+        it('deny when not siteAdmin', () => {
+            const {req, res, next} = createContext({
+                req: {
+                    person: {
+                        siteAdmin: false
+                    }
+                }
+            });
+
+            requireSiteAdmin(req,res,next);
+
+            expect(res.status).toHaveBeenCalledWith(403);
+            expect(next).not.toHaveBeenCalled();
+        });
+        it('allow when siteAdmin', () => {
+            const {req, res, next} = createContext({
+                req: {
+                    person: {
+                        siteAdmin: true
+                    }
+                }
+            });
+
+            requireSiteAdmin(req,res,next);
+
             expect(next).toHaveBeenCalled();
         });
     });

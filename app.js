@@ -13,7 +13,7 @@ import { barfPlease, systemStatus } from './api/controllers/public/status.js';
 import errorHandler from './api/helpers/error.js';
 import apiDoc from './api/routes/api-doc.js';
 import { Authenticate } from './api/middleware/authentication.js';
-import { requireAreaAccess } from './api/middleware/authorization.js';
+import { requireAreaAccess, requireSiteAdmin } from './api/middleware/authorization.js';
 import coachPaths from './api/routes/paths/coach/index.js';
 import extPaths from './api/routes/paths/ext/index.js';
 import glpPaths from './api/routes/paths/glp/index.js';
@@ -223,66 +223,12 @@ app.all(localRoutes, async (req, res, next) => {
 	next();
 });
 
-app.all(['/v1/ext/:area', '/v1/ext/:area/*', '/v1/ext/:area/:tournId/*'],requireAreaAccess, async (req, res, next) => {
-
-	// All EXT requests are from external services and sources that do not
-	// necessarily hook into the Tabroom authentication methods.  They must
-	// have instead a basic authentication header with a Tabroom ID and
-	// corresponding api_key setting for an account in person_settings. Certain
-	// endpoints might be authorized to only some person accounts, such as site
-	// admins for internal NSDA purposes, or Hardy because that guy is super
-	// shady and I need to keep a specific eye on him.
-
-	// if (req.session) {
-	// 	if (req.params.area === 'tourn') {
-	// 		req.session = await tabAuth(req, res);
-	// 	} else if (!req.session?.settings[`api_auth_${req.params.area}`]) {
-	// 		// Give the keyAuth a chance to work
-	// 		delete req.session;
-	// 	}
-	// }
-
-	// if (!req.session) {
-	// 	try {
-	// 		await keyAuth(req, res);
-	// 	} catch(err) {
-	// 		return res.status(401).json({
-	// 			error   : true,
-	// 			message : `Key API authentication failed: ${err}`,
-	// 		});
-	// 	}
-	// }
-
-	// if (!req.session || !req.session.person) {
-	// 	return res.status(401).json({
-	// 		error   : true,
-	// 		message : `That function is not accessible to your API credentials.  Key ${req.params.area} required`,
-	// 	});
-	// }
-
-	next();
+app.use('/v1/ext/tourn/*', async (req,res,next) => {
+	// /v1/ext/tourn requires tourn level permission
+	req.session = await tabAuth(req, res);
 });
-
-app.all('/v1/glp/*', async (req, res, next) => {
-
-	// GLP are Godlike Powers; aka site administrators
-
-	if (!req.person) {
-		return res.status(401).json({
-			error     : true,
-			message   : `GLP : You are not logged in.`,
-		});
-	}
-
-	if (!req.person?.siteAdmin) {
-		return res.status(401).json({
-			error   : true,
-			message : `That function is accessible to Tabroom site administrators only`,
-		});
-	}
-
-	next();
-});
+app.use('/v1/ext/:area',requireAreaAccess);
+app.use('/v1/glp/*'    ,requireSiteAdmin);
 
 const systemPaths = [
 	{ path : '/status', module : systemStatus },
