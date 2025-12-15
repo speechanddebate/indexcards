@@ -1,7 +1,8 @@
 import personRepo from '../repos/personRepo.js';
+import { Unauthorized, Forbidden } from '../helpers/problem.js';
 export async function requireAreaAccess(req, res, next) {
 	if (!req.person) {
-		return res.status(401).json({ message: 'User not authenticated' });
+		return Unauthorized(res,'User not Authenticated');
 	}
 
 	const personId = req.person.id;
@@ -11,9 +12,7 @@ export async function requireAreaAccess(req, res, next) {
 		const hasAccess = await personRepo.hasAreaAccess(personId, area);
 
 		if (!hasAccess) {
-			return res.status(403).json({
-				message: `Access to ${area} is forbidden for your API credentials`,
-			});
+			return Forbidden(res,`Access to ${area} is forbidden for your API credentials`);
 		}
 
 		next();

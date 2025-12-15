@@ -1,3 +1,4 @@
+//Modeled after RFC 7807
 export const ErrorResponse = {
 	description: 'Unexpected Error',
 	content: {
@@ -6,7 +7,7 @@ export const ErrorResponse = {
 				$ref: '#/components/schemas/Problem',
 			},
 			example: {
-				type: 'https://api.example.com/errors/internal-error',
+				type: 'about:blank',
 				title: 'Internal Server Error',
 				status: 500,
 				detail: 'An unexpected error occurred.',
