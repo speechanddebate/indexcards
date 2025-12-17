@@ -155,7 +155,7 @@ export const getTournInvite = {
 					and nsda_event_category.event = event.id
 
 				left join nsda_category
-					on nsda_category.code = nsda_event_category.value 
+					on nsda_category.code = nsda_event_category.value
 
 				left join event_setting cap
 					on cap.event = event.id
@@ -839,4 +839,78 @@ getResults.GET.apiDoc = {
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
 	tags: ['invite', 'public', 'results'],
+};
+
+export const getEventByAbbr = {
+
+	GET: async (req, res) => {
+
+		const db = req.db;
+
+		const eventData = await db.sequelize.query(`
+			select
+				event.name eventName,
+				event.id eventId,
+				event.type eventType
+			from event
+			where 1=1
+				and event.tourn = :tournId
+				and event.abbr = :eventAbbr
+		`, {
+			replacements : { ...req.params },
+			type         : db.Sequelize.QueryTypes.SELECT,
+		});
+
+		eventData.rounds = await db.sequelize.query(`
+			select
+				round.name roundNumber,
+				round.id roundId,
+				round.label roundLabel
+				round.type roundType
+			from round
+			where 1=1
+				and round.event = :eventId
+				and round.published != 0
+				order by round.name
+		`, {
+			replacements : { ...req.params },
+			type         : db.Sequelize.QueryTypes.SELECT,
+		});
+
+		res.status(200).json(eventData);
+	},
+};
+
+getEventByAbbr.GET.apiDoc = {
+	summary     : 'Returns some limited data about an event together with published rounds by event abbreviation',
+	operationId : 'getEventByAbbr',
+	parameters  : [
+		{
+			in          : 'path',
+			name        : 'tournId',
+			description : 'Tournament ID to return events for',
+			required    : true,
+			schema      : { type: 'number', minimum: 1 },
+		}, {
+			in          : 'path',
+			name        : 'eventAbbr',
+			description : 'Human readable event abbreviation',
+			required    : true,
+			schema      : { type: 'string', minimum: 1 },
+		},
+	],
+	responses: {
+		200: {
+			description: 'Event and Round in JSON format for parsing',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'object',
+					},
+				},
+			},
+		},
+		default: { $ref: '#/components/responses/ErrorResponse' },
+	},
+	tags: ['invite', 'public', 'event', 'eventAbbr', 'rounds'],
 };

@@ -9,6 +9,7 @@ import {
 	getTournPublishedResults,
 	getTournIdByWebname,
 	getTournSchedule,
+	getEventByAbbr,
 } from '../../../controllers/public/invite/tourn.js';
 
 import {
@@ -32,6 +33,7 @@ export default [
 	{ path: '/public/invite/:tournId/nonschools'              , module : getMyChaptersNonTourn }    ,
 	{ path: '/public/invite/:tournId/events'                  , module : getTournEvents }           ,
 	{ path: '/public/invite/:tournId/events/:eventAbbr/field' , module : getEntryFieldByEvent }     ,
+	{ path: '/public/invite/:tournId/events/:eventAbbr'       , module : getEventByAbbr }           ,
 	{ path: '/public/invite/:tournId/files'                   , module : getTournPublishedFiles }   ,
 	{ path: '/public/invite/:tournId/rounds'                  , module : getTournPublishedRounds }  ,
 	{ path: '/public/invite/:tournId/results'                 , module : getTournPublishedResults } ,
