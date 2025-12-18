@@ -8,6 +8,7 @@ export const userChapters = {
 			where 1=1
 				and permission.person = :personId
 				and permission.chapter = chapter.id
+			group by chapter.id
 		`, {
 			replacements: { personId: req.session.person },
 			type: req.db.Sequelize.QueryTypes.SELECT,
@@ -33,6 +34,7 @@ export const userChaptersByTourn = {
 			where 1=1
 				and permission.person = :personId
 				and permission.chapter = chapter.id
+			group by chapter.id
 		`, {
 			replacements : {
 				personId : req.session.person,

@@ -72,12 +72,16 @@ export const testAdminSession = {
 
 export const testUserChapterPerm = {
 	chapter : 130737,
+	school  : 699354,
+	tourn   : 31059,
 	person  : 69,
 	tag     : 'chapter',
 };
 
 export const testUserSchoolContact = {
 	school   : 694009,
+	tourn    : 30661,
+	chapter  : 130140,
 	person   : 69,
 	official : 1,
 	onsite   : 1,

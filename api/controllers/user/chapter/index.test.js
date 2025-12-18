@@ -3,7 +3,11 @@ import { assert } from 'chai';
 import config from '../../../../config/config';
 import server from '../../../../app';
 import db from '../../../data/db';
-import { testUserChapterPerm, testUserSchoolContact, testUserSession } from '../../../../tests/testFixtures';
+import {
+	testUserChapterPerm,
+	testUserSchoolContact,
+	testUserSession
+} from '../../../../tests/testFixtures';
 
 describe('User Chapter', () => {
 
@@ -19,7 +23,14 @@ describe('User Chapter', () => {
 			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
+
 		assert.isArray(res.body, 'Response is an array');
+
+		assert.equal(
+			res.body.length,
+			1,
+			'Only one chapter returned',
+		);
 
 		assert.equal(
 			res.body[0].id,

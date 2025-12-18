@@ -24,6 +24,7 @@ export const getMyChaptersNonTourn = {
 						and school.chapter = chapter.id
 						and school.tourn = :tournId
 				)
+			group by chapter.id
 			order by chapter.name
 		`, {
 			replacements: {

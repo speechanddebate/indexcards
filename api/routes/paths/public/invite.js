@@ -13,11 +13,6 @@ import {
 } from '../../../controllers/public/invite/tourn.js';
 
 import {
-	getMySchoolsByTourn,
-	getMyChaptersNonTourn,
-} from '../../../controllers/public/invite/school.js';
-
-import {
 	getThisWeekTourns,
 	getFutureTourns,
 } from '../../../controllers/public/invite/list.js';
@@ -29,8 +24,6 @@ import {
 export default [
 	{ path: '/public/invite/webname/:webname'                 , module : getTournIdByWebname}       ,
 	{ path: '/public/invite/:tournId'                         , module : getTournInvite }           ,
-	{ path: '/public/invite/:tournId/myschools'               , module : getMySchoolsByTourn }      ,
-	{ path: '/public/invite/:tournId/nonschools'              , module : getMyChaptersNonTourn }    ,
 	{ path: '/public/invite/:tournId/events'                  , module : getTournEvents }           ,
 	{ path: '/public/invite/:tournId/events/:eventAbbr/field' , module : getEntryFieldByEvent }     ,
 	{ path: '/public/invite/:tournId/events/:eventAbbr'       , module : getEventByAbbr }           ,
