@@ -107,7 +107,7 @@ export const tabroomLinter = {
 			}
 		],
 		'max-len': ['error',
-			100,
+			128,
 			2,
 			{
 				ignoreUrls             : true,
