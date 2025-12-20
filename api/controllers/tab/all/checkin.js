@@ -1,3 +1,5 @@
+import { Forbidden } from '../../../helpers/problem';
+
 // Enables the Online Status Attendance dashboard functions
 export const categoryCheckin = {
 	GET: async (req, res) => {
@@ -29,7 +31,7 @@ export const categoryCheckin = {
 
 			res.status(200).json(judges);
 		} else {
-			res.status(401).json('You do not have access to that tournament or category');
+			return Forbidden(res, 'You do not have access to that tournament or category');
 		}
 	},
 };
@@ -64,8 +66,7 @@ export const eventCheckin = {
 
 			res.status(200).json(entries);
 		} else {
-			res.status(401).json(perms);
-			res.status(401).json('You do not have access to that tournament or event');
+			return Forbidden(res, 'You do not have access to that tournament or event');
 		}
 	},
 };

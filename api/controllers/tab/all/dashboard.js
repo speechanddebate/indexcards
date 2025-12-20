@@ -1,6 +1,7 @@
 import { showDateTime } from '@speechanddebate/nsda-js-utils';
 import { flightTimes } from '../../../helpers/round.js';
 import { errorLogger } from '../../../helpers/logger.js';
+import { BadRequest, Forbidden, Unauthorized } from '../../../helpers/problem.js';
 
 //  Perms work done, needs testing
 
@@ -38,7 +39,7 @@ export const tournAttendance = {
 			queryLimit = `where round.id = :roundId`;
 			replacements.roundId = req.params.roundId;
 		} else {
-			return res.status(400).json({ message: 'No parameters sent for query' });
+			return BadRequest(res, 'No parameters sent for query');
 		}
 
 		// Limit those with only some access to those events they have access to.
@@ -355,7 +356,7 @@ export const tournAttendance = {
 		});
 
 		if (status.count < 1) {
-			return res.status(400).json({ message: 'No events found in that tournament' });
+			return BadRequest(res, 'No events found in that tournament');
 		}
 
 		return res.status(200).json(status);
@@ -623,13 +624,13 @@ export const tournDashboard = {
 		const tournId = req.params.tournId;
 
 		if (!req.session) {
-			return res.status(401).json('You are not logged in to view the dashboard');
+			return Unauthorized(res, 'You are not logged in to view the dashboard');
 		}
 
 		const perms = req.session.perms;
 
 		if (!perms.tourn[tournId]) {
-			return res.status(401).json('You do not have access to that tournament');
+			return Forbidden(res,'You do not have access to that tournament');
 		}
 
 		const db = req.db;

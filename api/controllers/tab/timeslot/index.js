@@ -1,5 +1,7 @@
 // import { showDateTime } from '../../../helpers/common';
 
+import { UnexpectedError } from '../../../helpers/problem';
+
 // General CRUD for the timeslot itself
 
 export const updateTimeslot = {
@@ -17,10 +19,7 @@ export const updateTimeslot = {
 		try {
 			await timeslot.update(updates);
 		} catch (err) {
-			res.status(400).json({
-				error: true,
-				message: err,
-			});
+			return UnexpectedError(res, err.message);
 		}
 		res.status(200).json(timeslot);
 	},
@@ -30,8 +29,8 @@ export const updateTimeslot = {
 			await req.db.timeslot.destroy({
 				where: { id: req.params.timeslotId },
 			});
-		} catch (err) {
-			res.status(401).json(err);
+		} catch {
+			return UnexpectedError(res, 'An error occured while deleting the tournament.');
 		}
 
 		res.status(200).json({

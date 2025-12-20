@@ -2,6 +2,7 @@ import { getFollowers } from '../../../helpers/followers.js';
 import { errorLogger } from '../../../helpers/logger.js';
 import { notify } from '../../../helpers/blast.js';
 import { blastRoundPairing } from '../round/blast.js';
+import { BadRequest, Forbidden } from '../../../helpers/problem.js';
 
 // Refactor this so that it will allow an event/category only user to blast only those
 // events which they personally have access to.  Also remove all the deps and instead
@@ -11,13 +12,13 @@ export const blastTimeslotMessage = {
 	POST: async (req, res) => {
 
 		if (!req.body.message) {
-			return res.status(401).json(`No message to blast was input`);
+			return BadRequest(res,`No message to blast was input`);
 		}
 
 		req.body.timeslotId = req.session.timeslot?.id;
 
 		if (!req.body.timeslotId) {
-			return res.status(401).json(`No timeslot to blast was sent`);
+			return BadRequest(res, `No timeslot to blast was sent`);
 		}
 
 		delete req.body.roundId;
@@ -30,7 +31,7 @@ export const blastTimeslotMessage = {
 			if (req.session.perms.event) {
 				options.limits = { event: req.session.perms.event };
 			} else {
-				res.status(401).json('You do not have access to any rounds to blast');
+				return Forbidden(res, 'You do not have access to any rounds to blast');
 			}
 		}
 
@@ -109,7 +110,7 @@ export const blastTimeslotPairings = {
 				queryLimit += ` and round.event IN (:permEvents) `;
 				replacements.permEvents = Object.keys(req.session.perms.event);
 			} else {
-				res.status(401).json('You do not have access to any rounds to blast');
+				return Forbidden(res, 'You do not have access to any rounds to blast');
 			}
 		}
 
@@ -172,7 +173,7 @@ export const messageFreeJudges = {
 		}
 
 		if (!req.body.timeslotId) {
-			return res.status(401).json(`No timeslot to blast was sent`);
+			return BadRequest(res, `No timeslot to blast was sent`);
 		}
 
 		const freeJudgesQuery = `
@@ -288,7 +289,7 @@ export const messageReleasedJudges = {
 		}
 
 		if (!req.body.timeslotId) {
-			return res.status(401).json(`No timeslot to blast was sent`);
+			return BadRequest(res, `No timeslot to blast was sent`);
 		}
 
 		const releasedJudgesQuery = `

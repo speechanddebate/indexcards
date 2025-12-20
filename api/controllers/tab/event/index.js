@@ -1,3 +1,5 @@
+import { UnexpectedError } from '../../../helpers/problem';
+
 // General CRUD for the event itself
 export const updateEvent = {
 
@@ -14,10 +16,7 @@ export const updateEvent = {
 		try {
 			await event.update(updates);
 		} catch (err) {
-			res.status(400).json({
-				error: true,
-				message: err,
-			});
+			return UnexpectedError(res, err.message);
 		}
 		res.status(200).json(event);
 	},
@@ -28,7 +27,7 @@ export const updateEvent = {
 				where: { id: req.params.eventId },
 			});
 		} catch (err) {
-			res.status(401).json(err);
+			return UnexpectedError(res, err.message);
 		}
 
 		res.status(200).json({

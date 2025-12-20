@@ -4,6 +4,7 @@ import { notify } from './blast.js';
 import { sidelocks } from './round.js';
 import { config } from '../../config/config.js';
 import changeLogModel from '../data/models/change_log.js';
+import { UnexpectedError } from './problem.js';
 
 // Functions related to creating pairing blasts for each section.
 // formatBlast pulls the sql paramters from the blastSection/Round/Timeslot
@@ -598,55 +599,48 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 	}
 
 	if (blastResponse.error) {
+		return UnexpectedError(res, blastResponse.error);
+	}
 
-		res.status(400).json({
-			blastError   : blastResponse.error,
-			blastMessage : blastResponse.message,
-			emailCount   : blastResponse.email,
-			webCount     : blastResponse.web,
+	const changeLog = changeLogModel(req.db.sequelize, req.db.Sequelize.DataTypes);
+
+	if (req.params.sectionId) {
+		await changeLog.create({
+			tag         : 'blast',
+			description : `Pairing sent to section. Message: ${req.body.message}`,
+			person      : blastData.sender || req.session?.person?.id,
+			count       : (blastResponse.web + blastResponse.email) || 0,
+			panel       : req.params.sectionId,
 		});
 
 	} else {
 
-		const changeLog = changeLogModel(req.db.sequelize, req.db.Sequelize.DataTypes);
+		const blastPromises = [];
 
-		if (req.params.sectionId) {
-			await changeLog.create({
+		for (const round of blastData.rounds) {
+			const promise = changeLog.create({
 				tag         : 'blast',
-				description : `Pairing sent to section. Message: ${req.body.message}`,
+				description : `Round pairings blasted. Message: ${req.body.message}`,
 				person      : blastData.sender || req.session?.person?.id,
 				count       : (blastResponse.web + blastResponse.email) || 0,
-				panel       : req.params.sectionId,
+				round       : round.id,
 			});
 
-		} else {
-
-			const blastPromises = [];
-
-			for (const round of blastData.rounds) {
-				const promise = changeLog.create({
-					tag         : 'blast',
-					description : `Round pairings blasted. Message: ${req.body.message}`,
-					person      : blastData.sender || req.session?.person?.id,
-					count       : (blastResponse.web + blastResponse.email) || 0,
-					round       : round.id,
-				});
-
-				blastPromises.push(promise);
-			}
-
-			await Promise.all(blastPromises);
+			blastPromises.push(promise);
 		}
 
-		const browserResponse = {
-			error   : false,
-			message : `Pairings sent to ${blastResponse.web} web and ${blastResponse.email} email recipients`,
-			web     : blastResponse.web,
-			email   : blastResponse.email,
-		};
-
-		return browserResponse;
+		await Promise.all(blastPromises);
 	}
+
+	const browserResponse = {
+		error   : false,
+		message : `Pairings sent to ${blastResponse.web} web and ${blastResponse.email} email recipients`,
+		web     : blastResponse.web,
+		email   : blastResponse.email,
+	};
+
+	return browserResponse;
+
 };
 
 const processRounds = async (rawRounds) => {

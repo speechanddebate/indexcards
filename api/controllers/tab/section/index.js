@@ -1,3 +1,5 @@
+import { UnexpectedError } from '../../../helpers/problem';
+
 // General CRUD for the section itself
 export const updateSection = {
 
@@ -17,10 +19,7 @@ export const updateSection = {
 		try {
 			await section.update(updates);
 		} catch (err) {
-			res.status(400).json({
-				error: true,
-				message: err,
-			});
+			return UnexpectedError(res, err.message);
 		}
 		res.status(200).json(section);
 	},
@@ -31,7 +30,7 @@ export const updateSection = {
 				where: { id: req.params.sectionId },
 			});
 		} catch (err) {
-			res.status(401).json(err);
+			return UnexpectedError(res, err.message);
 		}
 
 		res.status(200).json({

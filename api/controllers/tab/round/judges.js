@@ -1,3 +1,4 @@
+import { NotFound } from '../../../helpers/problem';
 export const roundAvailableJudges = {
 
 	GET:  async (req, res) => {
@@ -477,7 +478,7 @@ export const placeJudges = {
 		});
 
 		if (round) {
-			return res.status(404).json({message: 'No such round found'});
+			return NotFound(res, 'No such round found');
 		}
 
 		const sections = db.sequelize.query(`

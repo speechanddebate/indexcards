@@ -32,6 +32,6 @@ describe('Person History', () => {
 			.set('Accept', 'application/json')
 			.set('Authorization', `Basic ${authHeader}`)
 			.expect('Content-Type', /json/)
-			.expect(400);
+			.expect(404);
 	}, 30000);
 });

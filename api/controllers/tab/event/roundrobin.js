@@ -1,5 +1,6 @@
 // Assigning a round robin.  For now this is used only for defined pattern
 // round robins that have preset patterns in the global settings.
+import { BadRequest } from '../../../helpers/problem.js';
 import { writeRound } from '../../../helpers/round.js';
 
 export const sectionTemplateRobin = {
@@ -37,7 +38,7 @@ export const sectionTemplateRobin = {
 		});
 
 		if (rounds.length !== rrPattern.rounds) {
-			return res.status(400).json(`Incorrect round count for pattern. ${rrPattern.rounds} rounds required`);
+			return BadRequest(res,`Incorrect round count for pattern. ${rrPattern.rounds} rounds required`);
 		}
 
 		const judges = await db.judge.findAll({

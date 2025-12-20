@@ -1,10 +1,11 @@
+import { BadRequest, Forbidden, Unauthorized } from '../../../helpers/problem.js';
 import personRepo from '../../../repos/personRepo.js';
 
 export const getProfile = {
 	GET: async (req, res) => {
 
 		if (!req.person) {
-			return res.status(401).json({ message: 'You have no active user session' });
+			return Unauthorized(res, 'You have no active user session');
 		}
 		let person;
 
@@ -12,13 +13,13 @@ export const getProfile = {
 			person = await personRepo.getPersonByIdWithSettings(req.params.personId);
 
 		} else if (req.params.personId ) {
-			return res.status(401).json({ message: 'Only admin staff may access another profile' });
+			return Forbidden(res,'Only admin staff may access another profile');
 		} else if (req.person) {
 			person = await personRepo.getPersonByIdWithSettings(req.person.id);
 		}
 
 		if (!person) {
-			return res.status(400).json({ message: 'User does not exist' });
+			return BadRequest(res, 'User does not exist');
 		}
 
 		return res.status(200).json(person);

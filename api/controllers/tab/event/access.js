@@ -1,5 +1,7 @@
 // Event level access maniuplation
 
+import { BadRequest, Forbidden, NotFound } from '../../../helpers/problem';
+
 export const changeAccess = {
 
 	// Add permissions that are not there already
@@ -15,7 +17,7 @@ export const changeAccess = {
 		const targetEvent = await req.db.summon(db.event, req.params.eventId);
 
 		if (!targetPerson || !targetEvent) {
-			return res.status(401).json('No person found with that Tabroom ID');
+			return NotFound(res, 'No person found with that Tabroom ID');
 		}
 
 		if (
@@ -32,7 +34,7 @@ export const changeAccess = {
 			});
 
 			if (!currentPerm) {
-				return res.status(400).json(`User ${targetPerson.email} does not have access ${targetEvent.abbr} and so it cannot be altered`);
+				return Forbidden(res, `User ${targetPerson.email} does not have access ${targetEvent.abbr} and so it cannot be altered`);
 			}
 
 			if (currentPerm.tag === 'checker') {
@@ -117,7 +119,7 @@ export const changeAccess = {
 			});
 		}
 
-		return res.status(401).json(`You do not have access to change permissions in ${targetEvent.abbr}`);
+		return Forbidden(res,`You do not have access to change permissions in ${targetEvent.abbr}`);
 	},
 };
 
@@ -131,11 +133,11 @@ export const backupAccess = {
 		const targetEvent = await req.db.summon(req.db.event, req.params.eventId);
 
 		if (!targetPerson) {
-			return res.status(400).json('No tabroom account was found with that email');
+			return NotFound(res, 'No tabroom account was found with that email');
 		}
 
 		if (targetPerson.no_email) {
-			return res.status(400).json('That Tabroom account is set to not allow emails to be sent to it');
+			return BadRequest(res, 'That Tabroom account is set to not allow emails to be sent to it');
 		}
 
 		const backupAccounts = await req.db.eventSetting.findOne({

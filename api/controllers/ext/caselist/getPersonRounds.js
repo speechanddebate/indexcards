@@ -1,11 +1,12 @@
 import { startOfYear } from '@speechanddebate/nsda-js-utils';
+import { BadRequest, NotFound } from '../../../helpers/problem';
 
 const getPersonRounds = {
 	GET: async (req, res) => {
 		const db = req.db;
 
 		if (!req.query.person_id && !req.query.slug) {
-			return res.status(400).json({ message: 'One of person_id or slug is required' });
+			return BadRequest(res, 'One of person_id or slug is required');
 		}
 
 		let ids;
@@ -25,7 +26,7 @@ const getPersonRounds = {
 			`, { replacements: [req.query.slug] });
 
 			if (!persons || persons[0].length < 1 || !persons[0][0].person) {
-				return res.status(404).json({ message: 'No caselist links found' });
+				return NotFound(res, 'No caselist links found');
 			}
 			ids = persons[0].map(p => p.person);
 		}

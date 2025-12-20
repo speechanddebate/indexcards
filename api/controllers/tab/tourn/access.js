@@ -1,4 +1,5 @@
 import { errorLogger } from '../../../helpers/logger.js';
+import { BadRequest, Forbidden, NotFound, UnexpectedError } from '../../../helpers/problem.js';
 
 // Functions that manage overall tournament access.
 
@@ -8,7 +9,7 @@ export const changeAccess = {
 	// Will port over.
 
 	POST : async (req, res) => {
-		res.status(400).json('Not yet implemented');
+		return UnexpectedError(res, 'Not yet Implemnted');
 	},
 
 	// Alter existing permissions
@@ -18,8 +19,7 @@ export const changeAccess = {
 		const targetPerson = await req.db.summon(db.person, req.params.personId);
 
 		if (!targetPerson) {
-			res.status(401).json('No person found with that Tabroom ID');
-			return;
+			return NotFound(res, 'No person found with that Tabroom ID');
 		}
 
 		let tag = req.body.access_level;
@@ -109,8 +109,7 @@ export const changeAccess = {
 					|| req.body.property_value
 				)
 			) {
-				res.status(401).json('Only tournament owners may adjust tournament contacts other than yourself');
-				return;
+				return Forbidden(res,'Only tournament owners may adjust tournament contacts other than yourself');
 			}
 
 			const currentPerm = await db.permission.findOne({
@@ -151,8 +150,7 @@ export const changeAccess = {
 
 			// I should not be a contact!
 			if (!currentPerm) {
-				res.status(400).json(`User ${targetPerson.email} is not a tournament contact`);
-				return;
+				return BadRequest(res, `User ${targetPerson.email} is not a tournament contact`);
 			}
 
 			await db.permission.destroy({
@@ -195,15 +193,13 @@ export const changeAccess = {
 		const target = targetTags[tag];
 
 		if (!target) {
-			res.status(401).json(`Access type ${req.params.access_type} unknown`);
-			return;
+			return BadRequest(res,`Access type ${req.params.access_type} unknown`);
 		}
 
 		if (!req.session.perms.tourn[req.params.tournId]
 			|| !target.mustBe.includes(req.session.perms.tourn[req.params.tournId])
 		) {
-			res.status(401).json('You do not have sufficient access to grant that level of permissions');
-			return;
+			return Forbidden(res, 'You do not have sufficient access to grant that level of permissions');
 		}
 
 		const currentPerms = await db.permission.findAll({
@@ -228,8 +224,7 @@ export const changeAccess = {
 		}
 
 		if (currentPerm?.tag === tag) {
-			res.status(400).json(`User ${targetPerson.email} already has tournament wide ${tag} permissions`);
-			return;
+			return BadRequest(res,`User ${targetPerson.email} already has tournament wide ${tag} permissions`);
 		}
 
 		if (currentPerm?.id) {
@@ -290,8 +285,7 @@ export const changeAccess = {
 				perm.tag === 'owner'
 				&& req.session.perms.tourn[req.params.tournId] !== 'owner'
 			) {
-				res.status(401).json('Only an owner-level account may delete another owner account!');
-				return;
+				return Forbidden(res,'Only an owner-level account may delete another owner account!');
 			}
 
 			deletePerms.push(perm.id);
@@ -346,12 +340,7 @@ export const changeAccess = {
 			return;
 		}
 
-		res.status(400).json({
-			error   : false,
-			destroy : req.params.personId,
-			message : 'That user does not have current permissions to this tournament',
-		});
-
+		return Forbidden(res, 'That user does not have current permissions to this tournament');
 	},
 };
 
@@ -368,11 +357,11 @@ export const backupAccess = {
 		});
 
 		if (!newAccount) {
-			res.status(400).json('No tabroom account was found with that email');
+			res.status.json = NotFound(res, 'No tabroom account was found with that email');
 		}
 
 		if (newAccount.no_email) {
-			res.status(400).json('That Tabroom account is set to not allow emails to be sent to it');
+			res.status.json = BadRequest(res,'That Tabroom account is set to not allow emails to be sent to it');
 		}
 
 		const backupAccounts = await req.db.tournSetting.findOne({

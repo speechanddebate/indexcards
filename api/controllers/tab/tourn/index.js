@@ -1,3 +1,5 @@
+import { UnexpectedError } from '../../../helpers/problem';
+
 // General CRUD for the tourn itself
 export const updateTourn = {
 
@@ -14,10 +16,7 @@ export const updateTourn = {
 		try {
 			await tourn.update(updates);
 		} catch (err) {
-			res.status(400).json({
-				error: true,
-				message: err,
-			});
+			return UnexpectedError(res, err.message);
 		}
 		res.status(200).json(tourn);
 	},
@@ -27,8 +26,8 @@ export const updateTourn = {
 			await req.db.tourn.destroy({
 				where: { id: req.params.tournId },
 			});
-		} catch (err) {
-			res.status(401).json(err);
+		} catch {
+			return UnexpectedError(res, 'An error occured while deleting the tournament.');
 		}
 
 		res.status(200).json({

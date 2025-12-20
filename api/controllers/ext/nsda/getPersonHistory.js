@@ -1,3 +1,5 @@
+import { NotFound } from '../../../helpers/problem';
+
 export const getPersonHistory = {
 	GET: async (req, res) => {
 
@@ -25,7 +27,7 @@ export const getPersonHistory = {
 		}
 
 		if (!person?.id) {
-			return res.status(400).json({ message: 'Person not found' });
+			return NotFound(res, 'Person not found');
 		}
 
 		const replacements = {

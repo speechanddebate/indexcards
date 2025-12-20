@@ -1,3 +1,5 @@
+import { UnexpectedError } from '../../../helpers/problem';
+
 // General CRUD for the category itself
 export const updateCategory = {
 
@@ -14,10 +16,7 @@ export const updateCategory = {
 		try {
 			await category.update(updates);
 		} catch (err) {
-			res.status(400).json({
-				error: true,
-				message: err,
-			});
+			return UnexpectedError(res, err.message);
 		}
 		res.status(200).json(category);
 	},
@@ -28,7 +27,7 @@ export const updateCategory = {
 				where: { id: req.params.categoryId },
 			});
 		} catch (err) {
-			res.status(401).json(err);
+			return UnexpectedError(res, err.message);
 		}
 
 		res.status(200).json({

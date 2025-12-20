@@ -2,6 +2,7 @@ import axios from 'axios';
 import notify from '../../helpers/blast.js';
 import config from '../../../config/config.js';
 import { errorLogger } from '../../helpers/logger.js';
+import { BadRequest, UnexpectedError } from '../../helpers/problem.js';
 
 export const getInstances = {
 
@@ -383,15 +384,11 @@ export const changeInstanceCount = {
 		const target = parseInt(req.params.target) || parseInt(req.body.target) || 0;
 
 		if ((target + tabwebs.length) > (config.TABWEB_CAP || 16))  {
-			return res.status(401).json({
-				message: `This process only allows for ${config.TABWEB_CAP || 16} machines to exist at one time.`,
-			});
+			return BadRequest(res, `This process only allows for ${config.TABWEB_CAP || 16} machines to exist at one time.`);
 		}
 
 		if (target < 1) {
-			return res.status(401).json({
-				message: `No count target sent; nothing done because I cannot make ${target} machines`,
-			});
+			return BadRequest(res, `No count target sent; nothing done because I cannot make ${target} machines`);
 		}
 
 		// Find the next serial number needed.  Tabweb1 should always exist.
@@ -477,10 +474,10 @@ export const changeInstanceCount = {
 			} catch (err) {
 
 				console.log(err);
-
-				return res.status(401).json({
-					message: `Machine creation ${hostname} failed with response code ${err.response?.status} ${err.response?.statusText} and errors`,
-				});
+				return UnexpectedError(
+					res,
+					`Machine creation ${hostname} failed with response code ${err.response?.status} ${err.response?.statusText} and errors`
+				);
 			}
 			serialNumber++;
 		}
@@ -519,9 +516,7 @@ export const changeInstanceCount = {
 		if (serialNumber < 3) {
 			let reply = `You may only shrink the Tabroom instance footprint to a minimum of 2 machines.`;
 			reply += `Deleting ${target} would leave me with ${hostnames.length - target}.`;
-			return res.status(401).json({
-				message: reply,
-			});
+			return BadRequest(res, reply);
 		}
 
 		const resultMessages = [
@@ -571,10 +566,7 @@ export const changeInstanceCount = {
 					}
 
 				} catch (err) {
-
-					return res.status(401).json({
-						message: `Deleting ${hostname} failed with response code ${err.response.status} ${err.response.statusText} and errors ${err.response?.data?.errors}`,
-					});
+					return UnexpectedError(res, `Deleting ${hostname} failed with response code ${err.response.status} ${err.response.statusText} and errors ${err.response?.data?.errors}`);
 				}
 			}
 			serialNumber++;

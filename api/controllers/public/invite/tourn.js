@@ -1,4 +1,5 @@
 import { shortZone } from '../../../helpers/dateTime.js';
+import { NotFound } from '../../../helpers/problem.js';
 
 export const getTournIdByWebname = {
 	GET: async (req, res) => {
@@ -103,7 +104,7 @@ export const getTournInvite = {
 		}
 
 		if (!invite.tourn?.id || invite.tourn?.hidden) {
-			return res.status(404).json({message: 'No such tournament found'});
+			return NotFound(res, 'No such tournament found');
 		}
 
 		invite.pages = await db.webpage.findAll({
@@ -313,7 +314,7 @@ export const getRound = {
 		});
 
 		if (roundData.length < 1) {
-			return res.status(404).json({ message: `No round found with ID ${req.params.roundID}`});
+			return NotFound(res, `No round found with ID ${req.params.roundID}`);
 		}
 
 		const round = roundData[0];
@@ -775,7 +776,7 @@ export const getResults = {
 		});
 
 		if (resultSetData.length < 1) {
-			return res.status(404).json({ message: `No result set found with ID ${req.params.resultSetID}`});
+			return NotFound(res, `No result set found with ID ${req.params.resultSetID}`);
 		}
 
 		const resultSet = resultSetData[0];

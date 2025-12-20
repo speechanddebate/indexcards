@@ -1,5 +1,6 @@
 import { getFollowers } from '../../../helpers/followers.js';
 import { emailBlast } from '../../../helpers/mail.js';
+import { BadRequest, NotFound } from '../../../helpers/problem.js';
 
 const sendShareFile = {
 	POST: async (req, res) => {
@@ -28,7 +29,7 @@ const sendShareFile = {
 		});
 
 		if (!sections || sections.length < 1) {
-			return res.status(400).json(`No section found for codenames ${req.body.panels}`);
+			return NotFound(res, `No section found for codenames ${req.body.panels}`);
 		}
 
 		let counter = 0;
@@ -74,7 +75,7 @@ const sendShareFile = {
 		}
 
 		if (emailPromises.length < 1) {
-			return res.status(400).json('No emails found, nothing to send');
+			return BadRequest(res, 'No emails found, nothing to send');
 		}
 
 		await Promise.all(emailPromises);

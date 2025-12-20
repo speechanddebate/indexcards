@@ -1,6 +1,7 @@
 import authorizenet from 'authorizenet';
 import { debugLogger } from '../../../helpers/logger.js';
 import { emailBlast } from '../../../helpers/mail.js';
+import { UnexpectedError } from '../../../helpers/problem.js';
 
 export const processAuthorizeNet = {
 	POST: async (req, res) => {
@@ -257,7 +258,7 @@ export const processAuthorizeNet = {
 			});
 			return res.status(200).json(result);
 		} catch (err) {
-			return res.status(400).json(err);
+			return UnexpectedError(res, err.message);
 		}
 	},
 };

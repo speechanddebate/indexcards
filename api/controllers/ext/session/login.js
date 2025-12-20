@@ -1,5 +1,6 @@
 /* eslint-disable-next-line import/no-unresolved */
 import { verify } from 'unixcrypt';
+import { BadRequest,NotFound,Forbidden } from '../../../helpers/problem';
 
 // This function name is currently a misnomer, because this doesn't actually
 // create a session, it just validates the username and password. Eventually,
@@ -10,7 +11,7 @@ export const login = {
 		const db = req.db;
 
 		if (!req.body?.username) {
-			return res.status(400).json({ error: 'No username sent' });
+			return BadRequest(res, 'No username sent');
 		}
 
 		const person = await db.person.findOne({
@@ -21,13 +22,13 @@ export const login = {
 		});
 
 		if (!person || typeof person !== 'object' || !person.id || !person.password) {
-			return res.status(400).json({ error: 'No user found for username' });
+			return NotFound(res, 'No user found for username');
 		}
 
 		const verified = verify(req.body.password, person.password);
 
 		if (!verified) {
-			return res.status(400).json({ error: 'Incorrect password' });
+			return Forbidden(res, 'Incorrect password');
 		}
 
 		// Check account reputation - default to untrusted

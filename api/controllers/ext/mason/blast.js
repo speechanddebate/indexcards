@@ -2,6 +2,7 @@ import { notify } from '../../../helpers/blast.js';
 import { debugLogger, errorLogger } from '../../../helpers/logger.js';
 import { sendPairingBlast, formatPairingBlast } from '../../../helpers/pairing.js';
 import { getPairingFollowers } from '../../../helpers/followers.js';
+import { UnexpectedError } from '../../../helpers/problem.js';
 
 export const blastMessage = {
 
@@ -21,7 +22,7 @@ export const blastMessage = {
 
 		if (notifyResponse.error) {
 			errorLogger.error(notifyResponse.message);
-			return res.status(401).json(notifyResponse);
+			return UnexpectedError(res, notifyResponse);
 		}
 
 		return res.status(200).json({
@@ -43,7 +44,7 @@ export const blastPairing = {
 		const blastData = await formatPairingBlast(queryData, req);
 
 		if (!blastData) {
-			return res.status(400).json(`No blast Data returned`);
+			return UnexpectedError(res, `No blast Data returned`);
 		}
 		const tourns = await req.db.sequelize.query(`
 			select

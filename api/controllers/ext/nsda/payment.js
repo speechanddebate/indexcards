@@ -2,6 +2,7 @@
 import hmacSHA512 from 'crypto-js/hmac-sha512.js';
 import Base64 from 'crypto-js/enc-base64.js';
 import config from '../../../../config/config.js';
+import { BadRequest, Forbidden, NotFound } from '../../../helpers/problem.js';
 
 export const postPayment = {
 
@@ -10,7 +11,7 @@ export const postPayment = {
 		const tourn = await db.summon(db.tourn, req.params.tournId);
 
 		if (!tourn.settings && !tourn.settings.store_cards) {
-			return res.status(400).json({ message: 'No shopping cart applies to that tournament' });
+			return NotFound(res, 'No shopping cart applies to that tournament');
 		}
 
 		res.status(200).json(tourn);
@@ -21,28 +22,28 @@ export const postPayment = {
 		const postRequest = req.body;
 
 		if (!postRequest.invoice_id) {
-			return res.status(400).json({ message: 'Invalid request sent: no invoice ID' });
+			return BadRequest(res, 'Invalid request sent: no invoice ID');
 		}
 
 		const hashDigest = Base64.stringify(hmacSHA512(postRequest.invoice_id, config.NSDA.KEY));
 
 		if (hashDigest !== postRequest.hash_key) {
-			return res.status(400).json({ message: `Permission key invalid` });
+			return Forbidden(res, `Permission key invalid`);
 		}
 
 		if (!postRequest.tournId) {
-			return res.status(400).json({ message: 'Invalid request sent: no tournament ID' });
+			return BadRequest(res, 'Invalid request sent: no tournament ID');
 		}
 
 		const tourn = await db.summon(db.tourn, postRequest.tournId);
 		const [invoiceId, cartKey] = postRequest.invoice_id.split('-');
 
 		if (!tourn.settings.store_carts) {
-			return res.status(400).json({ message: 'No shopping cart found for that tournament' });
+			return NotFound(res, 'No shopping cart found for that tournament');
 		}
 
 		if (!tourn.settings.store_carts[cartKey]) {
-			return res.status(400).json({ message: `Invoice ${invoiceId} cart ${cartKey} not found` });
+			return NotFound(res, `Invoice ${invoiceId} cart ${cartKey} not found`);
 		}
 
 		const tournCart = tourn.settings.store_carts[cartKey];

@@ -1,3 +1,5 @@
+import { NotFound } from '../../helpers/problem';
+
 // General CRUD for contact coaches
 export const updateContact = {
 
@@ -249,7 +251,7 @@ export const userProfile = {
 		}
 
 		if (result.count < 1) {
-			return res.status(400).json({ message: 'User does not exist' });
+			return NotFound(res, 'User does not exist');
 		}
 
 		const jsonOutput = result.toJSON();

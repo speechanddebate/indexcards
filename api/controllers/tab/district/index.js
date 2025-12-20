@@ -1,3 +1,5 @@
+import { UnexpectedError } from '../../../helpers/problem';
+
 // General CRUD for the district itself
 export const updateDistrict = {
 
@@ -14,10 +16,7 @@ export const updateDistrict = {
 		try {
 			await district.update(updates);
 		} catch (err) {
-			res.status(400).json({
-				error: true,
-				message: err,
-			});
+			return UnexpectedError(res, err.message);
 		}
 		res.status(200).json(district);
 	},
@@ -28,7 +27,7 @@ export const updateDistrict = {
 				where: { id: req.params.districtId },
 			});
 		} catch (err) {
-			res.status(401).json(err);
+			return UnexpectedError(res, err.message);
 		}
 
 		res.status(200).json({

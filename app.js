@@ -30,6 +30,7 @@ import {
 
 import db from './api/data/db.js';
 import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger.js';
+import { Forbidden, Unauthorized } from './api/helpers/problem.js';
 
 const app = express();
 
@@ -121,10 +122,7 @@ app.use(Authenticate);
 
 app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
 	if (!req.person) {
-		return res.status(401).json({
-			error   : false,
-			message : `User: You are not logged in.`,
-		});
+		return Unauthorized(res, 'User: You are not logged in.');
 	}
 	next();
 });
@@ -141,19 +139,13 @@ const tabRoutes = [
 app.all(tabRoutes, async (req, res, next) => {
 
 	if (!req.person) {
-		return res.status(401).json({
-			error   : false,
-			message : `Tab: You are not logged in.`,
-		});
+		return Unauthorized(res, 'Tab: You are not logged in.');
 	}
 
 	req.session = await tabAuth(req, res);
 
 	if (typeof req.session?.perms !== 'object') {
-		return res.status(401).json({
-			error   : true,
-			message : `You do not have access to that part of that tournament`,
-		});
+		return Forbidden(res, `You do not have access to that part of that tournament`);
 	}
 	next();
 });
@@ -170,10 +162,7 @@ app.all(coachRoutes, async (req, res, next) => {
 	// one off
 
 	if (!req.person) {
-		return res.status(401).json({
-			error   : false,
-			message : `Coach: You are not logged in.`,
-		});
+		return Unauthorized(res, 'Coach: You are not logged in.');
 	}
 
 	const chapter = await coachAuth(req, res);
@@ -181,10 +170,7 @@ app.all(coachRoutes, async (req, res, next) => {
 	if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
 		req.chapter = chapter;
 	} else {
-		return res.status(401).json({
-			error   : true,
-			message : `You do not have access to that part of that institution`,
-		});
+		return Forbidden(res, `You do not have access to that part of that institution`);
 	}
 
 	next();
@@ -201,10 +187,7 @@ app.all(localRoutes, async (req, res, next) => {
 	// region, or an NCFL diocese, or a circuit.
 
 	if (!req.person) {
-		return res.status(401).json({
-			error   : false,
-			message : `Admin: You are not logged in.`,
-		});
+		return Unauthorized(res, 'Admin: You are not logged in.');
 	}
 
 	const response = await localAuth(req, res);
@@ -214,10 +197,7 @@ app.all(localRoutes, async (req, res, next) => {
 		req.session.perms = { ...req.session.perms, ...response.perms };
 		next();
 	} else {
-		return res.status(401).json({
-			error   : true,
-			message : `Admin : You do not have the access required.`,
-		});
+		return Forbidden(res, `Admin : You do not have the access required.`);
 	}
 
 	next();

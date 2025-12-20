@@ -44,3 +44,19 @@ export function Forbidden(res, detail, extras = {}){
 		...extras,
 	});
 }
+export function NotFound(res, detail, extras = {}){
+	return sendProblem(res, {
+		title: 'The specified resource was not found.',
+		status: 404,
+		detail,
+		...extras,
+	});
+}
+export function UnexpectedError(res, detail, extras = {}){
+	return sendProblem(res, {
+		title: 'The Server has encountered an unexpected error.',
+		status: 500,
+		detail,
+		...extras,
+	});
+}

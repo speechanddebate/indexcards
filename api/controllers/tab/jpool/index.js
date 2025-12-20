@@ -1,5 +1,7 @@
 // import { showDateTime } from '../../../helpers/common';
 
+import { UnexpectedError } from '../../../helpers/problem';
+
 // General CRUD for the jpool itself
 export const updateJPool = {
 
@@ -16,10 +18,7 @@ export const updateJPool = {
 		try {
 			await jpool.update(updates);
 		} catch (err) {
-			res.status(400).json({
-				error: true,
-				message: err,
-			});
+			return UnexpectedError(res, err.message);
 		}
 		res.status(200).json(jpool);
 	},
@@ -30,7 +29,7 @@ export const updateJPool = {
 				where: { id: req.params.jpoolId },
 			});
 		} catch (err) {
-			res.status(401).json(err);
+			return UnexpectedError(res, err.message);
 		}
 
 		res.status(200).json({
@@ -59,10 +58,7 @@ export const updateJPoolJudge = {
 				type: req.db.sequelize.QueryTypes.INSERT,
 			});
 		} catch (err) {
-			res.status(400).json({
-				error   : true,
-				message : err,
-			});
+			return UnexpectedError(res, err.message);
 		}
 
 		res.status(200).json({
@@ -132,7 +128,7 @@ export const updateJPoolJudges = {
 		});
 
 		if (errs) {
-			res.status(400).json(errs);
+			return UnexpectedError(res, errs);
 		}
 
 		res.status(200).json('Judges added to pool');
@@ -170,7 +166,7 @@ export const updateJPoolRound = {
 				type: req.db.sequelize.QueryTypes.INSERT,
 			});
 		} catch (err) {
-			res.status(400).json(err);
+			return UnexpectedError(res, err.message);
 		}
 
 		res.status(200).json('Round added to pool');
@@ -236,7 +232,7 @@ export const updateJPoolRounds = {
 		});
 
 		if (errs) {
-			res.status(400).json(errs);
+			return UnexpectedError(res, errs);
 		}
 
 		res.status(200).json('Rounds added to pool');

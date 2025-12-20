@@ -13,25 +13,15 @@ export const updateRound = {
 		const updates = req.body;
 		delete updates.id;
 
-		try {
-			await round.update(updates);
-		} catch (err) {
-			res.status(400).json({
-				error: true,
-				message: err,
-			});
-		}
+		await round.update(updates);
 		res.status(200).json(round);
 	},
 
 	DELETE: async (req, res) => {
-		try {
-			await req.db.round.destroy({
-				where: { id: req.params.roundId },
-			});
-		} catch (err) {
-			res.status(401).json(err);
-		}
+
+		await req.db.round.destroy({
+			where: { id: req.params.roundId },
+		});
 
 		res.status(200).json({
 			error: false,

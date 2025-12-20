@@ -1,15 +1,12 @@
 import { notify } from '../../../helpers/blast.js';
+import { BadRequest, UnexpectedError } from '../../../helpers/problem.js';
 
 export const blastJudges = {
-
-	GET: async (req, res) => {
-		res.status(400).json('Please use a POST request to send a blast');
-	},
 
 	POST: async (req, res) => {
 
 		if (!req.body.message) {
-			res.status(401).json('No message to blast sent');
+			return BadRequest(res, 'No message to blast sent');
 		}
 
 		const jpool = await req.db.summon(req.db.jpool, req.params.jpoolId);
@@ -120,7 +117,7 @@ export const blastJudges = {
 		await Promise.all(promises);
 
 		if (blastResponse.error) {
-			res.status(401).json(blastResponse.message);
+			return UnexpectedError(res, blastResponse.message);
 		}
 
 		res.status(200).json(blastResponse);
