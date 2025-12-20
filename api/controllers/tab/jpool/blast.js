@@ -6,7 +6,7 @@ export const blastJudges = {
 	POST: async (req, res) => {
 
 		if (!req.body.message) {
-			return BadRequest(res, 'No message to blast sent');
+			return BadRequest(req, res, 'No message to blast sent');
 		}
 
 		const jpool = await req.db.summon(req.db.jpool, req.params.jpoolId);
@@ -117,7 +117,7 @@ export const blastJudges = {
 		await Promise.all(promises);
 
 		if (blastResponse.error) {
-			return UnexpectedError(res, blastResponse.message);
+			return UnexpectedError(req, res, blastResponse.message);
 		}
 
 		res.status(200).json(blastResponse);

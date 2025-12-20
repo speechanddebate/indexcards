@@ -38,7 +38,7 @@ export const sectionTemplateRobin = {
 		});
 
 		if (rounds.length !== rrPattern.rounds) {
-			return BadRequest(res,`Incorrect round count for pattern. ${rrPattern.rounds} rounds required`);
+			return BadRequest(req, res,`Incorrect round count for pattern. ${rrPattern.rounds} rounds required`);
 		}
 
 		const judges = await db.judge.findAll({

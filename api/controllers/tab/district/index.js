@@ -16,7 +16,7 @@ export const updateDistrict = {
 		try {
 			await district.update(updates);
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 		res.status(200).json(district);
 	},
@@ -27,7 +27,7 @@ export const updateDistrict = {
 				where: { id: req.params.districtId },
 			});
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 
 		res.status(200).json({

@@ -16,7 +16,7 @@ export const updateCategory = {
 		try {
 			await category.update(updates);
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 		res.status(200).json(category);
 	},
@@ -27,7 +27,7 @@ export const updateCategory = {
 				where: { id: req.params.categoryId },
 			});
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 
 		res.status(200).json({

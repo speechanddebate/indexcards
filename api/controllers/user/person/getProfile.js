@@ -5,7 +5,7 @@ export const getProfile = {
 	GET: async (req, res) => {
 
 		if (!req.person) {
-			return Unauthorized(res, 'You have no active user session');
+			return Unauthorized(req, res, 'You have no active user session');
 		}
 		let person;
 
@@ -13,13 +13,13 @@ export const getProfile = {
 			person = await personRepo.getPersonByIdWithSettings(req.params.personId);
 
 		} else if (req.params.personId ) {
-			return Forbidden(res,'Only admin staff may access another profile');
+			return Forbidden(req, res,'Only admin staff may access another profile');
 		} else if (req.person) {
 			person = await personRepo.getPersonByIdWithSettings(req.person.id);
 		}
 
 		if (!person) {
-			return BadRequest(res, 'User does not exist');
+			return BadRequest(req, res, 'User does not exist');
 		}
 
 		return res.status(200).json(person);

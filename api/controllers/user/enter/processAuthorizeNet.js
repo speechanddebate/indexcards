@@ -258,7 +258,7 @@ export const processAuthorizeNet = {
 			});
 			return res.status(200).json(result);
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 	},
 };

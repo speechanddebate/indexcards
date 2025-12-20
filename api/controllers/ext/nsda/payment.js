@@ -11,7 +11,7 @@ export const postPayment = {
 		const tourn = await db.summon(db.tourn, req.params.tournId);
 
 		if (!tourn.settings && !tourn.settings.store_cards) {
-			return NotFound(res, 'No shopping cart applies to that tournament');
+			return NotFound(req, res, 'No shopping cart applies to that tournament');
 		}
 
 		res.status(200).json(tourn);
@@ -22,28 +22,28 @@ export const postPayment = {
 		const postRequest = req.body;
 
 		if (!postRequest.invoice_id) {
-			return BadRequest(res, 'Invalid request sent: no invoice ID');
+			return BadRequest(req, res, 'Invalid request sent: no invoice ID');
 		}
 
 		const hashDigest = Base64.stringify(hmacSHA512(postRequest.invoice_id, config.NSDA.KEY));
 
 		if (hashDigest !== postRequest.hash_key) {
-			return Forbidden(res, `Permission key invalid`);
+			return Forbidden(req, res, `Permission key invalid`);
 		}
 
 		if (!postRequest.tournId) {
-			return BadRequest(res, 'Invalid request sent: no tournament ID');
+			return BadRequest(req, res, 'Invalid request sent: no tournament ID');
 		}
 
 		const tourn = await db.summon(db.tourn, postRequest.tournId);
 		const [invoiceId, cartKey] = postRequest.invoice_id.split('-');
 
 		if (!tourn.settings.store_carts) {
-			return NotFound(res, 'No shopping cart found for that tournament');
+			return NotFound(req, res, 'No shopping cart found for that tournament');
 		}
 
 		if (!tourn.settings.store_carts[cartKey]) {
-			return NotFound(res, `Invoice ${invoiceId} cart ${cartKey} not found`);
+			return NotFound(req, res, `Invoice ${invoiceId} cart ${cartKey} not found`);
 		}
 
 		const tournCart = tourn.settings.store_carts[cartKey];

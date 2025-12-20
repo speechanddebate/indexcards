@@ -6,7 +6,7 @@ const getPersonRounds = {
 		const db = req.db;
 
 		if (!req.query.person_id && !req.query.slug) {
-			return BadRequest(res, 'One of person_id or slug is required');
+			return BadRequest(req, res, 'One of person_id or slug is required');
 		}
 
 		let ids;
@@ -26,7 +26,7 @@ const getPersonRounds = {
 			`, { replacements: [req.query.slug] });
 
 			if (!persons || persons[0].length < 1 || !persons[0][0].person) {
-				return NotFound(res, 'No caselist links found');
+				return NotFound(req, res, 'No caselist links found');
 			}
 			ids = persons[0].map(p => p.person);
 		}

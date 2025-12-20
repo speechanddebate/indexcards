@@ -56,18 +56,18 @@ export async function Authenticate(req, res, next) {
 				const credentials = basic.parse(req.headers.authorization);
 
 				if (!credentials || !credentials.name || !credentials.pass) {
-					return BadRequest(res, 'The Authorization header is malformed. Expected format: Basic base64(user:key).');
+					return BadRequest(req, res, 'The Authorization header is malformed. Expected format: Basic base64(user:key).');
 				}
 
 				//req.person is what should be checked for every authorization decision
 				req.person = await personRepo.getPersonByApiKey(credentials.name, credentials.pass);
 
 				if (!req.person) {
-					return Unauthorized(res,'Invalid API key');
+					return Unauthorized(req, res,'Invalid API key');
 				}
 
 			} else {
-				return BadRequest(res, 'The Authorization header uses an unrecognized authentication scheme.');
+				return BadRequest(req, res, 'The Authorization header uses an unrecognized authentication scheme.');
 			}
 		}
 

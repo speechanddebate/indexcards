@@ -104,7 +104,7 @@ export const getTournInvite = {
 		}
 
 		if (!invite.tourn?.id || invite.tourn?.hidden) {
-			return NotFound(res, 'No such tournament found');
+			return NotFound(req, res, 'No such tournament found');
 		}
 
 		invite.pages = await db.webpage.findAll({
@@ -314,7 +314,7 @@ export const getRound = {
 		});
 
 		if (roundData.length < 1) {
-			return NotFound(res, `No round found with ID ${req.params.roundID}`);
+			return NotFound(req, res, `No round found with ID ${req.params.roundID}`);
 		}
 
 		const round = roundData[0];
@@ -776,7 +776,7 @@ export const getResults = {
 		});
 
 		if (resultSetData.length < 1) {
-			return NotFound(res, `No result set found with ID ${req.params.resultSetID}`);
+			return NotFound(req, res, `No result set found with ID ${req.params.resultSetID}`);
 		}
 
 		const resultSet = resultSetData[0];

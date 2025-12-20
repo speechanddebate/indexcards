@@ -19,7 +19,7 @@ export const updateTimeslot = {
 		try {
 			await timeslot.update(updates);
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 		res.status(200).json(timeslot);
 	},
@@ -30,7 +30,7 @@ export const updateTimeslot = {
 				where: { id: req.params.timeslotId },
 			});
 		} catch {
-			return UnexpectedError(res, 'An error occured while deleting the tournament.');
+			return UnexpectedError(req, res, 'An error occured while deleting the tournament.');
 		}
 
 		res.status(200).json({

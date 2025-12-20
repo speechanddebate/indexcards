@@ -27,7 +27,7 @@ export const getPersonHistory = {
 		}
 
 		if (!person?.id) {
-			return NotFound(res, 'Person not found');
+			return NotFound(req, res, 'Person not found');
 		}
 
 		const replacements = {

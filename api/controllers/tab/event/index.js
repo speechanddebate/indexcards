@@ -16,7 +16,7 @@ export const updateEvent = {
 		try {
 			await event.update(updates);
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 		res.status(200).json(event);
 	},
@@ -27,7 +27,7 @@ export const updateEvent = {
 				where: { id: req.params.eventId },
 			});
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 
 		res.status(200).json({

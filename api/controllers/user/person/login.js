@@ -11,7 +11,7 @@ export const login = {
 		const db = req.db;
 
 		if (!req.body?.username) {
-			return BadRequest(res, 'No username sent');
+			return BadRequest(req, res, 'No username sent');
 		}
 
 		const person = await db.person.findOne({
@@ -22,13 +22,13 @@ export const login = {
 		});
 
 		if (!person || typeof person !== 'object' || !person.id || !person.password) {
-			return BadRequest(res, 'No user found for username');
+			return BadRequest(req, res, 'No user found for username');
 		}
 
 		const verified = verify(req.body.password, person.password);
 
 		if (!verified) {
-			return BadRequest(res, 'Incorrect password');
+			return BadRequest(req, res, 'Incorrect password');
 		}
 
 		// Check account reputation - default to untrusted

@@ -19,7 +19,7 @@ export const updateSection = {
 		try {
 			await section.update(updates);
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 		res.status(200).json(section);
 	},
@@ -30,7 +30,7 @@ export const updateSection = {
 				where: { id: req.params.sectionId },
 			});
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 
 		res.status(200).json({

@@ -39,7 +39,7 @@ export const tournAttendance = {
 			queryLimit = `where round.id = :roundId`;
 			replacements.roundId = req.params.roundId;
 		} else {
-			return BadRequest(res, 'No parameters sent for query');
+			return BadRequest(req, res, 'No parameters sent for query');
 		}
 
 		// Limit those with only some access to those events they have access to.
@@ -356,7 +356,7 @@ export const tournAttendance = {
 		});
 
 		if (status.count < 1) {
-			return BadRequest(res, 'No events found in that tournament');
+			return BadRequest(req, res, 'No events found in that tournament');
 		}
 
 		return res.status(200).json(status);
@@ -624,13 +624,13 @@ export const tournDashboard = {
 		const tournId = req.params.tournId;
 
 		if (!req.session) {
-			return Unauthorized(res, 'You are not logged in to view the dashboard');
+			return Unauthorized(req, res, 'You are not logged in to view the dashboard');
 		}
 
 		const perms = req.session.perms;
 
 		if (!perms.tourn[tournId]) {
-			return Forbidden(res,'You do not have access to that tournament');
+			return Forbidden(req, res,'You do not have access to that tournament');
 		}
 
 		const db = req.db;

@@ -122,7 +122,7 @@ app.use(Authenticate);
 
 app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
 	if (!req.person) {
-		return Unauthorized(res, 'User: You are not logged in.');
+		return Unauthorized(req, res, 'User: You are not logged in.');
 	}
 	next();
 });
@@ -139,13 +139,13 @@ const tabRoutes = [
 app.all(tabRoutes, async (req, res, next) => {
 
 	if (!req.person) {
-		return Unauthorized(res, 'Tab: You are not logged in.');
+		return Unauthorized(req, res, 'Tab: You are not logged in.');
 	}
 
 	req.session = await tabAuth(req, res);
 
 	if (typeof req.session?.perms !== 'object') {
-		return Forbidden(res, `You do not have access to that part of that tournament`);
+		return Forbidden(req, res, `You do not have access to that part of that tournament`);
 	}
 	next();
 });
@@ -162,7 +162,7 @@ app.all(coachRoutes, async (req, res, next) => {
 	// one off
 
 	if (!req.person) {
-		return Unauthorized(res, 'Coach: You are not logged in.');
+		return Unauthorized(req, res, 'Coach: You are not logged in.');
 	}
 
 	const chapter = await coachAuth(req, res);
@@ -170,7 +170,7 @@ app.all(coachRoutes, async (req, res, next) => {
 	if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
 		req.chapter = chapter;
 	} else {
-		return Forbidden(res, `You do not have access to that part of that institution`);
+		return Forbidden(req, res, `You do not have access to that part of that institution`);
 	}
 
 	next();
@@ -187,7 +187,7 @@ app.all(localRoutes, async (req, res, next) => {
 	// region, or an NCFL diocese, or a circuit.
 
 	if (!req.person) {
-		return Unauthorized(res, 'Admin: You are not logged in.');
+		return Unauthorized(req, res, 'Admin: You are not logged in.');
 	}
 
 	const response = await localAuth(req, res);
@@ -197,7 +197,7 @@ app.all(localRoutes, async (req, res, next) => {
 		req.session.perms = { ...req.session.perms, ...response.perms };
 		next();
 	} else {
-		return Forbidden(res, `Admin : You do not have the access required.`);
+		return Forbidden(req, res, `Admin : You do not have the access required.`);
 	}
 
 	next();

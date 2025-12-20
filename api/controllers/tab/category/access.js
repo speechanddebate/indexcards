@@ -6,7 +6,7 @@ export const changeAccess = {
 
 	// Add permissions that are not there already
 	POST : async (req, res) => {
-		return UnexpectedError(res,`Stub because this feature not yet implemented`);
+		return UnexpectedError(req, res,`Stub because this feature not yet implemented`);
 	},
 
 	// Alter existing permissions
@@ -17,13 +17,13 @@ export const changeAccess = {
 		const targetCategory = await req.db.summon(db.category, req.params.categoryId);
 
 		if (!targetPerson || !targetCategory) {
-			return BadRequest(res, 'No person found with that Tabroom ID');
+			return BadRequest(req, res, 'No person found with that Tabroom ID');
 		}
 
 		if (req.session.perms.tourn[targetCategory.tourn] !== 'owner'
 			&& req.session.perms.tourn[targetCategory.tourn] !== 'tabber'
 		) {
-			return Forbidden(res, `You do not have access to change permissions in ${targetCategory.abbr}`);
+			return Forbidden(req, res, `You do not have access to change permissions in ${targetCategory.abbr}`);
 		}
 
 		const currentPerm = await db.permission.findOne({
@@ -34,7 +34,7 @@ export const changeAccess = {
 		});
 
 		if (!currentPerm) {
-			return Forbidden(res, `User ${targetPerson.email} does not have access ${targetCategory.abbr} and so it cannot be altered`);
+			return Forbidden(req, res, `User ${targetPerson.email} does not have access ${targetCategory.abbr} and so it cannot be altered`);
 		}
 
 		if (currentPerm.tag === 'checker') {
@@ -83,7 +83,7 @@ export const changeAccess = {
 		if (req.session.perms.tourn[targetCategory.tourn] !== 'owner'
 			&& req.session.perms.tourn[targetCategory.tourn] !== 'tabber'
 		) {
-			return Forbidden(res, `You do not have access to change permissions in ${targetCategory.abbr}`);
+			return Forbidden(req, res, `You do not have access to change permissions in ${targetCategory.abbr}`);
 		}
 
 		await req.db.sequelize.query(`
@@ -124,11 +124,11 @@ export const backupAccess = {
 		const targetCategory = await req.db.summon(req.db.category, req.params.categoryId);
 
 		if (!targetPerson) {
-			return NotFound(res, 'No tabroom account was found with that email');
+			return NotFound(req, res, 'No tabroom account was found with that email');
 		}
 
 		if (targetPerson.no_email) {
-			return BadRequest(res, 'That Tabroom account is set to not allow emails to be sent to it');
+			return BadRequest(req, res, 'That Tabroom account is set to not allow emails to be sent to it');
 		}
 
 		const backupAccounts = await req.db.categorySetting.findOne({

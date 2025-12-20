@@ -251,7 +251,7 @@ export const userProfile = {
 		}
 
 		if (result.count < 1) {
-			return NotFound(res, 'User does not exist');
+			return NotFound(req, res, 'User does not exist');
 		}
 
 		const jsonOutput = result.toJSON();

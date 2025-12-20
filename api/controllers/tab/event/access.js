@@ -17,7 +17,7 @@ export const changeAccess = {
 		const targetEvent = await req.db.summon(db.event, req.params.eventId);
 
 		if (!targetPerson || !targetEvent) {
-			return NotFound(res, 'No person found with that Tabroom ID');
+			return NotFound(req, res, 'No person found with that Tabroom ID');
 		}
 
 		if (
@@ -34,7 +34,7 @@ export const changeAccess = {
 			});
 
 			if (!currentPerm) {
-				return Forbidden(res, `User ${targetPerson.email} does not have access ${targetEvent.abbr} and so it cannot be altered`);
+				return Forbidden(req, res, `User ${targetPerson.email} does not have access ${targetEvent.abbr} and so it cannot be altered`);
 			}
 
 			if (currentPerm.tag === 'checker') {
@@ -119,7 +119,7 @@ export const changeAccess = {
 			});
 		}
 
-		return Forbidden(res,`You do not have access to change permissions in ${targetEvent.abbr}`);
+		return Forbidden(req, res,`You do not have access to change permissions in ${targetEvent.abbr}`);
 	},
 };
 
@@ -133,11 +133,11 @@ export const backupAccess = {
 		const targetEvent = await req.db.summon(req.db.event, req.params.eventId);
 
 		if (!targetPerson) {
-			return NotFound(res, 'No tabroom account was found with that email');
+			return NotFound(req, res, 'No tabroom account was found with that email');
 		}
 
 		if (targetPerson.no_email) {
-			return BadRequest(res, 'That Tabroom account is set to not allow emails to be sent to it');
+			return BadRequest(req, res, 'That Tabroom account is set to not allow emails to be sent to it');
 		}
 
 		const backupAccounts = await req.db.eventSetting.findOne({

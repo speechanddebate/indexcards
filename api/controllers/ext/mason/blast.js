@@ -22,7 +22,7 @@ export const blastMessage = {
 
 		if (notifyResponse.error) {
 			errorLogger.error(notifyResponse.message);
-			return UnexpectedError(res, notifyResponse);
+			return UnexpectedError(req, res, notifyResponse);
 		}
 
 		return res.status(200).json({
@@ -44,7 +44,7 @@ export const blastPairing = {
 		const blastData = await formatPairingBlast(queryData, req);
 
 		if (!blastData) {
-			return UnexpectedError(res, `No blast Data returned`);
+			return UnexpectedError(req, res, `No blast Data returned`);
 		}
 		const tourns = await req.db.sequelize.query(`
 			select

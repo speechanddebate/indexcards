@@ -31,7 +31,7 @@ export const categoryCheckin = {
 
 			res.status(200).json(judges);
 		} else {
-			return Forbidden(res, 'You do not have access to that tournament or category');
+			return Forbidden(req, res, 'You do not have access to that tournament or category');
 		}
 	},
 };
@@ -66,7 +66,7 @@ export const eventCheckin = {
 
 			res.status(200).json(entries);
 		} else {
-			return Forbidden(res, 'You do not have access to that tournament or event');
+			return Forbidden(req, res, 'You do not have access to that tournament or event');
 		}
 	},
 };

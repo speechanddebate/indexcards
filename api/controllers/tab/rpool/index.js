@@ -16,7 +16,7 @@ export const updateRPool = {
 		try {
 			await rpool.update(updates);
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 		return res.status(200).json(rpool);
 	},
@@ -27,7 +27,7 @@ export const updateRPool = {
 				where: { id: req.params.rpoolId },
 			});
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 
 		return res.status(200).json({
@@ -56,7 +56,7 @@ export const updateRPoolRoom = {
 				type: req.db.sequelize.QueryTypes.INSERT,
 			});
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 
 		return res.status(200).json({
@@ -126,7 +126,7 @@ export const updateRPoolRooms = {
 		});
 
 		if (errs) {
-			return UnexpectedError(res, errs);
+			return UnexpectedError(req, res, errs);
 		}
 
 		return res.status(200).json('Rooms added to pool');
@@ -164,7 +164,7 @@ export const updateRPoolRound = {
 				type: req.db.sequelize.QueryTypes.INSERT,
 			});
 		} catch (err) {
-			return UnexpectedError(res, err.message);
+			return UnexpectedError(req, res, err.message);
 		}
 
 		return res.status(200).json('Round added to pool');
@@ -226,7 +226,7 @@ export const updateRPoolRounds = {
 			});
 
 			if (!rounds || rounds.length < 1) {
-				return NotFound(res,`No round found with ID ${req.body.property_value}`);
+				return NotFound(req, res,`No round found with ID ${req.body.property_value}`);
 			}
 
 			const round = rounds.shift();
@@ -288,7 +288,7 @@ export const updateRPoolRounds = {
 		}
 
 		if (errs) {
-			return UnexpectedError(res, errs);
+			return UnexpectedError(req, res, errs);
 		}
 
 		if (reply) {

@@ -29,7 +29,7 @@ const sendShareFile = {
 		});
 
 		if (!sections || sections.length < 1) {
-			return NotFound(res, `No section found for codenames ${req.body.panels}`);
+			return NotFound(req, res, `No section found for codenames ${req.body.panels}`);
 		}
 
 		let counter = 0;
@@ -75,7 +75,7 @@ const sendShareFile = {
 		}
 
 		if (emailPromises.length < 1) {
-			return BadRequest(res, 'No emails found, nothing to send');
+			return BadRequest(req, res, 'No emails found, nothing to send');
 		}
 
 		await Promise.all(emailPromises);

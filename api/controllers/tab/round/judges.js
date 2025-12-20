@@ -478,7 +478,7 @@ export const placeJudges = {
 		});
 
 		if (round) {
-			return NotFound(res, 'No such round found');
+			return NotFound(req, res, 'No such round found');
 		}
 
 		const sections = db.sequelize.query(`

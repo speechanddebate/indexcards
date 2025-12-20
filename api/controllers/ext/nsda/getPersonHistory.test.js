@@ -27,7 +27,7 @@ describe('Person History', () => {
 	}, 30000);
 
 	it('Errors on a missing person id', async () => {
-		await request(server)
+		const test = await request(server)
 			.get(`/v1/ext/nsda/history?nsda_id=999999999`)
 			.set('Accept', 'application/json')
 			.set('Authorization', `Basic ${authHeader}`)

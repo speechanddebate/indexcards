@@ -599,7 +599,7 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 	}
 
 	if (blastResponse.error) {
-		return UnexpectedError(res, blastResponse.error);
+		return UnexpectedError(req, res, blastResponse.error);
 	}
 
 	const changeLog = changeLogModel(req.db.sequelize, req.db.Sequelize.DataTypes);

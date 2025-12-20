@@ -1,9 +1,9 @@
-export function sendProblem(res, {
+export function sendProblem(req, res, {
 	type = 'about:blank',
 	title,
 	status,
 	detail,
-	instance,
+	instance = req.originalUrl,
 	...extras
 }) {
 	return res
@@ -19,8 +19,8 @@ export function sendProblem(res, {
 	});
 }
 
-export function BadRequest(res, detail, extras = {}){
-	return sendProblem(res, {
+export function BadRequest(req, res, detail, extras = {}){
+	return sendProblem(req, res, {
 		title: 'Request Validation Failed',
 		status: 400,
 		detail,
@@ -28,32 +28,32 @@ export function BadRequest(res, detail, extras = {}){
 	});
 }
 //I hate that the 401 Unauthorized is technically for unauhenticated issues but we live in a society after all
-export function Unauthorized(res, detail, extras = {}) {
-	return sendProblem(res, {
+export function Unauthorized(req, res, detail, extras = {}) {
+	return sendProblem(req, res, {
 		title: 'Invalid or Missing Credentials',
 		status: 401,
 		detail,
 		...extras,
 	});
 }
-export function Forbidden(res, detail, extras = {}){
-	return sendProblem(res, {
+export function Forbidden(req, res, detail, extras = {}){
+	return sendProblem(req, res, {
 		title: 'You Do Not Have Access to This Resource',
 		status: 403,
 		detail,
 		...extras,
 	});
 }
-export function NotFound(res, detail, extras = {}){
-	return sendProblem(res, {
+export function NotFound(req, res, detail, extras = {}){
+	return sendProblem(req, res, {
 		title: 'The specified resource was not found.',
 		status: 404,
 		detail,
 		...extras,
 	});
 }
-export function UnexpectedError(res, detail, extras = {}){
-	return sendProblem(res, {
+export function UnexpectedError(req, res, detail, extras = {}){
+	return sendProblem(req, res, {
 		title: 'The Server has encountered an unexpected error.',
 		status: 500,
 		detail,
