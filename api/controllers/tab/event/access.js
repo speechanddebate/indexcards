@@ -1,6 +1,6 @@
 // Event level access maniuplation
 
-import { BadRequest, Forbidden, NotFound } from '../../../helpers/problem';
+import { BadRequest, Forbidden, NotFound } from '../../../helpers/problem.js';
 
 export const changeAccess = {
 

@@ -1,4 +1,4 @@
-import { UnexpectedError } from '../../../helpers/problem';
+import { UnexpectedError } from '../../../helpers/problem.js';
 
 // General CRUD for the category itself
 export const updateCategory = {

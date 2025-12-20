@@ -1,5 +1,5 @@
 import { startOfYear } from '@speechanddebate/nsda-js-utils';
-import { BadRequest, NotFound } from '../../../helpers/problem';
+import { BadRequest, NotFound } from '../../../helpers/problem.js';
 
 const getPersonRounds = {
 	GET: async (req, res) => {

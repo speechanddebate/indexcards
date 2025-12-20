@@ -1,4 +1,4 @@
-import { NotFound } from '../../helpers/problem';
+import { NotFound } from '../../helpers/problem.js';
 
 // General CRUD for contact coaches
 export const updateContact = {

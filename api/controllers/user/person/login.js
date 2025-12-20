@@ -1,6 +1,6 @@
 /* eslint-disable-next-line import/no-unresolved */
 import { verify } from 'unixcrypt';
-import { BadRequest } from '../../../helpers/problem';
+import { BadRequest } from '../../../helpers/problem.js';
 
 // This name is currently a misnomer, because this doesn't actually create a
 // session, it just validates the username and password Eventually, this should

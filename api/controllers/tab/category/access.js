@@ -1,6 +1,6 @@
 // Category level access maniuplation
 
-import { BadRequest, Forbidden, NotFound, UnexpectedError } from '../../../helpers/problem';
+import { BadRequest, Forbidden, NotFound, UnexpectedError } from '../../../helpers/problem.js';
 
 export const changeAccess = {
 

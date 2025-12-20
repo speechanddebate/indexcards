@@ -1,6 +1,6 @@
 // import { showDateTime } from '../../../helpers/common';
 
-import { UnexpectedError } from '../../../helpers/problem';
+import { UnexpectedError } from '../../../helpers/problem.js';
 
 // General CRUD for the jpool itself
 export const updateJPool = {

@@ -1,4 +1,4 @@
-import { Forbidden } from '../../../helpers/problem';
+import { Forbidden } from '../../../helpers/problem.js';
 
 // Enables the Online Status Attendance dashboard functions
 export const categoryCheckin = {

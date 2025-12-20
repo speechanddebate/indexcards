@@ -1,4 +1,4 @@
-import { NotFound } from '../../../helpers/problem';
+import { NotFound } from '../../../helpers/problem.js';
 export const roundAvailableJudges = {
 
 	GET:  async (req, res) => {

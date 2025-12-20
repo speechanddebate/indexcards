@@ -1,4 +1,4 @@
-import { NotFound, UnexpectedError } from '../../../helpers/problem';
+import { NotFound, UnexpectedError } from '../../../helpers/problem.js';
 
 // General CRUD for the RPool itself
 export const updateRPool = {
