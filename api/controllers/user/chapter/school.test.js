@@ -3,7 +3,7 @@ import request from 'supertest';
 import server from '../../../../app';
 
 import db from '../../../data/db';
-import { beforeAll, afterAll } from 'vitest';
+import { beforeEach, afterEach } from 'vitest';
 import config from '../../../../config/config';
 
 import {
@@ -14,9 +14,36 @@ import {
 
 describe ('getMySchoolsByTourn', () => {
 
-	beforeAll(async () => {
+	beforeEach(async () => {
 		await db.permission.create(testUserChapterPerm);
 		await db.contact.create(testUserSchoolContact);
+	});
+	afterEach(async () => {
+		await db.sequelize.query(
+			`delete from permission
+				where person = :personId
+				and chapter = :chapterId
+			`,{
+				replacements: {
+					personId: testUserChapterPerm.person,
+					chapterId: testUserChapterPerm.chapter,
+				},
+				type: db.sequelize.QueryTypes.DELETE,
+			}
+		);
+		await db.sequelize.query(
+			`delete from contact
+				where person = :personId
+				and school = :schoolId
+			`,
+			{
+				replacements: {
+					personId: testUserSchoolContact.person,
+					schoolId: testUserSchoolContact.school,
+				},
+				type: db.sequelize.QueryTypes.DELETE,
+			}
+		);
 	});
 
 	it ('User has no school in an unexpected tournament', async () => {
@@ -81,33 +108,5 @@ describe ('getMySchoolsByTourn', () => {
 
 		assert.typeOf(body, 'array'  , 'Array returned');
 		assert.equal(body.length, 1);
-	});
-
-	afterAll(async () => {
-		await db.sequelize.query(
-			`delete from permission
-				where person = :personId
-				and chapter = :chapterId
-			`,{
-				replacements: {
-					personId: testUserChapterPerm.person,
-					chapterId: testUserChapterPerm.chapter,
-				},
-				type: db.sequelize.QueryTypes.DELETE,
-			}
-		);
-		await db.sequelize.query(
-			`delete from contact
-				where person = :personId
-				and school = :schoolId
-			`,
-			{
-				replacements: {
-					personId: testUserSchoolContact.person,
-					schoolId: testUserSchoolContact.school,
-				},
-				type: db.sequelize.QueryTypes.DELETE,
-			}
-		);
 	});
 });
