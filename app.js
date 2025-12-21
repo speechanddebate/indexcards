@@ -6,21 +6,11 @@ import {v4 as uuid} from 'uuid';
 import expressWinston from 'express-winston';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
-import { initialize } from 'express-openapi';
-import swaggerUI from 'swagger-ui-express';
 import config from './config/config.js';
-import { barfPlease, systemStatus } from './api/controllers/public/status.js';
 import errorHandler from './api/helpers/error.js';
-import apiDoc from './api/routes/api-doc.js';
 import { Authenticate } from './api/middleware/authentication.js';
 import { requireAreaAccess, requireSiteAdmin } from './api/middleware/authorization.js';
-import coachPaths from './api/routes/paths/coach/index.js';
-import extPaths from './api/routes/paths/ext/index.js';
-import glpPaths from './api/routes/paths/glp/index.js';
-import localPaths from './api/routes/paths/local/index.js';
-import publicPaths from './api/routes/paths/public/index.js';
-import tabPaths from './api/routes/paths/tab/index.js';
-import userPaths from './api/routes/paths/user/index.js';
+import v1Router from './api/routes/routers/v1/indexRouter.js';
 
 import {
 	tabAuth,
@@ -123,6 +113,7 @@ app.use(cookieParser());
 
 // Authenticate all requests and set req.person if valid
 app.use(Authenticate);
+app.use('/v1',v1Router);
 
 app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
 	if (!req.person) {
@@ -207,40 +198,8 @@ app.all(localRoutes, async (req, res, next) => {
 
 	next();
 });
-
-app.use('/v1/ext/tourn/*', async (req,res,next) => {
-	// /v1/ext/tourn requires tourn level permission
-	req.session = await tabAuth(req, res);
-});
 app.use('/v1/ext/:area',requireAreaAccess);
 app.use('/v1/glp/*'    ,requireSiteAdmin);
-
-const systemPaths = [
-	{ path : '/status', module : systemStatus },
-	{ path : '/barf', module   : barfPlease },
-];
-
-// Combine the various paths into one
-const paths = [
-	...systemPaths,
-	...coachPaths,
-	...extPaths,
-	...glpPaths,
-	...localPaths,
-	...publicPaths,
-	...tabPaths,
-	...userPaths,
-];
-
-// Initialize OpenAPI middleware
-const apiDocConfig = initialize({
-	app,
-	apiDoc,
-	paths,
-	promiseMode     : true,
-	docsPath        : '/docs',
-	errorMiddleware : errorHandler,
-});
 
 // Log global errors with Winston
 app.use(expressWinston.errorLogger({
@@ -267,9 +226,6 @@ app.use(expressWinston.logger({
 
 // Final fallback error handling
 app.use(errorHandler);
-
-// Swagger UI interface for the API
-app.use('/v1/apidoc', swaggerUI.serve, swaggerUI.setup(apiDocConfig.apiDoc));
 
 // Start server
 const port = process.env.PORT || config.PORT || 3000;
