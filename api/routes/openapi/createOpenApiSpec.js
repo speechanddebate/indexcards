@@ -38,10 +38,10 @@ export function collectOpenApi(router, basePath = '') {
 			for (const method of Object.keys(layer.route.methods)) {
 				const handler = layer.route.stack.at(-1).handle;
 
-				if (handler.openapi) {
-					paths[routePath] ??= {};
-					paths[routePath][method] = handler.openapi;
-				}
+				paths[routePath] ??= {};
+				paths[routePath][method] =
+					handler.openapi ??
+					defaultOperation(method, routePath);
 			}
 		}
 
@@ -70,4 +70,16 @@ function joinPaths(base, path) {
 	return (`${base}/${path}`)
       .replace(/\/+/g, '/')
       .replace(/\/$/, '') || '/';
+}
+
+function defaultOperation(method, routePath) {
+	return {
+		summary: 'Undocumented Endpoint',
+		description: `${method.toUpperCase()} ${routePath} us undocumented. Need to add .openapi to handler`,
+		responses: {
+			200: {
+				description: 'Success',
+			},
+		},
+	};
 }
