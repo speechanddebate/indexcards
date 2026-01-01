@@ -13,7 +13,6 @@ env:
     HUSKY: 0
     REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
     REGISTRY_PASSWORD: ${{ secrets.REGISTRY_PASSWORD }}
-    SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
   build:
@@ -48,5 +47,4 @@ jobs:
       if: success()
       run: echo "SLACK_ICON=:white_check_mark:" >> $GITHUB_ENV
 
-    - name: Send slack notification
-      uses: speechanddebate/action-slack-notify@master
+
