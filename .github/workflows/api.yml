@@ -12,7 +12,9 @@ env:
     CI: true
     TZ: 'America/Chicago'
     NODE_ENV: 'test'
+    CODE_PATH: '/home/runner/work/indexcards/indexcards'
     HUSKY: 0
+    SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
   build:
@@ -60,3 +62,8 @@ jobs:
     - name: If tests passed change icon
       if: success()
       run: echo "SLACK_ICON=:white_check_mark:" >> $GITHUB_ENV
+
+    - name: Send slack notification
+      if: always()
+      uses: speechanddebate/action-slack-notify@master
+
