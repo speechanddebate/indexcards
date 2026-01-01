@@ -16,6 +16,7 @@ env:
     DB_USER: 'tabroom'
     DB_PASS: 'tabroom'
     HUSKY: 0
+    SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
   build:
@@ -63,3 +64,8 @@ jobs:
     - name: If tests passed change icon
       if: success()
       run: echo "SLACK_ICON=:white_check_mark:" >> $GITHUB_ENV
+
+    - name: Send slack notification
+      if: always()
+      uses: speechanddebate/action-slack-notify@master
+
