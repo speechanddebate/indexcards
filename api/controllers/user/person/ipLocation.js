@@ -3,7 +3,9 @@ import { findLocation, findISP } from '../../../helpers/clientInfo.js';
 import { queryLogger } from '../../../helpers/logger.js';
 
 const ipLocation = {
+
 	GET: async (req, res) => {
+
 		const requestIP = req.params.ipAddress || req.get('x-forwarded-for');
 
 		let locationData = {};

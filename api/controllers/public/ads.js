@@ -15,7 +15,7 @@ export const PublicAds = {
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
-		res.status(200).json(currentAds);
+		return res.status(200).json(currentAds);
 	},
 };
 

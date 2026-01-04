@@ -1,5 +1,7 @@
 export function baseRepo(model, mapFunction) {
+
 	const settingsAssoc = Object.values(model.associations).find(a => a.as.toLowerCase().endsWith('_settings'));
+
 	async function getById(id, options = {}) {
 		const include = [];
 

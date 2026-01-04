@@ -14,11 +14,11 @@ async function getPersonByApiKey(personId,apiKey) {
 		where: { id: personId },
 		include: [
 			{
-				model: db.personSetting,
-				as: 'person_settings',
+				model : db.personSetting,
+				as    : 'person_settings',
 				where: {
-					tag: 'api_key',
-					value: apiKey,
+					tag   : 'api_key',
+					value : apiKey,
 				},
 				required: true,
 			},
@@ -27,7 +27,6 @@ async function getPersonByApiKey(personId,apiKey) {
 }
 async function hasAreaAccess(personId, area) {
 	const authTag = `api_auth_${area}`;
-
 	const setting = await db.personSetting.findOne({
 		where: {
 			person: personId,
@@ -38,7 +37,9 @@ async function hasAreaAccess(personId, area) {
 	return setting !== null;
 }
 
-//eventually get rid of this and just use the with settings version but auth needs it now
+// Eventually get rid of this and just use the with settings version but auth
+// needs it now
+
 async function getPersonSettings(personId, options = {} ) {
 	return getSettings('person', personId,options);
 }

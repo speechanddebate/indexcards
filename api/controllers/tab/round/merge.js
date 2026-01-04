@@ -117,13 +117,20 @@ export const unmergeTimeslotRounds = {
 				replacements : { roundId },
 				type         : db.sequelize.QueryTypes.DELETE,
 			});
-		} finally {
+
+		} catch (err) {
+
 			res.status(200).json({
-				refresh : true,
-				error   : false,
-				message : `All rounds have been restored to their original event.`,
+				error   : true,
+				message : `Error occurred on merge: ${err}`,
 			});
 		}
+
+		res.status(200).json({
+			refresh : true,
+			error   : false,
+			message : `All rounds have been restored to their original event.`,
+		});
 	},
 };
 

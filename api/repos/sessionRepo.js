@@ -6,6 +6,7 @@ import { baseRepo } from './baseRepo.js';
 const base = baseRepo(db.session, mapSession);
 
 async function findByUserKey(key) {
+
 	const s = await db.session.findOne({
 		where: { userkey: key },
 		include: [
@@ -18,8 +19,8 @@ async function findByUserKey(key) {
 
 	return {
 		...mapSession(s),
-		person: mapPerson(s.person_person),
-		su: mapPerson(s.su_person),
+		person : mapPerson(s.person_person),
+		su     : mapPerson(s.su_person),
 	};
 }
 

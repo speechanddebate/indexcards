@@ -127,6 +127,7 @@ export const emailBlast = async (inputData) => {
 			inlineError(err, 'mail.js line 125');
 			console.log(err);
 		}
+
 	} else {
 		debugLogger.info(`Local: email not sending from ${messageData.from} to ${messageData.to} bcc ${messageData.bcc} `);
 		debugLogger.info(`Env: ${process.env.NODE_ENV}`);

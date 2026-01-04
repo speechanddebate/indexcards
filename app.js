@@ -62,7 +62,7 @@ app.get('/v1/ip', (request, response) => response.send(request.ip));
 // Rate limit all requests
 const limiter = rateLimiter({
 	windowMs : config.RATE_WINDOW || 15 * 60 * 1000 , // 15 minutes
-	max      : config.RATE_MAX || 10000             , // limit each IP to 100000 requests per windowMs
+	max      : config.RATE_MAX || 10000, // limit each IP to 100000 requests per windowMs
 });
 app.use(limiter);
 
@@ -129,15 +129,16 @@ app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], as
 		return Unauthorized(req, res, 'User: You are not logged in.');
 	}
 	next();
+
 });
 
 const tabRoutes = [
-	'/v1/tab/:tournId',
-	'/v1/tab/:tournId/:subType',
 	'/v1/tab/:tournId/:subType/:typeId',
 	'/v1/tab/:tournId/:subType/:typeId/*',
 	'/v1/tab/:tournId/:subType/:typeId/*/*',
 	'/v1/tab/:tournId/:subType/:typeId/*/*/*',
+	'/v1/tab/:tournId/:subType',
+	'/v1/tab/:tournId',
 ];
 
 app.all(tabRoutes, async (req, res, next) => {

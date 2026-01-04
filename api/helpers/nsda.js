@@ -47,6 +47,7 @@ export const getNSDA  = async (path) => {
 export const syncLearnResults = async (person) => {
 
 	let targetPerson = {};
+	const nsdaIds = {};
 
 	if (typeof person === 'number') {
 		targetPerson = await db.person.findByPk(person);
@@ -58,7 +59,9 @@ export const syncLearnResults = async (person) => {
 		return 'Learn courses may only be synced to valid Tabroom accounts';
 	}
 
-	if ( !targetPerson.nsda ) {
+	if ( targetPerson.nsda ) {
+		nsdaIds[targetPerson.nsda] = true;
+	} else {
 		const membership = await getNSDAMemberId(targetPerson.email);
 		if (membership && membership.id) {
 			targetPerson.nsda = membership.id;
@@ -66,12 +69,39 @@ export const syncLearnResults = async (person) => {
 		}
 	}
 
-	if ( !targetPerson.nsda ) {
-		return 'No NSDA ID is tied to that Tabroom account, and no NSDA account was found with that email';
+	const nsdaIdentities = await db.sequelize.query(`
+		select nsda_id.value nsda_id,
+			nsda_email.value nsda_email
+		from person
+			left join person_setting nsda_email on nsda_email.person = person.id and nsda_email.tag = 'nsda_email'
+			left join person_setting nsda_id on nsda_id.person = person.id and nsda_id.tag = 'nsda_id'
+		where 1=1
+			and person.id = :personId
+	`, {
+		replacements: { personId: targetPerson.id },
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	if (nsdaIdentities && nsdaIdentities[0].nsda_email) {
+		const membership = await getNSDAMemberId(nsdaIdentities[0].nsda_email);
+		if (membership && membership.id) {
+			if ( membership.id !== targetPerson.nsda ) {
+				nsdaIds[membership.id] = true;
+			}
+		}
 	}
 
-	const path = `/members/${targetPerson.nsda}/learn`;
-	const learnResults = await getNSDA(path);
+	if (nsdaIdentities && nsdaIdentities[0].nsda_id) {
+		nsdaIds[nsdaIdentities[0].nsda_id] = true;
+	}
+
+	const learnResults = [];
+
+	for (const nsdaId of Object.keys(nsdaIds)) {
+		const path = `/members/${nsdaId}/learn`;
+		const learn = await getNSDA(path);
+		learnResults.push(...learn);
+	}
 
 	if (!learnResults.length > 0) {
 		return `User ${targetPerson.nsda} does not have any completed NSDA Learn courses.`;
@@ -103,8 +133,8 @@ export const syncLearnResults = async (person) => {
 	};
 
 	for (const result of learnResults) {
-		if (result.status === 'completed') {
 
+		if (result.status === 'completed') {
 			if (quizByNSDA[result.courseId]?.pqId) {
 
 				if (!quizByNSDA[result.courseId].approved_by) {
@@ -120,7 +150,6 @@ export const syncLearnResults = async (person) => {
 						replacements: { personQuizId: quizByNSDA[result.courseId].pqId },
 						type: db.sequelize.QueryTypes.UPDATE,
 					});
-
 					results.updates++;
 				}
 
@@ -140,7 +169,7 @@ export const syncLearnResults = async (person) => {
 	}
 
 	return {
-		message : `I have updated ${results.new} new quizzes and ${results.updates} existing ones}`,
+		message : `I have updated ${results.new} new quizzes and ${results.updates} existing ones`,
 		...results,
 	};
 
@@ -149,25 +178,29 @@ export const syncLearnResults = async (person) => {
 export const syncLearnByCourse = async (quiz) => {
 
 	const courseData = await getNSDA(`/learn/courses/${quiz.nsda_course}`);
-
-	const usersById = {};
+	const usersByNsdaId = {};
 	const usersByEmail = {};
 
 	for (const courseResult of courseData) {
-		usersById[courseResult.user_id] = courseResult;
-		usersByEmail[courseResult.email] = courseResult;
+		usersByNsdaId[courseResult.person_id] = courseResult;
+		usersByEmail[courseResult.email.toLowerCase()] = courseResult;
 	}
 
 	// First filter everyone out who's already been tagged, and then
 	// update everyone with an existing PQ that is not completed.
 
 	const existingPQs = await db.sequelize.query(`
-		select person.id, person.email, person.nsda,
-			pq.id pq, pq.completed, pq.updated_at
-		from person, person_quiz pq, quiz
+		select person.id, person.email, person.nsda, person.first, person.last,
+			pq.id pq, pq.completed, pq.updated_at, pq.approved_by,
+			nsda_email.value nsda_email,
+			nsda_id.value nsda_id
+		from (person, person_quiz pq, quiz)
+			left join person_setting nsda_email on nsda_email.person = person.id and nsda_email.tag = 'nsda_email'
+			left join person_setting nsda_id on nsda_id.person = person.id and nsda_id.tag = 'nsda_id'
 		where 1=1
 			and person.id = pq.person
 			and pq.quiz = :quizId
+		group by pq.id
 	`, {
 		replacements : {
 			quizId: quiz.id,
@@ -175,27 +208,163 @@ export const syncLearnByCourse = async (quiz) => {
 		type : db.sequelize.QueryTypes.SELECT,
 	});
 
-	const allPromises = [];
-	const nsdaMismatches = [];
+	let allPromises = [];
+	const altSettings = [];
+
+	const now = new Date();
+	const logs = [];
 
 	for (const person of existingPQs) {
 
-		if (person.email
-			&& usersByEmail[person.email]
-			&& person.nsda !== usersByEmail[person.email].user_id
-		) {
-			usersByEmail[person.email].tabroom = person;
-			nsdaMismatches.push(usersByEmail[person.email]);
+		let existing = usersByEmail[person.email.toLowerCase()];
+
+		if (!existing && person.nsda_email) {
+			existing = usersByEmail[person.nsda_email.toLowerCase()];
 		}
 
-		if (person.completed && person.approved_by) {
+		if (
+			existing
+			&& (person.email === existing.email || person.email === existing.nsda_email)
+			&& parseInt(person.nsda) !== parseInt(existing.person_id)
+			&& parseInt(person.nsda_id) !== parseInt(existing.person_id)
+		) {
 
-			delete usersById[person.nsda];
-			delete usersByEmail[person.email];
+			if (person.nsda) {
+
+				const tabroomPerson = await getNSDA(`/members/${person.nsda}`);
+				const nsdaPerson = await getNSDA(`/members/${existing.person_id}`);
+
+				logs.push(`${now}: NSDA ID Mismatch: Same email ${existing.email}. Tabroom NSDA: ${person.nsda} Second ${person.nsda_id} and NSDA ID: ${existing.person_id}`);
+
+				if (!tabroomPerson) {
+
+					if (nsdaPerson.last === person.last || nsdaPerson.first === person.first) {
+
+						logs.push(`${now}: NSDA ID ${person.nsda} is invalid. Name match so switching to valid NSDA ID ${nsdaPerson.person_id}`);
+
+						swapNSDA(
+							person.id,
+							nsdaPerson.person_id,
+							`NSDA Learn unlinked invalid NSDA ID ${person.nsda}.  Switched to ${nsdaPerson.person_id}`
+						);
+
+					} else {
+
+						logs.push(`${now}: NSDA ID ${person.nsda} is invalid. No name match, unlinking`);
+
+						wipeNSDA(
+							person.id,
+							`NSDA Learn unlinked from invalid NSDA ID ${person.nsda}`,
+						);
+					}
+
+				} else {
+
+					if (tabroomPerson.last !== person.last && tabroomPerson.first !== person.first) {
+
+						if (
+							nsdaPerson.last === person.last
+							&& nsdaPerson.first === person.first
+						) {
+
+							swapNSDA(
+								person.id,
+								nsdaPerson.person_id,
+								`NSDA Learn unlinked from ${tabroomPerson.person_id} due to name and ID mismatch.  Switched to ${nsdaPerson.person_id}`,
+							);
+
+						} else {
+
+							wipeNSDA(
+								person.id,
+								nsdaPerson.person_id,
+								`NSDA Learn unlinked from ${tabroomPerson.person_id} due to name and ID mismatch`,
+							);
+						}
+
+					} else {
+						const altNSDA = {
+							tag    : 'nsda_id',
+							value  : nsdaPerson.person_id,
+							person : person.id,
+						};
+						altSettings.push(altNSDA);
+					}
+				}
+
+			} else if (!person.nsda) {
+
+				await db.sequelize.query(`
+					update person set nsda = :nsdaId where id = :personId
+				`, {
+					replacements: { personId: person.id, nsdaId: existing.person_id },
+					type: db.sequelize.QueryTypes.UPDATE,
+				});
+
+				logs.push(`${now} Linked Tabroom ${person.email} to NSDA ID: ${existing.person_id}`);
+
+				await db.changeLog.create({
+					tag         : 'link',
+					person      : person.id,
+					description : `NSDA Learn linked user to ${existing.person_id} because of email match`,
+				});
+			}
+		}
+
+		let nsdaExisting = usersByNsdaId[person.nsda];
+
+		if (!nsdaExisting && person.nsda_id) {
+			nsdaExisting = usersByNsdaId[parseInt(person.nsda_id)];
+		}
+
+		if (
+			nsdaExisting
+			&& person.email !== nsdaExisting.email
+			&& (
+				parseInt(person.nsda) === parseInt(nsdaExisting.person_id)
+				|| parseInt(person.nsda_id) === parseInt(nsdaExisting.person_id)
+			)
+			&& ( !person.nsda_email || person.nsda_email !== nsdaExisting.email)
+		) {
+
+			logs.push(`${now}: Email Mismatch: NSDA ID: ${person.nsda} belongs to Tabroom email ${person.email} and NSDA email ${nsdaExisting.email}`);
+
+			const altEmail = {
+				tag    : 'nsda_email',
+				value  : nsdaExisting.email,
+				person : person.id,
+			};
+
+			altSettings.push(altEmail);
+
+			// See if the primary Tabroom email also has an ID number and stash that too
+			const membership = await getNSDAMemberId(person.email);
+			logs.push(`${now}: Found membership info ${JSON.stringify(membership)} with original email ${person.email}`);
+
+			if (membership && membership.id) {
+				const altId = {
+					tag    : 'nsda_id',
+					value  : membership.id,
+					person : person.id,
+				};
+				altSettings.push(altId);
+			}
+		}
+
+		if (
+			nsdaExisting
+			&& nsdaExisting.completed
+			&& person.completed
+			&& person.approved_by
+		) {
+
+			delete usersByNsdaId[person.nsda];
+			delete usersByNsdaId[person.nsda_id];
+			delete usersByEmail[person.email.toLowerCase()];
 
 		} else {
 
-			if (usersById[person.nsda] || usersByEmail[person.email]) {
+			if (usersByNsdaId[person.nsda] || usersByEmail[person.email.toLowerCase()]) {
 
 				const promise = db.sequelize.query(`
 					update person_quiz pq set completed = 1, approved_by = 3, updated_at = :updatedAt where id = :pqId
@@ -206,136 +375,252 @@ export const syncLearnByCourse = async (quiz) => {
 
 				allPromises.push(promise);
 
-				delete usersById[person.nsda];
-				delete usersByEmail[person.email];
+				if (usersByNsdaId[person.nsda]) {
+					delete usersByNsdaId[person.nsda];
+				}
+				if (usersByEmail[person.email.toLowerCase()]) {
+					delete usersByEmail[person.email.toLowerCase()];
+				}
 			}
 		}
 	}
 
-	const userIds = Object.keys(usersById);
+	await db.personSetting.bulkCreate(
+		altSettings,
+		{
+			ignoreDuplicates: true,
+		}
+	);
 
-	if (userIds.length < 1) {
-		userIds.push(0);
-	}
+	await Promise.all(allPromises);
+	allPromises = [];
 
-	const notExisting = await db.sequelize.query(`
-		select person.id, person.nsda, person.email
-			from person
-		where 1=1
-		and person.nsda IN (:userIds)
-	`, {
-		replacements : { userIds },
-		type         : db.sequelize.QueryTypes.SELECT,
-	});
+	// And now we're left with some ID numbers and email addresses that were
+	// not synced or launched from Tabroom.
 
-	await db.sequelize.query(`
-		delete pq.*
-			from person, person_quiz pq
-		where 1=1
-			and person.nsda IN (:userIds)
-			and person.id = pq.person
-			and pq.quiz = :quizId
-	`, {
-		replacements : {
-			userIds,
-			quizId   : quiz.id,
-		},
-		type         : db.sequelize.QueryTypes.DELETE,
-	});
+	const userIds = Object.keys(usersByNsdaId);
 
-	const pqAdds = [];
+	if (userIds.length > 0) {
 
-	for (const person of notExisting) {
-		pqAdds.push({
-			person      : person.id,
-			quiz        : quiz.id,
-			completed   : 1,
-			approved_by : 3,
-			updated_at  : new Date(usersById[person.nsda].completed),
+		const notExisting = await db.sequelize.query(`
+			select person.id, person.nsda, person.email, person.middle,
+				nsda_id.value nsda_id,
+				nsda_email.value nsda_email
+				from person
+				left join person_setting nsda_id on nsda_id.person = person.id and nsda_id.tag = 'nsda_id'
+				left join person_setting nsda_email on nsda_email.person = person.email and nsda_email.tag = 'nsda_email'
+			where 1=1
+			and (
+				person.nsda IN (:userIds)
+				OR EXISTS (
+					select ps.id
+					from person_setting ps
+					where ps.person = person.id
+					and ps.tag='nsda_id'
+					and ps.value IN (:userIds)
+				)
+			)
+		`, {
+			replacements : { userIds },
+			type         : db.sequelize.QueryTypes.SELECT,
 		});
 
-		delete usersByEmail[person.email];
-	}
+		await db.sequelize.query(`
+			delete pq.*
+				from person, person_quiz pq
+			where 1=1
+				and person.nsda IN (:userIds)
+				and person.id = pq.person
+				and pq.quiz = :quizId
+		`, {
+			replacements : {
+				userIds,
+				quizId   : quiz.id,
+			},
+			type : db.sequelize.QueryTypes.DELETE,
+		});
 
-	const bigPromise = db.personQuiz.bulkCreate(pqAdds);
-	allPromises.push(bigPromise);
+		const pqAdds = [];
 
-	const emailAdds = [];
+		for (const person of notExisting) {
 
-	const userEmails = Object.keys(usersByEmail);
-	if (userEmails.length < 1) {
-		userEmails.push('nope');
-	}
+			let courseUser = usersByNsdaId[person.nsda];
 
-	const stillNotExisting = await db.sequelize.query(`
-		select person.id, person.nsda, person.email
-			from person
-		where 1=1
-		and person.email IN (:userEmails)
-	`, {
-		replacements : { userEmails },
-		type         : db.sequelize.QueryTypes.SELECT,
-	});
-
-	await db.sequelize.query(`
-		delete pq.*
-			from person, person_quiz pq
-		where 1=1
-			and person.nsda IN (:userEmails)
-			and person.id = pq.person
-			and pq.quiz = :quizId
-	`, {
-		replacements   : {
-			userEmails,
-			quizId     : quiz.id,
-		},
-		type : db.sequelize.QueryTypes.DELETE,
-	});
-
-	for (const person of stillNotExisting) {
-
-		const courseUser = usersByEmail[person.email];
-
-		if (courseUser) {
-
-			if (person.nsda && courseUser.user_id !== person.nsda) {
-
-				courseUser.tabroom = person;
-				nsdaMismatches.push(courseUser);
-
-			} else if (courseUser && !person.nsda) {
-
-				const promiseOne = db.sequelize.query(`
-					update person set nsda = :nsdaId where id = :personId
-				`, {
-					replacements: { personId: person.id, nsdaId: courseUser.user_id },
-					type: db.sequelize.QueryTypes.UPDATE,
-				});
-
-				allPromises.push(promiseOne);
+			if (!courseUser && person.nsda_id) {
+				courseUser = usersByNsdaId[person.nsda_id];
 			}
 
-			emailAdds.push({
-				person      : person.id,
-				quiz        : quiz.id,
-				completed   : 1,
-				approved_by : 3,
-				updated_at  : new Date(courseUser.completed),
-			});
+			if (courseUser && courseUser.completed) {
 
-			delete usersByEmail[person.email];
+				pqAdds.push({
+					person      : person.id,
+					quiz        : quiz.id,
+					completed   : 1,
+					approved_by : 3,
+					updated_at  : new Date(courseUser.completed),
+				});
+
+				// I've already found this person by NSDA ID so I do not need to do by email
+				delete usersByEmail[person.email.toLowerCase()];
+				if (person.nsda_email) {
+					delete usersByNsdaId[person.nsda_email.toLowerCase()];
+				}
+				delete usersByNsdaId[person.nsda];
+				if (person.nsda_id) {
+					delete usersByNsdaId[person.nsda_id];
+				}
+			}
+		}
+
+		const bigPromise = db.personQuiz.bulkCreate(pqAdds);
+		allPromises.push(bigPromise);
+	}
+
+	await Promise.all(allPromises);
+	allPromises = [];
+
+	const userEmails = Object.keys(usersByEmail);
+
+	if (userEmails.length > 0) {
+
+		const emailAdds = [];
+		let stillNotExisting = [];
+
+		stillNotExisting = await db.sequelize.query(`
+			select person.id, person.nsda, person.email, person.last, nsda_email.value nsda_email
+				from person
+				left join person_setting nsda_email on nsda_email.tag = 'nsda_email' and nsda_email.person = person.id
+			where 1=1
+			and
+				(
+					person.email IN (:userEmails)
+					OR EXISTS (
+						select ps.id
+						from person_setting ps
+						where ps.person = person.id
+						and ps.tag='nsda_email'
+						and ps.value IN (:userEmails)
+					)
+				)
+		`, {
+			replacements : { userEmails },
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+
+		await db.sequelize.query(`
+			delete pq.*
+				from person, person_quiz pq
+			where 1=1
+				and (person.email IN (:userEmails)
+					OR EXISTS (
+						select ps.id
+						from person_setting ps
+						where ps.person = person.id
+						and ps.tag='nsda_email'
+						and ps.value IN (:userEmails)
+					)
+				)
+				and person.id = pq.person
+				and pq.quiz = :quizId
+		`, {
+			replacements   : {
+				userEmails,
+				quizId     : quiz.id,
+			},
+			type : db.sequelize.QueryTypes.DELETE,
+		});
+
+		for (const person of stillNotExisting) {
+
+			let courseUser = usersByEmail[person.email.toLowerCase()];
+
+			if (!courseUser && person.nsda_email) {
+				courseUser = usersByEmail[person.nsda_email.toLowerCase()];
+			}
+
+			if (courseUser && courseUser.completed) {
+
+				if (
+					person.nsda && parseInt(courseUser.person_id) !== person.nsda
+					&& (!person.nsda_id || parseInt(person.nsda_id) !== courseUser.person_id)
+				) {
+
+					if (person.nsda_id !== courseUser.person_id) {
+						logs.push(` ${now} NSDA ID Mismatch: Same email ${person.email}. Tabroom NSDA: ${person.nsda} and NSDA ID: ${courseUser.person_id}`);
+					}
+
+				} else if (courseUser && !person.nsda) {
+
+					logs.push(` ${now} ${person.email} has no NSDA ID but email correponds to ${courseUser.person_id}.  Linking.`);
+
+					const promiseOne = db.sequelize.query(`
+						update person set nsda = :nsdaId where id = :personId
+					`, {
+						replacements: { personId: person.id, nsdaId: courseUser.person_id },
+						type: db.sequelize.QueryTypes.UPDATE,
+					});
+
+					allPromises.push(promiseOne);
+				}
+
+				emailAdds.push({
+					person      : person.id,
+					quiz        : quiz.id,
+					completed   : 1,
+					approved_by : 3,
+					updated_at  : new Date(courseUser.completed),
+				});
+
+				delete usersByEmail[person.email.toLowerCase()];
+				if (person.nsda_email) {
+					delete usersByEmail[person.nsda_email.toLowerCase()];
+				}
+				if (person.nsda) {
+					delete usersByNsdaId[person.nsda];
+				}
+				delete usersByNsdaId[courseUser.person_id];
+			}
+		}
+
+		const otherPromise = db.personQuiz.bulkCreate(emailAdds);
+		allPromises.push(otherPromise);
+
+	}
+
+	await Promise.resolve(allPromises);
+
+	const unmatchedResults = [];
+
+	for (const nsdaId of Object.keys(usersByNsdaId)) {
+		unmatchedResults.push( usersByNsdaId[nsdaId] );
+	}
+	for (const email of Object.keys(usersByEmail)) {
+		const result = usersByEmail[email];
+		if (!usersByNsdaId[result.person_id]) {
+			unmatchedResults.push(result);
 		}
 	}
 
-	const otherPromise = db.personQuiz.bulkCreate(emailAdds);
-	allPromises.push(otherPromise);
+	const quizMisses = await db.tabroomSetting.findOne({ where: { tag: `quiz_misses_${quiz.id}` } });
 
-	await Promise.resolve(allPromises);
+	if (quizMisses) {
+		quizMisses.value_text = JSON.stringify(unmatchedResults, null, );
+		await quizMisses.save();
+
+	} else {
+
+		await db.tabroomSetting.create({
+			tag        : `quiz_misses_${quiz.id}`,
+			value      : 'text',
+			person     : 3,
+			value_text : JSON.stringify(unmatchedResults, null, 4),
+		});
+	}
+
 	const quizLog = await db.tabroomSetting.findOne({ where: { tag: `quiz_log_${quiz.id}` } });
 
 	if (quizLog) {
-
-		quizLog.value_text = JSON.stringify(nsdaMismatches, null, 4);
+		quizLog.value_text = JSON.stringify(logs, null, 4);
 		await quizLog.save();
 
 	} else {
@@ -344,12 +629,42 @@ export const syncLearnByCourse = async (quiz) => {
 			tag        : `quiz_log_${quiz.id}`,
 			value      : 'text',
 			person     : 3,
-			value_text : JSON.stringify(nsdaMismatches, null, 4),
+			value_text : JSON.stringify(logs, null, 4),
 		});
 	}
 
-	return `${quiz.label} synchronized for ${courseData.length} records with ${nsdaMismatches.length} mismatches`;
+	return `${quiz.label} synchronized for ${courseData.length} records with ${logs.length} changes`;
 
+};
+
+export const swapNSDA = async (personId, goodNSDA, logMsg) => {
+	await db.sequelize.query(`
+		update person set nsda = :goodNSDA where id = :personId
+	`, {
+		replacements: { personId, goodNSDA },
+		type: db.sequelize.QueryTypes.UPDATE,
+	});
+
+	await db.changeLog.create({
+		tag         : 'link',
+		person      : personId,
+		description : logMsg || `NSDA ID swapped to ${goodNSDA}`,
+	});
+};
+
+export const wipeNSDA = async (personId, logMsg) => {
+	await db.sequelize.query(`
+		update person set nsda = NULL where id = :personId
+	`, {
+		replacements: { personId },
+		type: db.sequelize.QueryTypes.UPDATE,
+	});
+
+	await db.changeLog.create({
+		tag         : 'link',
+		person      : personId,
+		description : logMsg || `NSDA ID deleted `,
+	});
 };
 
 export default getNSDA;

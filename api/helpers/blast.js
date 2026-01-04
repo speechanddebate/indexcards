@@ -111,7 +111,7 @@ export const webBlast = async (inputData) => {
 		where person.id IN (:personIds)
 			and person.id = session.person
 			and session.push_notify is NOT NULL
-			and session.last_access > DATE_SUB(NOW(), INTERVAL 7 DAY)
+			and session.last_access > DATE_SUB(NOW(), INTERVAL 60 DAY)
 	`, {
 		replacements: { personIds: inputData.ids },
 		type: db.sequelize.QueryTypes.SELECT,
@@ -209,7 +209,7 @@ export const emailNotify = async (inputData) => {
 
 	const recipients = await db.sequelize.query(`
 		select
-			person.id, person.first, person.last, person.email
+			person.id, person.first, person.last, person.email, person.no_email
 		from person
 		where person.id IN (:personIds)
 	`, {
@@ -221,9 +221,7 @@ export const emailNotify = async (inputData) => {
 		if (inputData.ignoreNoEmail || (!person.no_email)) {
 			return person;
 		}
-
 		return null;
-
 	}).map( (person) => {
 		return person.email;
 	});
@@ -270,7 +268,6 @@ export const inboxMessage = async (inputData) => {
 		sender_string : inputData.replyTo || inputData.from,
 		url           : inputData.url,
 		email         : inputData.emailId,
-		created_at    : new Date(),
 	};
 
 	// Tourn must exist, or otherwise be null
@@ -278,7 +275,7 @@ export const inboxMessage = async (inputData) => {
 		message.tourn = inputData.tourn;
 	}
 
-	if (message.email) {
+	if (message.email && !inputData.append) {
 		delete message.body;
 	}
 
@@ -286,8 +283,9 @@ export const inboxMessage = async (inputData) => {
 	const errors = [];
 
 	inputData.ids.forEach( async (id) => {
+
 		try {
-			const response = await db.message.create({
+			const response = db.message.create({
 				person: id,
 				...message,
 			});

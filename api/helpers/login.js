@@ -28,13 +28,12 @@ const login = async (req) => {
 				return 'Password was incorrect!';
 			}
 
-			const now = new Date();
 			const userkey = encrypt(req.uuid);
 
 			const sessionTemplate = {
-				person     : person.id,
-				ip         : '127.0.0.1',
-				created_at : now.toJSON(),
+				person      : person.id,
+				ip          : '127.0.0.1',
+				push_notify : null,
 				userkey,
 			};
 

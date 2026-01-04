@@ -9,7 +9,7 @@ describe('Person History', () => {
 
 	it('Returns history for a person', async () => {
 
-		// Victim of the day is Navya Simha
+		// Victim of the day!
 		const res = await request(server)
 			.get(`/v1/ext/nsda/history?nsda_id=123456`)
 			.set('Accept', 'application/json')

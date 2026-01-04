@@ -97,6 +97,7 @@ export const sideCounts = {
 export const roundDecisionStatus = {
 
 	GET: async (req, res) => {
+
 		const db = req.db;
 
 		const labels = await db.sequelize.query(`
@@ -135,7 +136,7 @@ export const roundDecisionStatus = {
 			select
 				ballot.id ballot,
 				panel.id panel,
-				judge.id judge,
+				judge.id judge, judge.last judgeLast,
 				ballot.chair,
 				CONVERT_TZ(ballot.judge_started, '+00:00', tourn.tz) startTime,
 				ballot.audit,
@@ -145,15 +146,17 @@ export const roundDecisionStatus = {
 				point.id point,
 				winloss.id winloss,
 				winloss.value winner,
-				rubric.id rubric,
-				panel.flight
+				rubric.id rubric_id,
+				panel.flight,
+				rubric.content rubric
 
 			from (ballot, panel, round, event, tourn)
-				left join judge on ballot.judge = judge.id
-				left join score rank on rank.ballot = ballot.id and rank.tag = 'rank'
-				left join score point on point.ballot = ballot.id and point.tag = 'point'
+
+				left join judge on ballot.judge           = judge.id
+				left join score rank on rank.ballot       = ballot.id and rank.tag    = 'rank'
+				left join score point on point.ballot     = ballot.id and point.tag   = 'point'
 				left join score winloss on winloss.ballot = ballot.id and winloss.tag = 'winloss'
-				left join score rubric on rubric.ballot = ballot.id and rubric.tag = 'rubric'
+				left join score rubric on rubric.ballot   = ballot.id and rubric.tag  = 'rubric'
 
 			where round.id = :roundId
 				and panel.round = round.id
@@ -175,12 +178,21 @@ export const roundDecisionStatus = {
 
 		const done = [];
 
-		rawBallots.forEach( (ballot) => {
+		for (const ballot of rawBallots) {
+
+			if (ballot.rubric) {
+				ballot.rubricCount = 0;
+				const rubric = JSON.parse(ballot.rubric);
+				for (const rowCount of Object.keys(rubric)) {
+					if ( parseInt(rubric[rowCount].points) > 0) {
+						ballot.rubricCount++;
+					}
+				}
+			}
 
 			if (!ballot.judge && !ballot.pbye) {
 
 				round.panels[ballot.panel] = round.panels[ballot.panel] || 0;
-
 				let already = round.byePanels[ballot.panel] || '';
 
 				if (already) {
@@ -215,7 +227,7 @@ export const roundDecisionStatus = {
 
 				round.byePanels[ballot.panel] = already;
 
-				return;
+				continue;
 			}
 
 			if (!round.judges[ballot.judge]) {
@@ -236,11 +248,11 @@ export const roundDecisionStatus = {
 				round.out[ballot.flight] = {};
 			}
 
-			if (ballot.audit) {
+			if (!judge.text) {
+				judge.text = '';
+			}
 
-				if (!judge.text) {
-					judge.text = '';
-				}
+			if (ballot.audit) {
 
 				round.panels[ballot.panel] += 100;
 
@@ -297,11 +309,20 @@ export const roundDecisionStatus = {
 			) {
 				round.panels[ballot.panel] = 10000;
 				judge.text = 'BYE';
-			} else if (ballot.winloss || ballot.rank || ballot.point || ballot.rubric ) {
+			} else if (ballot.winloss || ballot.rank || ballot.point) {
 				round.out[ballot.flight][ballot.judge] = true;
 				round.panels[ballot.panel] += 100;
 				judge.text = '&frac12;';
 				judge.class = 'redtext';
+			} else if (ballot.rubricCount || judge.count) {
+				round.out[ballot.flight][ballot.judge] = true;
+				if (typeof ballot.rubricCount === 'number') {
+					if (!judge.count) {
+						judge.count = 0;
+					}
+					judge.count += ballot.rubricCount;
+					judge.class = 'bluetext italic';
+				}
 			} else if (ballot.startTime) {
 				round.out[ballot.flight][ballot.judge] = true;
 				round.panels[ballot.panel] += 10;
@@ -314,7 +335,20 @@ export const roundDecisionStatus = {
 				delete round.judges[ballot.judge][ballot.panel];
 				round.panels[ballot.panel] += 1;
 			}
-		});
+		}
+
+		for (const ballot of rawBallots) {
+			if (ballot?.judge && ballot?.panel) {
+				const judge = round.judges[ballot.judge][ballot.panel];
+
+				if (judge &&
+					judge.count
+					&& (!ballot.winloss && !ballot.rank && !ballot.point)
+				) {
+					judge.text = judge.count.toString();
+				}
+			}
+		}
 
 		res.status(200).json(round);
 	},

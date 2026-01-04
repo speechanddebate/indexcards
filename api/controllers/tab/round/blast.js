@@ -26,12 +26,19 @@ export const blastRoundMessage = {
 			fromAddress,
 		});
 
-		await req.db.changeLog.create({
+		const logMessage = {
 			tag         : 'blast',
 			description : `${req.body.message} sent.  ${blast.message}`,
-			person      : req.session?.person,
 			round       : req.body.roundId,
-		});
+		};
+
+		if (req.session?.person) {
+			logMessage.person = req.session.person;
+		} else if (req.body.sender) {
+			logMessage.person = req.body.sender;
+		}
+
+		await req.db.changeLog.create(logMessage);
 
 		const message = `Message sent to whole timeslot. ${blast.inbox || 0} recipients messaged, ${blast.web || 0} by web and ${blast.email || 0} by email`;
 
@@ -166,7 +173,7 @@ export const scheduleAutoFlip = async (roundId, req) => {
 						tag        : `flip_${flight}`,
 						round      : round.id,
 						active_at  : flipAt[flight],
-						created_at : Date(),
+						created_by : req.body.sender || 0,
 					});
 					promises.push(promise);
 				} else {
@@ -174,7 +181,7 @@ export const scheduleAutoFlip = async (roundId, req) => {
 						tag        : `flip`,
 						round      : round.id,
 						active_at  : flipAt[flight],
-						created_at : Date(),
+						created_by : req.body.sender || 0,
 					});
 
 					promises.push(promise);
@@ -238,7 +245,10 @@ export const blastRoundPairing = {
 		promises.push(rmBlasted);
 
 		const mkBlasted = req.db.sequelize.query(
-			`insert into round_setting (tag, round, value_date, value) values ('blasted', :roundId, now(), 'date')`, {
+			`insert into round_setting (tag, round, value_date, value)
+				values ('blasted', :roundId, now(), 'date')
+				ON DUPLICATE KEY UPDATE value_date = now()
+		`, {
 				replacements : queryData.replacements,
 				type         : req.db.sequelize.QueryTypes.INSERT,
 			});
@@ -293,9 +303,9 @@ export const blastRoundPairing = {
 
 				const logPromise = req.db.sequelize.query(`
 					insert into change_log
-						(tag, description, person, round, tourn, created_at)
+						(tag, description, person, round, tourn)
 					values
-						('tabbing', :description, :personId, :roundId, :tournId, NOW())
+						('tabbing', :description, :personId, :roundId, :tournId)
 				`, {
 					type : req.db.sequelize.QueryTypes.INSERT,
 					replacements,
@@ -317,6 +327,32 @@ export const blastRoundPairing = {
 		Promise.resolve(blastPromise).then( (blastResponse) => {
 			return res.status(200).json(blastResponse);
 		});
+	},
+};
+
+export const roundBlastStatus = {
+
+	GET: async (req, res) => {
+
+		const publish = await req.db.sequelize.query(`
+			select
+				aq.id,
+				aq.tag, aq.message,
+				person.id personId, person.email, person.first, person.last,
+				aq.active_at activeAt,
+				aq.created_at createdAt
+			from (autoqueue aq, round)
+				left join person on person.id = aq.created_by
+			where 1=1
+				and round.id  = :roundId
+				and round.id = aq.round
+				and aq.tag IN ('blast', 'publish', 'blast_publish')
+		`, {
+			replacements : { roundId: req.params.roundId },
+			type         : req.db.sequelize.QueryTypes.SELECT,
+		});
+
+		return res.status(200).json([...publish]); // always deliver an array, even when blank
 	},
 };
 

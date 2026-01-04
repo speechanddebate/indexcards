@@ -3,8 +3,7 @@ import { ordinalize } from '@speechanddebate/nsda-js-utils';
 import { notify } from './blast.js';
 import { sidelocks } from './round.js';
 import { config } from '../../config/config.js';
-import changeLogModel from '../data/models/change_log.js';
-import { UnexpectedError } from './problem.js';
+import db from '../data/db.js';
 
 // Functions related to creating pairing blasts for each section.
 // formatBlast pulls the sql paramters from the blastSection/Round/Timeslot
@@ -68,9 +67,14 @@ export const formatPairingBlast = async (queryData, req) => {
 			flip_at.value_date flip_at,
 			aff_label.value aff_label,
 			neg_label.value neg_label,
-			tourn.tz
+			tourn.tz,
+			limit_info.value limitInfo
 
 		from (tourn, event, round, panel section)
+
+			left join tourn_setting limit_info
+				on limit_info.tourn = tourn.id
+				and limit_info.tag = 'limit_info'
 
 			left join room on room.id = section.room
 
@@ -147,9 +151,11 @@ export const formatPairingBlast = async (queryData, req) => {
 
 	const roundData = await processRounds(rawRoundData);
 
-	for await (const entry of rawEntries) {
+	for (const entry of rawEntries) {
+
 		const section = roundData[entry.roundid].sections[entry.sectionid];
-		section.entries.push({
+
+		const entryLimit = {
 			id         : entry.id,
 			code       : entry.code,
 			name       : entry.name,
@@ -158,12 +164,19 @@ export const formatPairingBlast = async (queryData, req) => {
 			side       : entry.side,
 			speaker    : entry.speakerorder,
 			pronoun    : entry.pronoun,
-		});
+		};
+
+		if (roundData[entry.roundid].limitInfo) {
+			delete entryLimit.pronoun;
+		}
+		section.entries.push(entryLimit);
 	}
 
-	for await (const judge of rawJudges) {
+	for (const judge of rawJudges) {
+
 		const section = roundData[judge.roundid].sections[judge.sectionid];
-		section.judges.push({
+
+		const judgeLimit = {
 			id         : judge.id,
 			code       : judge.code,
 			first      : judge.first,
@@ -173,7 +186,13 @@ export const formatPairingBlast = async (queryData, req) => {
 			schoolName : judge.schoolname,
 			chair      : judge.chair,
 			pronoun    : judge.pronoun,
-		});
+		};
+
+		if (roundData[judge.roundid].limitInfo) {
+			delete judgeLimit.pronoun;
+		}
+
+		section.judges.push(judgeLimit);
 	}
 
 	// Now format round and section messages for each recipient.
@@ -193,7 +212,7 @@ export const formatPairingBlast = async (queryData, req) => {
 		schoolJudges  : {},
 	};
 
-	for await (const roundId of Object.keys(roundData)) {
+	for (const roundId of Object.keys(roundData)) {
 
 		const round = roundData[roundId];
 		const roundMessage = { };
@@ -206,9 +225,9 @@ export const formatPairingBlast = async (queryData, req) => {
 
 		let counter = 1;
 
-		for await (const flight of sectionFlights) {
+		for (const flight of sectionFlights) {
 
-			for await (const sectionId of Object.keys(round.flightSections[flight])) {
+			for (const sectionId of Object.keys(round.flightSections[flight])) {
 
 				const section = round.sections[sectionId];
 
@@ -258,7 +277,7 @@ export const formatPairingBlast = async (queryData, req) => {
 
 					let firstJudge = 0;
 
-					for await (const judge of section.judges) {
+					for (const judge of section.judges) {
 
 						judge.role = judgeRole(judge, round) || '';
 
@@ -304,7 +323,7 @@ export const formatPairingBlast = async (queryData, req) => {
 
 				let notFirstEntry = 0;
 
-				for await (const entry of section.entries) {
+				for (const entry of section.entries) {
 
 					entry.position = positionString(entry, round, section);
 
@@ -327,7 +346,7 @@ export const formatPairingBlast = async (queryData, req) => {
 						delete sectionMessage.entryText;
 					} else if (round.eventType === 'debate' || round.eventType === 'wsdc') {
 
-						for await (const other of section.entries) {
+						for (const other of section.entries) {
 							if (entry.id !== other.id) {
 								entry.opponent = other.code;
 							}
@@ -346,7 +365,7 @@ export const formatPairingBlast = async (queryData, req) => {
 				// And now that we have the standard texts, we can assemble the
 				// notifications for the actual entries
 
-				for await (const entry of section.entries) {
+				for (const entry of section.entries) {
 					// Myself
 					if (!blastData.entries[entry.id]) {
 						blastData.entries[entry.id] = {
@@ -422,7 +441,7 @@ export const formatPairingBlast = async (queryData, req) => {
 					}
 				}
 
-				for await (const judge of section.judges) {
+				for (const judge of section.judges) {
 
 					// Myself
 					if (!blastData.judges[judge.id]) {
@@ -450,7 +469,7 @@ export const formatPairingBlast = async (queryData, req) => {
 					if (round.eventType === 'mock_trial') {
 						let firstJudge = 0;
 
-						for await (const other of section.judges) {
+						for (const other of section.judges) {
 							if (firstJudge++ > 0) {
 								judgeMessage.text += ', ';
 							}
@@ -516,7 +535,7 @@ export const formatPairingBlast = async (queryData, req) => {
 			}
 		}
 
-		for await (const schoolId of Object.keys(blastData.schools)) {
+		for (const schoolId of Object.keys(blastData.schools)) {
 			blastData.schools[schoolId].text += `\n${round.eventAbbr} ${round.name} Start ${round.shortstart[1]}\n\n`;
 			if (blastData.schoolEntries?.[schoolId]) {
 				blastData.schools[schoolId].text += `ENTRIES\n${blastData.schoolEntries[schoolId].text}`;
@@ -545,109 +564,145 @@ export const sendPairingBlast = async (followers, blastData, req, res) => {
 
 	const promises = [];
 
-	Object.keys(blastData.judges).forEach( async (judgeId) => {
-
+	Object.keys(blastData.judges).forEach( (judgeId) => {
 		if (followers.judges[judgeId]) {
-			const notifyResponse = notify({
+			const promise = notify({
 				ids    : followers.judges[judgeId],
 				append : blastData.append,
 				from   : blastData.from,
 				tourn  : blastData.tourn,
 				...blastData.judges[judgeId],
 			});
-
-			promises.push(notifyResponse);
+			promises.push(promise);
 		}
 	});
 
-	Object.keys(blastData.entries).forEach( async (entryId) => {
+	Object.keys(blastData.entries).forEach( (entryId) => {
 		if (followers.entries[entryId]) {
-			const notifyResponse = notify({
+			const promise = notify({
 				ids    : followers.entries[entryId],
 				append : blastData.append,
 				from   : blastData.from,
 				tourn  : blastData.tourn,
 				...blastData.entries[entryId],
 			});
-			promises.push(notifyResponse);
+			promises.push(promise);
 		}
 	});
 
 	Object.keys(blastData.schools).forEach( (schoolId) => {
 		if (followers.schools[schoolId]) {
-			const notifyResponse = notify({
+			const promise = notify({
 				ids    : followers.schools[schoolId],
 				append : blastData.append,
 				from   : blastData.from,
 				tourn  : blastData.tourn,
 				...blastData.schools[schoolId],
 			});
-			promises.push(notifyResponse);
+			promises.push(promise);
 		}
 	});
 
-	const replies = await Promise.all(promises);
+	const returnPromise = new Promise( (resolve) => {
 
-	for await (const notifyResponse of replies) {
-		blastResponse.email += notifyResponse.email.count;
-		blastResponse.web += notifyResponse.web.count;
+		Promise.all(promises).then( (values) => {
 
-		if (notifyResponse.error) {
-			blastResponse.error = true;
-			blastResponse.message += notifyResponse.message;
-		}
-	}
+			for (const notifyResponse of values) {
+				blastResponse.email += notifyResponse.email;
+				blastResponse.web += notifyResponse.web;
+				blastResponse.inbox += notifyResponse.inbox;
+				if (notifyResponse.error) {
+					blastResponse.error = true;
+				}
+			}
 
-	if (blastResponse.error) {
-		return UnexpectedError(req, res, blastResponse.error);
-	}
+			if (blastResponse.error) {
+				resolve({
+					blastError   : blastResponse.error,
+					blastMessage : blastResponse.message,
+					emailCount   : blastResponse.email,
+					webCount     : blastResponse.web,
+				});
 
-	const changeLog = changeLogModel(req.db.sequelize, req.db.Sequelize.DataTypes);
+			}
 
-	if (req.params.sectionId) {
-		await changeLog.create({
-			tag         : 'blast',
-			description : `Pairing sent to section. Message: ${req.body.message}`,
-			person      : blastData.sender || req.session?.person?.id,
-			count       : (blastResponse.web + blastResponse.email) || 0,
-			panel       : req.params.sectionId,
-		});
+			const logPromises = [];
 
-	} else {
+			if (req.params.sectionId) {
+				const promise = db.changeLog.create({
+					tag         : 'blast',
+					description : `Pairing sent to section. Message: ${req.body.message}`,
+					person      : blastData.sender || req.session?.person?.id,
+					count       : (blastResponse.web + blastResponse.email) || 0,
+					panel       : req.params.sectionId,
+				});
 
-		const blastPromises = [];
+				logPromises.push(promise);
 
-		for (const round of blastData.rounds) {
-			const promise = changeLog.create({
-				tag         : 'blast',
-				description : `Round pairings blasted. Message: ${req.body.message}`,
-				person      : blastData.sender || req.session?.person?.id,
-				count       : (blastResponse.web + blastResponse.email) || 0,
-				round       : round.id,
+			} else {
+
+				blastData.rounds.forEach( (round) => {
+					const promise = db.changeLog.create({
+						tag         : 'blast',
+						description : `Round pairings blasted. Message: ${req.body.message}`,
+						person      : blastData.sender || req.session?.person?.id,
+						count       : (blastResponse.web + blastResponse.email) || 0,
+						round       : round.id,
+					});
+					logPromises.push(promise);
+				});
+			}
+
+			Promise.all(logPromises).then( () => {
+				resolve({
+					error   : false,
+					web     : blastResponse.web,
+					email   : blastResponse.email,
+				});
 			});
 
-			blastPromises.push(promise);
-		}
+			resolve({
+				error   : false,
+				message : `Pairings sent to ${blastResponse.web} web and ${blastResponse.email} email recipients`,
+				web     : blastResponse.web,
+				email   : blastResponse.email,
+			});
+		});
+	});
 
-		await Promise.all(blastPromises);
+	return returnPromise;
+};
+
+export const wudcPosition = (n, options) => {
+	const input = parseInt(n);
+
+	if (options === 'long') {
+		if (input === 1) { return 'Opening Government'; }
+		if (input === 2) { return 'Opening Opposition'; }
+		if (input === 3) { return 'Closing Government'; }
+		if (input === 4) { return 'Closing Opposition'; }
 	}
 
-	const browserResponse = {
-		error   : false,
-		message : `Pairings sent to ${blastResponse.web} web and ${blastResponse.email} email recipients`,
-		web     : blastResponse.web,
-		email   : blastResponse.email,
-	};
+	if (options === 'medium') {
+		if (input === 1) { return '1st Gov'; }
+		if (input === 2) { return '1st Opp'; }
+		if (input === 3) { return '2nd Gov'; }
+		if (input === 4) { return '2nd Opp'; }
+	}
 
-	return browserResponse;
-
+	if (input === 1) { return '1G'; }
+	if (input === 2) { return '1O'; }
+	if (input === 3) { return '2G'; }
+	if (input === 4) { return '2O'; }
 };
+
+export default formatPairingBlast;
 
 const processRounds = async (rawRounds) => {
 
 	const roundData  = { };
 
-	for await (const rawRound of rawRounds) {
+	for (const rawRound of rawRounds) {
 
 		if (!roundData[rawRound.roundid]) {
 
@@ -661,6 +716,7 @@ const processRounds = async (rawRounds) => {
 				eventName      : rawRound.eventname,
 				eventAbbr      : rawRound.eventabbr,
 				eventType      : rawRound.eventtype,
+				limitInfo      : rawRound.limitInfo,
 				flip           : false,
 				start          : {},
 				shortstart     : {},
@@ -672,7 +728,8 @@ const processRounds = async (rawRounds) => {
 				sidelocks      : {},
 			};
 
-			const settingTags = ['include_room_notes',
+			const settingTags = [
+				'include_room_notes',
 				'use_normal_rooms',
 				'anonymous_public',
 				'online_mode',
@@ -699,10 +756,10 @@ const processRounds = async (rawRounds) => {
 				}
 			}
 
-			// Every time I look for "the easy way to do something" that
-			// was like 4 characters in Perl the answer ends up being
-			// something like this monstrosity. 'Twas foreach (1 ... n) {}.
-			// Progress! Sigh.
+			// Every time I look for "the easy way to do something" that was
+			// like 4 characters in Perl the answer ends up being something
+			// like this monstrosity. 'Twas foreach (1 ... n) {}. Progress!
+			// Sigh.
 
 			for (const tick of [...Array(round.flights).keys()]) {
 				const flight = tick + 1;
@@ -855,27 +912,3 @@ const positionString = (entry, round, section) => {
 	return '';
 };
 
-export const wudcPosition = (n, options) => {
-	const input = parseInt(n);
-
-	if (options === 'long') {
-		if (input === 1) { return 'Opening Government'; }
-		if (input === 2) { return 'Opening Opposition'; }
-		if (input === 3) { return 'Closing Government'; }
-		if (input === 4) { return 'Closing Opposition'; }
-	}
-
-	if (options === 'medium') {
-		if (input === 1) { return '1st Gov'; }
-		if (input === 2) { return '1st Opp'; }
-		if (input === 3) { return '2nd Gov'; }
-		if (input === 4) { return '2nd Opp'; }
-	}
-
-	if (input === 1) { return '1G'; }
-	if (input === 2) { return '1O'; }
-	if (input === 3) { return '2G'; }
-	if (input === 4) { return '2O'; }
-};
-
-export default formatPairingBlast;

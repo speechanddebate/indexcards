@@ -34,7 +34,12 @@ export const login = {
 		// Check account reputation - default to untrusted
 		const response = {
 			person_id : person.id,
+			first     : person.first,
+			last      : person.last,
 			name      : `${person.first} ${person.last}`,
+			email     : req.body.username,
+			phone     : person.phone,
+			pronoun   : person.pronoun,
 			trusted   : false,
 		};
 

@@ -6,7 +6,7 @@ export const clearPaymentKeys = async () => {
 		DELETE TS FROM tourn_setting TS    
 		INNER JOIN tourn T ON T.id = TS.tourn    
 		WHERE     
-			T.end < NOW() - INTERVAL 7 DAY
+			T.end < NOW() - INTERVAL 14 DAY
 			AND (TS.tag LIKE '%authorizenet%' 
 				OR TS.tag LIKE '%paypal%'
 				OR TS.tag LIKE '%stripe%'
@@ -15,7 +15,7 @@ export const clearPaymentKeys = async () => {
 		type : db.sequelize.QueryTypes.DELETE,
 	});
 
-	return 'Paypal/Authorize/Stripe Payment keys deleted for tournaments more than a week over.';
+	return 'Paypal/Authorize/Stripe Payment keys deleted for tournaments more than two weeks over.';
 };
 
 await clearPaymentKeys();

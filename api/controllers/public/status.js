@@ -16,6 +16,7 @@ export const systemStatus = {
 			totalmem : os.totalmem(),
 			node     : process.version,
 			runtime  : process.env?.NODE_ENV,
+			database : config.DB_DATABASE,
 		});
 	},
 	POST: async (req, res) => {
@@ -31,6 +32,7 @@ export const systemStatus = {
 			totalmem : os.totalmem(),
 			node     : process.version,
 			runtime  : process.env?.NODE_ENV,
+			database : config.DB_DATABASE,
 		});
 	},
 };

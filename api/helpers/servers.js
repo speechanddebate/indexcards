@@ -2,19 +2,188 @@ import axios from 'axios';
 import db from '../data/db.js';
 import config from '../../config/config.js';
 import notify from './blast.js';
+import { errorLogger } from './logger.js';
 
-export const getLinodeInstances = async () => {
+export const showTabroomUsage = async () => {
 
-	const existingMachines = await axios.get(
-		`${config.LINODE.API_URL}/instances`,
-		{
-			headers : {
-				Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
-				'Content-Type' : 'application/json',
-				Accept         : 'application/json',
+	const allStudents = await db.sequelize.query(`
+		select
+			count(distinct student.person) count
+		from student, entry_student es, entry, event, tourn
+		where 1=1
+			and tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+			and tourn.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
+
+			and tourn.id = event.tourn
+			and tourn.hidden != 1
+			and event.id = entry.event
+			and entry.active = 1
+			and entry.id = es.entry
+			and es.student = student.id
+			and exists (
+				select timeslot.id
+					from timeslot
+				where 1=1
+					and timeslot.tourn = tourn.id
+					and timeslot.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+					and timeslot.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
+			)
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	const onlineStudents = await db.sequelize.query(`
+		select
+			count(distinct student.person) count
+		from student, entry_student es, entry, event, tourn
+		where 1=1
+			and tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+			and tourn.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
+			and tourn.id = event.tourn
+			and tourn.hidden != 1
+			and event.id = entry.event
+			and entry.active = 1
+			and entry.id = es.entry
+			and es.student = student.id
+            and exists (
+                select online.id
+					from event_setting online
+				where 1=1
+					and online.event = event.id
+					and online.tag = 'online_mode'
+					and online.value != 'async'
+            )
+
+			and exists (
+				select timeslot.id
+					from timeslot
+				where 1=1
+					and timeslot.tourn = tourn.id
+					and timeslot.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+					and timeslot.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
+			)
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	const allJudges = await db.sequelize.query(`
+		select
+			count(distinct judge.person) count
+		from judge, category, tourn
+		where 1=1
+			and tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+			and tourn.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
+			and tourn.id = category.tourn
+			and tourn.hidden != 1
+			and category.id = judge.category
+			and exists (
+				select timeslot.id
+					from timeslot
+				where 1=1
+					and timeslot.tourn = tourn.id
+					and timeslot.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+					and timeslot.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
+			)
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	const tournamentCount = await db.sequelize.query(`
+		select
+			count(distinct tourn.id) count
+		from tourn
+		where 1=1
+			and tourn.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+			and tourn.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
+			and tourn.hidden != 1
+			and exists (
+				select timeslot.id
+					from timeslot
+				where 1=1
+					and timeslot.tourn = tourn.id
+					and timeslot.start < DATE_ADD(CURRENT_TIMESTAMP, INTERVAL 4 HOUR)
+					and timeslot.end > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 1 HOUR)
+			)
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	const currentActiveUsers = await db.sequelize.query(`
+		select
+			count(distinct session.id) count
+		from session
+			where session.last_access > DATE_SUB(CURRENT_TIMESTAMP, INTERVAL 6 HOUR)
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	const totalUsers = (allJudges[0]?.count || 0)
+		+ (allStudents[0]?.count || 0)
+		+ (onlineStudents[0]?.count || 0);
+
+	let serverTarget = Math.ceil(totalUsers / (config.LINODE.USERS_PER_SERVER || 1250));
+
+	const overrides = await db.sequelize.query(`
+		select
+			setting.*
+		from tabroom_setting setting
+		where 1=1
+			and setting.tag IN ('min_servers', 'max_servers')
+			and value_date > CURRENT_TIMESTAMP
+	`, {
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	for (const override of overrides) {
+
+		if (
+			override.tag === 'min_servers'
+			&& override.value > serverTarget
+		) {
+			serverTarget = override.value;
+		} else if (
+			override.tag === 'max_servers'
+			&& override.value < serverTarget
+		) {
+			serverTarget = override.value;
+		}
+	}
+
+	if (serverTarget < (config.AUTOSCALE?.SCALE_MIN || 2)) {
+		serverTarget = (config.AUTOSCALE?.SCALE_MIN || 2);
+	}
+
+	return {
+		activeUsers    : currentActiveUsers[0]?.count,
+		tournaments    : tournamentCount[0]?.count,
+		judges         : allJudges[0]?.count,
+		students       : allStudents[0].count,
+		onlineStudents : onlineStudents[0].count,
+		totalUsers,
+		serverTarget,
+	};
+};
+
+export const getLinodeInstances = async ( limit ) => {
+
+	let existingMachines = {};
+
+	try {
+		existingMachines = await axios.get(
+			`${config.LINODE.API_URL}/instances`,
+			{
+				headers : {
+					Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
+					'Content-Type' : 'application/json',
+					Accept         : 'application/json',
+				},
 			},
-		},
-	);
+		);
+	} catch (err) {
+		errorLogger.error(`Error from Linode when polling new instances`);
+		errorLogger.error(err.message);
+		return {};
+	}
 
 	const dbServers = await db.sequelize.query(`select * from server`,
 		{ type: db.sequelize.QueryTypes.SELECT }
@@ -30,22 +199,29 @@ export const getLinodeInstances = async () => {
 
 	const tabroomMachines = existingMachines.data.data.filter( machine => {
 
-		if (
-			machine.tags.includes('control')
-			|| machine.tags.includes('haproxy')
-			|| machine.tags.includes('tabroom-db')
-			|| machine.tags.includes('tabroom-replica')
-			|| machine.tags.includes(config.LINODE.WEBHOST_BASE)
-		) {
-			return machine;
+		if (limit) {
+			if (
+				machine.tags.includes(limit) || machine.tags.includes(config.DB_HOST)
+			) {
+				return machine;
+			}
+		} else {
+
+			for (const tag of [config.LINODE.WEBHOST_BASE, ...config.LINODE.MONITOR_TARGETS]) {
+
+				if (machine.tags.includes(tag) ) {
+					return machine;
+				}
+			}
 		}
+
 		return null;
 
 	}).map( machine => {
 
 		const status = serverByLinodeId[machine.id]?.status || machine.status;
 
-		if (machine.tags.includes('tabweb') && (!serverByLinodeId[machine.id])) {
+		if (machine.tags.includes(config.LINODE.WEBHOST_BASE) && (!serverByLinodeId[machine.id])) {
 			databaseSyncs.push(machine);
 		}
 
@@ -96,12 +272,12 @@ export const getLinodeInstances = async () => {
 		if (proxyData) {
 			machine.uptime      = proxyData.uptime;
 			machine.mason       = proxyData.mason;
-			machine.indexcards  = proxyData.indexcards;
+			machine.masoncards  = proxyData.masoncards;
 			machine.loadOne     = proxyData['1m_cpu_load'];
 			machine.loadFive    = proxyData['5m_cpu_load'];
 			machine.loadFifteen = proxyData['15m_cpu_load'];
 			machine.mason       = proxyData.mason;
-			machine.indexcards  = proxyData.indexcards;
+			machine.masoncards  = proxyData.masoncards;
 
 			machine.memory = (proxyData.memory_available / proxyData.memory_total || 1);
 			machine.swap = (proxyData.swap_available / proxyData.swap_total || 1);
@@ -113,7 +289,7 @@ export const getLinodeInstances = async () => {
 
 };
 
-export const increaseLinodeCount = async (whodunnit, countNumber) => {
+export const increaseLinodeCount = async (whodunnit, countNumber, silent) => {
 
 	if (countNumber < 1) {
 		return { message: 'You cannot change by zero, silly' };
@@ -132,9 +308,9 @@ export const increaseLinodeCount = async (whodunnit, countNumber) => {
 	const hostnames = tabwebs.map( (machine) => machine.label );
 	const target = parseInt(countNumber) || 0;
 
-	if ((target + tabwebs.length) > (config.TABWEB_CAP || 20))  {
+	if ((target + tabwebs.length) > (config.TABWEB_CAP || 24))  {
 		return {
-			message: `This process only allows for ${config.TABWEB_CAP || 20} machines to exist at one time.`,
+			message: `This process only allows for ${config.TABWEB_CAP || 24} machines to exist at one time.`,
 		};
 	}
 
@@ -167,7 +343,7 @@ export const increaseLinodeCount = async (whodunnit, countNumber) => {
 			label           : `${hostname}`,
 			type            : config.LINODE.INSTANCE_TYPE,
 			region          : config.LINODE.REGION,
-			tags            : ['tabweb'],
+			tags            : [config.LINODE.WEBHOST_BASE],
 			has_user_data   : false,
 			disk_encryption : 'disabled',
 			swap_size       : config.LINODE.SWAP_SIZE,
@@ -186,6 +362,7 @@ export const increaseLinodeCount = async (whodunnit, countNumber) => {
 				},
 			],
 			depends_on       : [control[0].linode_id],
+			firewall_id      : config.LINODE.FIREWALL_ID,
 			stackscript_id   : config.LINODE.STACKSCRIPT_ID,
 			stackscript_data : {
 				hostname     : `${hostname}`,
@@ -210,7 +387,7 @@ export const increaseLinodeCount = async (whodunnit, countNumber) => {
 
 		} catch (err) {
 
-			console.log(`Error returned by creation request: ${JSON.stringify(err)} `);
+			errorLogger.error(`Error returned by creation request: ${JSON.stringify(err)} `);
 
 			return {
 				message: `Machine creation ${hostname} failed with response code ${err.response?.status} ${err.response?.statusText} and errors`,
@@ -249,18 +426,20 @@ export const increaseLinodeCount = async (whodunnit, countNumber) => {
 		description: resultMessages.join('\n'),
 	});
 
-	const emailResponse = await notifyCloudAdmins(whodunnit, resultMessages.join('<br />'), `${target} Machines Added`);
-
 	const response = {
-		emailResponse,
-		message : resultMessages.join('<br />'),
+		emailResponse : '',
+		message       : resultMessages.join('<br />'),
 	};
+
+	if (!silent) {
+		response.emailResponse = await notifyCloudAdmins(whodunnit, resultMessages.join('<br />'), `${target} Machines Added`);
+	}
 
 	return response;
 
 };
 
-export const decreaseLinodeCount = async (whodunnit, countNumber) => {
+export const decreaseLinodeCount = async (whodunnit, countNumber, silent) => {
 
 	if (countNumber < 1) {
 		return { message: 'You cannot change by zero, silly' };
@@ -346,13 +525,15 @@ export const decreaseLinodeCount = async (whodunnit, countNumber) => {
 		description: resultMessages.join('\n'),
 	});
 
-	const emailResponse = await notifyCloudAdmins(whodunnit, resultMessages.join(), `${target} Machines Removed`);
-
 	const response = {
-		delete  : destroyMe,
-		message : resultMessages.join('<br />'),
-		emailResponse,
+		delete        : destroyMe,
+		message       : resultMessages.join('<br />'),
+		emailResponse : '',
 	};
+
+	if (!silent) {
+		response.emailResponse = await notifyCloudAdmins(whodunnit, resultMessages.join(), `${target} Machines Removed`);
+	}
 
 	return response;
 };
@@ -392,6 +573,10 @@ export const notifyCloudAdmins = async (whodunnit, log, subject) => {
 		subject : `Tabroom Cloud Change: ${subject}`,
 	};
 
+	if (config.LINODE.NOTIFY_SLACK) {
+		message.emailInclude = [config.LINODE.NOTIFY_SLACK];
+	}
+
 	const emailResponse = await notify(message);
 	return emailResponse;
 };
@@ -422,8 +607,10 @@ export const getProxyStatus = async(existingMachines) => {
 			`http://haproxy.${config.INTERNAL_DOMAIN}:9000/;json`,
 		);
 	} catch (err) {
-		return `Could not connect to HAProxy.  Try again later. ${err}`;
+		return `Could not connect to HAProxy.  Try again later. Error: ${JSON.stringify(err)} `;
 	}
+
+	allStatus.haproxyData = haproxyData.data;
 
 	// HAproxy's export format is so convoluted I swear Jon Bruschke designed
 	// it. Parse it down to a key value store organized by host that an actual
@@ -466,7 +653,9 @@ export const getProxyStatus = async(existingMachines) => {
 	try {
 		resolvedMetrics = await Promise.all(metrics);
 	} catch (err) {
-		return { message: `Not all machines could be connected to.  Try again in a bit. ${err}` };
+		return {
+			message: `Not all machines could be connected to. Error: ${JSON.stringify(err)}`,
+		};
 	}
 	const metricsByMachine = {};
 
@@ -517,7 +706,6 @@ export const getProxyStatus = async(existingMachines) => {
 		) / 60 / 60 / 24;
 
 		// Figure out the HAProxy round robin status of the expected containers on this machine
-
 		if (machine.label.includes('tabweb')) {
 
 			const machineNumber = machine.label.replace(/\D/g,'');
@@ -528,13 +716,11 @@ export const getProxyStatus = async(existingMachines) => {
 				const masonId = haproxyKey[masonHost];
 
 				if (!machineStatus.mason) {
-					// The day may come when I iterate this properly.  BUT IT IS NOT THIS DAY.
-					machineStatus.mason = {
-						1: {},
-						2: {},
-						3: {},
-						4: {},
-					};
+					machineStatus.mason = {};
+				}
+
+				if (!machineStatus.mason[tick]) {
+					machineStatus.mason[tick] = {};
 				}
 
 				machineStatus.mason[tick] = {
@@ -545,27 +731,60 @@ export const getProxyStatus = async(existingMachines) => {
 					downtime    : parsedProxyData[masonId]?.downtime || 0,
 				};
 
-				const indexcardsHost = `indexcards${machineNumber}${tick}`;
-				const indexcardsId = haproxyKey[indexcardsHost];
+				const masoncardsHost = `masoncards${machineNumber}${tick}`;
+				const masoncardsId = haproxyKey[masoncardsHost];
 
-				if (!machineStatus.indexcards) {
-					// The day may come when I iterate this properly.  BUT IT IS NOT THIS DAY.
-					machineStatus.indexcards = {
-						1: {},
-						2: {},
-						3: {},
-						4: {},
-					};
+				if (!machineStatus.masoncards) {
+					machineStatus.masoncards = {};
 				}
 
-				machineStatus.indexcards[tick] = {
-					id          : indexcardsId,
-					status      : parsedProxyData[indexcardsId]?.status,
+				if (!machineStatus.masoncards[tick]) {
+					machineStatus.masoncards[tick] = {};
+				}
+
+				machineStatus.masoncards[tick] = {
+					id          : masoncardsId,
+					status      : parsedProxyData[masoncardsId]?.status,
 					checkStatus : parsedProxyData[masonId]?.check_status,
 					checkCode   : parsedProxyData[masonId]?.check_code,
 					downtime    : parsedProxyData[masonId]?.downtime || 0,
 				};
+
+				console.log(`machine status for ${tick} is `);
+				console.log(machineStatus);
 			}
+		}
+
+		if (machine.label.includes('tab-admin')) {
+
+			const masonHost = `mason-admin`;
+			const masonId   = haproxyKey[masonHost];
+
+			machineStatus.mason = {
+				1: {
+					id          : masonId,
+					status      : parsedProxyData[masonId]?.status,
+					checkStatus : parsedProxyData[masonId]?.check_status,
+					checkCode   : parsedProxyData[masonId]?.check_code,
+					downtime    : parsedProxyData[masonId]?.downtime || 0,
+				},
+			};
+
+			const masoncardsHost = `masoncards-admin`;
+			const masoncardsId = haproxyKey[masoncardsHost];
+
+			machineStatus.masoncards = {
+				1: {
+					id          : masoncardsId,
+					status      : parsedProxyData[masoncardsId]?.status,
+					checkStatus : parsedProxyData[masonId]?.check_status,
+					checkCode   : parsedProxyData[masonId]?.check_code,
+					downtime    : parsedProxyData[masonId]?.downtime || 0,
+				},
+			};
+
+			machineStatus.masonID      = haproxyKey[masonHost];
+			machineStatus.masoncardsID = haproxyKey[masoncardsHost];
 		}
 
 		allStatus[machine.label] = machineStatus;
