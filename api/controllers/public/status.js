@@ -42,9 +42,9 @@ export const barfPlease = {
 };
 
 systemStatus.GET.apiDoc = {
-	summary: 'Responds with a 200 if up',
-	operationId: 'getStatus',
-	responses: {
+	summary     : 'Responds with a 200 if up, with some system data',
+	operationId : 'getStatus',
+	responses   : {
 		200: {
 			description: 'Server is up',
 			content: { '*/*': { schema: { type: 'string' } } },
@@ -55,8 +55,8 @@ systemStatus.GET.apiDoc = {
 };
 
 systemStatus.POST.apiDoc = {
-	summary: 'Responds with a 200 if up',
-	operationId: 'postStatus',
+	summary     : 'Responds with a 200 if up, with some system data',
+	operationId : 'postStatus',
 	responses: {
 		200: {
 			description: 'Server is up',

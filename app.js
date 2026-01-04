@@ -29,6 +29,7 @@ import {
 } from './api/helpers/auth.js';
 
 import db from './api/data/db.js';
+
 import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger.js';
 import { Forbidden, Unauthorized } from './api/helpers/problem.js';
 
@@ -96,9 +97,10 @@ app.use('/v1/public/search', searchLimiter);
 // Enable CORS Access, hopefully in a way that means I don't
 // have to fight with it ever again.
 const corsOptions = {
-	origin : config.CORS_ORIGINS,
+	methods              : ['GET', 'POST', 'DELETE', 'PUT'],
 	optionsSuccessStatus : 204,
 	credentials          : true,
+	origin               : config.CORS_ORIGINS,
 };
 
 app.use('/v1', cors(corsOptions));
@@ -107,6 +109,8 @@ app.use('/v1', cors(corsOptions));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({ type: ['json', 'application/*json'], limit: '10mb' }));
 app.use(bodyParser.text({ type: '*/*', limit: '10mb' }));
+
+debugLogger.info(`Loading environment ${process.env?.NODE_ENV}`);
 
 if (process.env.NODE_ENV === 'development') {
 	// Pretty print JSON in the dev environment
