@@ -31,6 +31,7 @@ getPublishedAds.openapi = {
 	description : 'returns an array of current, approved ads to be displayed on the tabroom homepage.',
 	operationId : 'getPublishedAds',
 	tags        : ['ads','public'],
+	security    : [],
 	responses: {
 		200: {
 			description: 'An array of Ads to be displayed',
