@@ -9,7 +9,7 @@ import cookieParser from 'cookie-parser';
 import config from './config/config.js';
 import errorHandler from './api/helpers/error.js';
 import { Authenticate } from './api/middleware/authentication.js';
-import { requireAreaAccess, requireSiteAdmin } from './api/middleware/authorization.js';
+import { requireSiteAdmin } from './api/middleware/authorization.js';
 import v1Router from './api/routes/routers/v1/indexRouter.js';
 
 import {
@@ -198,7 +198,7 @@ app.all(localRoutes, async (req, res, next) => {
 
 	next();
 });
-app.use('/v1/ext/:area',requireAreaAccess);
+
 app.use('/v1/glp/*'    ,requireSiteAdmin);
 
 // Log global errors with Winston

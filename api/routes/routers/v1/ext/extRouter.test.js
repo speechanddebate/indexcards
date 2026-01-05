@@ -1,8 +1,8 @@
 import request from 'supertest';
 import { assert } from 'chai';
 import { vi } from 'vitest';
-import server from '../../../../app';
-import { testUserAPIKey } from '../../../../tests/testFixtures';
+import server from '../../../../../app.js';
+import { testUserAPIKey } from '../../../../../tests/testFixtures.js';
 
 const authHeader = Buffer.from(`69:${testUserAPIKey.value}`).toString('base64');
 
