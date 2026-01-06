@@ -2,6 +2,14 @@ import schemas from './schemas/index.js';
 import responses from './responses/index.js';
 import { tags as declaredTags, declaredTagGroups } from './tags.js';
 
+import { readFile } from 'node:fs/promises';
+
+const pkg = JSON.parse(
+	await readFile(
+		new URL('../../../package.json', import.meta.url),
+		'utf8'
+	)
+);
 /**
  * Build the OpenAPI spec from an Express router.
  * - Collects all paths + operations
@@ -32,10 +40,12 @@ export function createOpenApiSpec(apiRouter) {
 		servers: [{ url: '/v1' }],
 		info: {
 			title: 'IndexCards API',
-			version: '1.0.0',
+			version: pkg.version,
 			description: 'Tabroom.com data & operational API',
+			termsOfService: 'https://www.speechanddebate.org/terms-conditions/',
 			license: {
-				name: 'Copyright 2014-2021, National Speech & Debate Assocation',
+				name: 'Copyright 2014-2021, National Speech & Debate Association',
+				identifier: pkg.license,
 			},
 		},
 		tags: Array.from(tagMap.values()),
@@ -45,7 +55,8 @@ export function createOpenApiSpec(apiRouter) {
 			schemas,
 			responses,
 			securitySchemes: {
-				basic: { type: 'http', scheme: 'basic' },
+				basic:  { type: 'http', scheme: 'basic' },
+				cookie: { type: 'apiKey', in: 'cookie', name: 'x-tabroom-cookie' },
 			},
 		},
 		security: [{ basic: [] }],
@@ -112,6 +123,7 @@ function findOpenApiHandler(stack) {
 
 function normalizeOperation(method, routePath, op = {}) {
 	return {
+		...op,
 		summary:
 			op.summary ??
 			`${method.toUpperCase()} ${routePath}`,

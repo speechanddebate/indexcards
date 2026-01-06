@@ -1,3 +1,4 @@
+//Try to keep tags in alphabetical order
 export const tags = [
 	{
 		name: 'Admin : Servers',
@@ -6,6 +7,14 @@ export const tags = [
 	{
 		name: 'Admin : Mail',
 		description: 'Administrative functions for testing mail and notifications',
+	},
+	{
+		name: 'ads',
+		description: 'Endpoints related to advertisements displayed on Tabroom',
+	},
+	{
+		name: 'Auth',
+		description: 'Authentication related endpoints',
 	},
 	{
 		name: 'Ext : Caselist',
@@ -22,9 +31,6 @@ export const tags = [
 	{
 		name: 'Ext : Mason',
 		description: 'Endpoints for external access to Mason data',
-	},
-	{
-		name: 'ads',
 	},
 
 ];
