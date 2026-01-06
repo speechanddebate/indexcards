@@ -36,7 +36,6 @@ const testPerson = {
 	country    : 'US',
 	tz         : 'America/Chicago',
 	phone      : '9785551212',
-	provider   : 'tabroom.com',
 	site_admin : false,
 	nsda       : '1234',
 	password   : '$6$FQy6hwbm$DITMAX.qkTtZYdibOYz4zxqJ94OW82g0qOEnXQeJaRi3t4f4cQl7WwiPISZPSt5vZSgxyeN3ucmFuBAEtoMb0.',

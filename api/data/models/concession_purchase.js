@@ -2,79 +2,83 @@ import _sequelize from 'sequelize';
 const { Model, Sequelize } = _sequelize;
 
 export default class concessionPurchase extends Model {
-  static init(sequelize, DataTypes) {
-  return super.init({
-    id: {
-      autoIncrement: true,
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      primaryKey: true
-    },
-    quantity: {
-      type: DataTypes.INTEGER,
-      allowNull: false
-    },
-    placed: {
-      type: DataTypes.DATE,
-      allowNull: true
-    },
-    fulfilled: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    school: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'school',
-        key: 'id'
-      }
-    },
-    concession: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: {
-        model: 'concession',
-        key: 'id'
-      }
-    },
-    invoice: {
-      type: DataTypes.INTEGER,
-      allowNull: true
-    },
-    timestamp: {
-      type: DataTypes.DATE,
-      allowNull: false,
-      defaultValue: Sequelize.Sequelize.fn('current_timestamp')
-    }
-  }, {
-    sequelize,
-    tableName: 'concession_purchase',
-    timestamps: false,
-    indexes: [
-      {
-        name: "PRIMARY",
-        unique: true,
-        using: "BTREE",
-        fields: [
-          { name: "id" },
-        ]
-      },
-      {
-        name: "school",
-        using: "BTREE",
-        fields: [
-          { name: "school" },
-        ]
-      },
-      {
-        name: "fk_cp_concession",
-        using: "BTREE",
-        fields: [
-          { name: "concession" },
-        ]
-      },
-    ]
-  });
-  }
+		static init(sequelize, DataTypes) {
+		return sequelize.define('concessionPurchase', {
+				id: {
+						autoIncrement: true,
+						type: DataTypes.INTEGER,
+						allowNull: false,
+						primaryKey: true
+				},
+				quantity: {
+						type: DataTypes.INTEGER,
+						allowNull: false
+				},
+				placed: {
+						type: DataTypes.DATE,
+						allowNull: true
+				},
+				fulfilled: {
+						type: DataTypes.INTEGER,
+						allowNull: true
+				},
+				school: {
+						type: DataTypes.INTEGER,
+						allowNull: true,
+						references: {
+								model: 'school',
+								key: 'id'
+						}
+				},
+				concession: {
+						type: DataTypes.INTEGER,
+						allowNull: true,
+						references: {
+								model: 'concession',
+								key: 'id'
+						}
+				},
+				invoice: {
+						type: DataTypes.INTEGER,
+						allowNull: true
+				},
+				timestamp: {
+						type: DataTypes.DATE,
+						allowNull: false,
+						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
+				},
+				created_at: {
+						type: DataTypes.DATE,
+						allowNull: true,
+						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
+				}
+		}, {
+				tableName: 'concession_purchase',
+				timestamps: false,
+				indexes: [
+						{
+								name: "PRIMARY",
+								unique: true,
+								using: "BTREE",
+								fields: [
+										{ name: "id" },
+								]
+						},
+						{
+								name: "school",
+								using: "BTREE",
+								fields: [
+										{ name: "school" },
+								]
+						},
+						{
+								name: "fk_cp_concession",
+								using: "BTREE",
+								fields: [
+										{ name: "concession" },
+								]
+						},
+				]
+		});
+		}
 }

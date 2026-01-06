@@ -1319,7 +1319,6 @@ CREATE TABLE `person` (
   `country` char(4) DEFAULT NULL,
   `tz` varchar(63) DEFAULT NULL,
   `phone` bigint(20) DEFAULT NULL,
-  `provider` varchar(63) DEFAULT NULL,
   `site_admin` tinyint(1) DEFAULT NULL,
   `diversity` tinyint(1) DEFAULT NULL,
   `nsda` int(11) DEFAULT NULL,
