@@ -6,7 +6,7 @@ import share from './shareRouter.js';
 import nsda from './nsdaRouter.js';
 import mason from './masonRouter.js';
 
-import { login } from '../../../../controllers/ext/session/loginController.js';
+import { login } from '../../../../controllers/ext/loginController.js';
 import {ipLocation} from '../../../../controllers/rest/personController.js';
 
 const router = Router();
