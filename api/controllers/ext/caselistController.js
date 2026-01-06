@@ -20,7 +20,8 @@ export async function getPersonChapters(req, res) {
 };
 getPersonChapters.openapi = {
 	summary: 'Load chapters for a person ID',
-	operationId: 'getPersonChapters',
+	security: [{ extApiKey: [] }],
+	tags: ['Ext : Caselist'],
 	parameters: [
 		{
 			in          : 'query',
@@ -47,7 +48,6 @@ getPersonChapters.openapi = {
 		},
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
-	tags: ['caselist'],
 };
 export async function getPersonRounds(req, res) {
 	if (!req.query.person_id && !req.query.slug) {
@@ -160,7 +160,8 @@ export async function getPersonRounds(req, res) {
 };
 getPersonRounds.openapi = {
 	summary: 'Load rounds for a person ID',
-	operationId: 'getPersonRounds',
+	security: [{ extApiKey: [] }],
+	tags: ['Ext : Caselist'],
 	parameters: [
 		{
 			in          : 'query',
@@ -204,7 +205,6 @@ getPersonRounds.openapi = {
 		},
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
-	tags: ['caselist'],
 };
 
 export async function getPersonStudents(req, res) {
@@ -240,7 +240,8 @@ export async function getPersonStudents(req, res) {
 
 getPersonStudents.openapi = {
 	summary: 'Load students for a person ID',
-	operationId: 'getPersonStudents',
+	security: [{ extApiKey: [] }],
+	tags: ['Ext : Caselist'],
 	parameters: [
 		{
 			in          : 'query',
@@ -267,7 +268,6 @@ getPersonStudents.openapi = {
 		},
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
-	tags: ['caselist'],
 };
 
 export async function postCaselistLink(req, res) {
@@ -280,7 +280,8 @@ export async function postCaselistLink(req, res) {
 };
 postCaselistLink.openapi = {
 	summary: 'Create a link to a caselist page',
-	operationId: 'postCaselistLink',
+	security: [{ extApiKey: [] }],
+	tags: ['Ext : Caselist'],
 	requestBody: {
 		description: 'The caselist link',
 		required: true,
@@ -300,5 +301,4 @@ postCaselistLink.openapi = {
 		},
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
-	tags: ['caselist'],
 };

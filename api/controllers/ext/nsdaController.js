@@ -112,6 +112,8 @@ export async function getPersonHistory(req, res) {
 getPersonHistory.openapi = {
 	summary: 'Load history for a NSDA membership ID',
 	operationId: 'getPersonHistory',
+	security: [{ extApiKey: [] }],
+	tags: ['Ext : NSDA'],
 	parameters: [
 		{
 			in          : 'query',
@@ -133,7 +135,6 @@ getPersonHistory.openapi = {
 		},
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
-	tags: ['nsda'],
 };
 
 export async function syncNatsAppearances(req, res) {
@@ -253,7 +254,10 @@ export async function syncNatsAppearances(req, res) {
 		message : `${counters.chapters} chapters and ${counters.students} students nats appearances updated`,
 	});
 };
-
+syncNatsAppearances.openapi = {
+	security: [{ extApiKey: [] }],
+	tags: ['Ext : NSDA'],
+};
 export async function natsIndividualHonors(req, res) {
 	const studentResults = await db.sequelize.query(`
         select
@@ -299,6 +303,10 @@ export async function natsIndividualHonors(req, res) {
 
 	res.status(200).json(studentResults);
 };
+natsIndividualHonors.openapi = {
+	security: [{ extApiKey: [] }],
+	tags: ['Ext : NSDA'],
+};
 export async function getPayment(req, res) {
 	const tourn = await db.summon(db.tourn, req.params.tournId);
 
@@ -307,6 +315,10 @@ export async function getPayment(req, res) {
 	}
 
 	res.status(200).json(tourn);
+};
+getPayment.openapi = {
+	security: [{ extApiKey: [] }],
+	tags: ['Ext : NSDA'],
 };
 export async function postPayment(req, res) {
 	const postRequest = req.body;
@@ -368,4 +380,8 @@ export async function postPayment(req, res) {
 	await db.setting(tourn, 'store_carts', { json: tourn.settings.store_carts[cartKey] });
 
 	res.status(201).json({ error: false, message: `Invoice ${postRequest.invoice_id} marked as paid` });
+};
+postPayment.openapi = {
+	security: [{ extApiKey: [] }],
+	tags: ['Ext : NSDA'],
 };

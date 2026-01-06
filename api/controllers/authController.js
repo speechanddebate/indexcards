@@ -23,3 +23,8 @@ export async function logout(req, res) {
 	//TODO : invalidate the current session token
 	return res.status(501);
 };
+logout.openapi = {
+	summary: 'Logout',
+	description: 'Logs out the current user and invalidates the session.',
+	tags: ['Auth'],
+};

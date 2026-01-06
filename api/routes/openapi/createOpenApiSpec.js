@@ -55,11 +55,11 @@ export function createOpenApiSpec(apiRouter) {
 			schemas,
 			responses,
 			securitySchemes: {
-				basic:  { type: 'http', scheme: 'basic' },
+				extApiKey:  { type: 'http', scheme: 'basic' },
 				cookie: { type: 'apiKey', in: 'cookie', name: 'x-tabroom-cookie' },
 			},
 		},
-		security: [{ basic: [] }],
+		security: [{ cookie: [] }],
 	};
 }
 

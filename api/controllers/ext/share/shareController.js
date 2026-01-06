@@ -80,10 +80,11 @@ export async function sendShareFile(req, res) {
 	await Promise.all(emailPromises);
 	return res.status(201).json({ message: `Successfully sent speech doc emails to ${counter} recipients` });
 };
-
 sendShareFile.openapi = {
 	summary: 'Sends a document to the docchain email list for a room',
 	operationId: 'sendShareFile',
+	security: [{ extApiKey: [] }],
+	tags: ['Ext : Share'],
 	requestBody: {
 		description : 'Initialize the doc chain room and emails',
 		required    : true,
@@ -102,7 +103,6 @@ sendShareFile.openapi = {
 		},
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
-	tags: ['share'],
 };
 
 export async function makeExtShareRooms(req, res) {
@@ -115,5 +115,9 @@ export async function makeExtShareRooms(req, res) {
 
 	req.params = { roundId: req.body.roundId };
 	makeShareRooms.POST(req, res);
+};
+makeExtShareRooms.openapi = {
+	security: [{ extApiKey: [] }],
+	tags: ['Ext : Share'],
 };
 
