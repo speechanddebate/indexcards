@@ -1,10 +1,12 @@
 import { Router } from 'express';
+import * as controller from '../../../controllers/authController.js';
 
 const router = Router();
 
 router.route('/login')
-	.get((req,res) => {
-		return res.status(200).json({message: 'hi'});
-	});
+	.post(controller.login);
+
+router.route('/logout')
+	.post(controller.logout);
 
 export default router;

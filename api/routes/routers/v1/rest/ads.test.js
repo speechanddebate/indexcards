@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import request from 'supertest';
-import server from '../../../app';
-import db from '../../data/db.js';
+import server from '../../../../../app.js';
+import db from '../../../../data/db.js';
 
 describe('Current ads', () => {
 	it('returns a list of ads', async () => {
@@ -18,7 +18,7 @@ describe('Current ads', () => {
 
 		//Act
 		const res = await request(server)
-			.get(`/v1/public/ads`)
+			.get(`/v1/rest/ads/published`)
 			.set('Accept', 'application/json')
 			.expect('Content-Type', /json/)
 			.expect(200);
