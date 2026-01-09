@@ -11,12 +11,12 @@ on:
 env:
     CI: true
     TZ: 'America/Chicago'
-    SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
     NODE_ENV: 'test'
     CODE_PATH: '/home/runner/work/indexcards/indexcards'
     DB_USER: 'tabroom'
     DB_PASS: 'tabroom'
     HUSKY: 0
+    SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
   build:
@@ -68,3 +68,4 @@ jobs:
     - name: Send slack notification
       if: always()
       uses: speechanddebate/action-slack-notify@master
+

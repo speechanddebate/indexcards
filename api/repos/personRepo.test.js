@@ -2,16 +2,6 @@ import { describe, it, expect } from "vitest";
 import db from "../data/db.js";
 import personRepo from "./personRepo.js";
 
-// Use a transaction to isolate tests this should probably go in a global setup file but too many other tests rely on seeded data and don't use transactions
-let tx;
-beforeEach(async () => {
-    tx = await db.sequelize.transaction();
-});
-
-afterEach(async () => {
-    await tx.rollback();
-});
-
 describe("PersonRepo", () => {
     describe("getPersonByApiKey", () => {
         it("returns the person when the key is valid", async () => {
