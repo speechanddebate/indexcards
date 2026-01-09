@@ -3,11 +3,7 @@ import tournRepo from '../../repos/tournRepo.js';
 import eventRepo from '../../repos/eventRepo.js';
 
 export async function getTourn(req, res) {
-	const tourn = await tournRepo.getTourn(req.params.tournId);
-
-	if (!tourn?.id || tourn?.hidden) {
-		return NotFound(req, res, 'No such tournament found');
-	}
+	const tourn = req.tourn;
 
 	return res.status(200).json(tourn);
 };

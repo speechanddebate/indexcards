@@ -13,7 +13,7 @@ export async function getTourn(tournId, { unpublished = false } = {}) {
 	if (typeof tournId === 'number' || !isNaN(parseInt(tournId))) {
 		where.id = parseInt(tournId);
 	} else {
-		where.webname = tourn.replace(/\W/g, '');
+		where.webname = tournId.replace(/\W/g, '');
 	}
 
 	const tourn = await db.tourn.findOne({

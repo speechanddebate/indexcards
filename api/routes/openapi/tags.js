@@ -32,7 +32,9 @@ export const tags = [
 		name: 'Ext : Mason',
 		description: 'Endpoints for external access to Mason data',
 	},
-
+	{
+		name: 'Tournaments',
+	},
 ];
 
 export const declaredTagGroups = [
