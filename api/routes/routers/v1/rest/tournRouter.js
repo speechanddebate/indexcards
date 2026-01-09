@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/rest/tournController.js';
-
+import { requirePublicTourn } from '../../../../policy/tournPolicy.js';
 import roundRouter from './roundRouter.js';
 
 const router = Router({ mergeParams: true });
 
+router.use('/:tournId', requirePublicTourn);
 router.get('/:tournId',controller.getTourn);
 router.use('/:tournId/rounds',roundRouter);
 router.get('/:tournId/events',controller.getTournEvents);
