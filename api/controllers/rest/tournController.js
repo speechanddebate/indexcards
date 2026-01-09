@@ -15,17 +15,6 @@ getTourn.openapi = {
 	summary: 'Get Public Tournament',
 	description: 'Retrieve public information about a specific tournament.',
 	tags: ['Tournaments'],
-	parameters: [
-		{
-			in: 'path',
-			name: 'tournId',
-			required: true,
-			schema: {
-				type: 'string',
-			},
-			description: 'The ID or webname of the tournament to retrieve.',
-		},
-	],
 	responses: {
 		200: {
 			description: 'Tournament information',
@@ -47,7 +36,7 @@ getTourn.openapi = {
 			$ref: '#/components/responses/Error',
 		},
 	},
-};	
+};
 
 export async function getTournInvite(req, res) {
 	const invite = {};
@@ -81,17 +70,6 @@ getTournInvite.openapi = {
 	summary: 'Get Tournament Invite',
 	description: 'Retrieve a public invite for a specific tournament, including pages, files, events, and contacts.',
 	tags: ['Tournaments'],
-	parameters: [
-		{
-			in: 'path',
-			name: 'tournId',
-			required: true,
-			schema: {
-				type: 'string',
-			},
-			description: 'The ID or webname of the tournament to get the invite for.',
-		},
-	],
 	responses: {
 		200: {
 			description: 'A public invite to a tournament',
@@ -114,6 +92,38 @@ getTournInvite.openapi = {
 		},
 	},
 };
+export async function getTournEvents(req, res) {
+	const events = await eventRepo.getEvents(req.params.tournId);
+	return res.status(200).json(events);
+};
+getTournEvents.openapi = {
+	summary: 'Get Tournament Events',
+	description: 'Retrieve a list of events associated with a specific tournament.',
+	tags: ['Tournaments'],
+	responses: {
+		200: {
+			description: 'List of tournament events',
+		},
+		401 : {
+			$ref : '#/components/responses/Unauthorized',
+		},
+		404: {
+			$ref: '#/components/responses/NotFound',
+		},
+		default: {
+			$ref: '#/components/responses/Error',
+		},
+	},
+};
+
+export async function getSchedule(req,res){
+	const schedule = await tournRepo.getSchedule(req.params.tournId);
+	return res.status(200).json(schedule);
+};
+getSchedule.openapi = {
+	tags: ['Tournaments'],
+};
+
 export async function getPublishedFiles(req, res) {
 	const files = await tournRepo.getFiles(req.params.tournId);
 	return res.status(200).json(files);
@@ -122,17 +132,6 @@ getPublishedFiles.openapi = {
 	summary: 'Get Tournament Files',
 	description: 'Retrieve a list of published files associated with a specific tournament.',
 	tags: ['Tournaments'],
-	parameters: [
-		{
-			in: 'path',
-			name: 'tournId',
-			required: true,
-			schema: {
-				type: 'string',
-			},
-			description: 'The ID or webname of the tournament to get files for.',
-		},
-	],
 	responses: {
 		200: {
 			description: 'List of tournament files',
@@ -158,3 +157,4 @@ getPublishedFiles.openapi = {
 		},
 	},
 };
+

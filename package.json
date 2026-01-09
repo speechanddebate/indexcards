@@ -13,6 +13,7 @@
 		"test": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest watch",
 		"test-ci": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest --watch false --run",
 		"cover": "NODE_ENV='test' NODE_OPTIONS='--experimental-vm-modules --no-warnings --experimental-specifier-resolution=node' VITEST_SEGFAULT_RETRY=3 vitest --coverage",
+		"dev-debug": "node --inspect-brk=9229 --experimental-vm-modules --experimental-specifier-resolution=node --enable-source-maps app.js",
 
 		"lint"         : "eslint .",
 		"lint-fix"     : "eslint --fix .",

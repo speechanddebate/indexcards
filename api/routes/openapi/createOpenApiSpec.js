@@ -1,6 +1,7 @@
 import schemas from './schemas/index.js';
 import responses from './responses/index.js';
 import { tags as declaredTags, declaredTagGroups } from './tags.js';
+import {parameters } from './parameters.js';
 
 import { readFile } from 'node:fs/promises';
 
@@ -48,18 +49,20 @@ export function createOpenApiSpec(apiRouter) {
 				identifier: pkg.license,
 			},
 		},
+		security: [{ cookie: [] }],
 		tags: Array.from(tagMap.values()),
 		'x-tagGroups': buildTagGroups(declaredTagGroups, usedTags),
 		paths,
 		components: {
 			schemas,
 			responses,
+			parameters,
 			securitySchemes: {
 				extApiKey:  { type: 'http', scheme: 'basic' },
 				cookie: { type: 'apiKey', in: 'cookie', name: 'x-tabroom-cookie' },
 			},
 		},
-		security: [{ cookie: [] }],
+
 	};
 }
 
@@ -73,6 +76,7 @@ export function collectOpenApi(router, basePath = '') {
 	for (const layer of router.stack) {
 		// Case 1: HTTP method route
 		if (layer.route) {
+
 			const routePath = joinPaths(basePath, layer.route.path);
 
 			for (const method of Object.keys(layer.route.methods)) {
@@ -122,6 +126,7 @@ function findOpenApiHandler(stack) {
 }
 
 function normalizeOperation(method, routePath, op = {}) {
+	const params = extractPathParams(routePath);
 	return {
 		...op,
 		summary:
@@ -135,27 +140,60 @@ function normalizeOperation(method, routePath, op = {}) {
 		tags:
 			Array.isArray(op.tags) ? op.tags : [],
 
+		parameters: [
+			...(op.parameters ?? []),
+			...params,
+		],
 		responses:
 			op.responses ?? {
 				200: { description: 'Success' },
 			},
 	};
 }
+function extractPathParams(path) {
+	return [...path.matchAll(/\{([^}]+)\}/g)].map(m => {
+		const name = m[1];
+
+		// If a named parameter exists in components, reference it
+		if (parameters?.[name]) {
+			return { $ref: `#/components/parameters/${name}` };
+		}
+
+		// Otherwise generate a default path param
+		return {
+			name,
+			in: 'path',
+			required: true,
+			schema: { type: 'string' },
+		};
+	});
+}
 
 function extractMountPath(layer) {
 	if (!layer.regexp) return '';
 
-	const match = layer.regexp.source
-		.replace(/\\\//g, '/')
-		.match(/^\^\/([^/?]+)(?:\/\?\(\?\/\|\$\))?/);
+	let path = layer.regexp.source
+		.replace(/\\\//g, '/')      // unescape slashes
+		.replace('(?:/([^/]+?))', ':param') // convert unnamed capture groups
+		.replace('/?(?=/|$)', '');           // remove lookahead at end
 
-	return match ? `/${match[1]}` : '';
+	// Replace layer.keys with param names if available
+	if (layer.keys && layer.keys.length) {
+		layer.keys.forEach((key) => {
+			path = path.replace(`:param`, `/:${key.name}`);
+		});
+	}
+
+	const result = path.startsWith('^') ? path.slice(1) : path;
+	return result;
 }
 
 function joinPaths(base, path) {
 	return (`${base}/${path}`)
-		.replace(/\/+/g, '/')
-		.replace(/\/$/, '') || '/';
+	.replace(/\/+/g, '/')            // collapse //
+	.replace(/\/$/, '')              // trim trailing slash
+	.replace(/:([A-Za-z0-9_]+)/g, '{$1}') // :param → {param}
+	|| '/';
 }
 function buildTagGroups(tagGroups, usedTags) {
 	const grouped = new Set(

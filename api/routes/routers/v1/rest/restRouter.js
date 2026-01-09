@@ -5,6 +5,6 @@ import tournRouter from './tournRouter.js';
 const router = Router();
 
 router.use('/ads', adsRouter);
-router.use('/tourn', tournRouter);
+router.use('/tourns', tournRouter);
 
 export default router;

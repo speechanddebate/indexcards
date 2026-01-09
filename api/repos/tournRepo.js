@@ -41,6 +41,26 @@ export async function getFiles(tournId, opts = {}) {
 		},
 	});
 };
+export async function getSchedule(tournId){
+	const schedule = await db.sequelize.query(`
+			select
+				round.id, round.name, round.label, round.type, round.start_time startTime,
+				event.id eventId, event.abbr eventAbbr,
+				round.published,
+				timeslot.id timeslotId, timeslot.start timeslotStart
+			from (round, event, timeslot)
+			where 1=1
+				and event.tourn = :tournId
+				and event.id = round.event
+				and round.timeslot = timeslot.id
+				and event.type != 'attendee'
+			order by event.abbr, round.name, timeslot.start
+		`, {
+		replacements: { tournId },
+		type: db.Sequelize.QueryTypes.SELECT,
+	});
+	return schedule;
+};
 /**
  * Get webpages scoped to a tournament.
  *
@@ -100,6 +120,7 @@ export default {
 	...baseRepo(db.tourn, mapTourn),
 	getTourn,
 	getFiles,
+	getSchedule,
 	getPages,
 	getContacts,
 };
