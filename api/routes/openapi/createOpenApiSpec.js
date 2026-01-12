@@ -125,8 +125,26 @@ function findOpenApiHandler(stack) {
 	return stack.at(-1).handle;
 }
 
-function normalizeOperation(method, routePath, op = {}) {
+function normalizeOperation(method, routePath, openapi) {
 	const params = extractPathParams(routePath);
+	let op = openapi;
+
+	const endsWithId = /\{[A-Za-z0-9_]+\}$/.test(routePath);
+
+	if (isMultiOperation(openapi)) {
+		if (!endsWithId && openapi.list) {
+			op = openapi.list;
+		} else if (endsWithId && openapi.get) {
+			op = openapi.get;
+		} else if (openapi.default) {
+			op = openapi.default;
+		} else {
+			op = {};
+		}
+	}
+
+	op ??= {};
+
 	return {
 		...op,
 		summary:
@@ -144,12 +162,20 @@ function normalizeOperation(method, routePath, op = {}) {
 			...(op.parameters ?? []),
 			...params,
 		],
-		responses:
-			op.responses ?? {
-				200: { description: 'Success' },
-			},
+		//add a 401 and 500 error to every endpoint and a 200 if nothing was defined
+		responses: {
+			...(op.responses ?? { 200: { description: 'Success' } }),
+			...Object.fromEntries(
+				Object.entries({
+					500 : { $ref: '#/components/responses/ErrorResponse' },
+					401 : { $ref : '#/components/responses/Unauthorized'},
+				})
+					.filter(([code]) => !(op.responses && code in op.responses))
+			),
+		},
 	};
 }
+
 function extractPathParams(path) {
 	return [...path.matchAll(/\{([^}]+)\}/g)].map(m => {
 		const name = m[1];
@@ -214,4 +240,18 @@ function buildTagGroups(tagGroups, usedTags) {
 	}
 
 	return finalGroups;
+}
+
+/** Determines if the .openapi for the route has multiple specs
+ */
+function isMultiOperation(openapi) {
+
+	if (!openapi || typeof openapi !== 'object') return false;
+
+	const MULTI_OP_KEYS = new Set([
+		'get',
+		'list',
+	]);
+
+	return Object.keys(openapi).some(k => MULTI_OP_KEYS.has(k));
 }

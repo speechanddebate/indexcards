@@ -16,7 +16,12 @@ export async function getWebpages({
 		for (const key of Object.keys(scope)) {
 			if (key === 'tournId') {
 				where.tourn = scope.tournId;
-			} else {
+			} else if (key === 'sitewide') {
+				where.sitewide = scope.sitewide;
+			} else if (key === 'slug') {
+				where.slug = scope.slug;
+			}
+			else {
 				throw new Error(`Invalid webpage scope key: ${key}`);
 			}
 		}

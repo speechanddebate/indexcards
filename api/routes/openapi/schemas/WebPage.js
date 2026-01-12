@@ -46,25 +46,11 @@ export const WebPage = {
 			description: 'Ordering value for page display',
 		},
 
-		tournId: {
-			type: 'integer',
-			format: 'int32',
-			nullable: true,
-			description: 'Associated tournament ID',
-		},
-
 		parentId: {
 			type: 'integer',
 			format: 'int32',
 			nullable: true,
 			description: 'Parent page ID (for hierarchical pages)',
-		},
-
-		lastEditorId: {
-			type: 'integer',
-			format: 'int32',
-			nullable: true,
-			description: 'User ID of the last editor',
 		},
 
 		lastModified: {

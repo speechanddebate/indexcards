@@ -1,6 +1,7 @@
 import { NotFound } from '../../helpers/problem.js';
 import tournRepo from '../../repos/tournRepo.js';
 import eventRepo from '../../repos/eventRepo.js';
+import { ToPublicPage } from '../mappers/pageMapper.js';
 
 export async function getTourn(req, res) {
 	const tourn = req.tourn;
@@ -22,14 +23,8 @@ getTourn.openapi = {
 				},
 			},
 		},
-		401 : {
-			$ref : '#/components/responses/Unauthorized',
-		},
 		404: {
 			$ref: '#/components/responses/NotFound',
-		},
-		default: {
-			$ref: '#/components/responses/Error',
 		},
 	},
 };
@@ -43,7 +38,7 @@ export async function getTournInvite(req, res) {
 		return NotFound(req, res, 'No such tournament found');
 	}
 
-	invite.pages = await tournRepo.getPages(invite.tourn.id);
+	invite.pages = (await tournRepo.getPages(invite.tourn.id)).map(ToPublicPage);
 	invite.files = (await tournRepo.getFiles(invite.tourn.id)).map(file => {
 		return {
 			id: file.id,
@@ -100,14 +95,8 @@ getTournEvents.openapi = {
 		200: {
 			description: 'List of tournament events',
 		},
-		401 : {
-			$ref : '#/components/responses/Unauthorized',
-		},
 		404: {
 			$ref: '#/components/responses/NotFound',
-		},
-		default: {
-			$ref: '#/components/responses/Error',
 		},
 	},
 };
@@ -142,14 +131,8 @@ getPublishedFiles.openapi = {
 				},
 			},
 		},
-		401 : {
-			$ref : '#/components/responses/Unauthorized',
-		},
 		404: {
 			$ref: '#/components/responses/NotFound',
-		},
-		default: {
-			$ref: '#/components/responses/Error',
 		},
 	},
 };
