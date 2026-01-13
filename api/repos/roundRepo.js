@@ -1,4 +1,5 @@
 import db from '../data/db.js';
+import  { mapEvent } from './eventRepo.js';
 export async function getRoundById(roundId){
 	const rounds = await db.sequelize.query(`
             select
@@ -172,48 +173,90 @@ export async function getRoundById(roundId){
 	}
 };
 
-export async function getPublishedRounds(tournId){
-	const rawRounds = await db.sequelize.query(`
-                select
-                    round.id roundId, round.name roundName, round.label roundLabel, round.type roundType,
-                        round.published,
-                        round.post_primary roundPostPrimary,
-                        round.post_secondary roundPostSecondary,
-                        round.post_feedback roundPostFeedback,
-                    event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
-                    event.level eventLevel,
-                    nsda_event_category.value eventNSDACode
-    
-                from (round, event, tourn)
-    
-                    left join event_setting nsda_event_category
-                        on nsda_event_category.tag = 'nsda_event_category'
-                        and nsda_event_category.event = event.id
-    
-                where 1=1
-                    and event.tourn  = :tournId
-                    and event.id     = round.event
-                    and event.tourn  = tourn.id
-                    and tourn.hidden = 0
-                    and round.published IS NOT NULL
-                    and round.published > 0
-                    and event.type != 'attendee'
-    
-                order by event.type,
-                    event.level,
-                    event.abbr,
-                    round.name DESC
-            `, {
-		replacements: { tournId },
-		type: db.Sequelize.QueryTypes.SELECT,
+/**
+ * Fetches rounds from the database with optional filters and event information.
+ *
+ * @param {Object} params - The options for fetching rounds.
+ * @param {number} params.tournId - The ID of the tournament. Required if filtering by tournament.
+ * @param {number} [params.eventId] - Optional ID of a specific event to filter rounds by.
+ * @param {boolean} [params.unpublished=false] - Whether to include unpublished rounds. Defaults to false (only published rounds).
+ * @param {boolean|Object} [params.includeEvent=false] - Whether to include event data with each round.
+ *   Can be:
+ *     - `false` (default) – do not include event info,
+ *     - `true` – include default event fields (`id`, `name`, `abbr`, `type`, `level`),
+ *     - an object with options:
+ *         @property {string[]} [fields] - Event fields to include.
+ *         @property {string[]} [settings] - Array of event_setting tags to include.
+ *
+ * @returns {Promise<Array<Object>>} An array of mapped round objects, each optionally containing event info and event settings.
+ *
+ * @example
+ * const rounds = await getRounds({
+ *   tournId: 12345,
+ *   includeEvent: {
+ *     fields: ['id','name','abbr','level'],
+ *     settings: ['nsda_event_category']
+ *   }
+ * });
+ * console.log(rounds[0].event.settings.nsda_event_category);
+ */
+export async function getRounds({
+	tournId,
+	eventId,
+	unpublished = false,
+	includeEvent = false,
+}) {
+
+	// Normalize includeEvent
+	if (includeEvent === true) {
+		includeEvent = {
+			fields: ['id','name','abbr','type','level'],
+			settings: [],
+		};
+	}
+
+	const where = {
+
+	};
+	const include = [];
+
+	if (!unpublished) {
+		where.published = 1;
+	}
+	if (eventId) {
+		where.event = eventId;
+	}
+
+	// Only include event join if tournId filter or we want to include event fields
+	if (tournId || includeEvent) {
+		const eventInclude = {
+			model: db.event,
+			as: 'event_event',
+			...(tournId ? { where: { tourn: tournId } } : {}), // filter by tournId if given
+			attributes: includeEvent ? includeEvent.fields : [], // use fields only if includeEvent
+		};
+
+		// Optionally include event settings if requested
+		if (includeEvent?.settings?.length) {
+			eventInclude.include = [
+				{
+					model: db.eventSetting,
+					as: 'event_settings',
+					required: false,
+					where: { tag: includeEvent.settings },
+					attributes: ['tag', 'value'],
+				},
+			];
+		}
+		include.push(eventInclude);
+	}
+
+	const rounds = await db.round.findAll({
+		where: where,
+		include,
 	});
 
-	const rounds = rawRounds.map( (round) => {
-		if (round.eventType === 'wsdc') {
-			round.eventType = 'debate';
-		}
-	});
-	return rounds;
+	return rounds.map(mapRound);
 }
 export async function getSections(roundId){
 	let sections = await db.sequelize.query(`
@@ -252,8 +295,27 @@ export async function getSections(roundId){
 	return sections;
 }
 
+function mapRound(round) {
+	if (!round) return null;
+
+	const mapped = {
+		id: round.id,
+		type: round.type,
+		name: round.name,
+		label: round.label,
+		flighted: round.flighted,
+		postPrimary: round.postPrimary,
+		postSecondary: round.postSecondary,
+		postFeedback: round.postFeedback,
+		published: round.published,
+		eventId: round.event,
+		event: mapEvent(round.event_event),
+	};
+	return mapped;
+}
+
 export default {
 	getRoundById,
-	getPublishedRounds,
+	getRounds,
 	getSections,
 };

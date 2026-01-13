@@ -2,6 +2,22 @@ import { assert } from 'chai';
 import request from 'supertest';
 import server from '../../../../../app';
 
+
+describe('getTournByWebname Human to ID', () => {
+	it('Returns the proper tournament given a webname string', async () => {
+		const res = await request(server)
+			.get(`/v1/pages/invite/webname/newengland`)
+			.set('Accept', 'application/json')
+			.expect('Content-Type', /json/)
+			.expect(200);
+
+		const body = res.body;
+		assert.typeOf(body, 'object');
+		assert.equal(body.tournId, 29714);
+	});
+});
+
+
 describe('Tournament Invitation Information', () => {
 
 	// I haven't loaded up the sample data thing yet so for now I just want to

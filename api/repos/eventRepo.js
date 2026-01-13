@@ -1,4 +1,5 @@
 import db from '../data/db.js';
+import { flattenSettings } from '../helpers/settings.js';
 import { baseRepo } from './baseRepo.js';
 
 /**
@@ -135,10 +136,15 @@ export async function getEvents(tournId) {
 	});
 	return events;
 };
-function mapEvent(eventInstance) {
-	if (!eventInstance) return null;
+export function mapEvent(event) {
+	if (!event) return null;
 	return {
-
+		id: event.id,
+		name: event.name,
+		abbr: event.abbr,
+		type: event.type,
+		level: event.level,
+		settings: flattenSettings(event.event_settings),
 	};
 }
 

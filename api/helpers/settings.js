@@ -2,6 +2,7 @@ import db from '../data/db.js';
 import { errorLogger } from './logger.js';
 
 export function flattenSettings(arr) {
+	if(!arr) return;
 	const out = {};
 	for (const s of arr) {
 		const setting = s.dataValues || s;
