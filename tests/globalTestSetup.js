@@ -8,7 +8,7 @@ export const setup = async () => {
 		{ type: db.sequelize.QueryTypes.SELECT },
 	);
 
-	if (tourncount?.[0]?.count === 10) {
+	if (tourncount?.[0]?.count >= 10) {
 		const firstPromises = [];
 
 		firstPromises.push(db.sequelize.query( `delete from session where person > 3 and person < 100 ` ));

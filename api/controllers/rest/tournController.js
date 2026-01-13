@@ -3,8 +3,11 @@ import tournRepo from '../../repos/tournRepo.js';
 import eventRepo from '../../repos/eventRepo.js';
 import { ToPublicPage } from '../mappers/pageMapper.js';
 
+//TODO remove all references
+import db from '../../data/db.js';
+
 export async function getTourn(req, res) {
-	const tourn = req.tourn;
+	var tourn = req.tourn;
 
 	return res.status(200).json(tourn);
 };
@@ -30,16 +33,16 @@ getTourn.openapi = {
 };
 
 export async function getTournInvite(req, res) {
-	const invite = {};
+	var invite = {};
 
-	invite.tourn = await tournRepo.getTourn(req.params.tournId);
+	invite = await tournRepo.getTourn(req.params.tournId);
 
-	if (!invite.tourn?.id || invite.tourn?.hidden) {
+	if (!invite?.id || invite?.hidden) {
 		return NotFound(req, res, 'No such tournament found');
 	}
 
-	invite.pages = (await tournRepo.getPages(invite.tourn.id)).map(ToPublicPage);
-	invite.files = (await tournRepo.getFiles(invite.tourn.id)).map(file => {
+	invite.pages = (await tournRepo.getPages(invite.id)).map(ToPublicPage);
+	invite.files = (await tournRepo.getFiles(invite.id)).map(file => {
 		return {
 			id: file.id,
 			tag: file.tag,
@@ -52,8 +55,8 @@ export async function getTournInvite(req, res) {
 			lastModified: file.lastModified,
 		};
 	});
-	invite.events = await eventRepo.getEventInvites(invite.tourn.id);
-	invite.contacts = await tournRepo.getContacts(invite.tourn.id);
+	invite.events = await eventRepo.getEventInvites(invite.id);
+	invite.contacts = await tournRepo.getContacts(invite.id);
 
 	return res.status(200).json(invite);
 };
@@ -80,23 +83,6 @@ getTournInvite.openapi = {
 		},
 		default: {
 			$ref: '#/components/responses/Error',
-		},
-	},
-};
-export async function getTournEvents(req, res) {
-	const events = await eventRepo.getEvents(req.params.tournId);
-	return res.status(200).json(events);
-};
-getTournEvents.openapi = {
-	summary: 'Get Tournament Events',
-	description: 'Retrieve a list of events associated with a specific tournament.',
-	tags: ['Tournaments'],
-	responses: {
-		200: {
-			description: 'List of tournament events',
-		},
-		404: {
-			$ref: '#/components/responses/NotFound',
 		},
 	},
 };
@@ -137,3 +123,47 @@ getPublishedFiles.openapi = {
 	},
 };
 
+export async function getTournPublishedResults(req,res) {
+	const results = await db.sequelize.query(`
+			select
+				result_set.id, result_set.label name, result_set.bracket, result_set.generated,
+				result_set.published, result_set.coach,
+				event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
+				sweep_set.id sweepSetId, sweep_set.name sweepSetName,
+				sweep_award.id sweepAwardId, sweep_award.name sweepAwardName
+
+			from (result_set, tourn)
+				left join event on result_set.event = event.id and event.type != 'attendee'
+				left join sweep_set on result_set.sweep_set = sweep_set.id
+				left join sweep_award on sweep_award.id = sweep_set.sweep_award
+
+			where 1=1
+				and result_set.tourn = :tournId
+				and result_set.published = 1
+				and tourn.id = result_set.tourn
+				and tourn.hidden = 0
+		`, {
+		replacements : { tournId: req.params.tournId },
+		type         : db.sequelize.QueryTypes.SELECT,
+	});
+
+	res.status(200).json(results);
+};
+
+getTournPublishedResults.openapi = {
+	summary     : 'Returns an array of result_sets that are published in a tournament',
+	operationId : 'getTournPublishedResults',
+	responses: {
+		200: {
+			description: 'Array of events',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'array',
+					},
+				},
+			},
+		},
+	},
+	tags: ['invite', 'public', 'results'],
+};

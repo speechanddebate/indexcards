@@ -11,6 +11,7 @@ export function ToPublicPage(page){
 		published: page.published,
 		sitewide: page.sitewide,
 		special: page.special,
+		slug: page.slug,
 		pageOrder: page.pageOrder,
 		parentId: page.parentId,
 		lastModified: page.lastModified,

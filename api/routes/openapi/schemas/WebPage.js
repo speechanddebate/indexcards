@@ -38,7 +38,12 @@ export const WebPage = {
 			nullable: true,
 			description: 'Special page identifier or mode',
 		},
-
+		slug: {
+			type: 'string',
+			maxLength: 63,
+			nullable: true,
+			description: 'page slug',
+		},
 		pageOrder: {
 			type: 'integer',
 			format: 'int16',
