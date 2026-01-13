@@ -48,7 +48,7 @@ getRound.openapi = {
 
 export async function getPublishedRounds(req, res){
 	const rounds = await roundRepo.getRounds({
-		tournId: 29807,
+		tournId: req.params.tournId,
 		includeEvent: {
 			fields: ['id', 'name', 'abbr','type', 'level'],
 			settings: ['nsda_event_category'],
