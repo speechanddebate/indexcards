@@ -9,6 +9,7 @@ import cookieParser from 'cookie-parser';
 import config from './config/config.js';
 import errorHandler from './api/helpers/error.js';
 import { Authenticate } from './api/middleware/authentication.js';
+import csrfMiddleware from './api/middleware/csrfMiddleware.js';
 import v1Router from './api/routes/routers/v1/indexRouter.js';
 
 import {
@@ -112,6 +113,7 @@ app.use(cookieParser());
 
 // Authenticate all requests and set req.person if valid
 app.use(Authenticate);
+app.use(csrfMiddleware);
 app.use('/v1',v1Router);
 
 app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {

@@ -75,4 +75,6 @@ export const teardown = async () => {
 	await db.sequelize.query( `delete from ad where id < 2 `);
 
 	console.log(`Cleanup done`);
+	console.log('Closing Sequelize...');
+	await db.sequelize.close();
 };

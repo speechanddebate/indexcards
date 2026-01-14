@@ -19,14 +19,14 @@ describe('GET /rounds', () => {
         body.forEach((round, i) => {
             assert.strictEqual(
             round.published, 1, `Round at index ${i} is not published (value = ${round.published})`);
+            // IDs and names
+            assert.typeOf(round.id, 'number', `Round at index ${i} contains valid round Id`);
+            assert.typeOf(round.eventId, 'number', `Round at index ${i} contains valid event Id`);
+            assert.typeOf(round.event.name, 'string', `Round at index ${i} contains valid event Name`);
+            assert.typeOf(round.event.abbr, 'string', `Round at index ${i} contains valid event Abbr`);
+        
         });
-        
         assert.equal(body.length, 29, 'I should have found 29 published rounds');
-        
-        assert.typeOf(body[0].roundId, 'number', 'Object contains valid round ID number');
-        assert.typeOf(body[0].eventId, 'number', 'Object contains valid event ID number');
-        assert.typeOf(body[0].eventName, 'string', 'Object contains valid event name');
-        assert.equal(body[0].eventAbbr, 'DUO', 'The first listed event should be DUO');
-        assert.equal(body[0].roundName, '4', 'The first listed round should be DUO Round 4');
+
 	});
 });

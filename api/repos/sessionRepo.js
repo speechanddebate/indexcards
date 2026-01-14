@@ -2,6 +2,7 @@ import db from '../data/db.js';
 import { mapPerson } from './personRepo.js';
 import { safeParseJson } from '../helpers/json.js';
 import { baseRepo } from './baseRepo.js';
+import crypto from 'crypto';
 
 const base = baseRepo(db.session, mapSession);
 
@@ -24,15 +25,41 @@ async function findByUserKey(key) {
 	};
 }
 
-export function mapSession(sessionInstance) {
-	if (!sessionInstance) return null;
+async function createSession({
+	personId,
+	ip,
+	agentData,
+}){
+
+	const userkey = crypto.randomBytes(32).toString('hex');
+
+	const session = await db.session.create({
+		person: personId,
+		userkey,
+		ip,
+		agent_data: agentData,
+		last_access: new Date(),
+	});
+
+	var result =  mapSession(session);
+	result.userkey = session.userkey ;//userkey only ever returned from a createSession
+	return result;
+}
+async function deleteSession(sessionId){
+	await db.session.destroy({
+		where: {
+			id: sessionId,
+		},
+	});
+}
+
+export function mapSession(session) {
+	if (!session) return null;
 
 	return {
-		id        : sessionInstance.id,
-		userkey   : sessionInstance.userkey,
-		siteAdmin : sessionInstance.siteAdmin,
-		defaults  : sessionInstance.defaults ? safeParseJson(sessionInstance.defaults)     : null,
-		agentData : sessionInstance.agent_data ? safeParseJson(sessionInstance.agent_data) : null,
+		id        : session.id,
+		defaults  : session.defaults ? safeParseJson(session.defaults)     : null,
+		agentData : session.agent_data ? safeParseJson(session.agent_data) : null,
 	};
 }
 
@@ -40,4 +67,6 @@ export function mapSession(sessionInstance) {
 export default {
 	...base,
 	findByUserKey,
+	createSession,
+	deleteSession,
 };
