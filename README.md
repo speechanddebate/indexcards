@@ -8,6 +8,14 @@ Running this against Mason tabroom could break things.
 
 Probs will.
 
+===Running===
+
+There is anonymized test data in tests/tests.sql you can load for a sample
+database in mysql/maria.  Database access details go into config/config.js;
+copy over the config.js.sample for a framework.
+
+Then simply run npm run dev in the directory to run a development instance.
+
 ===Some Notes on Choices===
 
 - The API runs on a Express backend rather than using Svelte's built in server
