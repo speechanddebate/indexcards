@@ -3,6 +3,7 @@ import { mapPerson } from './personRepo.js';
 import { safeParseJson } from '../helpers/json.js';
 import { baseRepo } from './baseRepo.js';
 import crypto from 'crypto';
+import { assertPresent } from '../helpers/validators.js';
 
 const base = baseRepo(db.session, mapSession);
 
@@ -28,8 +29,8 @@ async function findByUserKey(key) {
 async function createSession({
 	personId,
 	ip,
-	agentData,
 }){
+	assertPresent(personId, 'personId');
 
 	const userkey = crypto.randomBytes(32).toString('hex');
 
@@ -37,7 +38,6 @@ async function createSession({
 		person: personId,
 		userkey,
 		ip,
-		agent_data: agentData,
 		last_access: new Date(),
 	});
 
@@ -45,12 +45,18 @@ async function createSession({
 	result.userkey = session.userkey ;//userkey only ever returned from a createSession
 	return result;
 }
-async function deleteSession(sessionId){
-	await db.session.destroy({
-		where: {
-			id: sessionId,
-		},
-	});
+/**
+ * Deletes a session if it exists by its ID.
+ *
+ * @param {number} sessionId - The ID of the session to delete.
+ * @returns {Promise<number>} The number of rows deleted.
+ * @throws {TypeError} If sessionId is not a number.
+ */
+async function deleteSession(sessionId) {
+	if (sessionId == null) return 0;
+	if (typeof sessionId !== 'number') throw new TypeError();
+
+	return db.session.destroy({ where: { id: sessionId } });
 }
 
 export function mapSession(session) {

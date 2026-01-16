@@ -60,3 +60,11 @@ export function UnexpectedError(req, res, detail, extras = {}){
 		...extras,
 	});
 }
+export function NotImplemented(req, res, detail, extras = {}){
+	return sendProblem(req, res, {
+		title: 'This function is not yet implemented.',
+		status: 501,
+		detail,
+		...extras,
+	});
+}

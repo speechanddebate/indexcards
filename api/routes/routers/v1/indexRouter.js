@@ -4,6 +4,7 @@ import adminRouter from './admin/adminRouter.js';
 import extRouter from './ext/extRouter.js';
 import pagesRouter from './pages/pagesRouter.js';
 import restRouter from './rest/restRouter.js';
+import legacyRouter from './legacy/legacyRouter.js';
 import { createOpenApiSpec } from '../../openapi/createOpenApiSpec.js';
 import { apiReference } from '@scalar/express-api-reference';
 
@@ -14,6 +15,7 @@ router.use('/admin',adminRouter);
 router.use('/ext', extRouter);
 router.use('/pages', pagesRouter);
 router.use('/rest',restRouter);
+router.use('/',legacyRouter);
 
 const openApiSpec = createOpenApiSpec(router);
 
