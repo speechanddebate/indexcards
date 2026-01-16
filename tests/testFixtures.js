@@ -7,7 +7,6 @@ const lastWeek = getPast({days: 7});
 const nextWeek = getFuture({days: 7});
 
 export const testAd = {
-	id			: 1,
 	tag         : 'Renew',
 	filename    : 'TabroomAd_Renew.png',
 	url			: 'https://www.speechanddebate.org/signup/',

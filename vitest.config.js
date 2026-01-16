@@ -6,10 +6,10 @@ export default defineConfig({
 		globals: true,
 		globalSetup: './tests/globalTestSetup.js',
 		coverage: {
-			reporter: ['text', 'html'],
-			exclude: [
-				'node_modules/',
-			],
-		},
+			cleanOnRerun: false,
+			include: ['api/**/*.{js,ts,tsx}'],
+			exclude: ['**/data/models/**'],
+			reportOnFailure: true
+			},
 	},
 });

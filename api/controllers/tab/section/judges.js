@@ -1,49 +1,45 @@
-import { roundAvailableJudges, roundJudgeConflicts } from '../round/judges.js';
-import { sectionEntries } from './entries.js';
+import { getRoundAvailableJudges, getRoundJudgeConflicts } from '../round/judges.js';
+import { getSectionEntries } from './entries.js';
+import db from '../../../data/db.js';
 
-export const sectionCleanJudges = {
+export async function getSectionCleanJudges(req, res) {
+	const section = await db.summon(db.section, req.params.sectionId);
 
-	GET: async (req, res) => {
+	// Pull settings and everything else we need about this round
+	section.round = await roundData(section.round);
 
-		const db = req.db;
-		const section = await db.summon(db.section, req.params.sectionId);
+	// Rather than triplicate code I'm calling the functions embedded with a flag
+	// to return instead of outputting.  I'm sure some Express purist somewhere just
+	// broke out in hives.  I'm equally sure I do not care.
+	req.return = true;
 
-		// Pull settings and everything else we need about this round
-		section.round = await roundData(db, section.round);
+	// Get the information and relevant data about the entries in my section
+	section.entries = await getSectionEntries(req, res);
 
-		// Rather than triplicate code I'm calling the functions embedded with a flag
-		// to return instead of outputting.  I'm sure some Express purist somewhere just
-		// broke out in hives.  I'm equally sure I do not care.
-		req.return = true;
+	// Pull the judges who are available to judge this round timewise
+	req.round = section.round;
+	section.round.judges = await getRoundAvailableJudges(req, res);
 
-		// Get the information and relevant data about the entries in my section
-		section.entries = await sectionEntries.GET(req, res);
+	// Pull the entry constraints against juges
+	const judgeConflicts = await getRoundJudgeConflicts(req, res);
 
-		// Pull the judges who are available to judge this round timewise
-		req.round = section.round;
-		section.round.judges = await roundAvailableJudges.GET(req, res);
-
-		// Pull the entry constraints against juges
-		const judgeConflicts = await roundJudgeConflicts.GET(req, res);
-
-		const cleanJudges = section.round.judges.filter( (judge) => {
-			if (judgeConflicts[judge.id]
-				&& section.entries.Entries.some( entry => judgeConflicts[judge.id].indexOf(entry.id) !== -1)
-			) {
-				return false;
-			}
-			return judge;
-		});
-
-		if (req.return) {
-			return cleanJudges;
+	const cleanJudges = section.round.judges.filter( (judge) => {
+		if (judgeConflicts[judge.id]
+			&& section.entries.Entries.some( entry => judgeConflicts[judge.id].indexOf(entry.id) !== -1)
+		) {
+			return false;
 		}
+		return judge;
+	});
 
-		res.status(200).json(cleanJudges);
-	},
+	if (req.return) {
+		return cleanJudges;
+	}
+
+	res.status(200).json(cleanJudges);
 };
 
-const roundData = async (db, roundId) => {
+const roundData = async (roundId) => {
 
 	const [round] = await db.sequelize.query(`
 		select
@@ -160,5 +156,3 @@ const roundData = async (db, roundId) => {
 
 	return round;
 };
-
-export default sectionCleanJudges;

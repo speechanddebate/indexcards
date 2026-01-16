@@ -1,47 +1,44 @@
-export const circuitQualifiers = {
-	POST: async (req, res) => {
-		const db = req.db;
+import db from '../../../data/db.js';
+export async function circuitQualifiers(req, res) {
+	let events = [];
 
-		let events = [];
+	if (req.body.name === 'qualifying_target') {
+		const event = await db.event.findByPk(req.body.property_value);
+		events.push(event);
+	} else {
+		events = await db.event.findAll(
+			{ where: { tourn: req.params.tournId } }
+		);
+	}
 
-		if (req.body.name === 'qualifying_target') {
-			const event = await db.event.findByPk(req.body.property_value);
-			events.push(event);
-		} else {
-			events = await db.event.findAll(
-				{ where: { tourn: req.params.tournId } }
-			);
+	let msg = '';
+
+	for (const event of events) {
+		if (req.body.eventId && req.body.eventId !== event.id) {
+			return;
 		}
-
-		let msg = '';
-
-		for (const event of events) {
-			if (req.body.eventId && req.body.eventId !== event.id) {
-				return;
-			}
-			const eventSave = await saveEventResult(req.db, event.id);
-			console.log(`Event Save is ${JSON.stringify(eventSave, null, 2)}` );
-			if (typeof eventSave === 'string') {
-				msg += eventSave;
-			}
+		const eventSave = await saveEventResult(event.id);
+		console.log(`Event Save is ${JSON.stringify(eventSave, null, 2)}` );
+		if (typeof eventSave === 'string') {
+			msg += eventSave;
 		}
+	}
 
-		if (msg) {
-			res.status(200).json({
-				error   : true,
-				message : `Tournament qualifying data posted for ${events.length} events.  ${msg}`,
-			});
-		} else {
-			res.status(200).json({
-				error   : false,
-				message : `Tournament qualifying data posted for ${events.length} events.`,
-				refresh : true,
-			});
-		}
-	},
+	if (msg) {
+		res.status(200).json({
+			error   : true,
+			message : `Tournament qualifying data posted for ${events.length} events.  ${msg}`,
+		});
+	} else {
+		res.status(200).json({
+			error   : false,
+			message : `Tournament qualifying data posted for ${events.length} events.`,
+			refresh : true,
+		});
+	}
 };
 
-export const saveEventResult = async (db, eventId) => {
+export const saveEventResult = async (eventId) => {
 
 	// Get event and qualifier event tags
 
@@ -419,5 +416,3 @@ export const saveEventResult = async (db, eventId) => {
 
 	return message;
 };
-
-export default circuitQualifiers;

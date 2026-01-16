@@ -44,9 +44,11 @@ jobs:
         tags: "${{ env.COMMIT_VERSION }}"
         dockerfile: cron.Dockerfile
 
-    - name: If image was published change icon
+    - name: If publish succeeded, change icon
       if: success()
       run: echo "SLACK_ICON=:white_check_mark:" >> $GITHUB_ENV
 
     - name: Send slack notification
+      if: always()
       uses: speechanddebate/action-slack-notify@master
+

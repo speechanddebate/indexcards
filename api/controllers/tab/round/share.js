@@ -4,14 +4,10 @@ import { getFollowers } from '../../../helpers/followers.js';
 import { emailBlast } from '../../../helpers/mail.js';
 import { db } from '../../../helpers/litedb.js';
 
-export const makeShareRooms = {
-	POST: async (req, res) => {
-		const counter = await shareRooms(req.params.roundId);
-		return res.status(201).json({ message: `Successfully sent speech doc emails to ${counter} recipients` });
-	},
+export async function makeShareRooms(req, res) {
+	const counter = await shareRooms(req.params.roundId);
+	return res.status(201).json({ message: `Successfully sent speech doc emails to ${counter} recipients` });
 };
-
-export default makeShareRooms;
 
 // Direct functional export because this also is called by cron.
 

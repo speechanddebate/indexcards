@@ -1,5 +1,6 @@
 import basic from 'basic-auth';
 import config from '../../config/config.js';
+import authService from '../services/AuthService.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import personRepo from '../repos/personRepo.js';
 import { BadRequest, Unauthorized } from '../helpers/problem.js';
@@ -10,7 +11,7 @@ export async function Authenticate(req, res, next) {
 
 		// COOKIE AUTHENTICATION
 		const cookieName = config.COOKIE_NAME;
-		const cookie = req.cookies[cookieName] || req.headers['x-tabroom-cookie'];
+		const cookie = req.cookies[cookieName];
 
 		if (cookie) {
 			let cookieSession = await sessionRepo.findByUserKey(cookie);
@@ -46,6 +47,8 @@ export async function Authenticate(req, res, next) {
 
 				//req.person is what should be checked for every authorization decision
 				req.person = await personRepo.getById(req.session.person);
+				req.authType = 'cookie';
+				req.session.csrfToken = authService.generateCSRFToken(cookie);
 			}
 		}
 
@@ -65,6 +68,7 @@ export async function Authenticate(req, res, next) {
 				if (!req.person) {
 					return Unauthorized(req, res,'Invalid API key');
 				}
+				req.authType = 'basic';
 
 			} else {
 				return BadRequest(req, res, 'The Authorization header uses an unrecognized authentication scheme.');

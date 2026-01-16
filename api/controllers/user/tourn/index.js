@@ -4,81 +4,78 @@ import db from '../../../data/db.js';
 // about" at a tournament. That will help sorting the relevant judges, entries,
 // events, etc to the top of the stack when displaying information.
 
-export const getPersonTournPresence = {
+export async function getPersonTournPresence(req, res) {
 
-	GET: async (req, res) => {
+	const tournPresence = {
+		judges     : {},
+		schools    : {},
+		entries    : {},
+		events     : {},
+		categories : {},
+	};
 
-		const tournPresence = {
-			judges     : {},
-			schools    : {},
-			entries    : {},
-			events     : {},
-			categories : {},
-		};
+	tournPresence.entries = await getPersonTournEntries(req.session.person , req.params.tournId);
+	tournPresence.judges  = await getPersonTournJudges(req.session.person   , req.params.tournId);
+	tournPresence.schools = await getPersonTournSchools(req.session.person  , req.params.tournId);
 
-		tournPresence.entries = await getPersonTournEntries(req.session.person , req.params.tournId);
-		tournPresence.judges  = await getPersonTournJudges(req.session.person   , req.params.tournId);
-		tournPresence.schools = await getPersonTournSchools(req.session.person  , req.params.tournId);
+	for (const entryId in tournPresence.entries) {
+		const entry = tournPresence.entries[entryId];
 
-		for (const entryId in tournPresence.entries) {
-			const entry = tournPresence.entries[entryId];
+		if (!tournPresence.schools[entry.schoolId]) {
+			tournPresence.schools[entry.schoolId] = {
+				name : entry.schoolName,
+				code : entry.schoolCode,
+			};
+		}
 
-			if (!tournPresence.schools[entry.schoolId]) {
-				tournPresence.schools[entry.schoolId] = {
-					name : entry.schoolName,
-					code : entry.schoolCode,
-				};
+		tournPresence.events[entry.eventsId]  = true;
+	}
+
+	for (const judgeId in tournPresence.judges) {
+		const judge = tournPresence.judges[judgeId];
+
+		if (!tournPresence.schools[judge.schoolId]) {
+			tournPresence.schools[judge.schoolId] = {
+				name : judge.schoolName,
+				code : judge.schoolCode,
+			};
+		}
+		judge.events?.split(',').forEach( (event) => {
+			tournPresence.events[event]  = true;
+
+		});
+		tournPresence.categories[judge.categoryId]  = true;
+	}
+
+	for (const schoolId in tournPresence.schools) {
+
+		const school = tournPresence.schools[schoolId];
+
+		school.entries?.split(',').forEach(entry => {
+			if (!tournPresence.entries[entry]) {
+				tournPresence.entries[entry] = true;
 			}
+		});
 
-			tournPresence.events[entry.eventsId]  = true;
-		}
-
-		for (const judgeId in tournPresence.judges) {
-			const judge = tournPresence.judges[judgeId];
-
-			if (!tournPresence.schools[judge.schoolId]) {
-				tournPresence.schools[judge.schoolId] = {
-					name : judge.schoolName,
-					code : judge.schoolCode,
-				};
+		school.judges?.split(',').forEach(judge => {
+			if (!tournPresence.judges[judge]) {
+				tournPresence.judges[judge] = true;
 			}
-			judge.events?.split(',').forEach( (event) => {
-				tournPresence.events[event]  = true;
+		});
 
-			});
-			tournPresence.categories[judge.categoryId]  = true;
-		}
+		school.events?.split(',').forEach (event => {
+			tournPresence.events[event] = true;
+		});
 
-		for (const schoolId in tournPresence.schools) {
+		school.categories?.split(',').forEach(category => {
+			tournPresence.categories[category] = true;
+		});
+	}
 
-			const school = tournPresence.schools[schoolId];
-
-			school.entries?.split(',').forEach(entry => {
-				if (!tournPresence.entries[entry]) {
-					tournPresence.entries[entry] = true;
-				}
-			});
-
-			school.judges?.split(',').forEach(judge => {
-				if (!tournPresence.judges[judge]) {
-					tournPresence.judges[judge] = true;
-				}
-			});
-
-			school.events?.split(',').forEach (event => {
-				tournPresence.events[event] = true;
-			});
-
-			school.categories?.split(',').forEach(category => {
-				tournPresence.categories[category] = true;
-			});
-		}
-
-		return res.status(200).json(tournPresence);
-	},
+	return res.status(200).json(tournPresence);
 };
 
-getPersonTournPresence.GET.apiDoc = {
+getPersonTournPresence.openapi = {
 	summary     : 'Lists all the entries, judges, events, categories, and schools a Tabroom account cares about at a tournament',
 	operationId : 'getPersonTournPresence',
 	parameters  : [

@@ -3,12 +3,15 @@ import config from '../config/config.js';
 import testData from './testFixtures';
 
 export const setup = async () => {
+	// Ensure database connection first
+	await db.sequelize.authenticate();
+
 	const tourncount = await db.sequelize.query(
 		`select count(id) as count from tourn`,
 		{ type: db.sequelize.QueryTypes.SELECT },
 	);
 
-	if (tourncount?.[0]?.count === 10) {
+	if (tourncount?.[0]?.count >= 10) {
 		const firstPromises = [];
 
 		firstPromises.push(db.sequelize.query( `delete from session where person > 3 and person < 100 ` ));
@@ -75,4 +78,6 @@ export const teardown = async () => {
 	await db.sequelize.query( `delete from ad where id < 2 `);
 
 	console.log(`Cleanup done`);
+	console.log('Closing Sequelize...');
+	await db.sequelize.close();
 };

@@ -1,147 +1,132 @@
 import { NotFound, UnexpectedError } from '../../../helpers/problem.js';
+import db from '../../../data/db.js';
 
-// General CRUD for the RPool itself
-export const updateRPool = {
+export async function getRPool(req, res) {
+	const rpool = await db.summon(db.rpool, req.params.rpoolId);
+	return res.status(200).json(rpool);
+}
+export async function createRPool(req, res) {
+	const rpool = await db.summon(db.rpool, req.params.rpoolId);
+	const updates = req.body;
+	delete updates.id;
 
-	GET: async (req, res) => {
-		const rpool = await req.db.summon(req.db.rpool, req.params.rpoolId);
-		return res.status(200).json(rpool);
-	},
-
-	POST: async (req, res) => {
-		const rpool = await req.db.summon(req.db.rpool, req.params.rpoolId);
-		const updates = req.body;
-		delete updates.id;
-
-		try {
-			await rpool.update(updates);
-		} catch (err) {
-			return UnexpectedError(req, res, err.message);
-		}
-		return res.status(200).json(rpool);
-	},
-
-	DELETE: async (req, res) => {
-		try {
-			await req.db.rpool.destroy({
-				where: { id: req.params.rpoolId },
-			});
-		} catch (err) {
-			return UnexpectedError(req, res, err.message);
-		}
-
-		return res.status(200).json({
-			error: false,
-			message: 'Room pool deleted',
+	try {
+		await rpool.update(updates);
+	} catch (err) {
+		return UnexpectedError(req, res, err.message);
+	}
+	return res.status(200).json(rpool);
+};
+export async function deleteRPool(req, res) {
+	try {
+		await db.rpool.destroy({
+			where: { id: req.params.rpoolId },
 		});
-	},
+	} catch (err) {
+		return UnexpectedError(req, res, err.message);
+	}
+
+	return res.status(200).json({
+		error: false,
+		message: 'Room pool deleted',
+	});
 };
 
 // CRUD for the rooms in the rpool.  Almost entirely consists of removing
 // or creating rpool_room relationships.
 
 // Update a single room.  Only POST and DELETE needed here.
-export const updateRPoolRoom = {
-	POST: async (req, res) => {
-		try {
-			await req.db.sequelize.query(`
-				INSERT IGNORE into rpool_room
-					(rpool, room)
-					values (:rpoolId, :roomId)
-			`, {
-				replacements : {
-					rpoolId  : req.params.rpoolId,
-					roomId   : req.params.roomId,
-				},
-				type: req.db.sequelize.QueryTypes.INSERT,
-			});
-		} catch (err) {
-			return UnexpectedError(req, res, err.message);
-		}
-
-		return res.status(200).json({
-			error   : false,
-			message : 'Room added to pool',
-		});
-	},
-
-	DELETE: async (req, res) => {
-		await req.db.sequelize.query(`
-			delete rpj.*
-				from rpool_room rpj
-				where rpj.rpool = :rpoolId
-				and rpj.room = :roomId
+export async function createRPoolRoom(req, res) {
+	try {
+		await db.sequelize.query(`
+			INSERT IGNORE into rpool_room
+				(rpool, room)
+				values (:rpoolId, :roomId)
 		`, {
 			replacements : {
 				rpoolId  : req.params.rpoolId,
 				roomId   : req.params.roomId,
 			},
-			type: req.db.sequelize.QueryTypes.DELETE,
+			type: db.sequelize.QueryTypes.INSERT,
 		});
+	} catch (err) {
+		return UnexpectedError(req, res, err.message);
+	}
 
-		return res.status(200).json({
-			error: false,
-			message: 'Room removed from pool',
-		});
-	},
+	return res.status(200).json({
+		error   : false,
+		message : 'Room added to pool',
+	});
+}
+export async function deleteRPoolRoom(req, res) {
+	await db.sequelize.query(`
+		delete rpj.*
+			from rpool_room rpj
+			where rpj.rpool = :rpoolId
+			and rpj.room = :roomId
+	`, {
+		replacements : {
+			rpoolId  : req.params.rpoolId,
+			roomId   : req.params.roomId,
+		},
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	return res.status(200).json({
+		error: false,
+		message: 'Room removed from pool',
+	});
+}
+
+export async function getRPoolRooms(req, res) {
+	const rooms = await db.sequelize.query(`
+		select room.* from room, rpool_room rpj
+			where room.id = rpj.room
+			and rpj.rpool = :rpoolId
+	`, {
+		replacements: { rpoolId: req.params.rpoolId },
+		type: db.sequelize.QueryTypes.SELECT,
+	});
+
+	return res.status(200).json(rooms);
 };
+export async function createRPoolRooms(req, res) {
+	let errs = '';
 
-// Update a bunch of rooms
-export const updateRPoolRooms = {
-
-	GET: async (req, res) => {
-		const rooms = await req.db.sequelize.query(`
-			select room.* from room, rpool_room rpj
-				where room.id = rpj.room
-				and rpj.rpool = :rpoolId
-		`, {
-			replacements: { rpoolId: req.params.rpoolId },
-			type: req.db.sequelize.QueryTypes.SELECT,
-		});
-
-		return res.status(200).json(rooms);
-	},
-
-	POST: async (req, res) => {
-
-		let errs = '';
-
-		req.body.rooms.forEach( async (roomId) => {
-			try {
-				await req.db.sequelize.query(`
+	req.body.rooms.forEach( async (roomId) => {
+		try {
+			await db.sequelize.query(`
 					INSERT IGNORE into rpool_room
 						(rpool, room)
 						values (:rpoolId, :roomId)
 				`, {
-					replacements: {
-						rpoolId: req.params.rpoolId,
-						roomId,
-					},
-					type: req.db.sequelize.QueryTypes.INSERT,
-				});
+				replacements: {
+					rpoolId: req.params.rpoolId,
+					roomId,
+				},
+				type: db.sequelize.QueryTypes.INSERT,
+			});
 
-			} catch (err) {
-				errs += err;
-			}
-		});
-
-		if (errs) {
-			return UnexpectedError(req, res, errs);
+		} catch (err) {
+			errs += err;
 		}
+	});
 
-		return res.status(200).json('Rooms added to pool');
-	},
+	if (errs) {
+		return UnexpectedError(req, res, errs);
+	}
 
-	DELETE: async (req, res) => {
-		await req.db.sequelize.query(`
+	return res.status(200).json('Rooms added to pool');
+};
+export async function deleteRPoolRooms(req, res) {
+	await db.sequelize.query(`
 			delete rpj.* from rpool_room rpj where rpj.rpool = :rpoolId
 		`, {
-			replacements: { rpoolId: req.params.rpoolId },
-			type: req.db.sequelize.QueryTypes.DELETE,
-		});
+		replacements: { rpoolId: req.params.rpoolId },
+		type: db.sequelize.QueryTypes.DELETE,
+	});
 
-		return res.status(200).json('All rooms removed from pool');
-	},
+	return res.status(200).json('All rooms removed from pool');
 };
 
 // CRUD for the rounds in the rpool.  Almost entirely consists of removing
@@ -149,173 +134,163 @@ export const updateRPoolRooms = {
 
 // Update a single round.  Only POST and DELETE needed here.
 
-export const updateRPoolRound = {
-	POST: async (req, res) => {
+export async function createRPoolRound(req, res) {
+	try {
+		await db.sequelize.query(`
+			INSERT IGNORE into rpool_round
+				(rpool, round)
+				values (:rpoolId, :roundId)
+		`, {
+			replacements: {
+				rpoolId: req.params.rpoolId,
+				roundId: req.params.roundId,
+			},
+			type: db.sequelize.QueryTypes.INSERT,
+		});
+	} catch (err) {
+		return UnexpectedError(req, res, err.message);
+	}
+
+	return res.status(200).json('Round added to pool');
+}
+export async function deleteRPoolRound(req, res) {
+	await db.sequelize.query(`
+		delete rpr.*
+			from rpool_round rpr
+			where rpr.rpool = :rpoolId
+			and rpr.round = :roundId
+	`, {
+		replacements: {
+			rpoolId: req.params.rpoolId,
+			roundId: req.params.roundId,
+		},
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	return res.status(200).json({
+		error: false,
+		message: 'Round removed from pool',
+	});
+};
+
+// Update a bunch of rounds
+
+export async function getRPoolRounds(req, res) {
+	const rounds = await db.sequelize.query(`
+		select round.* from round, rpool_round rpr
+		where round.id = rpr.round
+			and rpr.rpool = :rpoolId
+	`, {
+		replacements : { rpoolId : req.params.rpoolId },
+		type         : db.sequelize.QueryTypes.SELECT,
+	});
+
+	return res.status(200).json(rounds);
+};
+export async function createRPoolRounds(req, res) {
+
+	let errs = '';
+	let reply = '';
+
+	if (req.body.property_value) {
+
+		const rounds = await db.sequelize.query(`
+			select round.id, round.label, round.name, event.abbr
+			from round, event
+			where round.id = :roundId
+			and round.event = event.id
+		`, {
+			replacements: { roundId: req.body.property_value },
+			type: db.Sequelize.QueryTypes.SELECT,
+		});
+
+		if (!rounds || rounds.length < 1) {
+			return NotFound(req, res,`No round found with ID ${req.body.property_value}`);
+		}
+
+		const round = rounds.shift();
+
 		try {
-			await req.db.sequelize.query(`
+			await db.sequelize.query(`
 				INSERT IGNORE into rpool_round
 					(rpool, round)
 					values (:rpoolId, :roundId)
 			`, {
 				replacements: {
 					rpoolId: req.params.rpoolId,
-					roundId: req.params.roundId,
+					roundId: parseInt(req.body.property_value),
 				},
-				type: req.db.sequelize.QueryTypes.INSERT,
+				type: db.sequelize.QueryTypes.INSERT,
 			});
+
 		} catch (err) {
-			return UnexpectedError(req, res, err.message);
+			errs += err;
 		}
 
-		return res.status(200).json('Round added to pool');
-	},
+		// oh for the day when I have a real framework running and no longer
+		// have to do this
+		reply                 = `
+			<span class       = "quarter nospace">
+			<a value          = "1"
+				id            = "${round.id}_${req.params.rpoolId}"
+				property_name = "delete"
+				round_id      = "${round.id}"
+				rpool_id      = "${req.params.rpoolId}"
+				on_success    = "destroy"
+				onclick       = "postSwitch(this, 'rpool_round_rm.mhtml'); fixVisual();"
+				class         = "full white nowrap hover marno smallish"
+				title         = "Remove this round"
+			>${round.abbr} ${round.name}</a>
+			</span>
+		`;
 
-	DELETE: async (req, res) => {
-		await req.db.sequelize.query(`
-			delete rpr.*
-				from rpool_round rpr
-				where rpr.rpool = :rpoolId
-				and rpr.round = :roundId
-		`, {
-			replacements: {
-				rpoolId: req.params.rpoolId,
-				roundId: req.params.roundId,
-			},
-			type: req.db.sequelize.QueryTypes.DELETE,
-		});
+	} else if (req.body.rounds) {
 
-		return res.status(200).json({
-			error: false,
-			message: 'Round removed from pool',
-		});
-	},
-};
-
-// Update a bunch of rounds
-
-export const updateRPoolRounds = {
-
-	GET: async (req, res) => {
-		const rounds = await req.db.sequelize.query(`
-			select round.* from round, rpool_round rpr
-			where round.id = rpr.round
-				and rpr.rpool = :rpoolId
-		`, {
-			replacements : { rpoolId : req.params.rpoolId },
-			type         : req.db.sequelize.QueryTypes.SELECT,
-		});
-
-		return res.status(200).json(rounds);
-	},
-
-	POST: async (req, res) => {
-
-		let errs = '';
-		let reply = '';
-
-		if (req.body.property_value) {
-
-			const rounds = await req.db.sequelize.query(`
-				select round.id, round.label, round.name, event.abbr
-				from round, event
-				where round.id = :roundId
-				and round.event = event.id
-			`, {
-				replacements: { roundId: req.body.property_value },
-				type: req.db.Sequelize.QueryTypes.SELECT,
-			});
-
-			if (!rounds || rounds.length < 1) {
-				return NotFound(req, res,`No round found with ID ${req.body.property_value}`);
-			}
-
-			const round = rounds.shift();
-
+		req.body.rounds.forEach( async (roundId) => {
 			try {
-				await req.db.sequelize.query(`
+				await db.sequelize.query(`
 					INSERT IGNORE into rpool_round
 						(rpool, round)
 						values (:rpoolId, :roundId)
 				`, {
 					replacements: {
 						rpoolId: req.params.rpoolId,
-						roundId: parseInt(req.body.property_value),
+						roundId,
 					},
-					type: req.db.sequelize.QueryTypes.INSERT,
+					type: db.sequelize.QueryTypes.INSERT,
 				});
 
 			} catch (err) {
 				errs += err;
 			}
-
-			// oh for the day when I have a real framework running and no longer
-			// have to do this
-			reply                 = `
-				<span class       = "quarter nospace">
-				<a value          = "1"
-					id            = "${round.id}_${req.params.rpoolId}"
-					property_name = "delete"
-					round_id      = "${round.id}"
-					rpool_id      = "${req.params.rpoolId}"
-					on_success    = "destroy"
-					onclick       = "postSwitch(this, 'rpool_round_rm.mhtml'); fixVisual();"
-					class         = "full white nowrap hover marno smallish"
-					title         = "Remove this round"
-				>${round.abbr} ${round.name}</a>
-				</span>
-			`;
-
-		} else if (req.body.rounds) {
-
-			req.body.rounds.forEach( async (roundId) => {
-				try {
-					await req.db.sequelize.query(`
-						INSERT IGNORE into rpool_round
-							(rpool, round)
-							values (:rpoolId, :roundId)
-					`, {
-						replacements: {
-							rpoolId: req.params.rpoolId,
-							roundId,
-						},
-						type: req.db.sequelize.QueryTypes.INSERT,
-					});
-
-				} catch (err) {
-					errs += err;
-				}
-			});
-		}
-
-		if (errs) {
-			return UnexpectedError(req, res, errs);
-		}
-
-		if (reply) {
-			return res.status(200).json({
-				error        : false,
-				message      : 'Rounds added to pool',
-				reply_append : `${req.params.rpoolId}_rounds`,
-				reply,
-			});
-		}
-
-		return res.status(200).json('Rounds added to pool');
-	},
-
-	DELETE: async (req, res) => {
-		await req.db.sequelize.query(`
-			delete
-				rpr.*
-			from rpool_round rpr
-			where rpr.rpool = :rpoolId
-		`, {
-			replacements: { rpoolId: req.params.rpoolId },
-			type: req.db.sequelize.QueryTypes.DELETE,
 		});
+	}
 
-		res.status(200).json('All rounds removed from pool');
-	},
+	if (errs) {
+		return UnexpectedError(req, res, errs);
+	}
+
+	if (reply) {
+		return res.status(200).json({
+			error        : false,
+			message      : 'Rounds added to pool',
+			reply_append : `${req.params.rpoolId}_rounds`,
+			reply,
+		});
+	}
+
+	return res.status(200).json('Rounds added to pool');
 };
+export async function deleteRPoolRounds(req, res) {
+	await db.sequelize.query(`
+		delete
+			rpr.*
+		from rpool_round rpr
+		where rpr.rpool = :rpoolId
+	`, {
+		replacements: { rpoolId: req.params.rpoolId },
+		type: db.sequelize.QueryTypes.DELETE,
+	});
 
-export default updateRPool;
+	res.status(200).json('All rounds removed from pool');
+};

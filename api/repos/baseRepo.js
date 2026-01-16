@@ -1,14 +1,16 @@
 export function baseRepo(model, mapFunction) {
 
-	const settingsAssoc = Object.values(model.associations).find(a => a.as.toLowerCase().endsWith('_settings'));
+	function getSettingsAlias() {
+		return Object.values(model.associations).find(a => a.as.toLowerCase().endsWith('_settings'))?.as || null;
+	}
 
 	async function getById(id, options = {}) {
 		const include = [];
 
-		if (options.settings && settingsAssoc) {
+		if (options.settings && getSettingsAlias()) {
 			include.push({
-				model: settingsAssoc.target,
-				as: settingsAssoc.as,
+				model: model.associations[getSettingsAlias()].target,
+				as: getSettingsAlias(),
 			});
 		}
 		var instance = await model.findByPk(id,
