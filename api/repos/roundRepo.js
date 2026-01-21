@@ -1,5 +1,5 @@
 import db from '../data/db.js';
-import  { mapEvent } from './eventRepo.js';
+import  { toDomain } from './mappers/roundMapper.js';
 export async function getRoundById(roundId){
 	const rounds = await db.sequelize.query(`
             select
@@ -256,7 +256,7 @@ export async function getRounds({
 		include,
 	});
 
-	return rounds.map(mapRound);
+	return rounds.map(toDomain);
 }
 export async function getSections(roundId){
 	let sections = await db.sequelize.query(`
@@ -293,25 +293,6 @@ export async function getSections(roundId){
 	});
 
 	return sections;
-}
-
-function mapRound(round) {
-	if (!round) return null;
-
-	const mapped = {
-		id: round.id,
-		type: round.type,
-		name: round.name,
-		label: round.label,
-		flighted: round.flighted,
-		postPrimary: round.postPrimary,
-		postSecondary: round.postSecondary,
-		postFeedback: round.postFeedback,
-		published: round.published,
-		eventId: round.event,
-		event: mapEvent(round.event_event),
-	};
-	return mapped;
 }
 
 export default {

@@ -44,7 +44,7 @@ describe("Authentication Middleware", () => {
                     }
                 };});
 
-            vi.spyOn(personRepo, 'getById').mockImplementationOnce(async (id) => {
+            vi.spyOn(personRepo, 'getPerson').mockImplementationOnce(async (id) => {
                 return {
                     id: 69,
                     email: '',

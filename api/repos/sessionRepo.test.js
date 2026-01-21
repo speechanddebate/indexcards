@@ -47,48 +47,31 @@ describe('deleteSession', () => {
       const stillThere = await db.session.findByPk(session.id);
       expect(stillThere).not.toBeNull();
     });
-
-    describe('createSession', () => {
-        it('creates a session and returns mapped session with userkey', async () => {
-            const person = await factories.person();
-            const ip = '127.0.0.1';
-
-            const result = await sessionRepo.createSession({ personId: person.id, ip });
-
-            expect(result).toHaveProperty('id');
-            expect(result).toHaveProperty('userkey');
-            expect(typeof result.userkey).toBe('string');
-            expect(result).toHaveProperty('defaults');
-            expect(result).toHaveProperty('agentData');
-
-            const sessionInDb = await db.session.findByPk(result.id);
-            expect(sessionInDb).not.toBeNull();
-            expect(sessionInDb.userkey).toBe(result.userkey);
-            expect(sessionInDb.person).toBe(person.id);
-            expect(sessionInDb.ip).toBe(ip);
-        });
-
-        it('generates a unique userkey for each session', async () => {
-            const person = await factories.person();
-            const ip = '127.0.0.1';
-
-            const session1 = await sessionRepo.createSession({ personId: person.id, ip });
-            const session2 = await sessionRepo.createSession({ personId: person.id, ip });
-
-            expect(session1.userkey).not.toBe(session2.userkey);
-        });
-
-        it('throws if personId is missing', async () => {
-            await expect(
-                sessionRepo.createSession({ ip: '127.0.0.1' })
-            ).rejects.toThrow();
-        });
-
-        it('throws if ip is missing', async () => {
-            const person = await factories.person();
-            await expect(
-                sessionRepo.createSession({ personId: person.id })
-            ).rejects.toThrow();
-        });
-    });
   });  
+  describe('createSession', () => {
+    it('creates a session and returns mapped session with userkey', async () => {
+        const person = await factories.person();
+        const ip = '127.0.0.1';
+
+        const { id, userkey } = await sessionRepo.createSession({ person: person.id, ip });
+
+        expect(id).toBeDefined();
+        expect(userkey).toBeDefined();
+        expect(typeof userkey).toBe('string');
+        const sessionInDb = await db.session.findByPk(id);
+        expect(sessionInDb).not.toBeNull();
+        expect(sessionInDb.userkey).toBe(userkey);
+        expect(sessionInDb.person).toBe(person.id);
+        expect(sessionInDb.ip).toBe(ip);
+    });
+
+    it('generates a unique userkey for each session', async () => {
+        const person = await factories.person();
+        const ip = '127.0.0.1';
+
+        const session1 = await sessionRepo.createSession({ personId: person.id, ip });
+        const session2 = await sessionRepo.createSession({ personId: person.id, ip });
+
+        expect(session1.userkey).not.toBe(session2.userkey);
+    });
+});

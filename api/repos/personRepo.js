@@ -1,14 +1,23 @@
 import db from '../data/db.js';
-import { baseRepo } from './baseRepo.js';
 /* eslint-disable-next-line import/no-unresolved */
 import { verify } from 'unixcrypt';
-import getSettings, { flattenSettings } from '../helpers/settings.js';
+import { toDomain } from './mappers/personMapper.js';
+import { withSettingsInclude } from './utils/settings.js';
 
-const base = baseRepo(db.person, mapPerson);
+export async function getPerson(personId, opts = {}) {
+	const dbRow = await db.person.findByPk(personId, {
+		include: [
+			...withSettingsInclude({
+				model: db.personSetting,
+				as: 'person_settings',
+				settings: opts.settings,
+			}),
+		],
+	});
 
-//simple wrapper to get person by id including settings
-async function getPersonByIdWithSettings(personId) {
-	return base.getById(personId, {settings: true});
+	if (!dbRow) return null;
+
+	return toDomain(dbRow);
 }
 
 async function getPersonByApiKey(personId,apiKey) {
@@ -42,7 +51,7 @@ async function getPersonByUsername(username){
 	const person = await db.person.findOne({
 		where: { email: username },
 	});
-	return mapPerson(person);
+	return toDomain(person);
 }
 /**
  *  verify a username and password
@@ -59,50 +68,13 @@ export async function verifyPassword(username, password){
 	if (!ok) {
 		return null;
 	}
-	return mapPerson(person);
-}
-
-// Eventually get rid of this and just use the with settings version but auth
-// needs it now
-
-async function getPersonSettings(personId, options = {} ) {
-	return getSettings('person', personId,options);
-}
-
-export function mapPerson(person) {
-	if (!person) return null;
-
-	return {
-		id            : person.id,
-		email         : person.email,
-		first         : person.first,
-		middle        : person.middle,
-		last          : person.last,
-		state         : person.state,
-		country       : person.country,
-		tz            : person.tz,
-		nada          : person.nsda,
-		phone         : person.phone,
-		gender        : person.gender,
-		pronoun       : person.pronoun,
-		no_email      : person.no_email,
-		siteAdmin     : person.site_admin,
-		accesses      : person.accesses,
-		lastAccess    : person.last_access,
-		passTimestamp : person.pass_timestamp,
-		timestamp     : person.timestamp,
-		settings: person.person_settings ?
-			flattenSettings(person.person_settings) : undefined,
-	};
+	return toDomain(person);
 }
 
 // export the  data functions NOT the mappers
 export default {
-	...base,
-
+	getPerson,
 	getPersonByApiKey,
 	hasAreaAccess,
-	getPersonByIdWithSettings,
-	getPersonSettings,
 	getPersonByUsername,
 };

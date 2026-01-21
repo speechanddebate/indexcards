@@ -3,6 +3,7 @@ import authRouter from './authRouter.js';
 import adminRouter from './admin/adminRouter.js';
 import extRouter from './ext/extRouter.js';
 import pagesRouter from './pages/pagesRouter.js';
+import tabRouter from './tab/indexRouter.js';
 import restRouter from './rest/restRouter.js';
 import legacyRouter from './legacy/legacyRouter.js';
 import { createOpenApiSpec } from '../../openapi/createOpenApiSpec.js';
@@ -14,6 +15,7 @@ router.use('/auth',authRouter);
 router.use('/admin',adminRouter);
 router.use('/ext', extRouter);
 router.use('/pages', pagesRouter);
+router.use('/tab',tabRouter);
 router.use('/rest',restRouter);
 router.use('/',legacyRouter);
 

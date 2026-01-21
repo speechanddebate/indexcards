@@ -209,21 +209,6 @@ export async function getSchematic(req,res){
 getSchematic.openapi = {
 	summary     : 'Returns public round information necessary to create a full schematic',
 	operationId : 'getSchematic',
-	parameters  : [
-		{
-			in          : 'path',
-			name        : 'tournId',
-			description : 'Tournament ID to return events for',
-			required    : false,
-			schema      : { type: 'number', minimum: 1 },
-		}, {
-			in          : 'path',
-			name        : 'roundId',
-			description : 'Round ID to return schematics for',
-			required    : false,
-			schema      : { type: 'number', minimum: 1 },
-		},
-	],
 	responses: {
 		200: {
 			description: 'Object of Round with public information on it for a schematic, which includes a list of entries or sections as appropriate.',

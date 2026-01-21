@@ -1,5 +1,5 @@
 import db from '../data/db.js';
-import { baseRepo } from './baseRepo.js';
+import { toDomain } from './mappers/fileMapper.js';
 
 export async function getFiles({
 	scope = {},
@@ -28,34 +28,8 @@ export async function getFiles({
 		order: ['tag', 'label'],
 	});
 
-	return files.map(mapFile);
-};
-
-function mapFile(fileInstance) {
-	if (!fileInstance) return null;
-	return {
-		id: fileInstance.id,
-		tag: fileInstance.tag,
-		type: fileInstance.type,
-		label: fileInstance.label,
-		filename: fileInstance.filename,
-		published: fileInstance.published,
-		coach: fileInstance.coach,
-		pageOrder: fileInstance.page_order,
-		uploaded: fileInstance.uploaded,
-		billCategory: fileInstance.bill_category,
-		tournId: fileInstance.tourn,
-		schoolId: fileInstance.school,
-		entryId: fileInstance.entry,
-		eventId: fileInstance.event,
-		districtId: fileInstance.district,
-		circuitId: fileInstance.circuit,
-		parentId: fileInstance.parent,
-		personId: fileInstance.person,
-		lastModified: fileInstance.timestamp,
-	};
+	return files.map(toDomain);
 };
 export default {
-	...baseRepo(db.file, mapFile),
 	getFiles,
 };

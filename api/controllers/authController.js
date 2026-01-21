@@ -19,7 +19,7 @@ export async function login(req, res) {
 	}  catch (err) {
 		if (err === AUTH_INVALID) return Unauthorized(req,res,'Invalid Credentials');
 	}
-	const { person, token, defaults } = result;
+	const { person, token } = result;
 
 	var response = {
 		token: token,
@@ -27,7 +27,6 @@ export async function login(req, res) {
 			id: person.id,
 			email: person.email,
 		},
-		defaults: defaults,
 	};
 	res.cookie(config.COOKIE_NAME, token, authService.getAuthCookieOptions());
 	res.cookie(config.CSRF.COOKIE_NAME, authService.generateCSRFToken(token), authService.getCSRFCookieOptions());

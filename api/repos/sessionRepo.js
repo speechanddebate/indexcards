@@ -1,11 +1,7 @@
 import db from '../data/db.js';
-import { mapPerson } from './personRepo.js';
-import { safeParseJson } from '../helpers/json.js';
-import { baseRepo } from './baseRepo.js';
 import crypto from 'crypto';
-import { assertPresent } from '../helpers/validators.js';
-
-const base = baseRepo(db.session, mapSession);
+import * as personMapper from './mappers/personMapper.js';
+import { toDomain, toPersistence } from './mappers/sessionMapper.js';
 
 async function findByUserKey(key) {
 
@@ -20,30 +16,18 @@ async function findByUserKey(key) {
 	if (!s) return null;
 
 	return {
-		...mapSession(s),
-		person : mapPerson(s.person_person),
-		su     : mapPerson(s.su_person),
+		...toDomain(s),
+		person : personMapper.toDomain(s.person_person),
+		su     : personMapper.toDomain(s.su_person),
 	};
 }
-
-async function createSession({
-	personId,
-	ip,
-}){
-	assertPresent(personId, 'personId');
-
+async function createSession(session){
 	const userkey = crypto.randomBytes(32).toString('hex');
-
-	const session = await db.session.create({
-		person: personId,
-		userkey,
-		ip,
-		last_access: new Date(),
+	const created = await db.session.create({
+		...toPersistence(session),
+		userkey: userkey,
 	});
-
-	var result =  mapSession(session);
-	result.userkey = session.userkey ;//userkey only ever returned from a createSession
-	return result;
+	return { id: created.id, userkey  };
 }
 /**
  * Deletes a session if it exists by its ID.
@@ -59,19 +43,8 @@ async function deleteSession(sessionId) {
 	return db.session.destroy({ where: { id: sessionId } });
 }
 
-export function mapSession(session) {
-	if (!session) return null;
-
-	return {
-		id        : session.id,
-		defaults  : session.defaults ? safeParseJson(session.defaults)     : null,
-		agentData : session.agent_data ? safeParseJson(session.agent_data) : null,
-	};
-}
-
 // export the  data functions NOT the mappers
 export default {
-	...base,
 	findByUserKey,
 	createSession,
 	deleteSession,

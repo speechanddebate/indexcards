@@ -177,15 +177,6 @@ getMySchoolsByTourn.openapi = {
 
 	summary     : 'Returns the schools with entries and events you can access for a tournament',
 	operationId : 'getMySchoolsByTourn',
-	parameters  : [
-		{
-			in          : 'path',
-			name        : 'tournId',
-			description : 'Tournament ID of tournament to return',
-			required    : false,
-			schema      : { type: 'string', minimum: 1 },
-		},
-	],
 	responses: {
 		200: {
 			description: 'Listing of schools with events and entry IDs to highlight',

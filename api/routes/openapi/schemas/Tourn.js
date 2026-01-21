@@ -98,3 +98,67 @@ export const TournContact = {
 		},
 	},
 };
+
+export const BackupRequest = {
+	type: 'object',
+	description: 'A request to create a backup for a tournament or part of a tournament',
+	required: ['scope'],
+	properties: {
+		scope: {
+			type: 'object',
+			description: 'Defines what part of the tournament to back up',
+			required: ['type'],
+			properties: {
+				type: {
+					type: 'string',
+					description: 'The scope of the backup',
+					enum: ['tournament', 'category', 'event', 'school'],
+				},
+				id: {
+					type: 'integer',
+					description:
+				'The ID of the category, event, or school being backed up (required when scope type is not "tournament")',
+				},
+			},
+			additionalProperties: false,
+		},
+
+		options: {
+			type: 'object',
+			description: 'Optional flags that affect how the backup is generated',
+			properties: {
+				ignoreComments: {
+					type: 'boolean',
+					description: 'Exclude comments from the backup',
+				},
+				ignoreBallots: {
+					type: 'boolean',
+					description: 'Exclude ballots from the backup',
+				},
+			},
+			additionalProperties: false,
+		},
+	},
+	additionalProperties: false,
+
+	examples: [
+		{
+			scope: {
+				type: 'tournament',
+			},
+			options: {
+				ignoreComments: true,
+			},
+		},
+		{
+			tournId: 123,
+			scope: {
+				type: 'event',
+				id: 456,
+			},
+			options: {
+				ignoreBallots: true,
+			},
+		},
+	],
+};

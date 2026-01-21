@@ -454,15 +454,6 @@ export async function getFutureTourns(req,res){
 getFutureTourns.openapi = {
 	summary     : 'Returns the public listing of upcoming tournaments',
 	operationId : 'getFutureTourns',
-	parameters  : [
-		{
-			in          : 'path',
-			name        : 'circuit',
-			description : 'ID of a circuit to limit the search to',
-			required    : false,
-			schema      : { type: 'integer', minimum : 1 },
-		},
-	],
 	responses: {
 		200: {
 			description: 'List of public upcoming tournaments',

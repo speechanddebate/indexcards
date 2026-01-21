@@ -28,11 +28,6 @@ export async function Authenticate(req, res, next) {
 				 * and policies
 				 */
 
-				const settings = await personRepo.getPersonSettings(
-					cookieSession.person.id,
-					{ skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] }
-				);
-
 				req.session = {
 					id        : cookieSession.id,
 					person    : cookieSession.person.id,
@@ -42,11 +37,10 @@ export async function Authenticate(req, res, next) {
 					first     : cookieSession.person.first,
 					last      : cookieSession.person.last,
 					su        : cookieSession.su?.id || null,
-					settings,
 				};
 
 				//req.person is what should be checked for every authorization decision
-				req.person = await personRepo.getById(req.session.person);
+				req.person = await personRepo.getPerson(req.session.person);
 				req.authType = 'cookie';
 				req.session.csrfToken = authService.generateCSRFToken(cookie);
 			}

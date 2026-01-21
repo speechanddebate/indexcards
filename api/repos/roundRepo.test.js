@@ -1,5 +1,3 @@
-import db from "../data/db.js";
-import event from "../data/models/event.js";
 import roundRepo from "./roundRepo.js";
 
 
@@ -13,7 +11,7 @@ describe('getRounds', () => {
 
         rounds.forEach((round, i) => {
             assert.equal(round.published, 1, `Round at index ${i} (roundId=${round.roundId}) is not published`);
-            assert.strictEqual(round.event, null);
+            assert.strictEqual(round.event, undefined, `Round at index ${i} (id=${round.id}) should not have event data`);
           });
 	});
     it('returns event info when include.event is true', async () => {

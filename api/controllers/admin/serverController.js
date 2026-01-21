@@ -22,7 +22,7 @@ export async function getInstances(req, res) {
 };
 getInstances.openapi = {
 	summary: 'TODO write spec',
-	tags: ['Servers'],
+	tags: ['Admin : Servers'],
 	responses: {
 		'200': {
 			description: 'OK',

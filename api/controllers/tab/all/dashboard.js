@@ -657,7 +657,7 @@ export async function postTournAttendance(req, res) {
 		errorLogger.info(err);
 	}
 }
-postTournAttendance.POST.openapi = {
+postTournAttendance.openapi = {
 	summary: 'Mark or unmark a member of a room as present',
 	operationId: 'tournAttendance',
 	tags: ['tab/all'],

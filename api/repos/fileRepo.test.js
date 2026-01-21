@@ -23,6 +23,22 @@ describe("FileRepo", () => {
             expect(matchedFile.label).toBe("Unpublished File");
             expect(matchedFile.filename).toBe("unpublishedfile.pdf");
         });
+        it('returns error when invalid scope is provided', async () => {
+            // Arrange
+            let errorCaught = null;
+
+            // Act
+            try {
+                await fileRepo.getFiles({
+                    scope: { invalidScope: 123 },
+                });
+            } catch (error) {
+                errorCaught = error;
+            }
+
+            // Assert
+            expect(errorCaught).toBeInstanceOf(Error);
+        });
     });
     describe("getTournFiles", () => {
         it("returns only published tourn files when given tournId", async () => {

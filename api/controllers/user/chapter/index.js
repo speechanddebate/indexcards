@@ -118,18 +118,6 @@ userChapters.openapi = {
 userChaptersByTourn.openapi = {
 	summary: 'List the chapters and permissions level given a person ID',
 	operationId: 'userChaptersByTourn',
-	parameters: [
-		{
-			in          : 'path',
-			name        : 'tournId',
-			description : 'ID of tournament to pull parallel school registration information from.',
-			required    : true,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},
-	],
 	responses: {
 		200: {
 			description: 'Chapter with School Metadata',

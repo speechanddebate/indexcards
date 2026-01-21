@@ -61,21 +61,6 @@ export const getResults = {
 getResults.GET.apiDoc = {
 	summary     : 'Returns a result set for display as long as it is public',
 	operationId : 'getResults',
-	parameters  : [
-		{
-			in          : 'path',
-			name        : 'tournId',
-			description : 'Tournament ID to return events for',
-			required    : false,
-			schema      : { type: 'number', minimum: 1 },
-		}, {
-			in          : 'path',
-			name        : 'resultSetId',
-			description : 'Result Set ID to return results for',
-			required    : false,
-			schema      : { type: 'number', minimum: 1 },
-		},
-	],
 	responses: {
 		200: {
 			description: 'Results JSON format for parsing into a table',

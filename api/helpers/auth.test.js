@@ -3,6 +3,7 @@ import { Authenticate } from '../middleware/authentication.js';
 import config from '../../config/config';
 import { tabAuth } from './auth';
 import userData from '../../tests/testFixtures';
+import { createContext } from '../../tests/httpMocks.js';
 
 describe('Authorization Functions', () => {
 
@@ -10,20 +11,20 @@ describe('Authorization Functions', () => {
 
 		const testTourn = userData.testUserTournPerm.tourn;
 
-		const req = {
-			person: {
-				id: userData.testUserSession.person
+		const { req, res } = createContext({
+			req: {
+				person: {
+					id: userData.testUserSession.person
+				},
+				config,
+				params: {
+					tournId : testTourn,
+				},
+				cookies : {
+					[config.COOKIE_NAME]: userData.testUserSession.userkey,
+				},
 			},
-			config,
-			params: {
-				tournId : testTourn,
-			},
-			cookies : {
-				[config.COOKIE_NAME]: userData.testUserSession.userkey,
-			},
-			clearCookie: vi.fn()
-		};
-		const res = {};
+		});
 		// Call the middleware to set req.session
 		await new Promise((resolve, reject) => {
 			Authenticate(req, res, (err) => {

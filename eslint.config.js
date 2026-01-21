@@ -27,7 +27,14 @@ export default [
 
 		files : ['**/*.js', '*.js'],
 		rules : {
-			semi : 'error'
+			semi : 'error',
+			'no-unused-vars' : [
+				'error',
+				{
+					args : 'all',
+					argsIgnorePattern : '^(err|req|res|next|opts)$',
+				},
+			],
 		},
 		languageOptions : {
 			ecmaVersion : 2023,

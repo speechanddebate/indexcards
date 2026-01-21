@@ -1,29 +1,66 @@
 import db from '../data/db.js';
-import { baseRepo } from './baseRepo.js';
 import  fileRepo  from './fileRepo.js';
 import webpageRepo  from './webpageRepo.js';
-import { flattenSettings } from '../helpers/settings.js';
+import { toDomain } from './mappers/tournMapper.js';
 
-export async function getTourn(tournId, { unpublished = false } = {}) {
+/**
+ * Fetch a single tournament by ID or webname.
+ *
+ * @param {number|string} tournId
+ *   Tournament ID (numeric) or webname (string).
+ *
+ * @param {Object} [opts] - Options for fetching the tournament.
+ * @returns {Promise<Object|null>}
+ *   The tournament domain object, or null if not found.
+ */
+export async function getTourn(tournId,opts = {}) {
+	const {
+		unpublished = false, // false | true (include unpublished tourns)
+		settings = false, // false | true | string[] of setting tags
+	} = opts;
 	const where = {};
+	const include = [];
+
+	// ---- settings handling ----
+	if (settings) {
+		const settingsInclude = {
+			model: db.tournSetting,
+			as: 'tourn_settings',
+		};
+
+		// If settings is an array, filter by tag
+		if (Array.isArray(settings)) {
+			settingsInclude.where = {
+				tag: settings,
+			};
+			settingsInclude.required = false; // still return tourn if no matching settings
+		}
+
+		include.push(settingsInclude);
+	}
+
+	// ---- publication filter ----
 	if (!unpublished) {
 		where.hidden = 0;
 	}
 
+	// ---- ID vs webname ----
 	if (typeof tournId === 'number' || !isNaN(parseInt(tournId))) {
-		where.id = parseInt(tournId);
+		where.id = parseInt(tournId, 10);
 	} else {
 		where.webname = tournId.replace(/\W/g, '');
 	}
 
 	const tourn = await db.tourn.findOne({
 		where,
-		order : [['start', 'desc']],
-		limit : 1,
+		include,
+		order: [['start', 'desc']],
+		limit: 1,
 	});
 
-	return  mapTourn(tourn);
-};
+	return toDomain(tourn);
+}
+
 /**
  * Get files scoped to a tournament.
  *
@@ -95,29 +132,8 @@ export async function getContacts(tournId) {
 		type         : db.sequelize.QueryTypes.SELECT,
 	});
 };
-function mapTourn(tournInstance) {
-	if (!tournInstance) return null;
-	return {
-		id: tournInstance.id,
-		name: tournInstance.name,
-		city: tournInstance.city,
-		state: tournInstance.state,
-		country: tournInstance.country,
-		tz: tournInstance.tz,
-		webname: tournInstance.webname,
-		hidden: tournInstance.hidden,
-		timestamp: tournInstance.timestamp,
-		start: tournInstance.start,
-		end: tournInstance.end,
-		regStart: tournInstance.reg_start,
-		regEnd: tournInstance.reg_end,
-		settings: tournInstance.tourn_settings ?
-                  flattenSettings(tournInstance.tourn_settings) : undefined,
-	};
-}
 
 export default {
-	...baseRepo(db.tourn, mapTourn),
 	getTourn,
 	getFiles,
 	getSchedule,

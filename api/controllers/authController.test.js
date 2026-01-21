@@ -79,7 +79,6 @@ describe('authController',() => {
       assert.equal(json.token, 'jwt123');
       assert.equal(json.person.id, 42);
       assert.equal(json.person.email, 'test@test.com');
-      assert.deepEqual(json.defaults, fakeResult.defaults);
     });
   
   });

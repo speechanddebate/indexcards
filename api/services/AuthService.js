@@ -9,14 +9,14 @@ export async function login(username, password, context = {}) {
 		throw AUTH_INVALID;
 	}
 
-	const session = await sessionRepo.createSession({
-		personId: person.id,
+	const { userkey: userkey } = await sessionRepo.createSession({
+		person: person.id,
 		ip: ip,
 		agentData: agentData,
 	});
 	//TODO enforce limits
 
-	return {person,token: session.userkey, defaults: session.defaults };
+	return {person,token: userkey};
 }
 
 function generateCSRFToken(userkey){

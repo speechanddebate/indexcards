@@ -19,6 +19,23 @@ export function sendProblem(req, res, {
 	});
 }
 
+export function handleDomainError(err, req, res, next) {
+	switch (err.code) {
+		case 'BAD_REQUEST':
+			return BadRequest(req, res, err.detail);
+		case 'UNAUTHORIZED':
+			return Unauthorized(req, res, err.detail);
+		case 'FORBIDDEN':
+			return Forbidden(req, res, err.detail);
+		case 'NOT_FOUND':
+			return NotFound(req, res, err.detail);
+		case 'NOT_IMPLEMENTED':
+			return NotImplemented(req, res, err.detail);
+		default:
+			return next(err);
+	}
+}
+
 export function BadRequest(req, res, detail, extras = {}){
 	return sendProblem(req, res, {
 		title: 'Request Validation Failed',

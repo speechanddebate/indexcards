@@ -1,5 +1,5 @@
 import db from '../data/db.js';
-import { baseRepo } from './baseRepo.js';
+import { toDomain } from './mappers/webpageMapper.js';
 
 export async function getWebpages({
 	scope = {},
@@ -33,30 +33,9 @@ export async function getWebpages({
 		order: ['page_order'],
 	});
 
-	return webpages.map(mapWebpage);
+	return webpages.map(toDomain);
 };
 
-function mapWebpage(pageInstance) {
-	if (!pageInstance) return null;
-
-	return {
-		id: pageInstance.id,
-		title: pageInstance.title,
-		slug: pageInstance.slug,
-		content: pageInstance.content,
-		sidebar: pageInstance.sidebar,
-		published: pageInstance.published,
-		sitewide: pageInstance.sitewide,
-		special: pageInstance.special,
-		pageOrder: pageInstance.page_order,
-		tournId: pageInstance.tourn,
-		parentId: pageInstance.parent,
-		lastEditorId: pageInstance.last_editor,
-		timestamp: pageInstance.timestamp,
-		createdAt: pageInstance.created_at,
-	};
-}
 export default {
-	...baseRepo(db.webpage, mapWebpage),
 	getWebpages,
 };

@@ -1,6 +1,8 @@
 // import { showDateTime } from '../../../helpers/common.js';
 import { objectify, arrayify, objectStrip, objectifySettings, objectifyGroupSettings } from '../../../helpers/objectify.js';
 import db from '../../../data/db.js';
+import BackupService from '../../../services/BackupService.js';
+import { handleDomainError } from '../../../helpers/problem.js';
 
 export async function backupTourn(req,res) {
 	const tournShell  = await db.tourn.findByPk(req.params.tournId);
@@ -331,4 +333,39 @@ export async function restoreTourn(req,res) {
 };
 restoreTourn.openapi = {
 	tags       : ['Backup and Restore'],
+};
+
+export async function Backup(req, res, next) {
+	// TODO permission check
+	try {
+		const scope = req.body.scope || {};
+
+		const backupData = await BackupService.generateBackup(
+			Number(req.params.tournId),
+			scope.type,
+		scope.id !== undefined ? Number(scope.id) : null,
+		{}
+		);
+
+		return res.status(200).json(backupData);
+
+	} catch (err) {
+		return handleDomainError(err, req, res, next);
+	}
+}
+Backup.openapi = {
+	summary	 : 'Tournament Backup',
+	description: 'Creates a backup dump of the tournament data in JSON format',
+	tags       : ['Backup and Restore'],
+	requestBody: {
+		description: 'Parameters for the backup request',
+		required: true,
+		content: {
+			'application/json': {
+				schema: {
+					$ref: '#/components/schemas/BackupRequest',
+				},
+			},
+		},
+	},
 };

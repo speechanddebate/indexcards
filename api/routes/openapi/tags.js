@@ -17,6 +17,10 @@ export const tags = [
 		description: 'Authentication related endpoints',
 	},
 	{
+		name: 'Backup and Restore',
+		description: 'Endpoints for managing tournament backups and restores',
+	},
+	{
 		name: 'Ext : Caselist',
 		description: 'Endpoints for external access to Caselist data',
 	},
@@ -48,10 +52,17 @@ export const declaredTagGroups = [
 	{
 		name: 'Ext',
 		tags: [
+			'Ext',
 			'Ext : Caselist',
 			'Ext : Share',
 			'Ext : NSDA',
 			'Ext : Mason',
+		],
+	},
+	{
+		name: 'Tournament Management',
+		tags: [
+			'Backup and Restore',
 		],
 	},
 ];
