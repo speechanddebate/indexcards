@@ -17,7 +17,34 @@ async function getSchool(id, opts = {}) {
 
 	return toDomain(dbRow);
 }
+async function getSchools(scope, opts = {}) {
+	const where = {};
+	if (scope.tournId) {
+		where.tourn = scope.tournId;
+	}
+	if (scope.chapterId) {
+		where.chapter = scope.chapterId;
+	}
+	if (scope.regionId) {
+		where.region = scope.regionId;
+	}
+	if (scope.districtId) {
+		where.district = scope.districtId;
+	}
 
+	const dbRows = await db.school.findAll({
+		where,
+		include: [
+			...withSettingsInclude({
+				model: db.schoolSetting,
+				as: 'school_settings',
+				settings: opts.settings,
+			}),
+		],
+	});
+
+	return dbRows.map(toDomain);
+}
 async function createSchool(school) {
 	const created = await db.school.create(
 		toPersistence(school)
@@ -55,6 +82,7 @@ async function deleteSchool(id) {
 
 export default {
 	getSchool,
+	getSchools,
 	createSchool,
 	updateSchool,
 	deleteSchool,

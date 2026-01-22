@@ -80,12 +80,15 @@ export function collectOpenApi(router, basePath = '') {
 			const routePath = joinPaths(basePath, layer.route.path);
 
 			for (const method of Object.keys(layer.route.methods)) {
-				const handler = findOpenApiHandler(layer.route.stack);
+				const handler = findHandlerForMethod(
+					layer.route.stack,
+					method
+				);
 
 				const op = normalizeOperation(
 					method,
 					routePath,
-					handler.openapi
+					handler?.openapi
 				);
 
 				paths[routePath] ??= {};
@@ -111,18 +114,6 @@ export function collectOpenApi(router, basePath = '') {
 	}
 
 	return { paths, usedTags };
-}
-
-/**
- * Prefer a handler that actually defines `.openapi`
- */
-function findOpenApiHandler(stack) {
-	for (let i = stack.length - 1; i >= 0; i--) {
-		if (stack[i].handle?.openapi) {
-			return stack[i].handle;
-		}
-	}
-	return stack.at(-1).handle;
 }
 
 function normalizeOperation(method, routePath, openapi) {
@@ -254,4 +245,26 @@ function isMultiOperation(openapi) {
 	]);
 
 	return Object.keys(openapi).some(k => MULTI_OP_KEYS.has(k));
+}
+
+function findHandlerForMethod(stack, method) {
+	method = method.toLowerCase();
+
+	// Prefer a handler for THIS method that defines .openapi
+	for (let i = stack.length - 1; i >= 0; i--) {
+		const layer = stack[i];
+		if (layer.method === method && layer.handle?.openapi) {
+			return layer.handle;
+		}
+	}
+
+	// Fallback: the handler for THIS method
+	for (let i = stack.length - 1; i >= 0; i--) {
+		const layer = stack[i];
+		if (layer.method === method) {
+			return layer.handle;
+		}
+	}
+
+	return null;
 }
