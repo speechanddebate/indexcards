@@ -9,7 +9,7 @@ export async function userChapters(req,res) {
 			and permission.chapter = chapter.id
 		group by chapter.id
 	`, {
-		replacements: { personId: req.session.person },
+		replacements: { personId: req.person.id },
 		type: req.db.Sequelize.QueryTypes.SELECT,
 	});
 

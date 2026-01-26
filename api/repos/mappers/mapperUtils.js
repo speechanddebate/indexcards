@@ -1,3 +1,22 @@
+/**
+ * Helper to convert DB 0/1 or boolean to JS boolean (true/false)
+ */
+export function toBool(v) {
+	return v === true || v === 1 || v === '1';
+}
+
+/**
+ * Helper to convert JS boolean to DB 0/1
+ */
+export function fromBool(v) {
+	return v ? 1 : 0;
+}
+
+// Usage in a fieldMap:
+// FIELD_MAP = {
+//   inactive: { db: 'inactive', toDomain: toBool, toDb: fromBool },
+//   ...
+// }
 // repos/mappers/mapperUtils.js
 import { flattenSettings } from '../utils/settings.js';
 /**

@@ -72,7 +72,7 @@ export function withSettingsInclude({
  *
  * @returns {Array<Object>} rows suitable for bulkCreate
  */
-function buildSettingsRows({
+export function buildSettingsRows({
 	settings,
 	ownerKey,
 	ownerId,

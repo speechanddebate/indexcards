@@ -1,7 +1,8 @@
 import db from '../data/db.js';
 import  fileRepo  from './fileRepo.js';
 import webpageRepo  from './webpageRepo.js';
-import { toDomain } from './mappers/tournMapper.js';
+import { toDomain, toPersistence } from './mappers/tournMapper.js';
+import { saveSettings, withSettingsInclude } from './utils/settings.js';
 
 /**
  * Fetch a single tournament by ID or webname.
@@ -16,28 +17,8 @@ import { toDomain } from './mappers/tournMapper.js';
 export async function getTourn(tournId,opts = {}) {
 	const {
 		unpublished = false, // false | true (include unpublished tourns)
-		settings = false, // false | true | string[] of setting tags
 	} = opts;
 	const where = {};
-	const include = [];
-
-	// ---- settings handling ----
-	if (settings) {
-		const settingsInclude = {
-			model: db.tournSetting,
-			as: 'tourn_settings',
-		};
-
-		// If settings is an array, filter by tag
-		if (Array.isArray(settings)) {
-			settingsInclude.where = {
-				tag: settings,
-			};
-			settingsInclude.required = false; // still return tourn if no matching settings
-		}
-
-		include.push(settingsInclude);
-	}
 
 	// ---- publication filter ----
 	if (!unpublished) {
@@ -53,12 +34,31 @@ export async function getTourn(tournId,opts = {}) {
 
 	const tourn = await db.tourn.findOne({
 		where,
-		include,
+		include: [
+			...withSettingsInclude({
+				model: db.tournSetting,
+				as: 'tourn_settings',
+				settings: opts.settings,
+			}),
+		],
 		order: [['start', 'desc']],
 		limit: 1,
 	});
 
 	return toDomain(tourn);
+}
+export async function createTourn(tourn) {
+	const created = await db.tourn.create(
+		toPersistence(tourn)
+	);
+
+	await saveSettings({
+		model: db.tournSetting,
+		settings: tourn.settings,
+		ownerKey: 'tourn',
+		ownerId: created.id,
+	});
+	return created.id;
 }
 
 /**
@@ -135,6 +135,7 @@ export async function getContacts(tournId) {
 
 export default {
 	getTourn,
+	createTourn,
 	getFiles,
 	getSchedule,
 	getPages,

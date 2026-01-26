@@ -1,5 +1,5 @@
 // repos/mappers/tournMapper.js
-import { toDomain as genericToDomain, toPersistence as genericToPersistence } from './mapperUtils.js';
+import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
 
 export const FIELD_MAP = {
 	id: 'id',
@@ -9,13 +9,14 @@ export const FIELD_MAP = {
 	country: 'country',
 	tz: 'tz',
 	webname: 'webname',
-	hidden: { db: 'hidden', toDomain: v => Boolean(v), toDb: v => (v ? 1 : 0) },
+	hidden: { db: 'hidden', toDomain: toBool, toDb: fromBool },
 	start: 'start',
 	end: 'end',
 	regStart: 'reg_start',
 	regEnd: 'reg_end',
 	settings: 'tourn_settings',
-	createdAt: 'timestamp',
+	lastModified: { db: 'timestamp', toDb: () => undefined },
+	createdAt: { db: 'created_at', toDb: () => undefined },
 };
 
 export const toDomain = dbRow => genericToDomain(dbRow, FIELD_MAP);

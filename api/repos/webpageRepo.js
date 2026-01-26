@@ -1,12 +1,9 @@
 import db from '../data/db.js';
-import { toDomain } from './mappers/webpageMapper.js';
+import { toDomain, toPersistence } from './mappers/webpageMapper.js';
 
-export async function getWebpages({
-	scope = {},
-	includeUnpublished = false,
-} = {}
-) {
+export async function getWebpages({scope, opts = {}} = {}) {
 	const where = {};
+	const { includeUnpublished = false } = opts;
 
 	if (!includeUnpublished) {
 		where.published = 1;
@@ -36,6 +33,14 @@ export async function getWebpages({
 	return webpages.map(toDomain);
 };
 
+async function createWebpage(webpage) {
+	const created = await db.webpage.create(
+		toPersistence(webpage)
+	);
+	return created.id;
+}
+
 export default {
 	getWebpages,
+	createWebpage,
 };

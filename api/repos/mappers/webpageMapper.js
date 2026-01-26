@@ -1,5 +1,5 @@
 // repos/mappers/schoolMapper.js
-import { toDomain as genericToDomain, toPersistence as genericToPersistence } from './mapperUtils.js';
+import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
 
 export const FIELD_MAP = {
 	id: 'id',
@@ -7,8 +7,8 @@ export const FIELD_MAP = {
 	slug: 'slug',
 	content: 'content',
 	sidebar: 'sidebar',
-	published: 'published',
-	sitewide: 'sitewide',
+	published: { db: 'published', toDomain: toBool, toDb: fromBool },
+	sitewide: { db: 'sitewide', toDomain: toBool, toDb: fromBool },
 	special: 'special',
 	pageOrder: 'page_order',
 	tournId: 'tourn',
