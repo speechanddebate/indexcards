@@ -1,7 +1,6 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
-import rateLimiter from 'express-rate-limit';
 import {v4 as uuid} from 'uuid';
 import expressWinston from 'express-winston';
 import bodyParser from 'body-parser';
@@ -11,6 +10,7 @@ import errorHandler from './api/helpers/error.js';
 import { Authenticate } from './api/middleware/authentication.js';
 import csrfMiddleware from './api/middleware/csrfMiddleware.js';
 import v1Router from './api/routes/routers/v1/indexRouter.js';
+import { rateLimiterMiddleware } from './api/middleware/rateLimiter.js';
 
 import {
 	tabAuth,
@@ -49,41 +49,6 @@ app.use((req, res, next) => {
 app.enable('trust proxy', 1);
 app.get('/v1/ip', (request, response) => response.send(request.ip));
 
-// Rate limit all requests
-const limiter = rateLimiter({
-	windowMs : config.RATE_WINDOW || 15 * 60 * 1000 , // 15 minutes
-	max      : config.RATE_MAX || 10000, // limit each IP to 100000 requests per windowMs
-});
-app.use(limiter);
-
-const messageLimiter = rateLimiter({
-	windowMs : config.MESSAGE_RATE_WINDOW || 15 * 1000 , // 30 seconds
-	max      : config.MESSAGE_RATE_MAX || 1            , // limit each to 2 blasts requests per 30 seconds
-	message  : `
-		You have reached your rate limit on messages which is ${config.MESSAGE_RATE_MAX} .
-		Please do not blast people that persistently.
-	`,
-});
-
-// Can we find a way to match these on the last verb? -- CLP, dreaming instead of googling.
-
-app.use('/v1/tab/:tournId/round/:roundId/message', messageLimiter);
-app.use('/v1/tab/:tournId/round/:roundId/blast', messageLimiter);
-app.use('/v1/tab/:tournId/round/:roundId/poke', messageLimiter);
-app.use('/v1/tab/:tournId/timeslot/:timeslotId/message', messageLimiter);
-app.use('/v1/tab/:tournId/timeslot/:timeslotId/blast', messageLimiter);
-app.use('/v1/tab/:tournId/timeslot/:timeslotId/poke', messageLimiter);
-app.use('/v1/tab/:tournId/section/:sectionId/blastMessage', messageLimiter);
-app.use('/v1/tab/:tournId/section/:sectionId/blastPairing', messageLimiter);
-app.use('/v1/tab/:tournId/section/:sectionId/poke', messageLimiter);
-
-const searchLimiter = rateLimiter({
-	windowMs : config.SEARCH_RATE_WINDOW || 30 * 1000 , // 30 seconds
-	max      : config.SEARCH_RATE_MAX || 5            , // limit each to 5 search requests per 30 seconds
-});
-
-app.use('/v1/public/search', searchLimiter);
-
 // Enable CORS Access, hopefully in a way that means I don't
 // have to fight with it ever again.
 const corsOptions = {
@@ -113,6 +78,7 @@ app.use(cookieParser());
 
 // Authenticate all requests and set req.person if valid
 app.use(Authenticate);
+app.use(rateLimiterMiddleware);
 app.use(csrfMiddleware);
 app.use('/v1',v1Router);
 
