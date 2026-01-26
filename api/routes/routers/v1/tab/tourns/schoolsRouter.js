@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import * as controller from '../../../../controllers/tab/schoolController.js';
+import * as controller from '../../../../../controllers/tab/schoolController.js';
 
 const router = Router({ mergeParams: true });
 

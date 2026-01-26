@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import tournsRouter from './tournsRouter.js';
+import tournsRouter from './tourns/tournsRouter.js';
 
 const router = Router();
 
