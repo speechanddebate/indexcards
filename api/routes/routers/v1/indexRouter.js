@@ -27,6 +27,10 @@ router.use(
 	'/reference',
 	apiReference({
 		url: '/v1',
+		orderSchemaPropertiesBy: 'preserve',
+		metaData: {
+			title: 'Tabroom.com API Reference',
+		},
 	}),
 );
 

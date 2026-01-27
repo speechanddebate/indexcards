@@ -1,9 +1,11 @@
 import tournRepo from '../repos/tournRepo.js';
+import categoryRepo from '../repos/categoryRepo.js';
 import schoolRepo from '../repos/schoolRepo.js';
 import siteRepo from '../repos/siteRepo.js';
 import webpageRepo from '../repos/webpageRepo.js';
 
 export async function generateBackup(tournId, scope, scopeId, opts = {}) {
+	opts.settings = true;
 	validateScope(scope, opts);
 
 	const backupData = {
@@ -34,9 +36,10 @@ export async function generateBackup(tournId, scope, scopeId, opts = {}) {
 }
 
 async function backupTournament(tournId, opts = {}) {
-	const tourn = await tournRepo.getTourn(tournId);
+	const tourn = await tournRepo.getTourn(tournId, { settings: opts.settings });
 	tourn.webpages = await webpageRepo.getWebpages({ scope: { tournId }, opts: { includeUnpublished: true } });
 	tourn.sites = await siteRepo.getSites({ tournId },{include: {rooms: true}});
+	tourn.categories = await categoryRepo.getCategories({ tournId }, { settings: opts.settings });
 	return tourn;
 }
 async function backupSchool(schoolId, tournId, opts = {}) {

@@ -45,7 +45,7 @@ async function createSite(siteData) {
 			site: newSite.id,
 		});
 	}
-	return toDomain(newSite);
+	return newSite.id;
 }
 
 export default {
