@@ -20,7 +20,7 @@ export const FIELD_MAP = {
 	scoreId: 'score',
 	tmp: 'tmp',
 	settings: 'judge_settings',
-	lastModified: { db: 'timestamp', toDb: () => undefined },
+	updatedAt: { db: 'timestamp', toDb: () => undefined },
 	createdAt: { db: 'created_at', toDb: () => undefined },
 };
 

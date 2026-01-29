@@ -8,7 +8,7 @@ export const Category = {
 		patternId: { type: 'integer', nullable: true },
 		settings: { type: 'array', items: { type: 'object' } },
 		createdAt: { type: 'string', format: 'date-time' },
-		lastModified: { type: 'string', format: 'date-time' },
+		updatedAt: { type: 'string', format: 'date-time' },
 	},
 	examples: [
 		{
@@ -19,7 +19,7 @@ export const Category = {
 			patternId: 7,
 			settings: [],
 			createdAt: '2023-01-01T00:00:00Z',
-			lastModified: '2023-01-02T00:00:00Z',
+			updatedAt: '2023-01-02T00:00:00Z',
 		},
 	],
 };

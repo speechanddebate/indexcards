@@ -24,7 +24,7 @@ export const FIELD_MAP = {
 	directions: 'directions',
 	dropoff: 'dropoff',
 	host: 'host',
-	lastModified: 'timestamp',
+	updatedAt: 'timestamp',
 };
 
 export const toDomain = dbRow => genericToDomain(dbRow, FIELD_MAP);

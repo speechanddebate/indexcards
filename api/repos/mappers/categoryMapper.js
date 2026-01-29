@@ -11,7 +11,7 @@ export const FIELD_MAP = {
 	patternId: 'pattern',
 	settings: 'category_settings',
 	createdAt: { db: 'created_at', toDb: () => undefined },
-	lastModified: { db: 'timestamp', toDb: () => undefined },
+	updatedAt: { db: 'timestamp', toDb: () => undefined },
 };
 
 export const toDomain = dbRow => {

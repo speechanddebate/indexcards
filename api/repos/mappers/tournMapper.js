@@ -15,7 +15,7 @@ export const FIELD_MAP = {
 	regStart: 'reg_start',
 	regEnd: 'reg_end',
 	settings: 'tourn_settings',
-	lastModified: { db: 'timestamp', toDb: () => undefined },
+	updatedAt: { db: 'timestamp', toDb: () => undefined },
 	createdAt: { db: 'created_at', toDb: () => undefined },
 };
 

@@ -10,7 +10,7 @@ export const FIELD_MAP = {
 	dropoff: 'dropoff',
 	host: 'host',
 	circuit: 'circuit',
-	lastModified: 'timestamp',
+	updatedAt: 'timestamp',
 
 };
 

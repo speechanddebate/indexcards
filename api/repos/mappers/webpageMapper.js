@@ -14,7 +14,7 @@ export const FIELD_MAP = {
 	tournId: 'tourn',
 	parentId: 'parent',
 	lastEditorId: 'last_editor',
-	lastModified: 'timestamp',
+	updatedAt: 'timestamp',
 	createdAt: 'created_at',
 };
 

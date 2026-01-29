@@ -6,7 +6,7 @@ export const FIELD_MAP = {
 	categoryId: 'category',
 	siteId: 'site',
 	parentId: 'parent',
-	lastModified: { db: 'timestamp', toDb: () => undefined },
+	updatedAt: { db: 'timestamp', toDb: () => undefined },
 	createdAt: { db: 'created_at', toDb: () => undefined },
 };
 

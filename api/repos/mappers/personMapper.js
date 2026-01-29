@@ -20,7 +20,7 @@ export const FIELD_MAP = {
 	lastAccess    : 'last_access',
 	passTimestamp : 'pass_timestamp',
 	settings: 'person_settings',
-	lastModified: { db: 'timestamp', toDb: () => undefined },
+	updatedAt: { db: 'timestamp', toDb: () => undefined },
 	createdAt: { db: 'created_at', toDb: () => undefined },
 };
 

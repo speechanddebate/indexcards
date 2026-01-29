@@ -41,7 +41,7 @@ export const File = {
 			format: 'date-time',
 			nullable: true,
 		},
-		lastModified: {
+		updatedAt: {
 			type: 'string',
 			format: 'date-time',
 			description: 'When the file was last modified',

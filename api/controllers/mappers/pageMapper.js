@@ -14,6 +14,6 @@ export function ToPublicPage(page){
 		slug: page.slug,
 		pageOrder: page.pageOrder,
 		parentId: page.parentId,
-		lastModified: page.lastModified,
+		updatedAt: page.updatedAt,
 	};
 }

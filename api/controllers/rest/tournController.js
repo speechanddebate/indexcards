@@ -52,7 +52,7 @@ export async function getTournInvite(req, res) {
 			published: file.published,
 			pageOrder: file.pageOrder,
 			uploaded: file.uploaded,
-			lastModified: file.lastModified,
+			updatedAt: file.updatedAt,
 		};
 	});
 	invite.events = await eventRepo.getEventInvites(invite.id);

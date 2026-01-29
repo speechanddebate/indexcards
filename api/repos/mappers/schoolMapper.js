@@ -12,7 +12,7 @@ export const FIELD_MAP = {
 	regionId: 'region',
 	districtId: 'district',
 	settings: 'school_settings',
-	lastModified: { db: 'timestamp', toDb: () => undefined },
+	updatedAt: { db: 'timestamp', toDb: () => undefined },
 	createdAt: { db: 'created_at', toDb: () => undefined },
 };
 

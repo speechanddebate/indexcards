@@ -58,7 +58,7 @@ export const WebPage = {
 			description: 'Parent page ID (for hierarchical pages)',
 		},
 
-		lastModified: {
+		updatedAt: {
 			type: 'string',
 			format: 'date-time',
 			description: 'Timestamp when the page was last modified',

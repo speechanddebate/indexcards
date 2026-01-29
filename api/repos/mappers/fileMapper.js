@@ -20,7 +20,7 @@ export const FIELD_MAP = {
 	circuitId: 'circuit',
 	parentId: 'parent',
 	personId: 'person',
-	lastModified: 'timestamp',
+	updatedAt: 'timestamp',
 };
 
 export const toDomain = dbRow => genericToDomain(dbRow, FIELD_MAP);
