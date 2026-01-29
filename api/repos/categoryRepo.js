@@ -1,21 +1,44 @@
+
 import db from '../data/db.js';
 import { withSettingsInclude } from './utils/settings.js';
 import { toDomain, toPersistence } from './mappers/categoryMapper.js';
+import { judgeInclude } from './judgeRepo.js';
+
+function buildCategoryQuery(opts = {}) {
+	const query = {
+		include: [],
+	};
+
+	if (Array.isArray(opts.fields) && opts.fields.length > 0) {
+		query.attributes = opts.fields;
+	}
+
+	if (opts?.include?.judges) query.include.push(judgeInclude(opts.include.judges));
+
+	// Category settings
+	query.include.push(
+		...withSettingsInclude({
+			model: db.categorySetting,
+			as: 'category_settings',
+			settings: opts.settings,
+		})
+	);
+
+	return query;
+}
+
+export function categoryInclude(opts = {}) {
+	return {
+		model: db.category,
+		as: 'categories',
+		...buildCategoryQuery(opts),
+	};
+}
 
 async function getCategory(id, opts = {}) {
 	if (!id) throw new Error('getCategory: id is required');
-	const dbRow = await db.category.findByPk(id, {
-		include: [
-			...withSettingsInclude({
-				model: db.categorySetting,
-				as: 'category_settings',
-				settings: opts.settings,
-			}),
-		],
-	});
-
+	const dbRow = await db.category.findByPk(id, buildCategoryQuery(opts));
 	if (!dbRow) return null;
-
 	return toDomain(dbRow);
 }
 async function getCategories(scope, opts = {}) {
@@ -23,18 +46,10 @@ async function getCategories(scope, opts = {}) {
 	if (scope?.tournId) {
 		where.tourn = scope.tournId;
 	}
-
 	const dbRows = await db.category.findAll({
 		where,
-		include: [
-			...withSettingsInclude({
-				model: db.categorySetting,
-				as: 'category_settings',
-				settings: opts.settings,
-			}),
-		],
+		...buildCategoryQuery(opts),
 	});
-
 	return dbRows.map(toDomain);
 }
 async function createCategory(data, opts = {}) {

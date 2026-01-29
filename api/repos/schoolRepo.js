@@ -1,47 +1,46 @@
-import { toDomain, toPersistence } from './mappers/schoolMapper.js';
+import { FIELD_MAP, toDomain, toPersistence } from './mappers/schoolMapper.js';
 import { saveSettings, withSettingsInclude } from './utils/settings.js';
+import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import db from '../data/db.js';
 
-async function getSchool(id, opts = {}) {
-	const dbRow = await db.school.findByPk(id, {
-		include: [
-			...withSettingsInclude({
-				model: db.schoolSetting,
-				as: 'school_settings',
-				settings: opts.settings,
-			}),
-		],
-	});
+function buildSchoolQuery(opts = {}){
+	const query = {
+		where: {},
+		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
+		include: [],
+	};
 
-	if (!dbRow) return null;
+	query.include.push(
+		...withSettingsInclude({
+			model: db.schoolSetting,
+			as: 'school_settings',
+			settings: opts.settings,
+		})
+	);
+	return query;
+}
+
+async function getSchool(id, opts = {}) {
+	const dbRow = await db.school.findByPk(id, buildSchoolQuery(opts));
 
 	return toDomain(dbRow);
 }
 async function getSchools(scope, opts = {}) {
-	const where = {};
+	const query = buildSchoolQuery(opts);
 	if (scope.tournId) {
-		where.tourn = scope.tournId;
+		query.where.tourn = scope.tournId;
 	}
 	if (scope.chapterId) {
-		where.chapter = scope.chapterId;
+		query.where.chapter = scope.chapterId;
 	}
 	if (scope.regionId) {
-		where.region = scope.regionId;
+		query.where.region = scope.regionId;
 	}
 	if (scope.districtId) {
-		where.district = scope.districtId;
+		query.where.district = scope.districtId;
 	}
 
-	const dbRows = await db.school.findAll({
-		where,
-		include: [
-			...withSettingsInclude({
-				model: db.schoolSetting,
-				as: 'school_settings',
-				settings: opts.settings,
-			}),
-		],
-	});
+	const dbRows = await db.school.findAll(query);
 
 	return dbRows.map(toDomain);
 }

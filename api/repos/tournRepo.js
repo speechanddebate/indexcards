@@ -1,8 +1,29 @@
 import db from '../data/db.js';
 import  fileRepo  from './fileRepo.js';
 import webpageRepo  from './webpageRepo.js';
-import { toDomain, toPersistence } from './mappers/tournMapper.js';
+import { FIELD_MAP, toDomain, toPersistence } from './mappers/tournMapper.js';
 import { saveSettings, withSettingsInclude } from './utils/settings.js';
+import { resolveAttributesFromFields } from './utils/repoUtils.js';
+
+function buildTournQuery(opts = {}) {
+	const query = {
+		where: {},
+		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
+		include: [],
+		order: [['start', 'desc']],
+	};
+	if (!opts.unpublished){
+		query.where.hidden = 0;
+	}
+	query.include.push(
+		...withSettingsInclude({
+			model: db.tournSetting,
+			as: 'tourn_settings',
+			settings: opts.settings,
+		})
+	);
+	return query;
+}
 
 /**
  * Fetch a single tournament by ID or webname.
@@ -15,33 +36,17 @@ import { saveSettings, withSettingsInclude } from './utils/settings.js';
  *   The tournament domain object, or null if not found.
  */
 export async function getTourn(tournId,opts = {}) {
-	const {
-		unpublished = false, // false | true (include unpublished tourns)
-	} = opts;
-	const where = {};
-
-	// ---- publication filter ----
-	if (!unpublished) {
-		where.hidden = 0;
-	}
+	const query = buildTournQuery(opts);
 
 	// ---- ID vs webname ----
 	if (typeof tournId === 'number' || !isNaN(parseInt(tournId))) {
-		where.id = parseInt(tournId, 10);
+		query.where.id = parseInt(tournId, 10);
 	} else {
-		where.webname = tournId.replace(/\W/g, '');
+		query.where.webname = tournId.replace(/\W/g, '');
 	}
 
 	const tourn = await db.tourn.findOne({
-		where,
-		include: [
-			...withSettingsInclude({
-				model: db.tournSetting,
-				as: 'tourn_settings',
-				settings: opts.settings,
-			}),
-		],
-		order: [['start', 'desc']],
+		...query,
 		limit: 1,
 	});
 
@@ -70,13 +75,7 @@ export async function createTourn(tourn) {
  * @returns {Promise<Array<Object>>} List of files
  */
 export async function getFiles(tournId, opts = {}) {
-	return await fileRepo.getFiles({
-		...opts,
-		scope: {
-			...opts.scope,
-			tournId,
-		},
-	});
+	return await fileRepo.getFiles({ tournId: tournId }, opts);
 };
 export async function getSchedule(tournId){
 	const schedule = await db.sequelize.query(`

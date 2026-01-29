@@ -1,5 +1,55 @@
 import db from '../data/db.js';
-import  { toDomain } from './mappers/roundMapper.js';
+import  { FIELD_MAP, toDomain } from './mappers/roundMapper.js';
+import { eventInclude } from './eventRepo.js';
+import { withSettingsInclude } from './utils/settings.js';
+import { resolveAttributesFromFields } from './utils/repoUtils.js';
+
+function buildRoundQuery(opts = {}) {
+	const query = {
+		where: {},
+		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
+		include: [],
+	};
+
+	if(!opts.unpublished){
+		query.where.published = 1;
+	}
+
+	query.include.push(
+		...withSettingsInclude({
+			model: db.roundSetting,
+			as: 'round_settings',
+			settings: opts.settings,
+		})
+	);
+
+	if (opts.include?.event) {
+		const eventOpts =
+			opts.include.event === true
+				? { fields: ['id','name','abbr','type','level'], settings: [] }
+				: opts.include.event;
+
+		query.include.push({
+			...eventInclude({
+				as: 'event_event',
+				...eventOpts,
+			}),
+			required: eventOpts.required,
+			where: eventOpts.where,
+		});
+	}
+
+	return query;
+}
+
+export function roundInclude(opts = {}) {
+	return {
+		model: db.round,
+		as: 'rounds',
+		...buildRoundQuery(opts),
+	};
+}
+
 export async function getRoundById(roundId){
 	const rounds = await db.sequelize.query(`
             select
@@ -175,89 +225,40 @@ export async function getRoundById(roundId){
 
 /**
  * Fetches rounds from the database with optional filters and event information.
- *
- * @param {Object} params - The options for fetching rounds.
- * @param {number} params.tournId - The ID of the tournament. Required if filtering by tournament.
- * @param {number} [params.eventId] - Optional ID of a specific event to filter rounds by.
- * @param {boolean} [params.unpublished=false] - Whether to include unpublished rounds. Defaults to false (only published rounds).
- * @param {boolean|Object} [params.includeEvent=false] - Whether to include event data with each round.
- *   Can be:
- *     - `false` (default) – do not include event info,
- *     - `true` – include default event fields (`id`, `name`, `abbr`, `type`, `level`),
- *     - an object with options:
- *         @property {string[]} [fields] - Event fields to include.
- *         @property {string[]} [settings] - Array of event_setting tags to include.
- *
- * @returns {Promise<Array<Object>>} An array of mapped round objects, each optionally containing event info and event settings.
- *
- * @example
- * const rounds = await getRounds({
- *   tournId: 12345,
- *   includeEvent: {
- *     fields: ['id','name','abbr','level'],
- *     settings: ['nsda_event_category']
- *   }
- * });
- * console.log(rounds[0].event.settings.nsda_event_category);
  */
-export async function getRounds({
-	tournId,
-	eventId,
-	unpublished = false,
-	includeEvent = false,
-}) {
+export async function getRounds(scope = {}, opts = {}) {
+	const query = buildRoundQuery(opts);
 
-	// Normalize includeEvent
-	if (includeEvent === true) {
-		includeEvent = {
-			fields: ['id','name','abbr','type','level'],
-			settings: [],
-		};
+	// Scope-only filters that belong on the base model
+	if (scope.eventId) {
+		query.where.event = scope.eventId;
 	}
 
-	const where = {
+	if (scope.tournId) {
+		// Try to find an existing event include
+		let eventInc = query.include.find(i => i.as === 'event_event');
 
-	};
-	const include = [];
-
-	if (!unpublished) {
-		where.published = 1;
-	}
-	if (eventId) {
-		where.event = eventId;
-	}
-
-	// Only include event join if tournId filter or we want to include event fields
-	if (tournId || includeEvent) {
-		const eventInclude = {
-			model: db.event,
-			as: 'event_event',
-			...(tournId ? { where: { tourn: tournId } } : {}), // filter by tournId if given
-			attributes: includeEvent ? includeEvent.fields : [], // use fields only if includeEvent
-		};
-
-		// Optionally include event settings if requested
-		if (includeEvent?.settings?.length) {
-			eventInclude.include = [
-				{
-					model: db.eventSetting,
-					as: 'event_settings',
-					required: false,
-					where: { tag: includeEvent.settings },
-					attributes: ['tag', 'value'],
-				},
-			];
+		// If it doesn't exist, add a JOIN-ONLY include
+		if (!eventInc) {
+			eventInc = eventInclude({
+				as: 'event_event',
+				fields: [], // join-only include
+			});
+			query.include.push(eventInc);
 		}
-		include.push(eventInclude);
+
+		// Enforce scope
+		eventInc.required = true;
+		eventInc.where = {
+			...(eventInc.where || {}),
+			tourn: scope.tournId,
+		};
 	}
 
-	const rounds = await db.round.findAll({
-		where: where,
-		include,
-	});
-
+	const rounds = await db.round.findAll(query);
 	return rounds.map(toDomain);
 }
+
 export async function getSections(roundId){
 	let sections = await db.sequelize.query(`
             select

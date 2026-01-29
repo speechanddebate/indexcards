@@ -19,9 +19,10 @@ describe('getRounds', () => {
         const tourn = 29807;
 
         //Act
-        var rounds = await roundRepo.getRounds({
-            tournId: 29807,
-            includeEvent: true
+        var rounds = await roundRepo.getRounds({tournId: 29807},{
+            include: {
+                event: true
+            }
           });
 
         rounds.forEach((round, i) => {
@@ -33,13 +34,14 @@ describe('getRounds', () => {
     it('returns only requested event fields and settings when includeEvent is object', async () => {
         const tourn = 29807;
       
-        const rounds = await roundRepo.getRounds({
-          tournId: tourn,
-          includeEvent: {
-            fields: ['id', 'name', 'abbr', 'level'], // exclude 'type'
-            settings: ['nsda_event_category']
-          }
-        });
+        const rounds = await roundRepo.getRounds({ tournId: tourn },{
+        	include: { 
+				event: {
+					fields: ['id', 'name', 'abbr', 'level'], // exclude 'type'
+					settings: ['nsda_event_category']
+				}
+			}
+		});
       
         rounds.forEach((round, i) => {
           // Round itself

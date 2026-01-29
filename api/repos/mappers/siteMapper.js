@@ -1,5 +1,6 @@
 // repos/mappers/schoolMapper.js
 import { toDomain as genericToDomain, toPersistence as genericToPersistence } from './mapperUtils.js';
+import { toDomain as roomDomain } from './roomMapper.js';
 
 export const FIELD_MAP = {
 	id: 'id',
@@ -15,12 +16,8 @@ export const FIELD_MAP = {
 
 export const toDomain = dbRow => {
 	const domain = genericToDomain(dbRow, FIELD_MAP);
-	//set the tournId if available
-	if (dbRow.tourn_sites?.length) {
-		domain.tournId = dbRow.tourn_sites[0].tourn;
-	}
-	if(Array.isArray(dbRow.rooms)) {
-		domain.rooms = dbRow.rooms.map(room => toDomain(room));
+	if(Array.isArray(dbRow?.rooms)) {
+		domain.rooms = dbRow.rooms.map(room => roomDomain(room));
 	}
 	return domain;
 };

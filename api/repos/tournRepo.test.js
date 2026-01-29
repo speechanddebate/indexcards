@@ -18,11 +18,8 @@ describe("getTournFiles", () => {
 
     // Assert
     expect(spy).toHaveBeenCalledOnce();
-    expect(spy).toHaveBeenCalledWith({
+    expect(spy).toHaveBeenCalledWith({ tournId: 7 },{
       includeUnpublished: true,
-      scope: {
-        tournId: 7,
-      },
     });
 
     spy.mockRestore();

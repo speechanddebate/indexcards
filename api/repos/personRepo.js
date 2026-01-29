@@ -4,16 +4,32 @@ import { verify } from 'unixcrypt';
 import { toDomain } from './mappers/personMapper.js';
 import { withSettingsInclude } from './utils/settings.js';
 
+function buildPersonQuery(opts = {}) {
+	const query = {
+		include: [],
+	};
+
+	query.include.push(
+		...withSettingsInclude({
+			model: db.personSetting,
+			as: 'person_settings',
+			settings: opts.settings,
+		})
+	);
+
+	return query;
+}
+
+export function personInclude(opts = {}) {
+	return {
+		model: db.person,
+		as: 'persons',
+		...buildPersonQuery(opts),
+	};
+}
+
 export async function getPerson(personId, opts = {}) {
-	const dbRow = await db.person.findByPk(personId, {
-		include: [
-			...withSettingsInclude({
-				model: db.personSetting,
-				as: 'person_settings',
-				settings: opts.settings,
-			}),
-		],
-	});
+	const dbRow = await db.person.findByPk(personId, buildPersonQuery(opts));
 
 	if (!dbRow) return null;
 

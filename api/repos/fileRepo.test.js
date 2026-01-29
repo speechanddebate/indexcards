@@ -14,9 +14,7 @@ describe("FileRepo", () => {
             });
 
             // Act
-            const files = await fileRepo.getFiles({
-                includeUnpublished: true,
-            });
+            const files = await fileRepo.getFiles({}, { includeUnpublished: true });
             // Assert
             const matchedFile = files.find(f => f.id === unpublishedFile.id);
             expect(matchedFile).toBeDefined();
@@ -65,9 +63,7 @@ describe("FileRepo", () => {
             });
 
             // Act
-            const files = await fileRepo.getFiles({
-                scope: { tournId: tournInstance.id },
-            } );
+            const files = await fileRepo.getFiles({ tournId: tournInstance.id });
 
             // Assert
             expect(files).toBeInstanceOf(Array);
@@ -76,11 +72,12 @@ describe("FileRepo", () => {
             expect(matchedFile).toBeDefined();
             expect(matchedFile.label).toBe("Test File");
             expect(matchedFile.filename).toBe("testfile.pdf");
-            //expect all files to have tournId and published = 1
+            //expect all files to have tournId and published = true
             for (const f of files) {
                 expect(f.tournId).toBe(tournInstance.id);
-                expect(f.published).toBe(1);
+                expect(f.published).toBe(true);
             }
         });
     });
 });
+

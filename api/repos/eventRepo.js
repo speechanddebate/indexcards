@@ -1,4 +1,36 @@
 import db from '../data/db.js';
+import { withSettingsInclude } from './utils/settings.js';
+import { FIELD_MAP } from './mappers/eventMapper.js';
+import { resolveAttributesFromFields } from './utils/repoUtils.js';
+
+function buildEventQuery(opts = {}) {
+	const query = {
+		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
+		include: [],
+	};
+
+	query.include.push(
+		...withSettingsInclude({
+			model: db.eventSetting,
+			as: 'event_settings',
+			settings: opts.settings,
+		})
+	);
+	return query;
+}
+
+export function eventInclude(opts = {}) {
+	const {
+		as = 'events', // default plural
+		...queryOpts
+	} = opts;
+
+	return {
+		model: db.event,
+		as,
+		...buildEventQuery(queryOpts),
+	};
+}
 
 /**
  *  One of palmers creations to get event invite data for a tournament

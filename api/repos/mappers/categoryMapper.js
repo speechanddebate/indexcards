@@ -1,5 +1,7 @@
 // repos/mappers/categoryMapper.js
 import { toDomain as genericToDomain, toPersistence as genericToPersistence } from './mapperUtils.js';
+import { toDomain as judgeDomain } from './judgeMapper.js';
+import { toDomain as jPoolDomain } from './jPoolMapper.js';
 
 export const FIELD_MAP = {
 	id: 'id',
@@ -12,7 +14,16 @@ export const FIELD_MAP = {
 	lastModified: { db: 'timestamp', toDb: () => undefined },
 };
 
-export const toDomain = dbRow => genericToDomain(dbRow, FIELD_MAP);
+export const toDomain = dbRow => {
+	const domain = genericToDomain(dbRow, FIELD_MAP);
+	if(Array.isArray(dbRow.judges)) {
+		domain.judges = dbRow.judges.map(judge => judgeDomain(judge));
+	}
+	if(Array.isArray(dbRow.jpools)) {
+		domain.jpools = dbRow.jpools.map(jpool => jPoolDomain(jpool));
+	}
+	return domain;
+};
 export const toPersistence = domainObj => genericToPersistence(domainObj, FIELD_MAP);
 
 export default {

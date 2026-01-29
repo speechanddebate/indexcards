@@ -29,6 +29,17 @@ describe('getCategory', () => {
     it('throws an error when id is not provided', async () => {
         await expect(categoryRepo.getCategory()).rejects.toThrow();
     });
+	it('attaches judges when include.judges is true', async () => {
+		const category = {
+			name: 'Test Category'
+		}
+		const resultId = await categoryRepo.createCategory(category);
+		expect(resultId).toBeDefined();
+		const result = await categoryRepo.getCategory(resultId, { include: { judges: true } });
+		expect(result).toBeDefined();
+		expect(result.judges).toBeDefined();
+		expect(Array.isArray(result.judges)).toBe(true);
+	});
 });
 describe('getCategories', () => { 
     it('retrieves all categories for a given tournament', async () => {
@@ -63,6 +74,17 @@ describe('getCategories', () => {
         expect(results.length).toBeGreaterThanOrEqual(2);
         expect(results.map(c => c.name)).toEqual(expect.arrayContaining([category1.name, category2.name]));
     });
+	it('attaches judges when include.judges is true', async () => {
+		const category = {
+			name: 'Test Category'
+		}
+		const resultId = await categoryRepo.createCategory(category);
+		expect(resultId).toBeDefined();
+		const results = await categoryRepo.getCategories({},{ include: { judges: true } });
+		expect(results).toBeDefined();
+		expect(results[0].judges).toBeDefined();
+		expect(Array.isArray(results[0].judges)).toBe(true);
+	});
 });
 describe('deleteCategory', () => {
     it('deletes category by id', async () => {

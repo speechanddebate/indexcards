@@ -1,37 +1,44 @@
 import db from '../data/db.js';
-import { toDomain,toPersistence } from './mappers/siteMapper.js';
+import { FIELD_MAP, toDomain, toPersistence } from './mappers/siteMapper.js';
+import { resolveAttributesFromFields } from './utils/repoUtils.js';
 
-async function getSites(scope, opts ={}) {
-	const where = {};
-	let include = [];
+function buildSiteQuery(opts = {}) {
+	const query = {
+		where: {},
+		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
+		include: [],
+	};
+	if (opts.include?.rooms) {
+		query.include.push({
+			model: db.room,
+			as: 'rooms',
+		});
+	}
+	return query;
+}
 
-	if (scope && scope.tournId) {
-		// Join tourn_sites if tournId is specified
-		include.push({
+async function getSites(scope, opts = {}) {
+	const query = buildSiteQuery(opts);
+
+	// Base filters
+	if (scope?.circuitId) {
+		query.where = { ...query.where, circuit: scope.circuitId };
+	}
+
+	// Join-only filter via tourn_sites
+	if (scope?.tournId) {
+		query.include = query.include || [];
+
+		query.include.push({
 			model: db.tournSite,
 			as: 'tourn_sites',
 			required: true,
 			where: { tourn: scope.tournId },
-			attributes: ['tourn'],
-		});
-	} else if (scope && scope.circuitId) {
-		// Filter by circuit if circuitId is specified
-		where.circuit = scope.circuitId;
-	}
-
-	if (opts && opts.include?.rooms) {
-		include.push({
-			model: db.room,
-			as: 'rooms',
-			foreignKey: 'site', // room.site is the site id
+			attributes: [], // join-only
 		});
 	}
 
-	const sites = await db.site.findAll({
-		where,
-		...(include.length > 0 ? { include } : {}),
-	});
-
+	const sites = await db.site.findAll(query);
 	return sites.map(toDomain);
 }
 
