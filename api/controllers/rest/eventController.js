@@ -1,8 +1,7 @@
 import db from '../../data/db.js';
-import eventRepo from '../../repos/eventRepo.js';
+import { NotImplemented } from '../../helpers/problem.js';
 export async function getTournEvents(req, res) {
-	const events = await eventRepo.getEvents(req.params.tournId);
-	return res.status(200).json(events);
+	return NotImplemented(req,res,'Not implemented');
 };
 getTournEvents.openapi = {
 	summary: 'Get Tournament Events',

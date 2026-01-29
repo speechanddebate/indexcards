@@ -1,13 +1,22 @@
 import db from '../data/db.js';
 import { withSettingsInclude } from './utils/settings.js';
-import { FIELD_MAP } from './mappers/eventMapper.js';
+import { FIELD_MAP, toDomain } from './mappers/eventMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
+import { roundInclude } from './roundRepo.js';
 
 function buildEventQuery(opts = {}) {
 	const query = {
+		where: {},
 		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
 		include: [],
 	};
+
+	if(opts.include?.rounds){
+		query.include.push({
+			...roundInclude(opts.include.rounds),
+			as: 'rounds',
+		});
+	}
 
 	query.include.push(
 		...withSettingsInclude({
@@ -20,15 +29,9 @@ function buildEventQuery(opts = {}) {
 }
 
 export function eventInclude(opts = {}) {
-	const {
-		as = 'events', // default plural
-		...queryOpts
-	} = opts;
-
 	return {
-		model: db.event,
-		as,
-		...buildEventQuery(queryOpts),
+		...buildEventQuery(opts),
+		as: 'events',
 	};
 }
 
@@ -115,57 +118,16 @@ export async function getEventInvites(tournId) {
 		type         : db.sequelize.QueryTypes.SELECT,
 	});
 }
-/**
- *
- * @param {*} tournId
- * @returns A list of events associated with a tournament
- */
-export async function getEvents(tournId) {
-	//ripped straight from the old /tourn/:tournId/events route. may need adjustments to make generic
-	// the big adjustment being removing the tourn.hidden = 0 check as the caller should handle that
-	const events = await db.sequelize.query(`
-        select
-            event.id, event.abbr, event.name, event.fee, event.type,
-            cap.value cap,
-            school_cap.value school_cap,
-            topic.source topic_source, topic.event_type topic_event_type, topic.tag topic_tag,
-            topic.topic_text topic_text,
-            field_report.value field_report,
-            description.value_text description
 
-        from (event)
+export async function getEvents(scope = {}, opts = {}){
+	const query = buildEventQuery(opts);
 
-            left join event_setting cap
-                on cap.event = event.id
-                and cap.tag = 'cap'
-
-            left join event_setting school_cap
-                on school_cap.event = event.id
-                and school_cap.tag = 'school_cap'
-
-            left join event_setting field_report
-                on field_report.event = event.id
-                and field_report.tag = 'field_report'
-
-            left join event_setting description
-                on description.event = event.id
-                and description.tag = 'description'
-
-            left join event_setting topic_id
-                on topic_id.event = event.id
-                and topic_id.tag = 'topic'
-
-            left join topic on topic.id = topic_id.value
-
-        where 1=1
-            and event.type != 'attendee'
-            and event.tourn = :tournId
-    `, {
-		replacements : { tournId },
-		type         : db.sequelize.QueryTypes.SELECT,
-	});
-	return events;
-};
+	if(scope.tournId){
+		query.where.tourn = scope.tournId;
+	}
+	const results = await db.event.findAll(query);
+	return results.map(toDomain);
+}
 
 export default {
 	getEvents,

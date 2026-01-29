@@ -3,6 +3,7 @@ import  { FIELD_MAP, toDomain } from './mappers/roundMapper.js';
 import { eventInclude } from './eventRepo.js';
 import { withSettingsInclude } from './utils/settings.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
+import { sectionInclude } from './sectionRepo.js';
 
 function buildRoundQuery(opts = {}) {
 	const query = {
@@ -36,6 +37,11 @@ function buildRoundQuery(opts = {}) {
 			}),
 			required: eventOpts.required,
 			where: eventOpts.where,
+		});
+	}
+	if(opts.include?.sections){
+		query.include.push({
+			...sectionInclude(opts.include.sections),
 		});
 	}
 

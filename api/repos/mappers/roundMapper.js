@@ -1,5 +1,6 @@
 import { toDomain as genericToDomain, toPersistence as genericToPersistence } from './mapperUtils.js';
-import { toDomain as mapEvent } from './eventMapper.js';
+import { toDomain as eventToDomain } from './eventMapper.js';
+import { toDomain as sectionToDomain } from './sectionMapper.js';
 
 export const FIELD_MAP = {
 	id: 'id',
@@ -12,15 +13,19 @@ export const FIELD_MAP = {
 	postFeedback: 'post_feedback',
 	published: 'published',
 	eventId : 'event',
-
-	event : {
-		db       : 'event_event',
-		toDomain : mapEvent,
-		toDb     : () => undefined,
-	},
 };
 
-export const toDomain = dbRow => genericToDomain(dbRow, FIELD_MAP);
+export const toDomain = dbRow => {
+	if(!dbRow) return null;
+	const domain = genericToDomain(dbRow, FIELD_MAP);
+	if(dbRow.event_event){
+		domain.event = eventToDomain(dbRow.event_event);
+	}
+	if(dbRow.panels){
+		domain.sections = dbRow.panels.map(sectionToDomain);
+	}
+	return domain;
+};
 export const toPersistence = domainObj => genericToPersistence(domainObj, FIELD_MAP);
 
 export default {

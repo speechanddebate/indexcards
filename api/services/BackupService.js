@@ -3,6 +3,7 @@ import categoryRepo from '../repos/categoryRepo.js';
 import schoolRepo from '../repos/schoolRepo.js';
 import siteRepo from '../repos/siteRepo.js';
 import webpageRepo from '../repos/webpageRepo.js';
+import eventRepo from '../repos/eventRepo.js';
 
 export async function generateBackup(tournId, scope, scopeId, opts = {}) {
 	opts.settings = true;
@@ -40,10 +41,31 @@ async function backupTournament(tournId, opts = {}) {
 	tourn.webpages = await webpageRepo.getWebpages({ scope: { tournId }, opts: { includeUnpublished: true } });
 	tourn.sites = await siteRepo.getSites({ tournId },{include: {rooms: true}});
 	tourn.categories = await categoryRepo.getCategories({ tournId }, {
+		settings: true,
+		include: {
+			judges: {
+				settings: true,
+			} ,
+			jpools: {
+				settings: true,
+			},
+		},
+	});
+	tourn.events = await eventRepo.getEvents({tournId}, {
 		settings: opts.settings,
-		include: { judges: {
-			settings: opts.settings,
-		} },
+		include: {
+			rounds: {
+				include: {
+					sections: {
+						include: {
+							ballots: {
+
+							},
+						},
+					},
+				},
+			},
+		},
 	});
 	return tourn;
 }

@@ -3,6 +3,7 @@ import db from '../data/db.js';
 import { withSettingsInclude } from './utils/settings.js';
 import { toDomain, toPersistence } from './mappers/categoryMapper.js';
 import { judgeInclude } from './judgeRepo.js';
+import { jPoolInclude } from './jpoolRepo.js';
 
 function buildCategoryQuery(opts = {}) {
 	const query = {
@@ -13,7 +14,16 @@ function buildCategoryQuery(opts = {}) {
 		query.attributes = opts.fields;
 	}
 
-	if (opts?.include?.judges) query.include.push(judgeInclude(opts.include.judges));
+	if (opts?.include?.judges) {
+		const judge = judgeInclude(opts.include.judges);
+		judge.as = 'judges';
+		query.include.push(judge);
+	}
+	if (opts?.include?.jpools) {
+		const jpool = jPoolInclude(opts.include.jpools);
+		jpool.as = 'jpools';
+		query.include.push(jpool);
+	}
 
 	// Category settings
 	query.include.push(
