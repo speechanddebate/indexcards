@@ -32,11 +32,9 @@ function buildRoundQuery(opts = {}) {
 
 		query.include.push({
 			...eventInclude({
-				as: 'event_event',
 				...eventOpts,
 			}),
-			required: eventOpts.required,
-			where: eventOpts.where,
+			as: 'event_event',
 		});
 	}
 	if(opts.include?.sections){
@@ -56,6 +54,7 @@ export function roundInclude(opts = {}) {
 	};
 }
 
+//TODO remove
 export async function getRoundById(roundId){
 	const rounds = await db.sequelize.query(`
             select
@@ -242,29 +241,35 @@ export async function getRounds(scope = {}, opts = {}) {
 
 	if (scope.tournId) {
 		// Try to find an existing event include
-		let eventInc = query.include.find(i => i.as === 'event_event');
+		let eventIncIdx = query.include.findIndex(i => i.as === 'event_event');
 
 		// If it doesn't exist, add a JOIN-ONLY include
-		if (!eventInc) {
-			eventInc = eventInclude({
+		if (eventIncIdx === -1) {
+			query.include.push({
+				model: db.event,
 				as: 'event_event',
-				fields: [], // join-only include
+				attributes: [], // join-only include
+				required: true,
+				where: { tourn: scope.tournId },
 			});
-			query.include.push(eventInc);
+		} else {
+			// Enforce scope
+			query.include[eventIncIdx] = {
+				...query.include[eventIncIdx],
+				required: true,
+				where: {
+					...(query.include[eventIncIdx].where || {}),
+					tourn: scope.tournId,
+				},
+			};
 		}
-
-		// Enforce scope
-		eventInc.required = true;
-		eventInc.where = {
-			...(eventInc.where || {}),
-			tourn: scope.tournId,
-		};
 	}
 
 	const rounds = await db.round.findAll(query);
 	return rounds.map(toDomain);
 }
 
+//TODO remove
 export async function getSections(roundId){
 	let sections = await db.sequelize.query(`
             select

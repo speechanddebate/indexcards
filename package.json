@@ -98,6 +98,7 @@
 	"devDependencies": {
 		"@alt3/sequelize-to-json-schemas": "^0.3.55",
 		"@eslint/compat": "^1.2.5",
+		"@faker-js/faker": "^10.2.0",
 		"@stylistic/eslint-plugin-js": "^2.13.0",
 		"@types/luxon": "^3.7.1",
 		"@vitest/coverage-v8": "^4.0.17",

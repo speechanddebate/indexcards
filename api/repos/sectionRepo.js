@@ -1,5 +1,5 @@
 import db from '../data/db.js';
-import { FIELD_MAP } from './mappers/sectionMapper.js';
+import { FIELD_MAP, toPersistence } from './mappers/sectionMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { ballotInclude } from './ballotRepo.js';
 
@@ -27,3 +27,21 @@ export function sectionInclude(opts = {}){
 		...buildSectionQuery(opts),
 	};
 }
+
+async function getSection(id, opts = {}){
+	const query = buildSectionQuery(opts);
+	query.where.id = id;
+
+	const section = await db.panel.findOne(query);
+	return section;
+}
+
+async function createSection(data){
+	const section = await db.panel.create(toPersistence(data));
+	return section.id;
+}
+
+export default {
+	getSection,
+	createSection,
+};

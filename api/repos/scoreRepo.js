@@ -25,7 +25,7 @@ function buildScoreQuery(opts = {}) {
 	return query;
 }
 
-export async function scoreInclude(opts = {}) {
+export function scoreInclude(opts = {}) {
 	return {
 		model: db.score,
 		as: 'scores',

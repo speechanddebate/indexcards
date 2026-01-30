@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeAll } from 'vitest';
 import webpageRepo from './webpageRepo.js';
-import tournRepo from './tournRepo.js';
+import { createTestTourn } from '../../tests/factories/tourn.js';
 
 describe('getWebpages', () => {
 
-    var tourn, tournWebpage, nonTournWebpage, unpublishedWebPage;
+    var tournId, tournWebpage, nonTournWebpage, unpublishedWebPage;
 
     beforeAll( async() => {
-        tourn = await tournRepo.createTourn({ name: 'Test Tournament' });
-        tournWebpage = await webpageRepo.createWebpage({ title: 'Tournament Webpage', tournId: tourn, published: true });
+        ({ tournId } = await createTestTourn());
+        tournWebpage = await webpageRepo.createWebpage({ title: 'Tournament Webpage', tournId: tournId, published: true });
         nonTournWebpage = await webpageRepo.createWebpage({ title: 'Non-Tournament Webpage', published: true });
         unpublishedWebPage = await webpageRepo.createWebpage({ title: 'Unpublished Webpage', published: false });
     });
@@ -32,7 +32,7 @@ describe('getWebpages', () => {
     });
 
     it('filters by tournId in scope', async () => {
-        const result = await webpageRepo.getWebpages({ scope: { tournId: tourn } });
+        const result = await webpageRepo.getWebpages({ scope: { tournId } });
         expect(result).toEqual(
             expect.arrayContaining([
                 expect.objectContaining({ id: tournWebpage }),
@@ -40,7 +40,7 @@ describe('getWebpages', () => {
         );
         // All results should have tournId equal to tourn
         result.forEach(page => {
-            expect(page.tournId).toBe(tourn);
+            expect(page.tournId).toBe(tournId);
         });
     });
 

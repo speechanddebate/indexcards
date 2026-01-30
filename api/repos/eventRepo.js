@@ -30,8 +30,9 @@ function buildEventQuery(opts = {}) {
 
 export function eventInclude(opts = {}) {
 	return {
-		...buildEventQuery(opts),
+		model: db.event,
 		as: 'events',
+		...buildEventQuery(opts),
 	};
 }
 

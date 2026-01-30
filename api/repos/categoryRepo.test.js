@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import categoryRepo from './categoryRepo.js';
-import tournRepo from './tournRepo.js';
+import { createTestTourn } from '/tests/factories/tourn.js';
 
 
 describe('createCategory', () => {
@@ -43,7 +43,7 @@ describe('getCategory', () => {
 });
 describe('getCategories', () => { 
     it('retrieves all categories for a given tournament', async () => {
-        const tournId = await tournRepo.createTourn({ name: 'Test Tournament' });
+        const { tournId } = await createTestTourn();
         const category1 = {
             name: 'Test Category 1',
             tournId: tournId

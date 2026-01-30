@@ -1,6 +1,8 @@
 // repos/mappers/scoreMapper.js
 import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
 import { toDomain as scoreToDomain } from './scoreMapper.js';
+import { toDomain as judgeToDomain } from './judgeMapper.js';
+import { toDomain as sectionToDomain } from './sectionMapper.js';
 
 export const FIELD_MAP = {
 	id: 'id',
@@ -18,7 +20,7 @@ export const FIELD_MAP = {
 	enteredById: 'entered_by',
 	auditedById: 'audited_by',
 	judgeId: 'judge',
-	panelId: 'panel',
+	sectionId: 'panel',
 	entryId: 'entry',
 	updatedAt: { db: 'timestamp', toDb: () => undefined },
 	createdAt: { db: 'created_at', toDb: () => undefined },
@@ -30,6 +32,12 @@ export const toDomain = dbRow => {
 
 	if(dbRow.scores){
 		domain.scores = dbRow.scores.map(scoreToDomain);
+	}
+	if(dbRow.judge_judge){
+		domain.judge = judgeToDomain(dbRow.judge_judge);
+	}
+	if(dbRow.panel_panel){
+		domain.section = sectionToDomain(dbRow.panel_panel);
 	}
 	return domain;
 };

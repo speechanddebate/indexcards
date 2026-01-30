@@ -4,10 +4,10 @@ import roundRepo from "./roundRepo.js";
 describe('getRounds', () => {
 	it('returns published rounds when given valid tournId', async () => {
         //seeded tourn with rounds
-        const tourn = 29807;
+        const tournId = 29807;
 
         //Act
-        var rounds = await roundRepo.getRounds({tournId: 29807});
+        var rounds = await roundRepo.getRounds({tournId});
 
         rounds.forEach((round, i) => {
             assert.equal(round.published, 1, `Round at index ${i} (roundId=${round.roundId}) is not published`);
@@ -16,10 +16,10 @@ describe('getRounds', () => {
 	});
     it('returns event info when include.event is true', async () => {
         //seeded tourn with rounds
-        const tourn = 29807;
+        const tournId = 29807;
 
         //Act
-        var rounds = await roundRepo.getRounds({tournId: 29807},{
+        var rounds = await roundRepo.getRounds({tournId},{
             include: {
                 event: true
             }
@@ -32,9 +32,9 @@ describe('getRounds', () => {
           });
     });
     it('returns only requested event fields and settings when includeEvent is object', async () => {
-        const tourn = 29807;
+        const tournId = 29807;
       
-        const rounds = await roundRepo.getRounds({ tournId: tourn },{
+        const rounds = await roundRepo.getRounds({ tournId },{
         	include: { 
 				event: {
 					fields: ['id', 'name', 'abbr', 'level'], // exclude 'type'

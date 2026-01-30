@@ -1,13 +1,9 @@
-const modules = import.meta.glob('./*.js', { eager: true });
+import judge from './judge.js';
+import section from './section.js';
 
-const factories = {};
-
-for (const path in modules) {
-	const name = path
-    .replace('./', '')
-    .replace('.js', '');
-
-	factories[name] = modules[path].default;
-}
+const factories = {
+	judge,
+	section,
+};
 
 export default factories;
