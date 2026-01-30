@@ -1,5 +1,5 @@
 // repos/mappers/schoolMapper.js
-import { toDomain as genericToDomain, toPersistence as genericToPersistence } from './mapperUtils.js';
+import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
 
 export const FIELD_MAP = {
 	id: 'id',
@@ -7,8 +7,8 @@ export const FIELD_MAP = {
 	type: 'type',
 	label: 'label',
 	filename: 'filename',
-	published: 'published',
-	coachId: 'coach',
+	published: { db: 'published', fromDb: toBool, toDb: fromBool },
+	coach: { db: 'coach', fromDb: toBool, toDb: fromBool },
 	pageOrder: 'page_order',
 	uploaded: 'uploaded',
 	billCategory: 'bill_category',
@@ -20,7 +20,8 @@ export const FIELD_MAP = {
 	circuitId: 'circuit',
 	parentId: 'parent',
 	personId: 'person',
-	updatedAt: 'timestamp',
+	updatedAt: { db: 'timestamp', toDb: () => undefined },
+	createdAt: { db: 'created_at', toDb: () => undefined },
 };
 
 export const toDomain = dbRow => genericToDomain(dbRow, FIELD_MAP);

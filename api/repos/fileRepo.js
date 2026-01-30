@@ -1,21 +1,20 @@
 import db from '../data/db.js';
-import { toDomain } from './mappers/fileMapper.js';
+import { FIELD_MAP, toDomain, toPersistence } from './mappers/fileMapper.js';
+import { resolveAttributesFromFields } from './utils/repoUtils.js';
 
 function buildFileQuery(opts = {}) {
-	const where = {};
+	const query = {
+		where: {},
+		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
+		include: [],
+		order: [['tag', 'ASC'],['label', 'ASC']],
+	};
 
 	if (!opts.includeUnpublished) {
-		where.published = 1;
+		query.where.published = 1;
 	}
 
-	return {
-		where,
-		include: [],
-		order: [
-			['tag', 'ASC'],
-			['label', 'ASC'],
-		],
-	};
+	return query;
 }
 
 export function fileInclude(opts = {}) {
@@ -25,31 +24,35 @@ export function fileInclude(opts = {}) {
 		...buildFileQuery(opts),
 	};
 }
+export async function getFile(id, opts = {}) {
+	const query = buildFileQuery(opts);
+	query.where = {...query.where, id};
+	const file = await db.file.findOne(query);
+	return toDomain(file);
+}
 
 export async function getFiles(scope = {}, opts = {}) {
-	const scopeWhere = {};
+	const query = buildFileQuery(opts);
 
 	for (const key of Object.keys(scope)) {
 		if (key === 'tournId') {
-			scopeWhere.tourn = scope.tournId;
+			query.where = {...query.where, tourn: scope.tournId};
 		} else {
 			throw new Error(`Invalid file scope key: ${key}`);
 		}
 	}
 
-	const baseQuery = buildFileQuery(opts);
-
-	const files = await db.file.findAll({
-		...baseQuery,
-		where: {
-			...baseQuery.where,
-			...scopeWhere,
-		},
-	});
-
+	const files = await db.file.findAll(query);
 	return files.map(toDomain);
 }
 
+async function createFile(data) {
+	const createdFile = await db.file.create(toPersistence(data));
+	return createdFile.id;
+}
+
 export default {
+	getFile,
 	getFiles,
+	createFile,
 };

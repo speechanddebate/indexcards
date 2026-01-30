@@ -36,3 +36,6 @@ export async function createTestTourn(overrides = {}) {
 		getTourn: () => tournRepo.getTourn(tournId, { settings: true }),
 	};
 }
+export default {
+	createTestTourn,
+};
