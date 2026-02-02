@@ -1,11 +1,14 @@
 import db from '../data/db.js';
 /* eslint-disable-next-line import/no-unresolved */
 import { verify } from 'unixcrypt';
-import { toDomain } from './mappers/personMapper.js';
-import { withSettingsInclude } from './utils/settings.js';
+import { FIELD_MAP,toDomain,toPersistence } from './mappers/personMapper.js';
+import { withSettingsInclude, saveSettings } from './utils/settings.js';
+import { resolveAttributesFromFields } from './utils/repoUtils.js';
 
 function buildPersonQuery(opts = {}) {
 	const query = {
+		where: {},
+		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
 		include: [],
 	};
 
@@ -29,7 +32,9 @@ export function personInclude(opts = {}) {
 }
 
 export async function getPerson(personId, opts = {}) {
-	const dbRow = await db.person.findByPk(personId, buildPersonQuery(opts));
+	const query = buildPersonQuery(opts);
+	query.where = { ...query.where, id: personId };
+	const dbRow = await db.person.findOne(query);
 
 	if (!dbRow) return null;
 
@@ -87,10 +92,23 @@ export async function verifyPassword(username, password){
 	return toDomain(person);
 }
 
+async function createPerson(personData = {}){
+	const dbRow = await db.person.create(toPersistence(personData));
+
+	await saveSettings({
+		model: db.personSetting,
+		settings: personData.settings,
+		ownerKey: 'person',
+		ownerId: dbRow.id,
+	});
+	return dbRow.id;
+}
+
 // export the  data functions NOT the mappers
 export default {
 	getPerson,
 	getPersonByApiKey,
 	hasAreaAccess,
 	getPersonByUsername,
+	createPerson,
 };

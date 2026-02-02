@@ -2,8 +2,8 @@ import { toDomain as genericToDomain, toPersistence as genericToPersistence } fr
 
 export const FIELD_MAP = {
 	id        : 'id',
-	ip: 'ip',
-	person    : 'person',
+	ip        : 'ip',
+	personId  : 'person',
 	defaults  : 'defaults',
 	agentData : 'agent_data',
 };

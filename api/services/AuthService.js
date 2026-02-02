@@ -10,7 +10,7 @@ export async function login(username, password, context = {}) {
 	}
 
 	const { userkey: userkey } = await sessionRepo.createSession({
-		person: person.id,
+		personId: person.id,
 		ip: ip,
 		agentData: agentData,
 	});

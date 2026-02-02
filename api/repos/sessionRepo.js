@@ -3,6 +3,14 @@ import crypto from 'crypto';
 import * as personMapper from './mappers/personMapper.js';
 import { toDomain, toPersistence } from './mappers/sessionMapper.js';
 
+function buildSessionQuery(opts = {}) {
+	return {
+		where: {},
+		attributes: undefined,
+		include: [],
+	};
+}
+
 async function findByUserKey(key) {
 
 	const s = await db.session.findOne({
@@ -20,6 +28,14 @@ async function findByUserKey(key) {
 		person : personMapper.toDomain(s.person_person),
 		su     : personMapper.toDomain(s.su_person),
 	};
+}
+async function getSession(id, opts = {}) {
+	if (!id) throw new Error('getSession: id is required');
+	const query = buildSessionQuery(opts);
+	query.where = { id, ...query.where };
+	const dbRow = await db.session.findOne(query);
+	if (!dbRow) return null;
+	return toDomain(dbRow);
 }
 async function createSession(session){
 	const userkey = crypto.randomBytes(32).toString('hex');
@@ -46,6 +62,7 @@ async function deleteSession(sessionId) {
 // export the  data functions NOT the mappers
 export default {
 	findByUserKey,
+	getSession,
 	createSession,
 	deleteSession,
 };

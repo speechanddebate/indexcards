@@ -1,27 +1,28 @@
 
 import db from '../data/db.js';
 import { withSettingsInclude } from './utils/settings.js';
-import { toDomain, toPersistence } from './mappers/categoryMapper.js';
+import { FIELD_MAP,toDomain, toPersistence } from './mappers/categoryMapper.js';
 import { judgeInclude } from './judgeRepo.js';
 import { jPoolInclude } from './jpoolRepo.js';
+import { resolveAttributesFromFields } from './utils/repoUtils.js';
 
 function buildCategoryQuery(opts = {}) {
 	const query = {
+		where: {},
+		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
 		include: [],
 	};
-
-	if (Array.isArray(opts.fields) && opts.fields.length > 0) {
-		query.attributes = opts.fields;
-	}
 
 	if (opts?.include?.judges) {
 		const judge = judgeInclude(opts.include.judges);
 		judge.as = 'judges';
+		judge.required = false;
 		query.include.push(judge);
 	}
 	if (opts?.include?.jpools) {
 		const jpool = jPoolInclude(opts.include.jpools);
 		jpool.as = 'jpools';
+		jpool.required = false;
 		query.include.push(jpool);
 	}
 
@@ -47,19 +48,18 @@ export function categoryInclude(opts = {}) {
 
 async function getCategory(id, opts = {}) {
 	if (!id) throw new Error('getCategory: id is required');
-	const dbRow = await db.category.findByPk(id, buildCategoryQuery(opts));
+	const query = buildCategoryQuery(opts);
+	query.where = { id, ...query.where };
+	const dbRow = await db.category.findOne(query);
 	if (!dbRow) return null;
 	return toDomain(dbRow);
 }
 async function getCategories(scope, opts = {}) {
-	const where = {};
+	const query = buildCategoryQuery(opts);
 	if (scope?.tournId) {
-		where.tourn = scope.tournId;
+		query.where.tourn = scope.tournId;
 	}
-	const dbRows = await db.category.findAll({
-		where,
-		...buildCategoryQuery(opts),
-	});
+	const dbRows = await db.category.findAll(query);
 	return dbRows.map(toDomain);
 }
 async function createCategory(data, opts = {}) {

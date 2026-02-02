@@ -1,36 +1,36 @@
-import db from '../../api/data/db.js';
+import personRepo from '../../api/repos/personRepo.js';
+import { faker } from '@faker-js/faker';
 
-const data = (props = {}) => {
-	const defaultProps = {
-		// Generate random characters for the email
-		email: `user_${Math.random().toString(36).substring(2, 10)}@example.com`,
-		first: 'Test',
-		middle: '',
-		last: 'User',
-		gender: null,
-		pronoun: null,
-		no_email: false,
-		street: null,
-		city: null,
-		state: null,
-		zip: null,
-		postal: null,
-		country: null,
-		tz: null,
-		phone: null,
-		site_admin: false,
-		nsda: null,
-		password: null,
-		accesses: 0,
-		last_access: null,
-		pass_timestamp: null,
-		timestamp: new Date(),
-		created_at: new Date(),
+export function createPersonData(overrides = {}) {
+	// Ensure email is always unique by adding a random string
+	const uniqueEmail = `user_${Math.random().toString(36).substring(2, 10)}_${Date.now()}@example.com`;
+	return {
+		email: uniqueEmail,
+		firstName: faker.person.firstName(),
+		middleName: faker.datatype.boolean() ? faker.person.middleName() : null,
+		lastName: faker.person.lastName(),
+		state: faker.location.state({abbreviated: true}),
+		country: faker.location.countryCode(),
+		tz: faker.location.timeZone(),
+		...overrides,
 	};
-
-	return Object.assign({}, defaultProps, props);
-};
-
-export default async function (props = {}) {
-	return db.person.create(data(props));
 }
+
+export async function createTestPerson(overrides = {}) {
+
+	const data = createPersonData({
+		...overrides,
+	});
+
+	const personId = await personRepo.createPerson(data);
+
+	return {
+		personId,
+		getPerson: () => personRepo.getPerson(personId),
+	};
+}
+
+export default {
+	createTestPerson,
+	createPersonData,
+};

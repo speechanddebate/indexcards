@@ -1,16 +1,15 @@
-// repos/mappers/schoolMapper.js
 import { toDomain as genericToDomain, toPersistence as genericToPersistence } from './mapperUtils.js';
 
 export const FIELD_MAP = {
 	id            : 'id',
 	email         : 'email',
-	first         : 'first',
-	middle        : 'middle',
-	last          : 'last',
+	firstName     : 'first',
+	middleName    : 'middle',
+	lastName      : 'last',
 	state         : 'state',
 	country       : 'country',
 	tz            : 'tz',
-	nada          : 'nsda',
+	nsda          : 'nsda',
 	phone         : 'phone',
 	gender        : 'gender',
 	pronoun       : 'pronoun',
