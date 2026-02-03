@@ -64,6 +64,22 @@ export async function Authenticate(req, res, next) {
 				}
 				req.authType = 'basic';
 
+			} else if (req.headers.authorization.startsWith('Bearer ')) {
+
+				//BEARER AUTHENTICATION. allow the user to send their session token as a bearer token
+				const token = req.headers.authorization.substring(7).trim();
+
+				if (!token) {
+					return BadRequest(req, res, 'The Authorization header is malformed. Expected format: Bearer token.');
+				}
+				const session = await sessionRepo.findByUserKey(token);
+				if (!session) {
+					next();
+				}
+
+				req.person = await personRepo.getPerson(session.person.id);
+				req.authType = 'bearer';
+
 			} else {
 				return BadRequest(req, res, 'The Authorization header uses an unrecognized authentication scheme.');
 			}
