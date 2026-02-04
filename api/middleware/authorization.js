@@ -75,11 +75,15 @@ export async function loadTournContext(req, res, next){
 export function requireAccess(resource, capability) {
 
 	/**
-	 * not the final form but the api is defined. it should take a resource and a capability and using the req.auth.perms
-	 * determine if the user has access to the resource with the required capability. Probably needs more testing to ensure
-	 * that parent/child relationships are properly handled and that 'inherited' permissions work as expected.
+	 * Not the final form but the api is defined. it should take a resource and
+	 * a capability and using the req.auth.perms determine if the user has
+	 * access to the resource with the required capability. Probably needs more
+	 * testing to ensure that parent/child relationships are properly handled
+	 * and that 'inherited' permissions work as expected.
 	 */
+
 	return (req, res, next) => {
+
 		if (!req.person || !req.auth || !req.auth.perms) {
 			return Unauthorized(req, res,'User not Authenticated');
 		}
@@ -93,24 +97,28 @@ export function requireAccess(resource, capability) {
 			return next();
 		};
 
-		//roles as defined in db permission_tags. grants capabilities on scoped resource and it's children
+		// Roles as defined in db permission_tags. Grants capabilities on the
+		// scoped resource and its children
+
 		const ROLES = {
-			'owner': ['read','write','delete', 'owner'],
-			'tabber': ['read','write','delete'],
+			'owner'  : ['read','write','delete', 'owner'],
+			'tabber' : ['read','write','delete'],
 		};
 
 		const CHILDREN = {
-			'tourn': ['category','site'],
-			'category': ['event','jpool','judge'],
-			'event': ['round','entry'],
-			'site': ['room'],
+			'tourn'    : ['category','site'],
+			'category' : ['event','jpool','judge'],
+			'event'    : ['round','entry'],
+			'site'     : ['room'],
 		};
 
 		// Build list of resources that satisfy the requested resource
 		// If resource is a child, include its parent(s) as valid scopes
+
 		const validResources = [resource];
 		let current = resource;
 		let foundParent = true;
+
 		while (foundParent) {
 			foundParent = false;
 			for (const [parent, children] of Object.entries(CHILDREN)) {
@@ -125,21 +133,26 @@ export function requireAccess(resource, capability) {
 
 		// Map scope to the correct param name
 		const scopeParamMap = {
-			tourn: 'tournId',
-			event: 'eventId',
-			category: 'categoryId',
-			round: 'roundId',
-			section: 'sectionId',
+			tourn    : 'tournId',
+			event    : 'eventId',
+			category : 'categoryId',
+			round    : 'roundId',
+			section  : 'sectionId',
 			// Add more as needed
 		};
 
 		// Check for any permission that matches a valid resource scope and grants the required capability
 		const hasAccess = req.auth.perms.some(perm => {
+
 			// Scope must be in validResources (resource or its parent)
 			if (!validResources.includes(perm.scope)) return false;
+
 			// Must match correct id for scope
 			const paramName = scopeParamMap[perm.scope];
-			if (paramName && req.params[paramName] !== undefined && perm.id !== req.params[paramName]) return false;
+			if (paramName && req.params[paramName] !== undefined
+				&& perm.id !== req.params[paramName]
+			) return false;
+
 			// Role must grant the capability
 			return ROLES[perm.role]?.includes(capability);
 		});
