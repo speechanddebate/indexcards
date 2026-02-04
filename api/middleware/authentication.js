@@ -57,11 +57,14 @@ export async function Authenticate(req, res, next) {
 				}
 
 				//req.person is what should be checked for every authorization decision
-				req.person = await personRepo.getPersonByApiKey(credentials.name, credentials.pass);
+				const person = await personRepo.getPersonByUsername(credentials.name, {includeSettings: ['api_key']});
 
-				if (!req.person) {
+				if (!person || person.settings.api_key !== credentials.pass) {
 					return Unauthorized(req, res,'Invalid API key');
 				}
+
+				req.person = person;
+
 				req.authType = 'basic';
 
 			} else if (req.headers.authorization.startsWith('Bearer ')) {
@@ -74,10 +77,10 @@ export async function Authenticate(req, res, next) {
 				}
 				const session = await sessionRepo.findByUserKey(token);
 				if (!session) {
-					next();
+					return next();
 				}
 
-				req.person = await personRepo.getPerson(session.person.id);
+				req.person = await personRepo.getPerson(session.person?.id);
 				req.authType = 'bearer';
 
 			} else {

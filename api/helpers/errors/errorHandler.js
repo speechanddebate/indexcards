@@ -1,6 +1,6 @@
-import { errorLogger } from './logger.js';
-import { adminBlast } from './admin.js';
-import config from '../../config/config.js';
+import { errorLogger } from '../logger.js';
+import { adminBlast } from '../admin.js';
+import config from '../../../config/config.js';
 
 export const errorHandler = (err, req, res, next) => {
 

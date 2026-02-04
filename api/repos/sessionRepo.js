@@ -1,34 +1,38 @@
 import db from '../data/db.js';
 import crypto from 'crypto';
-import * as personMapper from './mappers/personMapper.js';
-import { toDomain, toPersistence } from './mappers/sessionMapper.js';
+import { FIELD_MAP,toDomain, toPersistence } from './mappers/sessionMapper.js';
+import { resolveAttributesFromFields } from './utils/repoUtils.js';
+import { personInclude } from './personRepo.js';
 
 function buildSessionQuery(opts = {}) {
-	return {
+	const query = {
 		where: {},
-		attributes: undefined,
+		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
 		include: [],
 	};
+	if(opts.include?.person){
+		query.include.push({
+			...personInclude(opts.include.person),
+			as: 'person_person',
+		});
+	}
+	if(opts.include?.su){
+		query.include.push({
+			...personInclude(opts.include.su),
+			as: 'su_person',
+		});
+	}
+	return query;
 }
 
 async function findByUserKey(key) {
+	const query = buildSessionQuery({ include: { person: true, su: true } });
+	query.where.userkey = key;
 
-	const s = await db.session.findOne({
-		where: { userkey: key },
-		include: [
-			{ model: db.person, as: 'person_person' },
-			{ model: db.person, as: 'su_person' },
-		],
-	});
-
-	if (!s) return null;
-
-	return {
-		...toDomain(s),
-		person : personMapper.toDomain(s.person_person),
-		su     : personMapper.toDomain(s.su_person),
-	};
+	const s = await db.session.findOne(query);
+	return toDomain(s);
 }
+
 async function getSession(id, opts = {}) {
 	if (!id) throw new Error('getSession: id is required');
 	const query = buildSessionQuery(opts);

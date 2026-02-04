@@ -1,11 +1,20 @@
-import { verifyPassword } from '../repos/personRepo.js';
-import sessionRepo from '../repos/sessionRepo.js';
+import personRepo from '../repos/personRepo.js';
+/* eslint-disable-next-line import/no-unresolved */
+import { verify, encrypt } from 'unixcrypt';
 import crypto from 'crypto';
+import sessionRepo from '../repos/sessionRepo.js';
+import { ValidationError } from '../helpers/errors/errors.js';
+
 export async function login(username, password, context = {}) {
 	const { ip, agentData } = context;
-	const person = await verifyPassword(username, password);
+	const person = await personRepo.getPersonByUsername(username, {includePassword: true});
 
-	if (!person?.id) {
+	if (!person || !person?.id || !person?.password) {
+		throw AUTH_INVALID;
+	}
+
+	const ok = verifyPassword(password, person.password);
+	if (!ok) {
 		throw AUTH_INVALID;
 	}
 
@@ -16,6 +25,34 @@ export async function login(username, password, context = {}) {
 	});
 	//TODO enforce limits
 
+	return {person,token: userkey};
+}
+
+export async function register(userData, context = {}) {
+	const { ip, agentData } = context;
+	//ensure email is not already in use
+	if(userData.email && await personRepo.getPersonByUsername(userData.email)){
+		throw new ValidationError('Email already in use');
+	}
+	if(!userData.password) throw new ValidationError('Password is required');
+
+	const newPersonData = {
+		email: userData.email,
+		password: hashPassword(userData.password),
+		firstName: userData.firstName,
+		middleName: userData.middleName,
+		lastName: userData.lastName,
+		state: userData.state,
+		country: userData.country,
+		timezone: userData.timezone,
+	};
+	const person = await personRepo.createPerson(newPersonData);
+
+	const { userkey } = await sessionRepo.createSession({
+		personId: person.id,
+		ip: ip,
+		agentData: agentData,
+	});
 	return {person,token: userkey};
 }
 
@@ -45,8 +82,16 @@ export function getCSRFCookieOptions() {
 	};
 }
 
+export function hashPassword(password) {
+	return encrypt(password);
+}
+export function verifyPassword(password, hashed) {
+	return verify(password, hashed);
+}
+
 export default {
 	login,
+	register,
 	getAuthCookieOptions,
 	getCSRFCookieOptions,
 	generateCSRFToken,

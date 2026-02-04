@@ -3,6 +3,56 @@ import factories from "../../tests/factories/index.js";
 import personRepo, { personInclude } from "./personRepo.js";
 
 describe("PersonRepo", () => {
+	describe('buildPersonQuery', () => {
+		it('excludes password by default', async () => {
+			// Arrange
+			const { personId } = await factories.person.createTestPerson();
+
+			// Act
+			const person = await personRepo.getPerson(personId);
+
+			// Assert
+			expect(person).toBeDefined();
+			expect(person.password).toBeUndefined();
+		});
+		it('includes password when requested via fields', async () => {
+			// Arrange
+			const { personId } = await factories.person.createTestPerson();
+			
+			// Act
+			const person = await personRepo.getPerson(personId, { fields: ['password'] });
+
+			// Assert
+			expect(person).toBeDefined();
+			expect(person.password).toBeDefined();
+		});
+		it('excludes password even when other fields are excluded', async () => {
+			// Arrange
+			const { personId } = await factories.person.createTestPerson();
+			
+			// Act
+			const person = await personRepo.getPerson(personId, { fields: { exclude: ['firstName', 'lastName'] } });
+
+			// Assert
+			expect(person).toBeDefined();
+			expect(person.password).toBeUndefined();
+			expect(person.firstName).toBeUndefined();
+			expect(person.lastName).toBeUndefined();
+		});
+		it('includes password when requested', async () => {
+			// Arrange
+			const password = 'testpassword';
+			const { personId } = await factories.person.createTestPerson({ password });
+
+			// Act
+			const person = await personRepo.getPerson(personId, { includePassword: true });
+
+			// Assert
+			expect(person).toBeDefined();
+			expect(person.password).toBeDefined();
+			expect(person.password).toBe(password);
+		});
+	});
 	describe('personInclude', () => {
 		it('returns base person include config', () => {
 			const inc = personInclude();
@@ -27,6 +77,20 @@ describe("PersonRepo", () => {
 			expect(result).toBeNull();
 		});
 	});
+	describe('getPersonByUsername', () => {
+		it('returns the person when the username is valid', async () => {
+			// Arrange
+			const { personId, getPerson } = await factories.person.createTestPerson();
+			const person = await getPerson();
+
+			// Act
+			const result = await personRepo.getPersonByUsername(person.email);
+
+			// Assert
+			expect(result).not.toBeNull();
+			expect(result.id).toBe(personId);
+		});
+	});
 	describe('createPerson', () => {
 		it('creates a person and returns the new id', async () => {
 			// Arrange
@@ -43,53 +107,6 @@ describe("PersonRepo", () => {
 			}
 		});
 	});
-    describe("getPersonByApiKey", () => {
-        it("returns the person when the key is valid", async () => {
-            // Arrange
-            const { personId } = await factories.person.createTestPerson({
-				settings: {
-					api_key: "goodkey",
-				}
-			});
-            // Act
-            const result = await personRepo.getPersonByApiKey(personId, "goodkey");
-
-            // Assert
-            expect(result).not.toBeNull();
-            expect(result.id).toBe(personId);
-        });
-
-        it("returns null when the key is invalid", async () => {
-            // Arrange
-            const { personId } = await factories.person.createTestPerson({
-				settings: {
-					api_key: "badkey",
-				}
-			});
-
-            // Act
-            const result = await personRepo.getPersonByApiKey(personId, "goodkey");
-
-            // Assert
-            expect(result).toBeNull();
-        });
-
-
-        it("returns null when the person id is wrong", async () => {
-            // Arrange
-			const { personId } = await factories.person.createTestPerson({
-				settings: {
-					api_key: "badkey",
-				}
-			});
-            // Act
-            const result = await personRepo.getPersonByApiKey(3, "goodkey");
-
-            // Assert
-            expect(result).toBeNull();
-        });
-
-    });
     describe("hasAreaAccess", () => {
         it("returns true when person has access", async () => {
             // Arrange

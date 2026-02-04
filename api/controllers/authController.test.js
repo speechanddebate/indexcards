@@ -4,6 +4,7 @@ import { createContext } from '../../tests/httpMocks.js';
 import * as controller from '../controllers/authController.js';
 import authService,{ AUTH_INVALID} from "../services/AuthService.js";
 import sessionRepo from '../repos/sessionRepo.js';
+import { ValidationError } from '../helpers/errors/errors.js';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -39,6 +40,17 @@ describe('authController',() => {
       assert.equal(res.status.mock.calls[0][0], 401);
       assert.ok(res.json.mock.calls.length === 1);
     });
+	it('throws on error other than AUTH_INVALID', async () => {
+		vi.spyOn(authService, 'login').mockRejectedValue(new Error('Some other error'));
+		const { req, res } = createContext({
+		req: {
+			body: { username: 'alice', password: 'badpassword' },
+			ip: '127.0.0.1',
+			get: () => 'Mozilla',
+		},
+		});
+		await expect(controller.login(req, res)).rejects.toThrow('Some other error');
+	});
   
     it('sets cookies and returns token + user on success', async () => {
       const fakeResult = {
@@ -133,4 +145,63 @@ describe('authController',() => {
           expect(next).not.toHaveBeenCalled();
         });
     });
+	
+	describe('register', () => {
+		it('returns 201 and result on successful registration', async () => {
+			const fakeResult = {
+				token: 'jwt456',
+				person: { id: 99, email: 'new@user.com' },
+			};
+			vi.spyOn(authService, 'register').mockResolvedValue(fakeResult);
+			vi.spyOn(authService, 'generateCSRFToken').mockReturnValue('csrf456');
+
+			const { req, res } = createContext({
+				req: {
+					body: { username: 'newuser', password: 'pw' },
+					ip: '127.0.0.1',
+					get: () => 'Mozilla',
+				},
+			});
+
+			await controller.register(req, res);
+
+			expect(authService.register).toHaveBeenCalledWith(
+				req.body,
+				{ ip: req.ip, agentData: 'Mozilla' }
+			);
+						expect(res.json).toHaveBeenCalledWith(fakeResult);
+			expect(res.cookie).toHaveBeenCalledWith(config.COOKIE_NAME, 'jwt456', expect.any(Object));
+			expect(res.cookie).toHaveBeenCalledWith(config.CSRF.COOKIE_NAME, 'csrf456', expect.any(Object));
+		});
+
+		it('returns 400 on ValidationError', async () => {
+			vi.spyOn(authService, 'register').mockRejectedValue(new ValidationError('Invalid data'));
+
+			const { req, res } = createContext({
+				req: {
+					body: { username: '', password: '' },
+					ip: '127.0.0.1',
+					get: () => 'Mozilla',
+				},
+			});
+
+			await controller.register(req, res);
+
+			expect(res.status).toHaveBeenCalledWith(400);
+		});
+
+		it('does not catch other errors', async () => {
+			vi.spyOn(authService, 'register').mockRejectedValue(new Error('Unexpected error'));
+
+			const { req, res } = createContext({
+				req: {
+					body: { username: 'fail', password: 'fail' },
+					ip: '127.0.0.1',
+					get: () => 'Mozilla',
+				},
+			});
+
+			await expect(controller.register(req, res)).rejects.toThrow('Unexpected error');
+		});
+	});
 });

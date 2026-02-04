@@ -104,7 +104,7 @@ describe("Authentication Middleware", () => {
     describe("Basic Auth", () => {
         it("sets req.person with valid token", async () => {
             // base64("myuserkey:myapikey")
-            const encoded = Buffer.from("123:myapikey").toString("base64");
+            const encoded = Buffer.from("username:myapikey").toString("base64");
 
             const { req, res, next } = createContext({
                 req: {
@@ -113,15 +113,18 @@ describe("Authentication Middleware", () => {
                   }
                 }
               });
-            vi.spyOn(personRepo, "getPersonByApiKey").mockResolvedValue({
+            vi.spyOn(personRepo, "getPersonByUsername").mockResolvedValue({
                 id: 123,
-                email: "example@test.com"
+                email: "example@test.com",
+				settings: {
+					api_key: "myapikey"
+				},
             });
 
             await Authenticate(req, res, next);
 
             // Assertions
-            expect(personRepo.getPersonByApiKey).toHaveBeenCalledWith("123", "myapikey");
+            expect(personRepo.getPersonByUsername).toHaveBeenCalledWith("username", {includeSettings: ['api_key']});
 
             expect(req.person).toBeDefined();
             expect(req.person.id).toBe(123);
@@ -129,7 +132,7 @@ describe("Authentication Middleware", () => {
         });
         it("returns 401 when API key is invalid", async () => {
             // base64("myuserkey:invalidapikey")
-            const encoded = Buffer.from("123:invalidapikey").toString("base64");
+            const encoded = Buffer.from("username:invalidapikey").toString("base64");
 
             const { req, res, next } = createContext({
                 req: {
@@ -139,12 +142,12 @@ describe("Authentication Middleware", () => {
                 }
               });
 
-            vi.spyOn(personRepo, "getPersonByApiKey").mockResolvedValue(null);
+            vi.spyOn(personRepo, "getPersonByUsername").mockResolvedValue(null);
 
             await Authenticate(req, res, next);
 
             // Assertions
-            expect(personRepo.getPersonByApiKey).toHaveBeenCalledWith("123", "invalidapikey");
+            expect(personRepo.getPersonByUsername).toHaveBeenCalledWith("username", {includeSettings: ['api_key']});
 
             expect(res.status).toHaveBeenCalledWith(401);
             expect(next).not.toHaveBeenCalled();

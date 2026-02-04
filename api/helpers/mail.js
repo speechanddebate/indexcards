@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import { convert } from 'html-to-text';
 import config from '../../config/config.js';
 import { debugLogger } from './logger.js';
-import { inlineError } from './error.js';
+import { inlineError } from './errors/errorHandler.js';
 
 export const emailBlast = async (inputData) => {
 
