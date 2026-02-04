@@ -1,11 +1,22 @@
 import db from '../data/db.js';
-/* eslint-disable-next-line import/no-unresolved */
-import { verify } from 'unixcrypt';
-import { toDomain } from './mappers/personMapper.js';
-import { withSettingsInclude } from './utils/settings.js';
+import { FIELD_MAP,toDomain,toPersistence } from './mappers/personMapper.js';
+import { withSettingsInclude, saveSettings } from './utils/settings.js';
+import { resolveAttributesFromFields } from './utils/repoUtils.js';
 
 function buildPersonQuery(opts = {}) {
+
+	// Exclude password by default unless opts.includePassword is true
+	let attributes = resolveAttributesFromFields(opts.fields, FIELD_MAP);
+	if (!opts.includePassword) {
+		if (!attributes) {
+			attributes = { exclude: ['password'] };
+		} else if (attributes.exclude && !attributes.exclude.includes('password')) {
+			attributes.exclude.push('password');
+		}
+	}
 	const query = {
+		where: {},
+		attributes,
 		include: [],
 	};
 
@@ -29,28 +40,20 @@ export function personInclude(opts = {}) {
 }
 
 export async function getPerson(personId, opts = {}) {
-	const dbRow = await db.person.findByPk(personId, buildPersonQuery(opts));
+	if (!personId) throw new Error('getPerson: personId is required');
+	const query = buildPersonQuery(opts);
+	query.where = { ...query.where, id: personId };
+	const dbRow = await db.person.findOne(query);
 
 	if (!dbRow) return null;
 
 	return toDomain(dbRow);
 }
-
-async function getPersonByApiKey(personId,apiKey) {
-	return await db.person.findOne({
-		where: { id: personId },
-		include: [
-			{
-				model : db.personSetting,
-				as    : 'person_settings',
-				where: {
-					tag   : 'api_key',
-					value : apiKey,
-				},
-				required: true,
-			},
-		],
-	});
+async function getPersonByUsername(username, opts = {}) {
+	const query = buildPersonQuery(opts);
+	query.where = { ...query.where, email: username };
+	const dbRow = await db.person.findOne(query);
+	return toDomain(dbRow);
 }
 async function hasAreaAccess(personId, area) {
 	const authTag = `api_auth_${area}`;
@@ -63,34 +66,23 @@ async function hasAreaAccess(personId, area) {
 
 	return setting !== null;
 }
-async function getPersonByUsername(username){
-	const person = await db.person.findOne({
-		where: { email: username },
+
+async function createPerson(personData = {}){
+	const dbRow = await db.person.create(toPersistence(personData));
+
+	await saveSettings({
+		model: db.personSetting,
+		settings: personData.settings,
+		ownerKey: 'person',
+		ownerId: dbRow.id,
 	});
-	return toDomain(person);
-}
-/**
- *  verify a username and password
- * @returns a person object if the credentials are valid, otherwise null
- */
-export async function verifyPassword(username, password){
-	const person = await db.person.findOne({
-		where: { email: username },
-	});
-	if(!person || !person.password){
-		return null;
-	}
-	const ok = verify(password, person.password);
-	if (!ok) {
-		return null;
-	}
-	return toDomain(person);
+	return dbRow.id;
 }
 
 // export the  data functions NOT the mappers
 export default {
 	getPerson,
-	getPersonByApiKey,
 	hasAreaAccess,
 	getPersonByUsername,
+	createPerson,
 };

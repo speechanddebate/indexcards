@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { requireAccess } from '../../../../../middleware/authorization.js';
 import { sideCounts, roundDecisionStatus } from '../../../../../controllers/tab/round/index.js';
 import { getRoundChangeLog } from '../../../../../controllers/tab/round/changeLog.js';
 import {
@@ -12,21 +13,28 @@ import { mergeTimeslotRounds, unmergeTimeslotRounds } from '../../../../../contr
 
 const router = Router();
 
-router.get('/:roundId/attendance', getTournAttendance);
+router.get('/:roundId/attendance', requireAccess('round', 'read'), getTournAttendance);
 
-router.post('/:roundId/blast',blastRoundPairing);
+router.post('/:roundId/blast', requireAccess('round', 'write'), blastRoundPairing);
 
-router.get('/:roundId/blastStatus',roundBlastStatus);
+router.get('/:roundId/blastStatus',
+	requireAccess('round', 'read'), roundBlastStatus);
+router.get('/:roundId/dashboard',
+	requireAccess('round', 'read'), getTournDashboard);
+router.get('/:roundId/log',
+	requireAccess('round', 'read'), getRoundChangeLog);
+router.post('/:roundId/makeShareRooms',
+	requireAccess('round', 'write'), makeShareRooms);
+router.post('/:roundId/merge',
+	requireAccess('round', 'write'), mergeTimeslotRounds);
 
-router.get('/:roundId/dashboard', getTournDashboard);
-router.get('/:roundId/log', getRoundChangeLog);
-router.post('/:roundId/makeShareRooms', makeShareRooms);
-router.post('/:roundId/merge', mergeTimeslotRounds);
+router.post('/:roundId/message',
+	requireAccess('round', 'write'), blastRoundMessage);
 
-router.post('/:roundId/message', blastRoundMessage);
-
-router.get('/:roundId/sidecount', sideCounts);
-router.get('/:roundId/status', roundDecisionStatus);
-router.post('/:roundId/unmerge', unmergeTimeslotRounds);
-
+router.get('/:roundId/sidecount',
+	requireAccess('round', 'read'), sideCounts);
+router.get('/:roundId/status',
+	requireAccess('round', 'read'), roundDecisionStatus);
+router.post('/:roundId/unmerge',
+	requireAccess('round', 'write'), unmergeTimeslotRounds);
 export default router;

@@ -3,10 +3,13 @@ import { Backup } from '../../../../../controllers/tab/tourn/backup.js';
 import categoriesRouter from './categoriesRouter.js';
 import schoolsRouter from './schoolsRouter.js';
 import sitesRouter from './sitesRouter.js';
+import { loadTournContext, requireAccess } from '../../../../../middleware/authorization.js';
 
 const router = Router();
 
-router.post('/:tournId/backup', Backup);
+router.use(loadTournContext);
+
+router.post('/:tournId/backup',requireAccess('tourn', 'read'), Backup);
 router.use('/:tournId/categories', categoriesRouter);
 router.use('/:tournId/schools', schoolsRouter);
 router.use('/:tournId/sites', sitesRouter);

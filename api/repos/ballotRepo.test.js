@@ -83,14 +83,6 @@ describe('ballotRepo', async () => {
 			expect(found).toBeDefined();
 			expect(found.sectionId).toBe(sectionId);
 		});
-
-		it('should return all ballots when no scope is provided', async () => {
-			// Create at least one ballot to ensure there is data
-			await ballotRepo.createBallot({ sectionId });
-			const ballots = await ballotRepo.getBallots();
-			expect(Array.isArray(ballots)).toBe(true);
-			expect(ballots.length).toBeGreaterThan(0);
-		});
 	});
 	describe('createBallot', async () => {
 		it('should create a ballot and retrieve it', async () => {

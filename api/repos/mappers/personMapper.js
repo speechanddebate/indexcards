@@ -1,23 +1,23 @@
-// repos/mappers/schoolMapper.js
-import { toDomain as genericToDomain, toPersistence as genericToPersistence } from './mapperUtils.js';
+import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
 
 export const FIELD_MAP = {
 	id            : 'id',
 	email         : 'email',
-	first         : 'first',
-	middle        : 'middle',
-	last          : 'last',
+	firstName     : 'first',
+	middleName    : 'middle',
+	lastName      : 'last',
 	state         : 'state',
 	country       : 'country',
-	tz            : 'tz',
-	nada          : 'nsda',
+	timezone      : 'tz',
+	nsda          : 'nsda',
 	phone         : 'phone',
 	gender        : 'gender',
 	pronoun       : 'pronoun',
-	no_email      : 'no_email',
-	siteAdmin     : 'site_admin',
+	noEmail       : {db: 'no_email', toDomain: toBool, toPersistence: fromBool },
+	siteAdmin     : {db: 'site_admin', toDomain: toBool, toPersistence: fromBool },
 	accesses      : 'accesses',
 	lastAccess    : 'last_access',
+	password      : 'password',
 	passTimestamp : 'pass_timestamp',
 	settings: 'person_settings',
 	updatedAt: { db: 'timestamp', toDb: () => undefined },

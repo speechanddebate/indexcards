@@ -6,7 +6,7 @@ import expressWinston from 'express-winston';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
 import config from './config/config.js';
-import errorHandler from './api/helpers/error.js';
+import errorHandler from './api/helpers/errors/errorHandler.js';
 import { Authenticate } from './api/middleware/authentication.js';
 import csrfMiddleware from './api/middleware/csrfMiddleware.js';
 import v1Router from './api/routes/routers/v1/indexRouter.js';
