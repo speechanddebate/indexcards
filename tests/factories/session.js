@@ -10,10 +10,11 @@ export function createSessionData(overrides = {}) {
 
 export async function createTestSession(overrides = {}) {
 	const data = createSessionData(overrides);
-	const { id: sessionId } = await sessionRepo.createSession(data);
+	const { id: sessionId, userkey } = await sessionRepo.createSession(data);
 
 	return {
 		sessionId,
+		userkey,
 		getSession: () => sessionRepo.getSession(sessionId, { settings: true }),
 	};
 }

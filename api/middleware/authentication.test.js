@@ -223,7 +223,7 @@ describe("Authentication Middleware", () => {
             expect(next).toHaveBeenCalled();
             expect(req.person).toBeDefined();
         });
-        it('does not set req.person when invalid token', async () => {
+        it('returns 401 when invalid token', async () => {
 
             const { req, res, next } = createContext({
                 req: {
@@ -240,8 +240,8 @@ describe("Authentication Middleware", () => {
             await Authenticate(req, res, next);
 
             //Assert
-            expect(next).toHaveBeenCalled();
-            expect(req.person).not.toBeDefined();
+            expect(res.status).toHaveBeenCalledWith(401);
+            expect(next).not.toHaveBeenCalled();
         });
         it('calls next(err) on sessionRepo error', async () => {
 

@@ -150,7 +150,7 @@ describe('authController',() => {
 		it('returns 201 and result on successful registration', async () => {
 			const fakeResult = {
 				token: 'jwt456',
-				person: { id: 99, email: 'new@user.com' },
+				personId: 55,
 			};
 			vi.spyOn(authService, 'register').mockResolvedValue(fakeResult);
 			vi.spyOn(authService, 'generateCSRFToken').mockReturnValue('csrf456');

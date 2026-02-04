@@ -21,6 +21,9 @@ export async function login(req, res) {
 		if (err === AUTH_INVALID) return Unauthorized(req,res,'Invalid Credentials');
 		throw err;
 	}
+	if (!result) {
+		return Unauthorized(req,res,'Invalid Credentials');
+	}
 	const { person, token } = result;
 
 	var response = {
@@ -80,14 +83,11 @@ export async function register(req,res){
 		if (err instanceof ValidationError) return BadRequest(req, res, err.message);
 		throw err;
 	}
-	const { person, token } = result;
+	const { personId, token } = result;
 
 	const response = {
 		token: token,
-		person: {
-			id: person.id,
-			email: person.email,
-		},
+		personId: personId,
 	};
 	res.cookie(config.COOKIE_NAME, token, authService.getAuthCookieOptions());
 	res.cookie(config.CSRF.COOKIE_NAME, authService.generateCSRFToken(token), authService.getCSRFCookieOptions());

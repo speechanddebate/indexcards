@@ -92,9 +92,8 @@ describe('AuthService', () => {
 
 			const result = await AuthService.register(userData);
 
-			expect(result).toHaveProperty('person');
+			expect(result).toHaveProperty('personId');
 			expect(result).toHaveProperty('token');
-			expect(result.person.email).toBe(userData.email);
 		});
 		it('throws ValidationError if email is already in use', async () => {
 			const personData = factories.person.createPersonData();

@@ -71,16 +71,14 @@ export async function Authenticate(req, res, next) {
 
 				//BEARER AUTHENTICATION. allow the user to send their session token as a bearer token
 				const token = req.headers.authorization.substring(7).trim();
-
 				if (!token) {
 					return BadRequest(req, res, 'The Authorization header is malformed. Expected format: Bearer token.');
 				}
-				const session = await sessionRepo.findByUserKey(token);
+				const session = await sessionRepo.findByUserKey(token, { include: { person: true } });
 				if (!session) {
-					return next();
+					return Unauthorized(req, res,'Invalid Bearer token');
 				}
-
-				req.person = await personRepo.getPerson(session.person?.id);
+				req.person = await personRepo.getPerson(session.personId);
 				req.authType = 'bearer';
 
 			} else {

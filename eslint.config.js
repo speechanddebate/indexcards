@@ -6,8 +6,7 @@ import tabroom from './config/eslint-tabroom.js';
 
 import globals from 'globals';
 
-import { includeIgnoreFile } from '@eslint/compat';
-import { fileURLToPath } from 'node:url';
+import tabRequireAccess from './eslint-rules/tab-require-access.js'; // <-- import the rule
 
 export default [
 	jslint.configs.recommended,
@@ -27,6 +26,7 @@ export default [
 
 		files : ['**/*.js', '*.js'],
 		rules : {
+			'tab-require-access/tab-require-access': 'error',
 			semi : 'error',
 			'no-unused-vars' : [
 				'error',
@@ -35,6 +35,9 @@ export default [
 					argsIgnorePattern : '^(err|req|res|next|opts)$',
 				},
 			],
+		},
+		plugins: {
+			'tab-require-access': { rules: { 'tab-require-access': tabRequireAccess } },
 		},
 		languageOptions : {
 			ecmaVersion : 2023,

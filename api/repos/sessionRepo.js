@@ -14,21 +14,22 @@ function buildSessionQuery(opts = {}) {
 		query.include.push({
 			...personInclude(opts.include.person),
 			as: 'person_person',
+			required: false,
 		});
 	}
 	if(opts.include?.su){
 		query.include.push({
 			...personInclude(opts.include.su),
 			as: 'su_person',
+			required: false,
 		});
 	}
 	return query;
 }
 
-async function findByUserKey(key) {
-	const query = buildSessionQuery({ include: { person: true, su: true } });
+async function findByUserKey(key, opts = {}) {
+	const query = buildSessionQuery(opts);
 	query.where.userkey = key;
-
 	const s = await db.session.findOne(query);
 	return toDomain(s);
 }

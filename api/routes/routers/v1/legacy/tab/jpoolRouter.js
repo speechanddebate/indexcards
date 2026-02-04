@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { requireAccess } from '../../../../../middleware/authorization.js';
 import {
 	getJPool,
 	updateJPool,
@@ -21,31 +22,29 @@ import { placeJudgesStandby } from '../../../../../controllers/tab/jpool/standby
 const router = Router();
 
 router.route('/:jpoolId')
-	.get(getJPool)
-	.put(updateJPool)
-	.delete(deleteJPool);
+	.get(requireAccess('jpool', 'read'), getJPool)
+	.put(requireAccess('jpool', 'write'), updateJPool)
+	.delete(requireAccess('jpool', 'write'), deleteJPool);
 
 router.route('/:jpoolId/judge/:judgeId')
-	.post(createJPoolJudge)
-	.delete(deleteJPoolJudge);
-
+	.post(requireAccess('jpool', 'write'), createJPoolJudge)
+	.delete(requireAccess('jpool', 'write'), deleteJPoolJudge);
 router.route('/:jpoolId/judges')
-	.get(getJPoolJudges)
-	.post(createJPoolJudges)
-	.delete(deleteJPoolJudges);
-
+	.get(requireAccess('jpool', 'read'), getJPoolJudges)
+	.post(requireAccess('jpool', 'write'), createJPoolJudges)
+	.delete(requireAccess('jpool', 'write'), deleteJPoolJudges);
 router.route('/:jpoolId/round/:roundId')
-	.post(createJPoolRound)
-	.delete(deleteJPoolRound);
+	.post(requireAccess('jpool', 'write'), createJPoolRound)
+	.delete(requireAccess('jpool', 'write'), deleteJPoolRound);
 
 router.route('/:jpoolId/rounds')
-	.get(getJPoolRounds)
-	.post(createJPoolRounds)
-	.delete(deleteJPoolRounds);
+	.get(requireAccess('jpool', 'read'), getJPoolRounds)
+	.post(requireAccess('jpool', 'write'), createJPoolRounds)
+	.delete(requireAccess('jpool', 'write'), deleteJPoolRounds);
 
-router.post('/:jpoolId/blast', blastJudges);
-router.post('/:jpoolId/placeJudges/standby', placeJudgesStandby);
-router.post('/:jpoolId/placeJudges/nats', placeJudgesNats);
-router.post('/:jpoolId/placeJudges/suppOnly', placeSuppOnlyJudges);
+router.post('/:jpoolId/blast', requireAccess('jpool', 'write'), blastJudges);
+router.post('/:jpoolId/placeJudges/standby', requireAccess('jpool', 'write'), placeJudgesStandby);
+router.post('/:jpoolId/placeJudges/nats', requireAccess('jpool', 'write'), placeJudgesNats);
+router.post('/:jpoolId/placeJudges/suppOnly', requireAccess('jpool', 'write'), placeSuppOnlyJudges);
 
 export default router;
