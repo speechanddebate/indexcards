@@ -44,15 +44,15 @@ export async function getTournInvite(req, res) {
 	invite.pages = (await tournRepo.getPages(invite.id)).map(ToPublicPage);
 	invite.files = (await tournRepo.getFiles(invite.id)).map(file => {
 		return {
-			id: file.id,
-			tag: file.tag,
-			type: file.type,
-			label: file.label,
-			filename: file.filename,
-			published: file.published,
-			pageOrder: file.pageOrder,
-			uploaded: file.uploaded,
-			updatedAt: file.updatedAt,
+			id        : file.id,
+			tag       : file.tag,
+			type      : file.type,
+			label     : file.label,
+			filename  : file.filename,
+			published : file.published,
+			pageOrder : file.pageOrder,
+			uploaded  : file.uploaded,
+			updatedAt : file.updatedAt,
 		};
 	});
 	invite.events = await eventRepo.getEventInvites(invite.id);
@@ -66,7 +66,7 @@ getTournInvite.openapi = {
 	tags: ['Tournaments'],
 	responses: {
 		200: {
-			description: 'A public invite to a tournament',
+			description: 'Public facing page data for a given tournament',
 			content: {
 				'application/json': {
 					schema: {

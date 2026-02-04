@@ -2,7 +2,6 @@ import { assert } from 'chai';
 import request from 'supertest';
 import server from '../../../../../app';
 
-
 describe('getTournByWebname Human to ID', () => {
 	it('Returns the proper tournament given a webname string', async () => {
 		const res = await request(server)
@@ -16,7 +15,6 @@ describe('getTournByWebname Human to ID', () => {
 		assert.equal(body.tournId, 29714);
 	});
 });
-
 
 describe('Tournament Invitation Information', () => {
 

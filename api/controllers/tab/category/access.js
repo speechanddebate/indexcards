@@ -43,6 +43,7 @@ createAccess.openapi= {
 
 // Alter existing permissions (update)
 export async function updateAccess(req, res) {
+
 	const targetPerson = await db.summon(db.person, req.params.personId);
 	const targetCategory = await db.summon(db.category, req.params.categoryId);
 
@@ -83,14 +84,14 @@ export async function updateAccess(req, res) {
 		},
 	];
 	await db.changeLog.create({
-		person: req.session.person,
-		tourn: req.params.tournId,
-		category: targetCategory.id,
-		tag: 'access',
+		person   : req.session.person,
+		tourn    : req.params.tournId,
+		category : targetCategory.id,
+		tag      : 'access',
 		description,
 	});
 
-	res.status(200).json({
+	return res.status(200).json({
 		error: false,
 		message: description,
 		replace,
@@ -130,7 +131,7 @@ export async function deleteAccess(req, res) {
 		description: `${targetPerson.email} access removed from ${targetCategory.abbr}`,
 	});
 
-	res.status(200).json({
+	return res.status(200).json({
 		error: false,
 		destroy: `category_${targetCategory.id}_${targetPerson.id}`,
 		message: log.description,
@@ -216,7 +217,7 @@ export async function createBackupAccess(req, res) {
 		});
 	}
 
-	res.status(200).json(`Added ${targetPerson.email} as a backup follower for ${targetCategory.abbr}`);
+	return res.status(200).json(`Added ${targetPerson.email} as a backup follower for ${targetCategory.abbr}`);
 }
 
 // Delete backup follower
@@ -252,6 +253,6 @@ export async function deleteBackupAccess(req, res) {
 		await backupAccounts.update();
 	}
 
-	res.status(200).json(`Backup follower removed`);
+	return res.status(200).json(`Backup follower removed`);
 }
 

@@ -87,7 +87,6 @@ app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], as
 		return Unauthorized(req, res, 'User: You are not logged in.');
 	}
 	next();
-
 });
 
 const tabRoutes = [
@@ -100,7 +99,6 @@ const tabRoutes = [
 ];
 
 app.all(tabRoutes, async (req, res, next) => {
-
 	if (!req.person) {
 		return Unauthorized(req, res, 'Tab: You are not logged in.');
 	}
@@ -120,9 +118,8 @@ const coachRoutes = [
 
 app.all(coachRoutes, async (req, res, next) => {
 
-	// apis related to the coach or directors of a program.  Prefs only
-	// access is in the /user/prefs directory because it's such a bizarre
-	// one off
+	// apis related to the coach or directors of a program.  Prefs only access
+	// is in the /user/prefs directory because it's such a bizarre one off
 
 	if (!req.person) {
 		return Unauthorized(req, res, 'Coach: You are not logged in.');
@@ -146,7 +143,7 @@ const localRoutes = [
 
 app.all(localRoutes, async (req, res, next) => {
 
-	// apis related to administrators of districts (the committee), or a
+	// APIs related to administrators of districts (the committee), or a
 	// region, or an NCFL diocese, or a circuit.
 
 	if (!req.person) {

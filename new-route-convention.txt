@@ -2,16 +2,16 @@
 before I get too deep into the weeds of the current API setup, perhaps some rationality,
 or at least some system that isn't the present total chaos.
 
-TOP LEVEL:  
+TOP LEVEL:
 
-	based on AUTHENTICATION STYLE.  Some of the names are a touch awkward because the intent 
+	based on AUTHENTICATION STYLE.  Some of the names are a touch awkward because the intent
 	is to reserve data type names (tourn, school, chapter).
 
 	/auto  	- public jobs with internal effects.  Autoqueue executors basically.  Restricted
 			  by origin IP of the address; must be from within the confines of the server env
 			  as defined in config.json
 
-	/ext 	- External APIs requiring an account with an API key to determine their scope. 
+	/ext 	- External APIs requiring an account with an API key to determine their scope.
 			  The API keys are tied to user accounts, and the user must have an api_auth_method
 			  person_setting (only settable by us on the backend for now).
 
@@ -19,7 +19,7 @@ TOP LEVEL:
 			  permissions.  All event-specific permission accessible APIs should live under /event.
 			  All category-specific permission APIs should live under /category. /all is the
 			  source of APIs that anyone with a tournament can access, to set up things like
-			  the user specific access for menus and such. 
+			  the user specific access for menus and such.
 
 			  Top level types under the tournament ID that support fine grained permissions are
 
@@ -30,17 +30,17 @@ TOP LEVEL:
 			  ++ /round
 			  ++ /entry
 
-	/coach/:chapterId 	- APIs and functions related to school/chapter administration.  
+	/coach/:chapterId 	- APIs and functions related to school/chapter administration.
 			  Depends on chapter permissions
 
 	/user	- Everything that is only personalized to a user's own account.  Student
-			  landing page, judge landing page, personal results records, paradigm 
+			  landing page, judge landing page, personal results records, paradigm
 			  editing.  person ID is embedded in the session.
 
 	/glp 	- Only those with godlike powers may enter here.  person ID is embedded in
 			  the session
 
-	/local	- Managers of various subdivisions of Tabroom.  This will include 
+	/local	- Managers of various subdivisions of Tabroom.  This will include
 				/circuit/:circuitId
 				/diocese/:dioceseID
 				/region/:regionId
@@ -49,14 +49,14 @@ TOP LEVEL:
 CONVENTION:
 
 	Underneath each top level should be the data area being operated on, followed by the
-	ID of that area, followed by a functional breakdown. 
+	ID of that area, followed by a functional breakdown.
 
 	/tab/12345 -> get -> get a data backup of the whole tourn. post uploads a backup file.
 	/tab/12345/setting/nsda_district -> get/post/put/delete -> get or affect this tourn setting
 
 	/tab/12345/event/14481/round/12345 -> get -> get databackup like above.  post uploads the same.
 
-	/tab/44151/event/44481/round/12345/schemat -> get a schematic only representation of a round.  
+	/tab/44151/event/44481/round/12345/schemat -> get a schematic only representation of a round.
 		[depending on what I do with the front end, this type of thing may not be desirable?]
 
 Reserve plural for multiple reports based on this as primary for a one-to-many relationship:
@@ -64,7 +64,7 @@ Reserve plural for multiple reports based on this as primary for a one-to-many r
 	/tab/12345/sites -> get -> get all sites
 	/tab/12345/status -> get -> get current event status
 		These could all be the same function but hide that from the endpoint tree and user
-		because why should they care. 
+		because why should they care.
 
 	/tab/12345/event/12466/rounds -> get all the rounds in this event
 
@@ -72,13 +72,13 @@ Reserve plural for multiple reports based on this as primary for a one-to-many r
 	/tab/12345/round/233485/dashboard -> get -> get all round dashboard status
 	/tab/12345/event/9535385/dashboard -> get -> get all event dashboard status
 
-Functional things should be simple commands defaulting to POST, placed in the tree underneath 
+Functional things should be simple commands defaulting to POST, placed in the tree underneath
 the thing operated on. Don't go too nuts with the escalating trees of doom; the single smallest
 necessary ID numbers are best.  Actions should as much as possible reflect what data is affected
 or added or something.  Parameters besides the id of the target operand should be in the body.
 
 use 'place' as a verb that is particular to the pairing/schematic/etc process.  Always use a verb
-when the backend is going to be manipulating data instead of simply delivering or accepting it. 
+when the backend is going to be manipulating data instead of simply delivering or accepting it.
 
 	/tab/round/151551/placeEntries -> POST -> pair the round
 	/tab/round/151551/placeJudges -> POST -> place the judges
@@ -92,7 +92,7 @@ Spec after everything if available
 	/tab/event/58125/rounds/placeEntries/prelims -> POST -> pair all the event's prelims
 
 And then the results and whatever else live in the same place
-	
+
 	/tab/event/58125/results 			overall results
 	/tab/event/58125/results/speakers 	overall speaker results
 	/tab/round/3558125/results 			results as of round whatever

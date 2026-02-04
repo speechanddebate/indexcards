@@ -33,6 +33,7 @@ export async function login(req, res) {
 	return res.json(response);
 
 };
+
 login.openapi = {
 	summary: 'Login',
 	description: 'Logs in a user and creates a session.',
@@ -49,7 +50,8 @@ login.openapi = {
 		},
 	},
 };
-export async function logout(req,res){
+
+export async function logout(req, res){
 
 	if (req.session?.id) {
 		await sessionRepo.deleteSession(req.session?.id);
@@ -62,6 +64,7 @@ export async function logout(req,res){
 	// Always return success
 	res.status(204).send();
 }
+
 logout.openapi = {
 	summary: 'Logout',
 	description: 'Logs out the current user and invalidates the session.',

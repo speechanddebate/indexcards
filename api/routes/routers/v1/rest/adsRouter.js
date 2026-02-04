@@ -4,7 +4,9 @@ import { requireSiteAdmin } from '../../../../middleware/authorization.js';
 
 const router = Router();
 
-router.get('/',requireSiteAdmin,controller.getAds);
-router.get('/published',controller.getPublishedAds);
+// Access through /rest/ads
+
+router.get('/', requireSiteAdmin, controller.getAds);
+router.get('/published', controller.getPublishedAds);
 
 export default router;

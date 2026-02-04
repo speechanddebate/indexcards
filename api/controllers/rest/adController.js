@@ -1,7 +1,9 @@
 import db from '../../data/db.js';
-export async function getAds(res,req) {
+
+export async function getAds(req, res) {
 	return res.status(503);
 };
+
 getAds.openapi = {
 	summary     : 'Get ads',
 	description : 'returns an array of ads',
@@ -38,6 +40,7 @@ export async function getPublishedAds(req,res) {
 
 	return res.status(200).json(currentAds);
 };
+
 getPublishedAds.openapi = {
 	summary     : 'GET public ads',
 	description : 'returns an array of current, approved ads to be displayed on the tabroom homepage.',

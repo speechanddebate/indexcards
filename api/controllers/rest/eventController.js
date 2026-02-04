@@ -1,8 +1,10 @@
 import db from '../../data/db.js';
-import { NotImplemented } from '../../helpers/problem.js';
+import { NotImplemented, NotFound } from '../../helpers/problem.js';
+
 export async function getTournEvents(req, res) {
 	return NotImplemented(req,res,'Not implemented');
 };
+
 getTournEvents.openapi = {
 	summary: 'Get Tournament Events',
 	description: 'Retrieve a list of events associated with a specific tournament.',
@@ -65,8 +67,9 @@ export async function getEntryFieldByEvent(req,res){
 	}
 
 	return res.status(200).json(entries);
-}
-export async function getScheduleByEvent(req,res){
+};
+
+export async function getScheduleByEvent(req,res) {
 	const rounds = await db.sequelize.query(`
         select
             round.id, round.name, round.label, round.type,
@@ -88,48 +91,61 @@ export async function getScheduleByEvent(req,res){
             )
         order by round.name
     `, {
-		replacements: {
-			tournId: req.params.tournId,
-			eventAbbr: req.params.eventAbbr,
+		replacements  : {
+			tournId   : req.params.tournId,
+			eventAbbr : req.params.eventAbbr,
 		},
 		type: req.db.Sequelize.QueryTypes.SELECT,
 	});
 
 	return res.status(200).json(rounds);
-}
-export async function getEventByAbbr(req,res){
+};
+
+export async function getEventByAbbr(req, res){
+
 	const eventData = await db.sequelize.query(`
-                select
-                    event.name eventName,
-                    event.id eventId,
-                    event.type eventType
-                from event
-                where 1=1
-                    and event.tourn = :tournId
-                    and event.abbr = :eventAbbr
-            `, {
+		select
+			event.name eventName,
+			event.id eventId,
+			event.type eventType
+		from event
+		where 1=1
+			and event.tourn = :tournId
+			and event.abbr = :eventAbbr
+	`, {
 		replacements : { ...req.params },
 		type         : db.Sequelize.QueryTypes.SELECT,
 	});
 
-	eventData.rounds = await db.sequelize.query(`
-                select
-                    round.name roundNumber,
-                    round.id roundId,
-                    round.label roundLabel
-                    round.type roundType
-                from round
-                where 1=1
-                    and round.event = :eventId
-                    and round.published != 0
-                    order by round.name
-            `, {
-		replacements : { ...req.params },
-		type         : db.Sequelize.QueryTypes.SELECT,
+	if (!eventData || eventData.length !== 1) {
+		return NotFound(req, res, `No event ${req.params.eventAbbr} found in tournament ${req.params.tournId}`);
+	}
+
+	// Latch to the one event
+	const event = eventData[0];
+
+	event.rounds = await db.sequelize.query(`
+		select
+			round.name roundNumber,
+			round.id roundId,
+			round.label roundLabel,
+			round.type roundType
+		from round
+		where 1=1
+			and round.event = :eventId
+			and round.published != 0
+			order by round.name
+	`, {
+		replacements : {
+			eventId  : event.id,
+			...req.params,
+		},
+		type : db.Sequelize.QueryTypes.SELECT,
 	});
 
-	res.status(200).json(eventData);
-}
+	return res.status(200).json(event);
+};
+
 getEventByAbbr.openapi = {
 	summary     : 'Returns some limited data about an event together with published rounds by event abbreviation',
 	operationId : 'getEventByAbbr',
