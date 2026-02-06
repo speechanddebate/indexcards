@@ -14,7 +14,7 @@ export async function Authenticate(req, res, next) {
 		const cookie = req.cookies[cookieName];
 
 		if (cookie) {
-			let cookieSession = await sessionRepo.findByUserKey(cookie);
+			let cookieSession = await sessionRepo.findByUserKey(cookie, {include: {su: true, person: true}});
 			if (!cookieSession) {
 				res.clearCookie(cookieName);  //invalid cookie, clear it
 			} else {
@@ -29,9 +29,11 @@ export async function Authenticate(req, res, next) {
 				 */
 
 				req.session = {
-					id        : cookieSession.id,
-					person    : cookieSession.personId,
-					su        : cookieSession.suId || null,
+					id     : cookieSession.id,
+					person : cookieSession.personId,
+					su     : cookieSession.suId || null,
+					Su     : cookieSession.su || null,
+					Person : cookieSession.person || null,
 				};
 
 				//req.person is what should be checked for every authorization decision
@@ -59,7 +61,6 @@ export async function Authenticate(req, res, next) {
 				}
 
 				req.person = person;
-
 				req.authType = 'basic';
 
 			} else if (req.headers.authorization.startsWith('Bearer ')) {
