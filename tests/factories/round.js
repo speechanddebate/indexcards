@@ -1,6 +1,6 @@
 import roundRepo from '../../api/repos/roundRepo.js';
 
-export function buildRoundData(overrides = {}) {
+export function createRoundData(overrides = {}) {
 	return {
 		published: true,
 		...overrides,
@@ -8,7 +8,7 @@ export function buildRoundData(overrides = {}) {
 }
 
 export async function createTestRound(overrides = {}) {
-	const data = buildRoundData(overrides);
+	const data = createRoundData(overrides);
 	const roundId = await roundRepo.createRound(data);
 
 	return {
@@ -16,3 +16,8 @@ export async function createTestRound(overrides = {}) {
 		getRound: () => roundRepo.getRound(roundId, { settings: true }),
 	};
 }
+
+export default {
+	createRoundData,
+	createTestRound,
+};

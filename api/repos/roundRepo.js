@@ -1,5 +1,5 @@
 import db from '../data/db.js';
-import  { FIELD_MAP, toDomain } from './mappers/roundMapper.js';
+import  { FIELD_MAP, toDomain, toPersistence } from './mappers/roundMapper.js';
 import { eventInclude } from './eventRepo.js';
 import { withSettingsInclude } from './utils/settings.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
@@ -306,8 +306,14 @@ export async function getSections(roundId){
 	return sections;
 }
 
+async function createRound(data){
+	const dbRow = await db.round.create(toPersistence(data));
+	return dbRow.id;
+}
+
 export default {
 	getRound,
 	getRounds,
+	createRound,
 	getSections,
 };

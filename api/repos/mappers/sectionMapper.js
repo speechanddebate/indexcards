@@ -11,6 +11,7 @@ export const FIELD_MAP = {
 	published: { db: 'publish', fromDb: toBool, toDb: fromBool },
 	roomId: 'room',
 	roundId: 'round',
+	settings: 'panel_settings',
 	updatedAt: { db: 'timestamp', toDb: () => undefined },
 	createdAt: { db: 'created_at', toDb: () => undefined },
 };

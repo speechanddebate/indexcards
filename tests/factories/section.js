@@ -1,13 +1,13 @@
 import sectionRepo from '../../api/repos/sectionRepo.js';
 
-export function buildSectionData(overrides = {}) {
+export function createSectionData(overrides = {}) {
 	return {
 		...overrides,
 	};
 }
 
 export async function createTestSection(overrides = {}) {
-	const data = buildSectionData(overrides);
+	const data = createSectionData(overrides);
 	const sectionId = await sectionRepo.createSection(data);
 
 	return {
@@ -16,5 +16,6 @@ export async function createTestSection(overrides = {}) {
 	};
 }
 export default {
+	createSectionData,
 	createTestSection,
 };
