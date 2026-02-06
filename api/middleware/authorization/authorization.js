@@ -30,46 +30,50 @@ export function requireSiteAdmin(req,res,next) {
 }
 
 export async function loadAuthContext(req, res, next){
+
 	req.actor = createActor(req);
 
 	//attach all relevant perms to the req.auth.perms object
 	req.auth = req.auth || {};
 	req.auth.perms = req.auth.perms || [];
 
-	const tournId = req.params.tournId;
+	// Unauthenticated request, skip loading perms
 	const personId = req.person?.id;
-	if (!tournId || !personId) return next();
+	if (!personId) return next();
 
-	//fetch all perms for a tourn
-	const perms = await permissionRepo.getPermissions({ tournId, personId });
-	for (const perm of perms) {
-		let scope = null;
-		let id = null;
+	//Tourn scoped request, load all of the perms for a tourn
+	const tournId = req.params.tournId;
+	if (tournId){
+		//fetch all or a persons perms for a tourn
+		const perms = await permissionRepo.getPermissions({ tournId, personId });
+		for (const perm of perms) {
+			let scope = null;
+			let id = null;
 
-		if (perm.event) {
-			scope = 'event';
-			id = perm.event;
-		}
-		else if (perm.category) {
-			scope = 'category';
-			id = perm.category;
-		}
-		else if (perm.tourn) {
-			scope = 'tourn';
-			id = perm.tourn;
-		}
-		else if (perm.circuit) {
-			scope = 'circuit';
-			id = perm.circuit;
+			if (perm.event) {
+				scope = 'event';
+				id = perm.event;
+			}
+			else if (perm.category) {
+				scope = 'category';
+				id = perm.category;
+			}
+			else if (perm.tourn) {
+				scope = 'tourn';
+				id = perm.tourn;
+			}
+
+			if (scope && id) {
+				req.auth.perms.push({
+					scope,
+					id,
+					role: perm.tag,
+				});
+			}
 		}
 
-		if (scope && id) {
-			req.auth.perms.push({
-				scope,
-				id,
-				role: perm.tag,
-			});
-		}
+		//TODO need to fetch all circuit level perms and attach those as well for proper RBAC to work,
+		// but this is a start and covers the most common use case of checking perms within a tourn
 	}
 	return next();
 }
@@ -186,7 +190,6 @@ const ROLES = {
 		permissions: [
 			{
 				actions: ['*/*'],            // allow any action on any scoped resource
-				notActions: ['tourn/owner'], // deny only owner on tourn
 			},
 		],
 	},
@@ -196,7 +199,6 @@ const ROLES = {
  * *\/read on circuit scope grants read access to tourns in that circuit
  */
 const CHILDREN = {
-	circuit	: ['tourn'],            // Circuit has these direct children
 	tourn: ['category', 'event'],   // Tourn has these direct children
 	category: ['event'],            // Category has these direct children
 	event: ['round'],               // Event has these direct children

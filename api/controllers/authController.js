@@ -21,9 +21,7 @@ export async function login(req, res) {
 		if (err === AUTH_INVALID) return Unauthorized(req,res,'Invalid Credentials');
 		throw err;
 	}
-	if (!result) {
-		return Unauthorized(req,res,'Invalid Credentials');
-	}
+
 	const { person, token } = result;
 
 	var response = {

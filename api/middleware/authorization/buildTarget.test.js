@@ -22,28 +22,17 @@ describe('buildTarget', () => {
 	});
 
 	it('target for tourn resource sets circuitIds', async () => {
-		vi.spyOn(circuitRepo, 'getCircuits').mockResolvedValueOnce([
-			{ id: '1' },
-			{ id: '2' },
-			{ id: '3' },
-		]);
 
 		const result = await buildTarget('tourn', '456', {}, targetCache);
 
 		expect(result).toEqual({
 			id: '456',
 			resource: 'tourn',
-			circuitIds: ['1', '2', '3'],
 		});
 		expect(targetCache.get('tourn:456')).toEqual(result);
 	});
 	it('target for category resource sets tournId and circuitIds', async () => {
 		vi.spyOn(categoryRepo, 'getCategory').mockResolvedValueOnce({ tournId: 1 });
-		vi.spyOn(circuitRepo, 'getCircuits').mockResolvedValueOnce([
-			{ id: 1 },
-			{ id: 2 },
-				{ id: 3 },
-			]);
 
 		const result = await buildTarget('category', '456', {}, targetCache);
 
@@ -51,17 +40,11 @@ describe('buildTarget', () => {
 			id: '456',
 			resource: 'category',
 			tournId: 1,
-			circuitIds: [1, 2, 3],
 		});
 		expect(targetCache.get('category:456')).toEqual(result);
 	});
 	it('target for event resource sets categoryId, tournId and circuitIds', async () => {
 		vi.spyOn(eventRepo, 'getEvent').mockResolvedValueOnce({ tournId: 1, categoryId: 10 });
-		vi.spyOn(circuitRepo, 'getCircuits').mockResolvedValueOnce([
-				{ id: 1 },
-				{ id: 2 },
-				{ id: 3 },
-			]);
 
 		const result = await buildTarget('event', '456', {}, targetCache);
 
@@ -70,7 +53,6 @@ describe('buildTarget', () => {
 			resource: 'event',
 			tournId: 1,
 			categoryId: 10,
-			circuitIds: [1, 2, 3],
 		});
 		expect(targetCache.get('event:456')).toEqual(result);
 	});
