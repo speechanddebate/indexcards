@@ -1,6 +1,6 @@
 import db from '../data/db.js';
 import  fileRepo  from './fileRepo.js';
-import webpageRepo  from './webpageRepo.js';
+import { webpageInclude }  from './webpageRepo.js';
 import { FIELD_MAP, toDomain, toPersistence } from './mappers/tournMapper.js';
 import { saveSettings, withSettingsInclude } from './utils/settings.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
@@ -14,6 +14,13 @@ function buildTournQuery(opts = {}) {
 	};
 	if (!opts.unpublished){
 		query.where.hidden = 0;
+	}
+	if(opts.include?.pages) {
+		query.include.push({
+			...webpageInclude(opts.include.pages),
+			as: 'webpages',
+			required: false,
+		});
 	}
 	query.include.push(
 		...withSettingsInclude({
@@ -109,16 +116,7 @@ export async function getSchedule(tournId){
  * @param {boolean} [opts.includeUnpublished=false] - Include unpublished webpages
  * @returns {Promise<Array<Object>>} List of webpages
  */
-export async function getPages(tournId, opts = {}) {
-	const webpages = await webpageRepo.getWebpages({
-		...opts,
-		scope: {
-			...opts.scope,
-			tournId,
-		},
-	});
-	return webpages;
-};
+
 export async function getContacts(tournId) {
 	return await db.sequelize.query(`
 		select
@@ -141,6 +139,5 @@ export default {
 	createTourn,
 	getFiles,
 	getSchedule,
-	getPages,
 	getContacts,
 };

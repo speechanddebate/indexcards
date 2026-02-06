@@ -7,6 +7,7 @@ import person from './person.js';
 import section from './section.js';
 import session from './session.js';
 import student from './student.js';
+import webpage from './webpage.js';
 
 const factories = {
 	ballot,
@@ -18,6 +19,7 @@ const factories = {
 	section,
 	session,
 	student,
+	webpage,
 };
 
 export default factories;

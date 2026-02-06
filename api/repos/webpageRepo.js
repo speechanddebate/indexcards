@@ -1,22 +1,48 @@
 import db from '../data/db.js';
-import { toDomain, toPersistence } from './mappers/webpageMapper.js';
+import { resolveAttributesFromFields } from './utils/repoUtils.js';
+import { FIELD_MAP,toDomain, toPersistence } from './mappers/webpageMapper.js';
 
-export async function getWebpages({scope, opts = {}} = {}) {
-	const where = {};
-	const { includeUnpublished = false } = opts;
+function buildWebpageQuery(opts = {}) {
+	const query = {
+		where: {},
+		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
+		include: [],
+		order: [['page_order', 'ASC']],
+	};
 
-	if (!includeUnpublished) {
-		where.published = 1;
+	if (!opts.includeUnpublished) {
+		query.where.published = 1;
 	}
+
+	return query;
+}
+export function webpageInclude(opts = {}) {
+	return {
+		model: db.webpage,
+		as: 'webpages',
+		...buildWebpageQuery(opts),
+	};
+}
+
+async function getWebpage(webpageId, opts = {}) {
+	if (!webpageId) throw new Error('getWebpage: WebpageId is required');
+	const query = buildWebpageQuery(opts);
+	query.where = {...query.where, id: webpageId};
+	const webpage = await db.webpage.findOne(query);
+	return toDomain(webpage);
+}
+
+async function getWebpages(scope, opts = {}) {
+	const query = buildWebpageQuery(opts);
 
 	if (scope && Object.keys(scope).length > 0) {
 		for (const key of Object.keys(scope)) {
 			if (key === 'tournId') {
-				where.tourn = scope.tournId;
+				query.where.tourn = scope.tournId;
 			} else if (key === 'sitewide') {
-				where.sitewide = scope.sitewide;
+				query.where.sitewide = scope.sitewide;
 			} else if (key === 'slug') {
-				where.slug = scope.slug;
+				query.where.slug = scope.slug;
 			}
 			else {
 				throw new Error(`Invalid webpage scope key: ${key}`);
@@ -24,12 +50,7 @@ export async function getWebpages({scope, opts = {}} = {}) {
 		}
 	}
 
-	const webpages = await db.webpage.findAll({
-		where,
-		raw: true,
-		order: ['page_order'],
-	});
-
+	const webpages = await db.webpage.findAll(query);
 	return webpages.map(toDomain);
 };
 
@@ -39,8 +60,28 @@ async function createWebpage(webpage) {
 	);
 	return created.id;
 }
+async function updateWebpage(webpageId, webpage) {
+	if (!webpageId) throw new Error('updateWebpage: WebpageId is required for update');
+	await db.webpage.update(
+		toPersistence(webpage),
+		{
+			where: { id: webpageId },
+		}
+	);
+	return webpageId;
+}
+async function deleteWebpage(webpageId) {
+	if (!webpageId) throw new Error('deleteWebpage: WebpageId is required for delete');
+	await db.webpage.destroy({
+		where: { id: webpageId },
+	});
+	return webpageId;
+}
 
 export default {
+	getWebpage,
 	getWebpages,
 	createWebpage,
+	updateWebpage,
+	deleteWebpage,
 };

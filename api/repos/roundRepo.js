@@ -55,7 +55,7 @@ export function roundInclude(opts = {}) {
 }
 
 //TODO remove
-export async function getRoundById(roundId){
+export async function getRound(roundId){
 	const rounds = await db.sequelize.query(`
             select
                 round.id, round.name, round.label, round.type tag,
@@ -234,7 +234,6 @@ export async function getRoundById(roundId){
 export async function getRounds(scope = {}, opts = {}) {
 	const query = buildRoundQuery(opts);
 
-	// Scope-only filters that belong on the base model
 	if (scope.eventId) {
 		query.where.event = scope.eventId;
 	}
@@ -308,7 +307,7 @@ export async function getSections(roundId){
 }
 
 export default {
-	getRoundById,
+	getRound,
 	getRounds,
 	getSections,
 };
