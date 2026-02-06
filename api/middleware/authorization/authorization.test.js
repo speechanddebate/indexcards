@@ -285,18 +285,6 @@ describe("Authorization Middleware", () => {
 			const granted = checkAccess('event', 'write', {id: 12, tournId: 44},person, perms);
 			expect(granted).toBe(true);
 		});
-		it('allows circuit admin access to tourns in circuit', async () => {
-			const person = factories.person.createPersonData();
-			const perm = { scope: 'circuit', id: 5, role: 'circuit' };
-			const granted = checkAccess('tourn', 'write', {id: 42, circuitId: [5]},person, [perm]);
-			expect(granted).toBe(true);
-		});
-		it('deny circuit admin owner access to tourns in circuit', async () => {
-			const person = factories.person.createPersonData();
-			const perm = { scope: 'circuit', id: 5, role: 'circuit' };
-			const granted = checkAccess('tourn', 'owner', {id: 42, circuitIds: [5]},person, [perm]);
-			expect(granted).toBe(false);
-		});
 		it('denies access when perm with the same id but different scope', async () => {
 			const person = factories.person.createPersonData();
 			const perm = { scope: 'event', id: 12, role: 'owner' };

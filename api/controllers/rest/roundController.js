@@ -2,7 +2,7 @@ import { NotFound } from '../../helpers/problem.js';
 import roundRepo from '../../repos/roundRepo.js';
 
 export async function getRound(req,res){
-	const round = await roundRepo.getRoundById(req.params.roundId);
+	const round = await roundRepo.getRound(req.params.roundId);
 
 	if (!round) {
 		return NotFound(req, res, `No round found with ID ${req.params.roundId}`);
@@ -61,7 +61,7 @@ export async function getPublishedRounds(req, res){
 };
 
 export async function getSchematic(req,res){
-	const round = await roundRepo.getRoundById(req.params.roundId);
+	const round = await roundRepo.getRound(req.params.roundId);
 
 	if (!round) {
 		return NotFound(req, res, `No round found with ID ${req.params.roundID}`);

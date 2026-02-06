@@ -35,13 +35,17 @@ getTourn.openapi = {
 export async function getTournInvite(req, res) {
 	var invite = {};
 
-	invite = await tournRepo.getTourn(req.params.tournId);
+	invite = await tournRepo.getTourn(req.params.tournId, {
+		include: {
+			pages: true,
+		},
+	});
 
 	if (!invite?.id || invite?.hidden) {
 		return NotFound(req, res, 'No such tournament found');
 	}
 
-	invite.pages = (await tournRepo.getPages(invite.id)).map(ToPublicPage);
+	invite.webpages = (invite.webpages ?? []).map(ToPublicPage);
 	invite.files = (await tournRepo.getFiles(invite.id)).map(file => {
 		return {
 			id        : file.id,

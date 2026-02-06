@@ -1,5 +1,6 @@
-import circuitRepo from '../../repos/circuitRepo.js';
+import sectionRepo from '../../repos/sectionRepo.js';
 import eventRepo from '../../repos/eventRepo.js';
+import roundRepo from '../../repos/roundRepo.js';
 import categoryRepo from '../../repos/categoryRepo.js';
 export async function buildTarget(resource, resourceId, req, targetCache) {
 	const key = `${resource}:${resourceId}`;
@@ -8,11 +9,6 @@ export async function buildTarget(resource, resourceId, req, targetCache) {
 	let target = { id: resourceId, resource };
 
 	switch (resource) {
-		case 'tourn': {
-			const circuits = await circuitRepo.getCircuits({ tournId: resourceId }, { fields: ['id'] });
-			target.circuitIds = circuits.map(c => c.id);
-			break;
-		}
 		case 'category': {
 			const category = await categoryRepo.getCategory(resourceId, { fields: ['tournId'] });
 			if (category) {
@@ -34,6 +30,33 @@ export async function buildTarget(resource, resourceId, req, targetCache) {
 					...target,
 				};
 			}
+			break;
+		}
+		case 'round': {
+			const round = await roundRepo.getRound(resourceId, { fields: ['eventId'] });
+			if (round) {
+				target.eventId = round.eventId;
+				target ={
+					...await buildTarget('event', target.eventId, req, targetCache),
+					...target,
+				};
+			}
+			break;
+		}
+		case 'section': {
+			const section = await sectionRepo.getSection(resourceId, { fields: ['roundId'] });
+			if (section) {
+				target.roundId = section.roundId;
+				target ={
+					...await buildTarget('round', target.roundId, req, targetCache),
+					...target,
+				};
+			}
+			break;
+		}
+		case 'circuit':
+		case 'tourn': {
+			// no parent scopes to load
 			break;
 		}
 		default:
