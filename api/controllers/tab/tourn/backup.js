@@ -9,7 +9,7 @@ export async function backupTourn(req,res) {
 	const tourn = tournShell.dataValues;
 
 	tourn.backup_created = new Date();
-	tourn.created_by     = req.session.email;
+	tourn.created_by     = req.person.email;
 	tourn.data_format    = '4.0';
 
 	// A bunch of little things that are all at the other end of a simple

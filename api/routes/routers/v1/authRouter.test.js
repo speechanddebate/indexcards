@@ -23,7 +23,7 @@ describe('Auth Router', () => {
 				.expect('Content-Type', /json/)
 				.expect(200);
 			assert.isObject(res.body, 'Response is an object');
-			assert.containsAllKeys(res.body, ['person', 'token'], 'Response has person object and session token');
+			assert.containsAllKeys(res.body, ['personId', 'token'], 'Response has personId and session token');
 		});
 	});
 	describe('/login' , () => {

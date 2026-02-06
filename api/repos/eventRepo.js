@@ -120,6 +120,13 @@ export async function getEventInvites(tournId) {
 	});
 }
 
+export function getEvent(eventId, opts = {}) {
+	if (!eventId) throw new Error('getEvent: eventId is required');
+	const query = buildEventQuery(opts);
+	query.where = { id: eventId, ...query.where };
+	return db.event.findOne(query).then(toDomain);
+}
+
 export async function getEvents(scope = {}, opts = {}){
 	const query = buildEventQuery(opts);
 
@@ -131,6 +138,7 @@ export async function getEvents(scope = {}, opts = {}){
 }
 
 export default {
+	getEvent,
 	getEvents,
 	getEventInvites,
 };

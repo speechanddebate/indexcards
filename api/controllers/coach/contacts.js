@@ -197,7 +197,7 @@ export async function userProfile(req, res) {
 		return res.status(201).json({ message: 'You have no active user session' });
 	}
 	let result;
-	if (req.params.personId && req.session.site_admin) {
+	if (req.params.personId && req.person.siteAdmin) {
 		result = await req.db.person.findByPk(
 			req.params.personId,
 			{

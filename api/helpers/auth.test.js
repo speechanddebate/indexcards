@@ -96,8 +96,8 @@ describe('Authorization Functions', () => {
 
 		assert.typeOf(session, 'object');
 		assert.equal(session.person, '70');
-		assert.equal(session.siteAdmin, true);
-		assert.equal(session.email, 'i.am.god@speechanddebate.org');
+		assert.equal(req.person.siteAdmin, true);
+		assert.equal(req.person.email, 'i.am.god@speechanddebate.org');
 	});
 
 	it('Permits GLP admin access to a tournament it is not admin for', async () => {

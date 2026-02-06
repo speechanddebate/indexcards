@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAccess } from '../../../../../middleware/authorization.js';
+import { requireAccess } from '../../../../../middleware/authorization/authorization.js';
 import { sideCounts, roundDecisionStatus } from '../../../../../controllers/tab/round/index.js';
 import { getRoundChangeLog } from '../../../../../controllers/tab/round/changeLog.js';
 import {

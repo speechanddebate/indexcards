@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAccess } from '../../../../../middleware/authorization.js';
+import { requireAccess } from '../../../../../middleware/authorization/authorization.js';
 import { updateEvent } from '../../../../../controllers/tab/event/index.js';
 import { sectionTemplateRobin } from '../../../../../controllers/tab/event/roundrobin.js';
 import * as accessController from '../../../../../controllers/tab/event/access.js';

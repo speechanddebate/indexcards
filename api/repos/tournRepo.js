@@ -24,6 +24,13 @@ function buildTournQuery(opts = {}) {
 	);
 	return query;
 }
+export function tournInclude(opts = {}) {
+	return {
+		model: db.tourn,
+		as: 'tourns',
+		...buildTournQuery(opts),
+	};
+}
 
 /**
  * Fetch a single tournament by ID or webname.
@@ -45,10 +52,7 @@ export async function getTourn(tournId,opts = {}) {
 		query.where.webname = tournId.replace(/\W/g, '');
 	}
 
-	const tourn = await db.tourn.findOne({
-		...query,
-		limit: 1,
-	});
+	const tourn = await db.tourn.findOne(query);
 
 	return toDomain(tourn);
 }

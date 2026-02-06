@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAccess } from '../../../../../middleware/authorization.js';
+import { requireAccess } from '../../../../../middleware/authorization/authorization.js';
 import * as timeslotController from '../../../../../controllers/tab/timeslot/index.js';
 import { blastTimeslotMessage, blastTimeslotPairings, messageFreeJudges } from '../../../../../controllers/tab/timeslot/blast.js';
 import { getTournDashboard, getTournAttendance } from '../../../../../controllers/tab/all/dashboard.js';

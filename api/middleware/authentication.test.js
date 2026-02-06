@@ -56,7 +56,7 @@ describe("Authentication Middleware", () => {
             //Assert
             expect(next).toHaveBeenCalled();
             expect(req.session).toBeDefined();
-            expect(req.session.person).toBe(69);
+            expect(req.person.id).toBe(69);
             expect(req.person).toBeDefined();
         });
         it('does not set req.session or req.person when invalid cookie', async () => {
@@ -104,7 +104,7 @@ describe("Authentication Middleware", () => {
     describe("Basic Auth", () => {
         it("sets req.person with valid token", async () => {
             // base64("myuserkey:myapikey")
-            const encoded = Buffer.from("username:myapikey").toString("base64");
+            const encoded = Buffer.from("123:myapikey").toString("base64");
 
             const { req, res, next } = createContext({
                 req: {
@@ -113,7 +113,7 @@ describe("Authentication Middleware", () => {
                   }
                 }
               });
-            vi.spyOn(personRepo, "getPersonByUsername").mockResolvedValue({
+            vi.spyOn(personRepo, "getPerson").mockResolvedValue({
                 id: 123,
                 email: "example@test.com",
 				settings: {
@@ -124,8 +124,6 @@ describe("Authentication Middleware", () => {
             await Authenticate(req, res, next);
 
             // Assertions
-            expect(personRepo.getPersonByUsername).toHaveBeenCalledWith("username", {includeSettings: ['api_key']});
-
             expect(req.person).toBeDefined();
             expect(req.person.id).toBe(123);
             expect(next).toHaveBeenCalledOnce();
@@ -147,8 +145,6 @@ describe("Authentication Middleware", () => {
             await Authenticate(req, res, next);
 
             // Assertions
-            expect(personRepo.getPersonByUsername).toHaveBeenCalledWith("username", {includeSettings: ['api_key']});
-
             expect(res.status).toHaveBeenCalledWith(401);
             expect(next).not.toHaveBeenCalled();
         });

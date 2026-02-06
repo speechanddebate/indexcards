@@ -51,7 +51,6 @@ async function getCategory(id, opts = {}) {
 	const query = buildCategoryQuery(opts);
 	query.where = { id, ...query.where };
 	const dbRow = await db.category.findOne(query);
-	if (!dbRow) return null;
 	return toDomain(dbRow);
 }
 async function getCategories(scope, opts = {}) {

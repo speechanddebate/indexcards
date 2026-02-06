@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAreaAccess } from '../../../../middleware/authorization.js';
+import { requireAreaAccess } from '../../../../middleware/authorization/authorization.js';
 
 import caselist from './caselistRouter.js';
 import share from './shareRouter.js';

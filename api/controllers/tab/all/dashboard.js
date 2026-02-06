@@ -530,10 +530,10 @@ export async function postTournAttendance(req, res) {
 					},{
 						id		  : `start_${panel.id}_${targetId}`,
 						property	: 'title',
-						value 		: `Judge marked as started by ${req.session.name}`,
+						value 		: `Judge marked as started by ${req.person.name}`,
 					},
 				],
-				message : `Judge marked as started by ${req.session.name}`,
+				message : `Judge marked as started by ${req.person.name}`,
 			};
 
 			return res.status(201).json(response);
@@ -547,9 +547,9 @@ export async function postTournAttendance(req, res) {
 			let logMessage;
 
 			if (target.first) {
-				logMessage = `${target.first} ${target.last} marked as absent by ${req.session.email}`;
+				logMessage = `${target.first} ${target.last} marked as absent by ${req.person.email}`;
 			} else if (target.code) {
-				logMessage = `${target.code} marked as absent by ${req.session.email}`;
+				logMessage = `${target.code} marked as absent by ${req.person.email}`;
 			}
 
 			const log = {
@@ -605,9 +605,9 @@ export async function postTournAttendance(req, res) {
 
 		let logMessage;
 		if (target.first) {
-			logMessage = `${target.first} ${target.last} marked as present by ${req.session.email}`;
+			logMessage = `${target.first} ${target.last} marked as present by ${req.person.email}`;
 		} else if (target.code) {
-			logMessage = `${target.code} marked as present by ${req.session.email}`;
+			logMessage = `${target.code} marked as present by ${req.person.email}`;
 		}
 
 		const log = {

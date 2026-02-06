@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAccess } from '../../../../../middleware/authorization.js';
+import { requireAccess } from '../../../../../middleware/authorization/authorization.js';
 import { getTournDashboard, getTournAttendance, postTournAttendance } from '../../../../../controllers/tab/all/dashboard.js';
 import { eventCheckin, categoryCheckin } from '../../../../../controllers/tab/all/checkin.js';
 import { searchAttendees } from '../../../../../controllers/tab/all/search.js';

@@ -30,13 +30,8 @@ export async function Authenticate(req, res, next) {
 
 				req.session = {
 					id        : cookieSession.id,
-					person    : cookieSession.person.id,
-					siteAdmin : cookieSession.person.siteAdmin,
-					email     : cookieSession.person.email,
-					name      : `${cookieSession.person?.first} ${cookieSession.person?.last}`,
-					first     : cookieSession.person.first,
-					last      : cookieSession.person.last,
-					su        : cookieSession.su?.id || null,
+					person    : cookieSession.personId,
+					su        : cookieSession.suId || null,
 				};
 
 				//req.person is what should be checked for every authorization decision
@@ -57,9 +52,9 @@ export async function Authenticate(req, res, next) {
 				}
 
 				//req.person is what should be checked for every authorization decision
-				const person = await personRepo.getPersonByUsername(credentials.name, {includeSettings: ['api_key']});
+				const person = await personRepo.getPerson(credentials.name, {settings: ['api_key']});
 
-				if (!person || person.settings.api_key !== credentials.pass) {
+				if (!person || person.settings?.api_key !== credentials.pass) {
 					return Unauthorized(req, res,'Invalid API key');
 				}
 

@@ -53,7 +53,7 @@ describe('Status Board', () => {
 	it('Return a correct JSON status object', async () => {
 
 		const res = await request(server)
-			.get(`/v1/tab/${testTourn.id}/round/${testTourn.round}/attendance`)
+			.get(`/v1/tab/tourns/${testTourn.id}/rounds/${testTourn.round}/attendance`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
 			.expect('Content-Type', /json/)

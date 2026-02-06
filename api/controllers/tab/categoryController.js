@@ -2,6 +2,7 @@ import { NotImplemented, NotFound, BadRequest } from '../../helpers/problem.js';
 import categoryRepo from '../../repos/categoryRepo.js';
 export async function getCategory(req, res) {
 	const { categoryId } = req.params;
+	if (!categoryId) return BadRequest(req,res,'Category ID is required');
 	const category = await categoryRepo.getCategory(categoryId,{settings: true});
 	if (category?.tournId != req.params.tournId)
 		return NotFound(req,res,'Category not found');

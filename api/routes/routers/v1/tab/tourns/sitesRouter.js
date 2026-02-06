@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAccess } from '../../../../../middleware/authorization.js';
+import { requireAccess } from '../../../../../middleware/authorization/authorization.js';
 import controller from '../../../../../controllers/tab/siteController.js';
 
 const router = Router({ mergeParams: true });

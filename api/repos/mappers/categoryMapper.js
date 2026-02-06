@@ -15,6 +15,7 @@ export const FIELD_MAP = {
 };
 
 export const toDomain = dbRow => {
+	if(!dbRow) return null;
 	const domain = genericToDomain(dbRow, FIELD_MAP);
 	if(Array.isArray(dbRow.judges)) {
 		domain.judges = dbRow.judges.map(judge => judgeDomain(judge));

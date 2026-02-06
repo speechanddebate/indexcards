@@ -148,8 +148,8 @@ export async function changeInstanceCount(req, res) {
 	const user = {
 		su    : req.session.su,
 		id    : req.session.person,
-		name  : `${req.session.name}`,
-		email : req.session.email,
+		name  : `${req.person.name}`,
+		email : req.person.email,
 	};
 
 	const serverCount = parseInt(req.params.target) || parseInt(req.body.target) || 0;
@@ -188,7 +188,7 @@ export async function rebootInstance(req, res) {
 	}
 
 	const resultMessages = [
-		`${req.session.name} ${req.session.email} has REBOOTED ${machine}:\n`,
+		`${req.person.name} ${req.person.email} has REBOOTED ${machine}:\n`,
 		'\n',
 	];
 

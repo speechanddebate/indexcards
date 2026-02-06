@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAccess } from '../../../../../middleware/authorization.js';
+import { requireAccess } from '../../../../../middleware/authorization/authorization.js';
 import * as controller from '../../../../../controllers/tab/tourn/index.js';
 import { restoreTourn } from '../../../../../controllers/tab/tourn/backup.js';
 import * as accessController from '../../../../../controllers/tab/tourn/access.js';
