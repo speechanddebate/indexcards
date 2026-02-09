@@ -25,6 +25,14 @@ const SCHOOLS = [
 	'Southridge',
 ];
 
+const SCHOOL_SUFFIXES = [
+	'High School',
+	'Academy',
+	'Preparatory',
+	'Secondary School',
+	'Institute',
+];
+
 const TOURN_SUFFIXES = [
 	'Invitational',
 	'Classic',
@@ -48,6 +56,10 @@ export function fakeTournName() {
 		default:
 			return `${faker.person.lastName()} Memorial Tournament`;
 	}
+}
+
+export function fakeSchoolName() {
+	return `${faker.helpers.arrayElement(SCHOOLS)} ${faker.helpers.arrayElement(SCHOOL_SUFFIXES)}`;
 }
 export function toWebName(name) {
 	return name

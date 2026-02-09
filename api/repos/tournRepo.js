@@ -77,6 +77,16 @@ export async function createTourn(tourn) {
 	return created.id;
 }
 
+async function addSite(tournId, siteId) {
+	if (!tournId) throw new Error('addSite: tournId is required');
+	if (!siteId) throw new Error('addSite: siteId is required');
+	await db.tournSite.create({
+		tourn: tournId,
+		site: siteId,
+	});
+	return true;
+}
+
 /**
  * Get files scoped to a tournament.
  *
@@ -137,6 +147,7 @@ export async function getContacts(tournId) {
 export default {
 	getTourn,
 	createTourn,
+	addSite,
 	getFiles,
 	getSchedule,
 	getContacts,

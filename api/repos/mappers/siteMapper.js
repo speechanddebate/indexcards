@@ -1,17 +1,17 @@
 // repos/mappers/schoolMapper.js
-import { toDomain as genericToDomain, toPersistence as genericToPersistence } from './mapperUtils.js';
+import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
 import { toDomain as roomDomain } from './roomMapper.js';
 
 export const FIELD_MAP = {
 	id: 'id',
 	name: 'name',
-	online: 'online',
+	online: { db: 'online', toDomain: fromBool, toDb: toBool },
 	directions: 'directions',
 	dropoff: 'dropoff',
-	host: 'host',
-	circuit: 'circuit',
-	updatedAt: 'timestamp',
-
+	hostId: 'host',
+	circuitId: 'circuit',
+	updatedAt: { db: 'timestamp', toDb: () => undefined },
+	createdAt: { db: 'created_at', toDb: () => undefined },
 };
 
 export const toDomain = dbRow => {

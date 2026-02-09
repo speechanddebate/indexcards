@@ -49,7 +49,7 @@ export function createOpenApiSpec(apiRouter) {
 				identifier: pkg.license,
 			},
 		},
-		security: [{ cookie: [] }],
+		security: [{ bearer: [] },{ cookie: []}],
 		tags: Array.from(tagMap.values()),
 		'x-tagGroups': buildTagGroups(declaredTagGroups, usedTags),
 		paths,
@@ -59,6 +59,7 @@ export function createOpenApiSpec(apiRouter) {
 			parameters,
 			securitySchemes: {
 				extApiKey:  { type: 'http', scheme: 'basic' },
+				bearer: { type: 'http', scheme: 'bearer' },
 				cookie: { type: 'apiKey', in: 'cookie', name: 'x-tabroom-cookie' },
 			},
 		},
