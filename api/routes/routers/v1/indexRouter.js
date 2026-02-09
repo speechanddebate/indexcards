@@ -28,6 +28,7 @@ router.use(
 	apiReference({
 		url: '/v1',
 		orderSchemaPropertiesBy: 'preserve',
+		persistAuth: true,
 		metaData: {
 			title: 'Tabroom.com API Reference',
 		},

@@ -10,7 +10,7 @@ export async function getCategory(req, res) {
 }
 getCategory.openapi = {
 	summary: 'Get category',
-	tags: ['Tourn > Category'],
+	tags: ['Category'],
 	responses: {
 		200: {
 			content: {
@@ -33,7 +33,7 @@ export async function getCategories(req, res) {
 }
 getCategories.openapi = {
 	summary: 'Get categories',
-	tags: ['Tourn > Category'],
+	tags: ['Category'],
 	responses: {
 		200: {
 			content: {
@@ -52,7 +52,7 @@ export function createCategory(req, res) {
 }
 createCategory.openapi = {
 	summary: 'Create category',
-	tags: ['Tourn > Category'],
+	tags: ['Category'],
 };
 
 export async function deleteCategory(req, res) {
@@ -68,7 +68,7 @@ export async function deleteCategory(req, res) {
 }
 deleteCategory.openapi = {
 	summary: 'Delete category',
-	tags: ['Tourn > Category'],
+	tags: ['Category'],
 };
 
 export function updateCategory(req, res) {
@@ -76,7 +76,7 @@ export function updateCategory(req, res) {
 }
 updateCategory.openapi = {
 	summary: 'Update category',
-	tags: ['Tourn > Category'],
+	tags: ['Category'],
 };
 
 export default {

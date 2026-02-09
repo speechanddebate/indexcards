@@ -15,7 +15,7 @@ export async function getSchool(req, res) {
 getSchool.openapi = {
 	summary: 'Get School by ID',
 	description: 'Retrieves a school by its ID within the specified tournament.',
-	tags: ['Tourn > Schools'],
+	tags: ['Schools'],
 	responses: {
 		200: {
 			description: 'School retrieved successfully',
@@ -38,7 +38,7 @@ export async function getSchools(req, res) {
 getSchools.openapi = {
 	summary: 'Get Schools for Tournament',
 	description: 'Retrieves all schools associated with the specified tournament.',
-	tags: ['Tourn > Schools'],
+	tags: ['Schools'],
 	responses: {
 		200: {
 			description: 'Schools retrieved successfully',
@@ -61,7 +61,7 @@ export async function createSchool(req, res) {
 createSchool.openapi = {
 	summary: 'Create School',
 	description: 'Creates a new school within the specified tournament.',
-	tags: ['Tourn > Schools'],
+	tags: ['Schools'],
 	requestBody: {
 		required: true,
 		content: {
@@ -92,7 +92,7 @@ export async function updateSchool(req, res) {
 updateSchool.openapi = {
 	summary: 'Update School',
 	description: 'Updates an existing school within the specified tournament.',
-	tags: ['Tourn > Schools'],
+	tags: ['Schools'],
 	requestBody: {
 		required: true,
 		content: {
@@ -114,7 +114,7 @@ export async function deleteSchool(req, res) {
 deleteSchool.openapi = {
 	summary: 'Delete School',
 	description: 'Deletes a school within the specified tournament.',
-	tags: ['Tourn > Schools'],
+	tags: ['Schools'],
 	responses: {
 		204: {
 			description: 'School deleted successfully',

@@ -13,7 +13,7 @@ async function getSite(req, res) {
 }
 getSite.openapi = {
 	summary: 'Get site',
-	tags: ['Tourn > Sites & Rooms'],
+	tags: ['Sites & Rooms'],
 };
 //tourns/:tournId/sites
 async function getSites(req, res) {
@@ -25,7 +25,7 @@ async function getSites(req, res) {
 }
 getSites.openapi = {
 	summary: 'Get sites',
-	tags: ['Tourn > Sites & Rooms'],
+	tags: ['Sites & Rooms'],
 };
 //tourns/:tournId/sites
 async function createSite(req, res) {
@@ -33,7 +33,7 @@ async function createSite(req, res) {
 }
 createSite.openapi = {
 	summary: 'Create site',
-	tags: ['Tourn > Sites & Rooms'],
+	tags: ['Sites & Rooms'],
 };
 //tourns/:tournId/sites/:siteId
 async function updateSite(req, res) {
@@ -41,7 +41,7 @@ async function updateSite(req, res) {
 }
 updateSite.openapi = {
 	summary: 'Update site',
-	tags: ['Tourn > Sites & Rooms'],
+	tags: ['Sites & Rooms'],
 };
 //tourns/:tournId/sites/:siteId
 async function deleteSite(req, res) {
@@ -49,7 +49,7 @@ async function deleteSite(req, res) {
 }
 deleteSite.openapi = {
 	summary: 'Delete site',
-	tags: ['Tourn > Sites & Rooms'],
+	tags: ['Sites & Rooms'],
 };
 
 //tourns/:tournId/sites/:siteId/rooms/:roomId
@@ -70,7 +70,7 @@ async function getRoom(req, res) {
 }
 getRoom.openapi = {
 	summary: 'Get room',
-	tags: ['Tourn > Sites & Rooms'],
+	tags: ['Sites & Rooms'],
 };
 
 //tourns/:tournId/sites/:siteId/rooms
@@ -85,7 +85,7 @@ async function getRooms(req, res) {
 }
 getRooms.openapi = {
 	summary: 'Get rooms',
-	tags: ['Tourn > Sites & Rooms'],
+	tags: ['Sites & Rooms'],
 };
 
 async function createRoom(req, res) {
@@ -93,7 +93,7 @@ async function createRoom(req, res) {
 }
 createRoom.openapi = {
 	summary: 'Create room',
-	tags: ['Tourn > Sites & Rooms'],
+	tags: ['Sites & Rooms'],
 };
 
 async function updateRoom(req, res) {
@@ -101,7 +101,7 @@ async function updateRoom(req, res) {
 }
 updateRoom.openapi = {
 	summary: 'Update room',
-	tags: ['Tourn > Sites & Rooms'],
+	tags: ['Sites & Rooms'],
 };
 
 async function deleteRoom(req, res) {
@@ -109,7 +109,7 @@ async function deleteRoom(req, res) {
 }
 deleteRoom.openapi = {
 	summary: 'Delete room',
-	tags: ['Tourn > Sites & Rooms'],
+	tags: ['Sites & Rooms'],
 };
 
 export default {
