@@ -10,12 +10,12 @@ export const getProfile = {
 		let person;
 
 		if (req.params.personId && req.person.siteAdmin) {
-			person = await personRepo.getPersonByIdWithSettings(req.params.personId);
+			person = await personRepo.getPerson(req.params.personId, { settings: true });
 
 		} else if (req.params.personId ) {
 			return Forbidden(req, res,'Only admin staff may access another profile');
 		} else if (req.person) {
-			person = await personRepo.getPersonByIdWithSettings(req.person.id);
+			person = await personRepo.getPerson(req.person.id, { settings: true });
 		}
 
 		if (!person) {

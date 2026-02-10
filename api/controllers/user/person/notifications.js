@@ -10,112 +10,102 @@ const headers = {
 	Accept         : 'application/json',
 };
 
-export const pushSubscribe = {
+export async function getSubscribe(req, res) {
+	try {
 
-	GET  : async (req,res) => {
+		const reply = await axios.get(
+			`${config.ONESIGNAL.URL}/users/by/external_id/${req.params.tabroomId}`,
+			{ headers },
+		);
 
-		try {
-
-			const reply = await axios.get(
-				`${config.ONESIGNAL.URL}/users/by/external_id/${req.params.tabroomId}`,
-				{ headers },
-			);
-
-			if (reply.data?.subscriptions) {
-				for (const sub of reply.data.subscriptions) {
-					if (sub.id === req.params.subscriptionId) {
-						return res.status(201).json(sub);
-					}
+		if (reply.data?.subscriptions) {
+			for (const sub of reply.data.subscriptions) {
+				if (sub.id === req.params.subscriptionId) {
+					return res.status(201).json(sub);
 				}
 			}
-
-			return res.status(201).json({ message: 'No such subscription found', enabled: false });
-
-		} catch (err) {
-			return res.status(201).json({
-				title  : 'Subscription view request failed; this user device is not subscribed',
-				detail : JSON.stringify(err),
-			});
 		}
 
-	},
+		return res.status(201).json({ message: 'No such subscription found', enabled: false });
 
-	POST : async (req, res) => {
+	} catch (err) {
+		return res.status(201).json({
+			title  : 'Subscription view request failed; this user device is not subscribed',
+			detail : JSON.stringify(err),
+		});
+	}
 
-		if (!req.params.subscriptionId) {
-			errorLogger.error(`No subscriptionID sent to the updater`);
-			return res.status(200).json('Session subscription disabled');
-		}
+};
+export async function pushSubscribe(req,res) {
 
-		const subscription = {
-			enabled: (req.params.subStatus === 'true' ? true : false),
-			notification_types: (req.params.subStatus === true ? 1 : -2),
-		};
+	if (!req.params.subscriptionId) {
+		errorLogger.error(`No subscriptionID sent to the updater`);
+		return res.status(200).json('Session subscription disabled');
+	}
 
-		try {
-			await axios.patch(
-				`${config.ONESIGNAL.URL}/subscriptions/${req.params.subscriptionId}`,
-				{ subscription } ,
-				{ headers },
-			);
-		} catch (err) {
+	const subscription = {
+		enabled: (req.params.subStatus === 'true' ? true : false),
+		notification_types: (req.params.subStatus === true ? 1 : -2),
+	};
 
-			return res.status(201).json({
-				title  : 'No such subscription was found',
-				detail : JSON.stringify(err),
-			});
-		}
+	try {
+		await axios.patch(
+			`${config.ONESIGNAL.URL}/subscriptions/${req.params.subscriptionId}`,
+			{ subscription } ,
+			{ headers },
+		);
+	} catch (err) {
 
-		if (req.params.subStatus === 'true') {
-			return res.status(200).json('Session subscription enabled');
-		}
+		return res.status(201).json({
+			title  : 'No such subscription was found',
+			detail : JSON.stringify(err),
+		});
+	}
 
-		await req.db.session.update(
+	if (req.params.subStatus === 'true') {
+		return res.status(200).json('Session subscription enabled');
+	}
+
+	await req.db.session.update(
+		{
+			push_notify: null,
+			last_access: new Date(),
+		},
+		{ where: { push_notify : req.params.subscriptionId } },
+	);
+
+	return res.status(200).json('Session subscription disabled');
+}
+export async function pushSync(req, res) {
+	const sessionId = req.body.sessionid || req.session.id;
+	const push_notify = req.body.subscriptionId || null;
+	const promises = [];
+
+	if (push_notify != null) {
+		const erasePromise = req.db.session.update(
 			{
 				push_notify: null,
-				last_access: new Date(),
 			},
-			{ where: { push_notify : req.params.subscriptionId } },
-		);
-
-		return res.status(200).json('Session subscription disabled');
-	},
-};
-
-export const pushSync = {
-
-	POST : async (req, res) => {
-
-		const sessionId = req.body.sessionid || req.session.id;
-		const push_notify = req.body.subscriptionId || null;
-		const promises = [];
-
-		if (push_notify != null) {
-			const erasePromise = req.db.session.update(
-				{
-					push_notify: null,
-				},
-				{ where: {
-					id         : { [Op.ne]: sessionId },
-					push_notify,
-				},
-				},
-			);
-			promises.push(erasePromise);
-		}
-
-		const updateSession = req.db.session.update(
-			{
+			{ where: {
+				id         : { [Op.ne]: sessionId },
 				push_notify,
-				last_access: new Date(),
 			},
-			{ where: { id : sessionId } },
+			},
 		);
+		promises.push(erasePromise);
+	}
 
-		promises.push(updateSession);
-		await Promise.all(promises);
-		return res.status(200).json(`Push status saved and synced to session`);
-	},
+	const updateSession = req.db.session.update(
+		{
+			push_notify,
+			last_access: new Date(),
+		},
+		{ where: { id : sessionId } },
+	);
+
+	promises.push(updateSession);
+	await Promise.all(promises);
+	return res.status(200).json(`Push status saved and synced to session`);
 };
 
 export default pushSubscribe;

@@ -1,26 +1,16 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
-import rateLimiter from 'express-rate-limit';
 import {v4 as uuid} from 'uuid';
 import expressWinston from 'express-winston';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
-import { initialize } from 'express-openapi';
-import swaggerUI from 'swagger-ui-express';
 import config from './config/config.js';
-import { barfPlease, systemStatus } from './api/controllers/public/status.js';
-import errorHandler from './api/helpers/error.js';
-import apiDoc from './api/routes/api-doc.js';
+import errorHandler from './api/helpers/errors/errorHandler.js';
 import { Authenticate } from './api/middleware/authentication.js';
-import { requireAreaAccess, requireSiteAdmin } from './api/middleware/authorization.js';
-import coachPaths from './api/routes/paths/coach/index.js';
-import extPaths from './api/routes/paths/ext/index.js';
-import glpPaths from './api/routes/paths/glp/index.js';
-import localPaths from './api/routes/paths/local/index.js';
-import publicPaths from './api/routes/paths/public/index.js';
-import tabPaths from './api/routes/paths/tab/index.js';
-import userPaths from './api/routes/paths/user/index.js';
+import csrfMiddleware from './api/middleware/csrfMiddleware.js';
+import v1Router from './api/routes/routers/v1/indexRouter.js';
+import { rateLimiterMiddleware } from './api/middleware/rateLimiter.js';
 
 import {
 	tabAuth,
@@ -59,41 +49,6 @@ app.use((req, res, next) => {
 app.enable('trust proxy', 1);
 app.get('/v1/ip', (request, response) => response.send(request.ip));
 
-// Rate limit all requests
-const limiter = rateLimiter({
-	windowMs : config.RATE_WINDOW || 15 * 60 * 1000 , // 15 minutes
-	max      : config.RATE_MAX || 10000, // limit each IP to 100000 requests per windowMs
-});
-app.use(limiter);
-
-const messageLimiter = rateLimiter({
-	windowMs : config.MESSAGE_RATE_WINDOW || 15 * 1000 , // 30 seconds
-	max      : config.MESSAGE_RATE_MAX || 1            , // limit each to 2 blasts requests per 30 seconds
-	message  : `
-		You have reached your rate limit on messages which is ${config.MESSAGE_RATE_MAX} .
-		Please do not blast people that persistently.
-	`,
-});
-
-// Can we find a way to match these on the last verb? -- CLP, dreaming instead of googling.
-
-app.use('/v1/tab/:tournId/round/:roundId/message', messageLimiter);
-app.use('/v1/tab/:tournId/round/:roundId/blast', messageLimiter);
-app.use('/v1/tab/:tournId/round/:roundId/poke', messageLimiter);
-app.use('/v1/tab/:tournId/timeslot/:timeslotId/message', messageLimiter);
-app.use('/v1/tab/:tournId/timeslot/:timeslotId/blast', messageLimiter);
-app.use('/v1/tab/:tournId/timeslot/:timeslotId/poke', messageLimiter);
-app.use('/v1/tab/:tournId/section/:sectionId/blastMessage', messageLimiter);
-app.use('/v1/tab/:tournId/section/:sectionId/blastPairing', messageLimiter);
-app.use('/v1/tab/:tournId/section/:sectionId/poke', messageLimiter);
-
-const searchLimiter = rateLimiter({
-	windowMs : config.SEARCH_RATE_WINDOW || 30 * 1000 , // 30 seconds
-	max      : config.SEARCH_RATE_MAX || 5            , // limit each to 5 search requests per 30 seconds
-});
-
-app.use('/v1/public/search', searchLimiter);
-
 // Enable CORS Access, hopefully in a way that means I don't
 // have to fight with it ever again.
 const corsOptions = {
@@ -123,13 +78,15 @@ app.use(cookieParser());
 
 // Authenticate all requests and set req.person if valid
 app.use(Authenticate);
+app.use(rateLimiterMiddleware);
+app.use(csrfMiddleware);
+app.use('/v1',v1Router);
 
 app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
 	if (!req.person) {
 		return Unauthorized(req, res, 'User: You are not logged in.');
 	}
 	next();
-
 });
 
 const tabRoutes = [
@@ -142,7 +99,6 @@ const tabRoutes = [
 ];
 
 app.all(tabRoutes, async (req, res, next) => {
-
 	if (!req.person) {
 		return Unauthorized(req, res, 'Tab: You are not logged in.');
 	}
@@ -162,9 +118,8 @@ const coachRoutes = [
 
 app.all(coachRoutes, async (req, res, next) => {
 
-	// apis related to the coach or directors of a program.  Prefs only
-	// access is in the /user/prefs directory because it's such a bizarre
-	// one off
+	// apis related to the coach or directors of a program.  Prefs only access
+	// is in the /user/prefs directory because it's such a bizarre one off
 
 	if (!req.person) {
 		return Unauthorized(req, res, 'Coach: You are not logged in.');
@@ -188,7 +143,7 @@ const localRoutes = [
 
 app.all(localRoutes, async (req, res, next) => {
 
-	// apis related to administrators of districts (the committee), or a
+	// APIs related to administrators of districts (the committee), or a
 	// region, or an NCFL diocese, or a circuit.
 
 	if (!req.person) {
@@ -206,40 +161,6 @@ app.all(localRoutes, async (req, res, next) => {
 	}
 
 	next();
-});
-
-app.use('/v1/ext/tourn/*', async (req,res,next) => {
-	// /v1/ext/tourn requires tourn level permission
-	req.session = await tabAuth(req, res);
-});
-app.use('/v1/ext/:area',requireAreaAccess);
-app.use('/v1/glp/*'    ,requireSiteAdmin);
-
-const systemPaths = [
-	{ path : '/status', module : systemStatus },
-	{ path : '/barf', module   : barfPlease },
-];
-
-// Combine the various paths into one
-const paths = [
-	...systemPaths,
-	...coachPaths,
-	...extPaths,
-	...glpPaths,
-	...localPaths,
-	...publicPaths,
-	...tabPaths,
-	...userPaths,
-];
-
-// Initialize OpenAPI middleware
-const apiDocConfig = initialize({
-	app,
-	apiDoc,
-	paths,
-	promiseMode     : true,
-	docsPath        : '/docs',
-	errorMiddleware : errorHandler,
 });
 
 // Log global errors with Winston
@@ -267,9 +188,6 @@ app.use(expressWinston.logger({
 
 // Final fallback error handling
 app.use(errorHandler);
-
-// Swagger UI interface for the API
-app.use('/v1/apidoc', swaggerUI.serve, swaggerUI.setup(apiDocConfig.apiDoc));
 
 // Start server
 const port = process.env.PORT || config.PORT || 3000;

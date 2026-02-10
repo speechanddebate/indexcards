@@ -1,5 +1,6 @@
 import basic from 'basic-auth';
 import config from '../../config/config.js';
+import authService from '../services/AuthService.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import personRepo from '../repos/personRepo.js';
 import { BadRequest, Unauthorized } from '../helpers/problem.js';
@@ -10,10 +11,10 @@ export async function Authenticate(req, res, next) {
 
 		// COOKIE AUTHENTICATION
 		const cookieName = config.COOKIE_NAME;
-		const cookie = req.cookies[cookieName] || req.headers['x-tabroom-cookie'];
+		const cookie = req.cookies[cookieName];
 
 		if (cookie) {
-			let cookieSession = await sessionRepo.findByUserKey(cookie);
+			let cookieSession = await sessionRepo.findByUserKey(cookie, {include: {su: true, person: true}});
 			if (!cookieSession) {
 				res.clearCookie(cookieName);  //invalid cookie, clear it
 			} else {
@@ -27,25 +28,18 @@ export async function Authenticate(req, res, next) {
 				 * and policies
 				 */
 
-				const settings = await personRepo.getPersonSettings(
-					cookieSession.person.id,
-					{ skip: ['paradigm', 'paradigm_timestamp', 'nsda_membership'] }
-				);
-
 				req.session = {
-					id        : cookieSession.id,
-					person    : cookieSession.person.id,
-					siteAdmin : cookieSession.person.siteAdmin,
-					email     : cookieSession.person.email,
-					name      : `${cookieSession.person?.first} ${cookieSession.person?.last}`,
-					first     : cookieSession.person.first,
-					last      : cookieSession.person.last,
-					su        : cookieSession.su?.id || null,
-					settings,
+					id     : cookieSession.id,
+					person : cookieSession.personId,
+					su     : cookieSession.suId || null,
+					Su     : cookieSession.su || null,
+					Person : cookieSession.person || null,
 				};
 
 				//req.person is what should be checked for every authorization decision
-				req.person = await personRepo.getById(req.session.person);
+				req.person = await personRepo.getPerson(req.session.person);
+				req.authType = 'cookie';
+				req.session.csrfToken = authService.generateCSRFToken(cookie);
 			}
 		}
 
@@ -60,11 +54,28 @@ export async function Authenticate(req, res, next) {
 				}
 
 				//req.person is what should be checked for every authorization decision
-				req.person = await personRepo.getPersonByApiKey(credentials.name, credentials.pass);
+				const person = await personRepo.getPerson(credentials.name, {settings: ['api_key']});
 
-				if (!req.person) {
+				if (!person || person.settings?.api_key !== credentials.pass) {
 					return Unauthorized(req, res,'Invalid API key');
 				}
+
+				req.person = person;
+				req.authType = 'basic';
+
+			} else if (req.headers.authorization.startsWith('Bearer ')) {
+
+				//BEARER AUTHENTICATION. allow the user to send their session token as a bearer token
+				const token = req.headers.authorization.substring(7).trim();
+				if (!token) {
+					return BadRequest(req, res, 'The Authorization header is malformed. Expected format: Bearer token.');
+				}
+				const session = await sessionRepo.findByUserKey(token, { include: { person: true } });
+				if (!session) {
+					return Unauthorized(req, res,'Invalid Bearer token');
+				}
+				req.person = await personRepo.getPerson(session.personId);
+				req.authType = 'bearer';
 
 			} else {
 				return BadRequest(req, res, 'The Authorization header uses an unrecognized authentication scheme.');

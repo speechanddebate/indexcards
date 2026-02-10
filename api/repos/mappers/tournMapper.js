@@ -1,0 +1,36 @@
+// repos/mappers/tournMapper.js
+import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
+import { toDomain as webpageToDomain } from './webpageMapper.js';
+export const FIELD_MAP = {
+	id: 'id',
+	name: 'name',
+	city: 'city',
+	state: 'state',
+	country: 'country',
+	tz: 'tz',
+	webname: 'webname',
+	hidden: { db: 'hidden', toDomain: toBool, toDb: fromBool },
+	startDate: 'start',
+	endDate: 'end',
+	regStartDate: 'reg_start',
+	regEndDate: 'reg_end',
+	settings: 'tourn_settings',
+	updatedAt: { db: 'timestamp', toDb: () => undefined },
+	createdAt: { db: 'created_at', toDb: () => undefined },
+};
+
+export const toDomain = dbRow => {
+	if(!dbRow) return null;
+	const domain = genericToDomain(dbRow, FIELD_MAP);
+	if(dbRow.webpages) {
+		domain.webpages = dbRow.webpages.map(webpage => webpageToDomain(webpage));
+	}
+	return domain;
+};
+export const toPersistence = domainObj => genericToPersistence(domainObj, FIELD_MAP);
+
+export default {
+	toDomain,
+	toPersistence,
+	FIELD_MAP,
+};

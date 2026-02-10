@@ -28,6 +28,10 @@ export const config = {
 	S3_URL				  : 'https://s3.amazonaws.com/tabroom-files/tourns',
 	COOKIE_NAME           : 'TabroomLocal',
 	COOKIE_DOMAIN         : '.dev.tabroom.com',
+	CSRF                  : {
+		COOKIE_NAME   : 'CSRF_Token',
+		HEADER_NAME   : 'x-csrf-token'
+	},
 	DB_PORT               : '3306',
 	DB_DATABASE           : 'tabroom',
 	NSDA 				  : {

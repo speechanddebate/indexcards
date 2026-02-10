@@ -97,12 +97,15 @@ const autoScale = async () => {
 			}
 
 		} else {
-			alert += '<h4>WARNING: LOAD IS HIGH AND WE ARE AT OUR MACHINE MAXIMUM COUNT. IF YOU ARE NOT PALMER OR HARDY';
-			alert += 'GET IN TOUCH WITH ONE OF THEM. IF YOU ARE, SCALE MACHINE TYPES UP OR OMG OMG PANIK PANIK OMG!!!!</h4>';
+			alert += '<h4>WARNING: LOAD IS HIGH AND WE ARE AT OUR MACHINE MAXIMUM COUNT.';
+			alert += `IF YOU ARE NOT PALMER OR HARDY`;
+			alert += 'GET IN TOUCH WITH ONE OF THEM. IF YOU ARE, SCALE MACHINE TYPES UP';
+			alert += 'OR OMG OMG PANIK PANIK OMG!!!!</h4>';
 		}
 
 		if (database.one > 110 || database.fifteen > 100) {
-			alert += `<h5>Database server load is also high.  Possible issue there: ${database.one} 1m load, ${database.fifteen} 15m.</h5>`;
+			alert += `<h5>Database server load is also high.  Possible issue there:`;
+			alert += `${database.one} 1m load, ${database.fifteen} 15m.</h5>`;
 			await notifyCloudAdmins(alert, 'AutoScaling UP.  DB Server Load Also High.');
 		} else {
 			await notifyCloudAdmins(alert, 'AutoScaling UP');
@@ -136,6 +139,7 @@ const autoScale = async () => {
 
 	// Check if we are under the estimated count for servers right now.
 	if (usageData.serverTarget > servers.length) {
+
 		const needed = usageData.serverTarget - servers.length;
 		let alert = `<p>Under forecasted needs. Spinning up ${needed} machines</p>`;
 		let response = {};

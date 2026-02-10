@@ -2,11 +2,9 @@
 import { db } from '../../../helpers/litedb.js';
 import { errorLogger } from '../../../helpers/logger.js';
 
-export const scheduleRoundFlips = {
-	POST: async (req, res) => {
-		const counter = await scheduleFlips(req.params.roundId);
-		return res.status(201).json({ message: `Successfully scheduled ${counter} coinflips` });
-	},
+export async function scheduleRoundFlips(req,res) {
+	const counter = await scheduleFlips(req.params.roundId);
+	return res.status(201).json({ message: `Successfully scheduled ${counter} coinflips` });
 };
 
 export const scheduleFlips = async (roundId) => {

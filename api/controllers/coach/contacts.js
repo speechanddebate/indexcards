@@ -1,100 +1,74 @@
 import { NotFound } from '../../helpers/problem.js';
 
 // General CRUD for contact coaches
-export const updateContact = {
-
-	POST: async (req, res) => {
-
-		const firstStatusCheck = await checkContactStatus(req);
-
-		const contacts = await req.db.contact.findAll({
-			where : {
-				school : parseInt(req.body.school),
-				person : parseInt(req.body.person),
-			},
+export async function updateContact(req, res) {
+	const firstStatusCheck = await checkContactStatus(req);
+	const contacts = await req.db.contact.findAll({
+		where: {
+			school: parseInt(req.body.school),
+			person: parseInt(req.body.person),
+		},
+	});
+	if (!contacts || contacts.length < 1) {
+		return res.status(200).json('No coach found');
+	}
+	const contact = contacts.shift();
+	for (const dupe of contacts) {
+		await dupe.destroy();
+	}
+	contact[req.body.property_name] = req.body.property_value;
+	await contact.save();
+	const secondStatusCheck = await checkContactStatus(req, res);
+	if ((secondStatusCheck === 'OK' || firstStatusCheck === 'OK') && (secondStatusCheck !== firstStatusCheck)) {
+		return res.status(200).json({
+			message: `Coach is now marked as ${req.body.property_name}`,
+			refresh: 1,
+			error: false,
 		});
-
-		if (!contacts || contacts.length < 1) {
-			return res.status(200).json('No coach found');
-		}
-
-		const contact = contacts.shift();
-
-		for (const dupe of contacts) {
-			await dupe.destroy();
-		}
-
-		contact[req.body.property_name] = req.body.property_value;
-
-		await contact.save();
-		const secondStatusCheck = await checkContactStatus(req, res);
-
-		if (
-			(secondStatusCheck === 'OK' || firstStatusCheck === 'OK')
-			&& (secondStatusCheck !== firstStatusCheck)
-		) {
-			return res.status(200).json({
-				message : `Coach is now marked as ${req.body.property_name}`,
-				refresh : 1,
-				error   : false,
-			});
-		}
-
-		if (secondStatusCheck !== 'OK') {
-			return res.status(200).json({
-				message : `Coach is now marked as ${req.body.property_name}`,
-				error   : false,
-				replace : [
-					{ id : 'contt_errors', content: secondStatusCheck.join('<br />') },
-				],
-			});
-		}
-
-		if (contact[req.body.property_name]) {
-			return res.status(200).json(`Coach is now marked as ${req.body.property_name}`);
-		}
-
-		return res.status(200).json(`Coach is no longer marked as ${req.body.property_name}`);
-	},
-};
+	}
+	if (secondStatusCheck !== 'OK') {
+		return res.status(200).json({
+			message: `Coach is now marked as ${req.body.property_name}`,
+			error: false,
+			replace: [
+				{ id: 'contt_errors', content: secondStatusCheck.join('<br />') },
+			],
+		});
+	}
+	if (contact[req.body.property_name]) {
+		return res.status(200).json(`Coach is now marked as ${req.body.property_name}`);
+	}
+	return res.status(200).json(`Coach is no longer marked as ${req.body.property_name}`);
+}
 
 // I find it rather absurdly dumb that you can't post a body to a DELETE.  I mean,
 // what's the point of having these verbs if you're not going to be able to use them
 // half the time?
 
-export const deleteContact = {
-
-	POST: async (req, res) => {
-
-		const firstStatusCheck = await checkContactStatus(req, res);
-
-		const contacts = await req.db.contact.findAll({
-			where : {
-				school : parseInt(req.body.school),
-				person : parseInt(req.body.person),
-			},
-		});
-
-		for (const contact of contacts) {
-			await contact.destroy();
-		}
-
-		const secondStatusCheck = await checkContactStatus(req, res);
-
-		if (secondStatusCheck !== firstStatusCheck) {
-			return res.status(200).json({
-				message : `Coach is now marked as ${req.body.property_name}`,
-				refresh : 1,
-				error   : false,
-			});
-		}
-
+export async function deleteContact(req, res) {
+	const firstStatusCheck = await checkContactStatus(req, res);
+	const contacts = await req.db.contact.findAll({
+		where: {
+			school: parseInt(req.body.school),
+			person: parseInt(req.body.person),
+		},
+	});
+	for (const contact of contacts) {
+		await contact.destroy();
+	}
+	const secondStatusCheck = await checkContactStatus(req, res);
+	if (secondStatusCheck !== firstStatusCheck) {
 		return res.status(200).json({
-			message: `Coach removed for your roster`,
+			message: `Coach is now marked as ${req.body.property_name}`,
+			refresh: 1,
 			error: false,
 		});
-	},
-};
+	}
+	return res.status(200).json({
+		message: `Coach removed for your roster`,
+		error: false,
+	});
+}
 
 export const checkContacts = {
 
@@ -218,47 +192,37 @@ export const checkContactStatus = async (req) => {
 	return ('OK');
 };
 
-export const userProfile = {
-	GET: async (req, res) => {
-
-		if (!req.session) {
-			return res.status(201).json({ message: 'You have no active user session' });
-		}
-		let result;
-
-		if (req.params.personId && req.session.site_admin) {
-			result = await req.db.person.findByPk(
-				req.params.personId,
-				{
-					include: [{
-						model: req.db.personSetting,
-						as: 'Settings',
-					}],
-				}
-			);
-
-		} else if (req.params.personId ) {
-			return res.status(201).json({ message: 'Only admin staff may access another profile' });
-		} else if (req.session.person) {
-			result = await req.db.person.findByPk(req.session.person,
-				{
-					include: [{
-						model: req.db.personSetting,
-						as: 'Settings',
-					}],
-				},
-			);
-		}
-
-		if (result.count < 1) {
-			return NotFound(req, res, 'User does not exist');
-		}
-
-		const jsonOutput = result.toJSON();
-		delete jsonOutput.password;
-
-		return res.status(200).json(jsonOutput);
-	},
-};
+export async function userProfile(req, res) {
+	if (!req.session) {
+		return res.status(201).json({ message: 'You have no active user session' });
+	}
+	let result;
+	if (req.params.personId && req.person.siteAdmin) {
+		result = await req.db.person.findByPk(
+			req.params.personId,
+			{
+				include: [{
+					model: req.db.personSetting,
+					as: 'Settings',
+				}],
+			}
+		);
+	} else if (req.params.personId) {
+		return res.status(201).json({ message: 'Only admin staff may access another profile' });
+	} else if (req.session.person) {
+		result = await req.db.person.findByPk(req.session.person, {
+			include: [{
+				model: req.db.personSetting,
+				as: 'Settings',
+			}],
+		});
+	}
+	if (!result || (result.count && result.count < 1)) {
+		return NotFound(req, res, 'User does not exist');
+	}
+	const jsonOutput = result.toJSON();
+	delete jsonOutput.password;
+	return res.status(200).json(jsonOutput);
+}
 
 export default updateContact;

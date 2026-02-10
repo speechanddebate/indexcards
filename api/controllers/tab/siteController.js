@@ -1,0 +1,183 @@
+import { NotImplemented, BadRequest, NotFound } from '../../helpers/problem.js';
+import siteRepo from '../../repos/siteRepo.js';
+import roomRepo from '../../repos/roomRepo.js';
+
+//tourns/:tournId/sites/:siteId
+async function getSite(req, res) {
+	if (!Number(req.params.siteId)) return BadRequest(req,res,'siteId is required');
+	const site = await siteRepo.getSite({ siteId: req.params.siteId, tournId: req.params.tournId });
+	if (!site) {
+		return NotFound(req,res,`No site found for tournId:${req.params.tournId} with id ${req.params.siteId}`);
+	}
+	return res.json(site);
+}
+getSite.openapi = {
+	summary: 'Get site',
+	tags: ['Sites & Rooms'],
+	responses: {
+		200: {
+			description: 'A site object',
+			content: {
+				'application/json': {
+					schema: { $ref: '#/components/schemas/SiteResponse' },
+					examples: {
+						site: {
+							summary: 'Example response',
+							value: {
+								id: 1,
+								name: 'Lincoln High School',
+								online: false,
+								directions: '123 Main St, Anytown, USA',
+								dropoff: 'Use the side entrance on 2nd Ave.',
+								hostId: 5,
+								circuitId: 2,
+								createdAt: '2023-01-01T00:00:00Z',
+								updatedAt: '2023-01-02T00:00:00Z',
+							},
+						},
+					},
+				},
+			},
+		},
+	},
+};
+//tourns/:tournId/sites
+async function getSites(req, res) {
+	if (!req.params.tournId) return BadRequest(req,res,'tournId is required');
+	const sites = await siteRepo.getSites({ tournId: req.params.tournId });
+	if (!sites) return NotFound(req,res,'No sites found for tournId ' + req.params.tournId);
+	return res.json(sites);
+
+}
+getSites.openapi = {
+	summary: 'Get sites',
+	tags: ['Sites & Rooms'],
+	responses: {
+		200: {
+			description: 'A list of sites for the tourn',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'array',
+						items: { $ref: '#/components/schemas/SiteResponse' },
+					},
+					examples: {
+						sites: {
+							summary: 'Example response',
+							value: [
+								{
+									id: 1,
+									name: 'Lincoln High School',
+									online: false,
+									directions: '123 Main St, Anytown, USA',
+									dropoff: 'Use the side entrance on 2nd Ave.',
+									hostId: 5,
+									circuitId: 2,
+									createdAt: '2023-01-01T00:00:00Z',
+									updatedAt: '2023-01-02T00:00:00Z',
+								},
+							],
+						},
+					},
+				},
+			},
+		},
+	},
+};
+//tourns/:tournId/sites
+async function createSite(req, res) {
+	return NotImplemented(req,res,'this feature is not implemented yet');
+}
+createSite.openapi = {
+	summary: 'Create site',
+	tags: ['Sites & Rooms'],
+};
+//tourns/:tournId/sites/:siteId
+async function updateSite(req, res) {
+	return NotImplemented(req,res,'this feature is not implemented yet');
+}
+updateSite.openapi = {
+	summary: 'Update site',
+	tags: ['Sites & Rooms'],
+};
+//tourns/:tournId/sites/:siteId
+async function deleteSite(req, res) {
+	return NotImplemented(req,res,'this feature is not implemented yet');
+}
+deleteSite.openapi = {
+	summary: 'Delete site',
+	tags: ['Sites & Rooms'],
+};
+
+//tourns/:tournId/sites/:siteId/rooms/:roomId
+async function getRoom(req, res) {
+	if (!req.params.roomId) return BadRequest(req,res,'roomId is required');
+	if (!req.params.siteId) return BadRequest(req,res,'siteId is required');
+	if (!req.params.tournId) return BadRequest(req,res,'tournId is required');
+	const room = await roomRepo.getRoom({
+		roomId: req.params.roomId,
+		siteId: req.params.siteId,
+		tournId: req.params.tournId,
+	});
+
+	if (!room) {
+		return NotFound(req,res,`No room found for tournId:${req.params.tournId} siteId:${req.params.siteId} with id ${req.params.roomId}`);
+	}
+	return res.json(room);
+}
+getRoom.openapi = {
+	summary: 'Get room',
+	tags: ['Sites & Rooms'],
+};
+
+//tourns/:tournId/sites/:siteId/rooms
+async function getRooms(req, res) {
+	if (!req.params.siteId) return BadRequest(req,res,'siteId is required');
+	if (!req.params.tournId) return BadRequest(req,res,'tournId is required');
+	const rooms = await roomRepo.getRooms({ siteId: req.params.siteId, tournId: req.params.tournId });
+	if (!rooms) {
+		return NotFound(req,res,`No rooms found for tournId:${req.params.tournId} siteId:${req.params.siteId}`);
+	}
+	return res.json(rooms);
+}
+getRooms.openapi = {
+	summary: 'Get rooms',
+	tags: ['Sites & Rooms'],
+};
+
+async function createRoom(req, res) {
+	return NotImplemented(req,res,'this feature is not implemented yet');
+}
+createRoom.openapi = {
+	summary: 'Create room',
+	tags: ['Sites & Rooms'],
+};
+
+async function updateRoom(req, res) {
+	return NotImplemented(req,res,'this feature is not implemented yet');
+}
+updateRoom.openapi = {
+	summary: 'Update room',
+	tags: ['Sites & Rooms'],
+};
+
+async function deleteRoom(req, res) {
+	return NotImplemented(req,res,'this feature is not implemented yet');
+}
+deleteRoom.openapi = {
+	summary: 'Delete room',
+	tags: ['Sites & Rooms'],
+};
+
+export default {
+	getSite,
+	getSites,
+	createSite,
+	updateSite,
+	deleteSite,
+	getRoom,
+	getRooms,
+	createRoom,
+	updateRoom,
+	deleteRoom,
+};

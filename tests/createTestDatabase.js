@@ -97,24 +97,24 @@ const pruneDatabase = async () => {
 	});
 
 	await db.sequelize.query(`
-		delete from result_key;
+		truncate table result_key;
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
 
 	await db.sequelize.query(`
-		delete from result_value;
+		truncate table result_value;
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
 
 	await db.sequelize.query(`
-		delete from campus_log;
+		truncate table campus_log;
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
 	await db.sequelize.query(`
-		delete from change_log;
+		truncate table change_log;
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
@@ -126,7 +126,7 @@ const pruneDatabase = async () => {
 	});
 
 	await db.sequelize.query(`
-		delete from session
+		truncate table session
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
@@ -138,13 +138,13 @@ const pruneDatabase = async () => {
 	});
 
 	await db.sequelize.query(`
-		delete from housing_slots;
+		truncate table housing_slots;
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
 
 	await db.sequelize.query(`
-		delete from housing;
+		truncate table housing;
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
@@ -436,25 +436,25 @@ const pruneDatabase = async () => {
 	});
 
 	await db.sequelize.query(`
-		delete from email
+		truncate table email
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
 
 	await db.sequelize.query(`
-		delete from invoice
+		truncate table invoice
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
 
 	await db.sequelize.query(`
-		delete from fine
+		truncate table fine
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
 
 	await db.sequelize.query(`
-		delete from message
+		truncate table message
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
@@ -645,7 +645,12 @@ const pruneDatabase = async () => {
 	pruners.push(coachPruner);
 
 	const personDeepPruner = await db.sequelize.query(`
-		alter table person drop street,city,zip,postal
+		UPDATE person
+		SET
+			street = NULL,
+			city   = NULL,
+			zip    = NULL,
+			postal = NULL
 	`, {
 		type: db.sequelize.QueryTypes.UPDATE,
 	});

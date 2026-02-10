@@ -1,0 +1,81 @@
+export const School = {
+	type: 'object',
+	properties: {
+		id: { type: 'integer', readOnly: true, description: 'Unique identifier for the school' },
+		name: { type: 'string', description: 'Name of the school' },
+		code: { type: 'string', description: 'School code' },
+		onsite: { type: 'boolean', description: 'Whether the school is onsite' },
+		tournId: { type: 'integer', description: 'Tournament ID' },
+		chapterId: { type: 'integer', description: 'Chapter ID' },
+		state: { type: 'string', description: 'State abbreviation' },
+		regionId: { type: 'integer', description: 'Region ID' },
+		districtId: { type: 'integer', description: 'District ID' },
+		settings: { type: 'object', description: 'School settings object' },
+		updatedAt: { type: 'string', readOnly: true, format: 'date-time', description: 'Last modified timestamp' },
+		createdAt: { type: 'string', readOnly: true, format: 'date-time', description: 'Creation timestamp' },
+	},
+	additionalProperties: false,
+	examples: [
+		{
+			id: 1985,
+			name: 'Shermer High School',
+			code: 'SHS',
+			onsite: true,
+			tournId: 123,
+			chapterId: 456,
+			state: 'IL',
+			regionId: 789,
+			districtId: 987,
+			settings: { allowGuests: true },
+			updatedAt: '2024-01-15T12:34:56Z',
+			createdAt: '2023-09-01T08:00:00Z',
+		},
+	],
+};
+export const CreateSchool = {
+	type: 'object',
+	required: ['chapterId'],
+	properties: {
+		name: { type: 'string', description: 'Name of the school' },
+		code: { type: 'string', description: 'School code' },
+		onsite: { type: 'boolean', description: 'Whether the school is onsite' },
+		chapterId: { type: 'integer', description: 'Chapter ID' },
+		state: { type: 'string', description: 'State abbreviation' },
+		regionId: { type: 'integer', description: 'Region ID' },
+		settings: { type: 'object', description: 'School settings object' },
+	},
+	additionalProperties: false,
+	examples: [
+		{
+			name: 'Shermer High School',
+			code: 'SHS',
+			onsite: true,
+			chapterId: 456,
+			state: 'IL',
+			regionId: 789,
+			settings: { allowGuests: true },
+		},
+	],
+};
+export const UpdateSchool = {
+	type: 'object',
+	properties: {
+		name: { type: 'string', description: 'Name of the school' },
+		code: { type: 'string', description: 'School code' },
+		onsite: { type: 'boolean', description: 'Whether the school is onsite' },
+		state: { type: 'string', description: 'State abbreviation' },
+		regionId: { type: 'integer', description: 'Region ID' },
+		settings: { type: 'object', description: 'School settings object' },
+	},
+	additionalProperties: false,
+	examples: [
+		{
+			name: 'Shermer High School',
+			code: 'SHS',
+			onsite: true,
+			state: 'IL',
+			regionId: 789,
+			settings: { allowGuests: true },
+		},
+	],
+};

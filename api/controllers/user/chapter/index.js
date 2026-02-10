@@ -1,27 +1,23 @@
-export const userChapters = {
-	GET: async (req, res) => {
-		const chapters = await req.db.sequelize.query(`
-			select
-				chapter.*,
-				permission.tag permission
-			from (permission, chapter)
-			where 1=1
-				and permission.person = :personId
-				and permission.chapter = chapter.id
-			group by chapter.id
-		`, {
-			replacements: { personId: req.session.person },
-			type: req.db.Sequelize.QueryTypes.SELECT,
-		});
+export async function userChapters(req,res) {
+	const chapters = await req.db.sequelize.query(`
+		select
+			chapter.*,
+			permission.tag permission
+		from (permission, chapter)
+		where 1=1
+			and permission.person = :personId
+			and permission.chapter = chapter.id
+		group by chapter.id
+	`, {
+		replacements: { personId: req.person.id },
+		type: req.db.Sequelize.QueryTypes.SELECT,
+	});
 
-		return res.status(200).json(chapters);
-	},
+	return res.status(200).json(chapters);
 };
 
-export const userChaptersByTourn = {
-
-	GET: async (req, res) => {
-		const chapters = await req.db.sequelize.query(`
+export async function userChaptersByTourn(req, res)  {
+	const chapters = await req.db.sequelize.query(`
 			select
 				chapter.*,
 				permission.tag permission,
@@ -36,21 +32,21 @@ export const userChaptersByTourn = {
 				and permission.chapter = chapter.id
 			group by chapter.id
 		`, {
-			replacements : {
-				personId : req.session.person,
-				tournId  : req.params.tournId,
-			},
-			type: req.db.Sequelize.QueryTypes.SELECT,
-		});
+		replacements : {
+			personId : req.session.person,
+			tournId  : req.params.tournId,
+		},
+		type: req.db.Sequelize.QueryTypes.SELECT,
+	});
 
-		const chapterIds = chapters.map( (chapter) => chapter.id );
+	const chapterIds = chapters.map( (chapter) => chapter.id );
 
-		if (chapterIds.length < 1) {
-			// Avoids null error below. There is no chapter 1.
-			chapterIds.push(1);
-		}
+	if (chapterIds.length < 1) {
+		// Avoids null error below. There is no chapter 1.
+		chapterIds.push(1);
+	}
 
-		const dashboards = await req.db.sequelize.query(`
+	const dashboards = await req.db.sequelize.query(`
 			select
 				chapter.*,
 				school.id schoolId, school.tourn tournId,
@@ -66,19 +62,19 @@ export const userChaptersByTourn = {
 				and chapter.id NOT IN ( :chapterIds )
 				group by chapter.id
 		`, {
-			replacements: {
-				personId   : req.session.person,
-				tournId    : req.params.tournId,
-				chapterIds,
-			},
-			type: req.db.Sequelize.QueryTypes.SELECT,
-		});
+		replacements: {
+			personId   : req.session.person,
+			tournId    : req.params.tournId,
+			chapterIds,
+		},
+		type: req.db.Sequelize.QueryTypes.SELECT,
+	});
 
-		chapters.push(...dashboards);
+	chapters.push(...dashboards);
 
-		const schoolIds = chapters.map( (chapter) => chapter.schoolId );
+	const schoolIds = chapters.map( (chapter) => chapter.schoolId );
 
-		const events = await req.db.sequelize.query(`
+	const events = await req.db.sequelize.query(`
 			select
 				event.id, event.type, event.name, event.abbr
 			from event, entry
@@ -89,20 +85,19 @@ export const userChaptersByTourn = {
 				and entry.school IN ( :schoolIds )
 			order by event.type, event.abbr
 		`, {
-			replacements : {schoolIds, tournId: req.params.tournId },
-			type: req.db.Sequelize.QueryTypes.SELECT,
-		});
+		replacements : {schoolIds, tournId: req.params.tournId },
+		type: req.db.Sequelize.QueryTypes.SELECT,
+	});
 
-		return res.status(200).json({
-			chapters,
-			events,
-		});
-	},
+	return res.status(200).json({
+		chapters,
+		events,
+	});
 };
 
 export default userChapters;
 
-userChapters.GET.apiDoc = {
+userChapters.openapi = {
 	summary: 'List the chapters and permissions level given a person ID',
 	operationId: 'userChapters',
 	responses: {
@@ -120,21 +115,9 @@ userChapters.GET.apiDoc = {
 	},
 };
 
-userChaptersByTourn.GET.apiDoc = {
+userChaptersByTourn.openapi = {
 	summary: 'List the chapters and permissions level given a person ID',
 	operationId: 'userChaptersByTourn',
-	parameters: [
-		{
-			in          : 'path',
-			name        : 'tournId',
-			description : 'ID of tournament to pull parallel school registration information from.',
-			required    : true,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},
-	],
 	responses: {
 		200: {
 			description: 'Chapter with School Metadata',

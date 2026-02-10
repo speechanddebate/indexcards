@@ -34,22 +34,6 @@ export default class session extends Model {
 								key: 'id'
 						}
 				},
-				tourn: {
-						type: DataTypes.INTEGER,
-						allowNull: true
-				},
-				event: {
-						type: DataTypes.INTEGER,
-						allowNull: true
-				},
-				category: {
-						type: DataTypes.INTEGER,
-						allowNull: true
-				},
-				weekend: {
-						type: DataTypes.INTEGER,
-						allowNull: true
-				},
 				agent_data: {
 						type: DataTypes.TEXT,
 						allowNull: true
