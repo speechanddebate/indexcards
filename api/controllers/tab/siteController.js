@@ -14,6 +14,32 @@ async function getSite(req, res) {
 getSite.openapi = {
 	summary: 'Get site',
 	tags: ['Sites & Rooms'],
+	responses: {
+		200: {
+			description: 'A site object',
+			content: {
+				'application/json': {
+					schema: { $ref: '#/components/schemas/SiteResponse' },
+					examples: {
+						site: {
+							summary: 'Example response',
+							value: {
+								id: 1,
+								name: 'Lincoln High School',
+								online: false,
+								directions: '123 Main St, Anytown, USA',
+								dropoff: 'Use the side entrance on 2nd Ave.',
+								hostId: 5,
+								circuitId: 2,
+								createdAt: '2023-01-01T00:00:00Z',
+								updatedAt: '2023-01-02T00:00:00Z',
+							},
+						},
+					},
+				},
+			},
+		},
+	},
 };
 //tourns/:tournId/sites
 async function getSites(req, res) {
@@ -26,6 +52,37 @@ async function getSites(req, res) {
 getSites.openapi = {
 	summary: 'Get sites',
 	tags: ['Sites & Rooms'],
+	responses: {
+		200: {
+			description: 'A list of sites for the tourn',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'array',
+						items: { $ref: '#/components/schemas/SiteResponse' },
+					},
+					examples: {
+						sites: {
+							summary: 'Example response',
+							value: [
+								{
+									id: 1,
+									name: 'Lincoln High School',
+									online: false,
+									directions: '123 Main St, Anytown, USA',
+									dropoff: 'Use the side entrance on 2nd Ave.',
+									hostId: 5,
+									circuitId: 2,
+									createdAt: '2023-01-01T00:00:00Z',
+									updatedAt: '2023-01-02T00:00:00Z',
+								},
+							],
+						},
+					},
+				},
+			},
+		},
+	},
 };
 //tourns/:tournId/sites
 async function createSite(req, res) {
