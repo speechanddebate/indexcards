@@ -8,6 +8,8 @@ export const FIELD_MAP = {
 	abbr: 'abbr',
 	type: 'type',
 	level: 'level',
+	categoryId: 'category',
+	tournId: 'tourn',
 	settings: 'event_settings',
 };
 

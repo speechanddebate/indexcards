@@ -6,6 +6,7 @@ import * as Event from './Event.js';
 import * as File from './File.js';
 import * as Invite from './Invite.js';
 import * as Problem from './Problem.js';
+import * as Site from './Site.js';
 import * as Tournament from './Tourn.js';
 import * as WebPage from './WebPage.js';
 import * as Person from './Person.js';
@@ -19,6 +20,7 @@ export default {
 	...File,
 	...Invite,
 	...Problem,
+	...Site,
 	...Tournament,
 	...WebPage,
 	...Person,

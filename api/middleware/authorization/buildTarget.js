@@ -1,7 +1,9 @@
-import sectionRepo from '../../repos/sectionRepo.js';
-import eventRepo from '../../repos/eventRepo.js';
-import roundRepo from '../../repos/roundRepo.js';
+
 import categoryRepo from '../../repos/categoryRepo.js';
+import eventRepo from '../../repos/eventRepo.js';
+import sectionRepo from '../../repos/sectionRepo.js';
+import roundRepo from '../../repos/roundRepo.js';
+import timeslotRepo from '../../repos/timeslotRepo.js';
 export async function buildTarget(resource, resourceId, req, targetCache) {
 	const key = `${resource}:${resourceId}`;
 	if (targetCache.has(key)) return targetCache.get(key);
@@ -49,6 +51,17 @@ export async function buildTarget(resource, resourceId, req, targetCache) {
 				target.roundId = section.roundId;
 				target ={
 					...await buildTarget('round', target.roundId, req, targetCache),
+					...target,
+				};
+			}
+			break;
+		}
+		case 'timeslot': {
+			const timeslot = await timeslotRepo.getTimeslot(resourceId, { fields: ['tournId'] });
+			if (timeslot) {
+				target.tournId = timeslot.tournId;
+				target ={
+					...await buildTarget('tourn', target.tournId, req, targetCache),
 					...target,
 				};
 			}

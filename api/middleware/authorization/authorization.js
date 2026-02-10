@@ -1,5 +1,4 @@
 import personRepo from '../../repos/personRepo.js';
-import permissionRepo from '../../repos/permissionRepo.js';
 import { buildTarget } from './buildTarget.js';
 import { Unauthorized, Forbidden } from '../../helpers/problem.js';
 // used for ext routes
@@ -29,55 +28,6 @@ export function requireSiteAdmin(req,res,next) {
 	next();
 }
 
-export async function loadAuthContext(req, res, next){
-
-	req.actor = createActor(req);
-
-	//attach all relevant perms to the req.auth.perms object
-	req.auth = req.auth || {};
-	req.auth.perms = req.auth.perms || [];
-
-	// Unauthenticated request, skip loading perms
-	const personId = req.person?.id;
-	if (!personId) return next();
-
-	//Tourn scoped request, load all of the perms for a tourn
-	const tournId = req.params.tournId;
-	if (tournId){
-		//fetch all or a persons perms for a tourn
-		const perms = await permissionRepo.getPermissions({ tournId, personId });
-		for (const perm of perms) {
-			let scope = null;
-			let id = null;
-
-			if (perm.event) {
-				scope = 'event';
-				id = perm.event;
-			}
-			else if (perm.category) {
-				scope = 'category';
-				id = perm.category;
-			}
-			else if (perm.tourn) {
-				scope = 'tourn';
-				id = perm.tourn;
-			}
-
-			if (scope && id) {
-				req.auth.perms.push({
-					scope,
-					id,
-					role: perm.tag,
-				});
-			}
-		}
-
-		//TODO need to fetch all circuit level perms and attach those as well for proper RBAC to work,
-		// but this is a start and covers the most common use case of checking perms within a tourn
-	}
-	return next();
-}
-
 export function requireAccess(resource, action) {
 	return async (req, res, next) => {
 		if (!req.person) {
@@ -105,6 +55,7 @@ export function createActor(req) {
 		type: 'user',
 		can: auth.can,
 		assert: auth.assert,
+		allowedIds: auth.allowedIds,
 	};
 }
 
@@ -160,9 +111,28 @@ function createAuthContext(req) {
 		return true;
 	}
 
+	function allowedIds(resource, action, opts = {}) {
+		if (!resource || !action) {
+			throw new Error('Invalid auth call');
+		}
+		if (!req.person) {
+			return { all: false, ids: [] };
+		}
+		if (req.person.siteAdmin) {
+			return { all: true, ids: [] };
+		}
+		const perms = req.auth?.perms;
+		if (!perms || !Array.isArray(perms)) {
+			return { all: false, ids: [] };
+		}
+
+		return getAllowedResourceIds(resource, action, perms, opts);
+	}
+
 	return {
 		can,
 		assert,
+		allowedIds,
 	};
 }
 
@@ -175,6 +145,10 @@ const ROLES = {
 				notActions: [],
 			},
 		],
+		parentAccess: {
+			tourn: ['tourn/read'],
+			category: ['category/read'],
+		},
 	},
 	tabber: {
 		description: 'Tabber - manage resource and its children except ownership',
@@ -184,12 +158,16 @@ const ROLES = {
 				notActions: ['tourn/owner'],
 			},
 		],
+		parentAccess: {
+			tourn: ['timeslot/read'],
+			category: ['category/read', 'jpool/read'],
+		},
 	},
 	circuit: {
 		description: 'Circuit administrator - manage a circuit and its tourns',
 		permissions: [
 			{
-				actions: ['*/*'],            // allow any action on any scoped resource
+				actions: ['*/*'],// allow any action on any scoped resource
 			},
 		],
 	},
@@ -197,10 +175,12 @@ const ROLES = {
 /**
  * Roles scoped to the parent resource can grant access to child resources. ex: action
  * *\/read on circuit scope grants read access to tourns in that circuit
+ * Note: category and event are siblings under tourn, not parent-child (no inheritance)
+ * but event can access category resources via parentAccess
  */
 const CHILDREN = {
-	tourn: ['category', 'event'],   // Tourn has these direct children
-	category: ['event'],            // Category has these direct children
+	tourn: ['category', 'event', 'timeslot'],   // Tourn has these direct children
+	category: ['jpool'],            // Category has jpools as children
 	event: ['round'],               // Event has these direct children
 };
 
@@ -263,6 +243,18 @@ function hasPermissionForResource(resource, action, target, perm, visited = new 
 		}
 	}
 
+	// Check parentAccess - child scope can access parent resources
+	if (roleDef.parentAccess) {
+		for (const [parentScope, allowedActions] of Object.entries(roleDef.parentAccess)) {
+			const parentIdAttr = parentScope + 'Id';
+			if (perm[parentIdAttr] && target[parentIdAttr] && perm[parentIdAttr] === target[parentIdAttr]) {
+				if (allowedActions.some(pattern => actionMatches(pattern, targetResource, action))) {
+					return true;
+				}
+			}
+		}
+	}
+
 	return false;
 }
 
@@ -271,4 +263,66 @@ function actionMatches(pattern, resource, action) {
 	const resMatch = resPattern === '*' || resPattern === resource;
 	const actMatch = actPattern === '*' || actPattern === action;
 	return resMatch && actMatch;
+}
+
+function roleAllowsAction(roleDef, resource, action) {
+	for (const p of roleDef.permissions) {
+		if (p.notActions?.some(pattern => actionMatches(pattern, resource, action))) {
+			continue;
+		}
+		if (p.actions?.some(pattern => actionMatches(pattern, resource, action))) {
+			return true;
+		}
+	}
+	return false;
+}
+
+function getAllowedResourceIds(resource, action, perms, opts = {}) {
+	const ids = new Set();
+	let hasFullAccess = false;
+
+	for (const perm of perms) {
+		const roleDef = ROLES[perm.role];
+		if (!roleDef) continue;
+
+		// Check direct scope match
+		if (perm.scope === resource && roleAllowsAction(roleDef, resource, action)) {
+			ids.add(perm.id);
+			continue;
+		}
+
+		// Check parent inheritance - can a parent scope grant access to this resource?
+		for (const [parentScope, children] of Object.entries(CHILDREN)) {
+			if (children.includes(resource) && perm.scope === parentScope) {
+				if (roleAllowsAction(roleDef, resource, action)) {
+					// Parent scope grants full access to this resource type
+					hasFullAccess = true;
+					break;
+				}
+			}
+		}
+
+		if (hasFullAccess) break;
+
+		// Check parentAccess - can this child scope access parent resources?
+		if (roleDef.parentAccess) {
+			for (const [parentScope, allowedActions] of Object.entries(roleDef.parentAccess)) {
+				if (resource === parentScope || (CHILDREN[parentScope]?.includes(resource))) {
+					if (allowedActions.some(pattern => actionMatches(pattern, resource, action))) {
+						// This child perm grants access to parent's resources
+						const parentIdAttr = parentScope + 'Id';
+						if (perm[parentIdAttr]) {
+							// For resources under the parent scope, we'd need full access flag
+							// For simplicity, mark as partial access requiring filtering
+							if (resource === parentScope) {
+								ids.add(perm[parentIdAttr]);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	return { all: hasFullAccess, ids: Array.from(ids) };
 }

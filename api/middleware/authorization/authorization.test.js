@@ -2,7 +2,8 @@ import { beforeEach, describe, it, vi,expect } from "vitest";
 import factories from "../../../tests/factories/index.js";
 import personRepo from '../../repos/personRepo.js';
 import * as buildTargetModule from '../authorization/buildTarget.js';
-import {requireAreaAccess, requireSiteAdmin, requireAccess, checkAccess, loadAuthContext} from "./authorization.js";
+import { loadTournAuthContext } from "./authContext.js";
+import {requireAreaAccess, requireSiteAdmin, requireAccess, checkAccess} from "./authorization.js";
 import { createContext } from "../../../tests/httpMocks.js";
 
 describe("Authorization Middleware", () => {
@@ -114,7 +115,7 @@ describe("Authorization Middleware", () => {
 				}
 			});
 	
-			await loadAuthContext(req, res, () => {});
+			await loadTournAuthContext(req, res, () => {});
 			await requireAccess(resource, capability)(req, res, next);
 	
 			expect(res.status).toHaveBeenCalledWith(401);
@@ -130,7 +131,7 @@ describe("Authorization Middleware", () => {
 					auth: { perms: [] }
 				}
 			});
-			await loadAuthContext(req, res, () => {});
+			await loadTournAuthContext(req, res, () => {});
 			await requireAccess(resource, capability)(req, res, next);
 			expect(next).toHaveBeenCalled();
 		});
@@ -148,7 +149,7 @@ describe("Authorization Middleware", () => {
 				}
 			}});
 			
-			await loadAuthContext(req, res, () => {});
+			await loadTournAuthContext(req, res, () => {});
 
 			for (const capability of capabilities) {
 				await requireAccess(resource, capability)(req, res, next);
@@ -168,7 +169,7 @@ describe("Authorization Middleware", () => {
 					]
 				}
 			}});
-			await loadAuthContext(req, res, () => {});
+			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'read')(req, res, next);
 			expect(next).toHaveBeenCalled();
 		});
@@ -185,7 +186,7 @@ describe("Authorization Middleware", () => {
 					}
 				}
 			});
-			await loadAuthContext(req, res, () => {});
+			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'read')(req, res, next);
 			expect(next).not.toHaveBeenCalled();
 			expect(res.status).toHaveBeenCalledWith(403);
@@ -203,7 +204,7 @@ describe("Authorization Middleware", () => {
 					}
 				}
 			});
-			await loadAuthContext(req, res, () => {});
+			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('category', 'read')(req, res, next);
 			expect(next).toHaveBeenCalled();
 		});
@@ -219,7 +220,7 @@ describe("Authorization Middleware", () => {
 					]
 				}
 			}});
-			await loadAuthContext(req, res, () => {});
+			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'owner')(req, res, next);
 			expect(next).not.toHaveBeenCalled();
 			expect(res.json).toHaveBeenCalled();
@@ -251,7 +252,7 @@ describe("Authorization Middleware", () => {
 					]
 				}
 			}});
-			await loadAuthContext(req, res, () => {});
+			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'read')(req, res, next);
 			expect(next).not.toHaveBeenCalled();
 			expect(res.json).toHaveBeenCalled();
@@ -295,6 +296,12 @@ describe("Authorization Middleware", () => {
 			const person = factories.person.createPersonData();
 			const perm = { scope: 'tourn', id: 42, role: 'owner' };
 			const granted = checkAccess('category', 'write', {id: 7, tournId: 42},person, [perm]);
+			expect(granted).toBe(true);
+		});
+		it('allow event tabber access to timeslot:read', async () => {
+			const person = factories.person.createPersonData();
+			const perm = { scope: 'event', id: 12,tournId: 42, role: 'tabber' };
+			const granted = checkAccess('timeslot', 'read', {id: 5, eventId: 12, tournId: 42},person, [perm]);
 			expect(granted).toBe(true);
 		});
 	});
