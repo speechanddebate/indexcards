@@ -8,20 +8,30 @@ export const FIELD_MAP = {
 	agentData : 'agent_data',
 	geoIP     : 'geo_ip',
 	personId  : 'person',
-	suId	  : 'su',
+	suId      : 'su',
 };
 
 export const toDomain = dbRow => {
+
 	if(!dbRow) return null;
+
 	const domain = genericToDomain(dbRow, FIELD_MAP);
+
 	if (dbRow.su_person) {
-		domain.su = personMapper.toDomain(dbRow.su_person);
+		domain.Su = personMapper.toDomain(dbRow.su_person);
 	}
+
 	if (dbRow.person_person) {
-		domain.person = personMapper.toDomain(dbRow.person_person);
+		domain.Person = personMapper.toDomain(dbRow.person_person);
 	}
+
+	if (dbRow.Person) {
+		domain.Person = personMapper.toDomain(dbRow.Person);
+	}
+
 	return domain;
 };
+
 export const toPersistence = domainObj => genericToPersistence(domainObj, FIELD_MAP);
 
 export default {
