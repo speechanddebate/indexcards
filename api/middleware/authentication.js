@@ -37,7 +37,7 @@ export async function Authenticate(req, res, next) {
 				};
 
 				//req.person is what should be checked for every authorization decision
-				req.person = await personRepo.getPerson(req.session.person);
+				req.person = await personRepo.getPerson(req.session.personId);
 				req.authType = 'cookie';
 				req.session.csrfToken = authService.generateCSRFToken(cookie);
 			}
