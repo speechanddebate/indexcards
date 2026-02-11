@@ -17,19 +17,20 @@ describe('sessionRepo', () => {
 			const session = await sessionRepo.getSession(sessionId, { include: { person: true} });
 			//Assert
 			expect(session).not.toBeNull();
-			expect(session.person).toBeDefined();
+			expect(session.Person).toBeDefined();
+
 		});
 
 		it('includes su when requested', async () => {
 			//Arrange
-			const { suId }      = await factories.person.createTestPerson();
+			const { personId: suId } = await factories.person.createTestPerson();
 			const { sessionId } = await factories.session.createTestSession({ suId, personId });
 
 			//Act
 			const session = await sessionRepo.getSession(sessionId, { include: { su: true } });
 			//Assert
 			expect(session).not.toBeNull();
-			expect(session.su).toBeDefined();
+			expect(session.Su).toBeDefined();
 		});
 	});
 

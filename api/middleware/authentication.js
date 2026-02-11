@@ -29,11 +29,11 @@ export async function Authenticate(req, res, next) {
 				 */
 
 				req.session = {
-					id     : cookieSession.id,
-					person : cookieSession.personId,
-					su     : cookieSession.suId || null,
-					Su     : cookieSession.su || null,
-					Person : cookieSession.person || null,
+					id       : cookieSession.id,
+					personId : cookieSession.personId,
+					suId     : cookieSession.suId || null,
+					Su       : cookieSession.Su || null,
+					Person   : cookieSession.Person || null,
 				};
 
 				//req.person is what should be checked for every authorization decision

@@ -4,7 +4,9 @@ import personRepo, { personInclude } from "./personRepo.js";
 
 describe("PersonRepo", () => {
 	describe('buildPersonQuery', () => {
+
 		it('excludes password by default', async () => {
+
 			// Arrange
 			const { personId } = await factories.person.createTestPerson();
 
@@ -15,10 +17,11 @@ describe("PersonRepo", () => {
 			expect(person).toBeDefined();
 			expect(person.password).toBeUndefined();
 		});
+
 		it('includes password when requested via fields', async () => {
 			// Arrange
 			const { personId } = await factories.person.createTestPerson();
-			
+
 			// Act
 			const person = await personRepo.getPerson(personId, { fields: ['password'] });
 
@@ -26,10 +29,11 @@ describe("PersonRepo", () => {
 			expect(person).toBeDefined();
 			expect(person.password).toBeDefined();
 		});
+
 		it('excludes password even when other fields are excluded', async () => {
 			// Arrange
 			const { personId } = await factories.person.createTestPerson();
-			
+
 			// Act
 			const person = await personRepo.getPerson(personId, { fields: { exclude: ['firstName', 'lastName'] } });
 
@@ -39,6 +43,7 @@ describe("PersonRepo", () => {
 			expect(person.firstName).toBeUndefined();
 			expect(person.lastName).toBeUndefined();
 		});
+
 		it('includes password when requested', async () => {
 			// Arrange
 			const password = 'testpassword';
@@ -53,6 +58,7 @@ describe("PersonRepo", () => {
 			expect(person.password).toBe(password);
 		});
 	});
+
 	describe('personInclude', () => {
 		it('returns base person include config', () => {
 			const inc = personInclude();
@@ -60,6 +66,7 @@ describe("PersonRepo", () => {
 			expect(Array.isArray(inc.include)).toBe(true);
 		});
 	});
+
 	describe('getPerson', () => {
 		it('returns the person when the id is valid', async () => {
 			// Arrange
@@ -77,6 +84,7 @@ describe("PersonRepo", () => {
 			expect(result).toBeNull();
 		});
 	});
+
 	describe('getPersonByUsername', () => {
 		it('returns the person when the username is valid', async () => {
 			// Arrange
@@ -91,6 +99,7 @@ describe("PersonRepo", () => {
 			expect(result.id).toBe(personId);
 		});
 	});
+
 	describe('createPerson', () => {
 		it('creates a person and returns the new id', async () => {
 			// Arrange
@@ -107,7 +116,8 @@ describe("PersonRepo", () => {
 			}
 		});
 	});
-    describe("hasAreaAccess", () => {
+   
+	describe("hasAreaAccess", () => {
         it("returns true when person has access", async () => {
             // Arrange
 
