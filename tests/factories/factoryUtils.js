@@ -61,6 +61,14 @@ export function fakeTournName() {
 export function fakeSchoolName() {
 	return `${faker.helpers.arrayElement(SCHOOLS)} ${faker.helpers.arrayElement(SCHOOL_SUFFIXES)}`;
 }
+export function fakeRoundName() {
+	const category = faker.helpers.arrayElement(CATEGORIES);
+	const roundNum = faker.number.int({ min: 1, max: 10 });
+	return `${category.abbr} Round ${roundNum}`;
+}
+export function noMs(datetime) {
+	return new Date(Math.floor(datetime.getTime() / 1000) * 1000);
+}
 export function toWebName(name) {
 	return name
 		.toLowerCase()

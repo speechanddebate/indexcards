@@ -16,6 +16,10 @@ const db = initModels(sequelize);
 //TODO for some reason this realationship isn't created in init-models. need to investigate later
 db.session.belongsTo(db.person, { as: 'su_person', foreignKey: 'su' });
 
+// Ensure round <-> timeslot association exists (init-models may not create it)
+db.round.belongsTo(db.timeslot, { as: 'timeslot_timeslot', foreignKey: 'timeslot' });
+db.timeslot.hasMany(db.round, { as: 'rounds', foreignKey: 'timeslot' });
+
 // By default Sequelize wants you to try...catch every single database call
 // for Reasons?  Otherwise all your database errors just go unprinted and you
 // get a random unfathomable 500 error.  Yeah, because that's great.  This will

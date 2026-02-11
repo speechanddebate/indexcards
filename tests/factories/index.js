@@ -8,6 +8,7 @@ import round from './round.js';
 import section from './section.js';
 import session from './session.js';
 import site from './site.js';
+import timeslot from './timeslot.js';
 import tourn from './tourn.js';
 import person from './person.js';
 import student from './student.js';
@@ -24,6 +25,7 @@ const factories = {
 	section,
 	session,
 	site,
+	timeslot,
 	tourn,
 	person,
 	student,

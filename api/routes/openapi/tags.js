@@ -53,6 +53,10 @@ export const tags = [
 		description: 'Endpoints for managing schools within tournaments',
 	},
 	{
+		name: 'Timeslots',
+		description: 'Endpoints for managing timeslots within tournaments',
+	},
+	{
 		name: 'Tournaments',
 	},
 ];
@@ -79,6 +83,7 @@ export const declaredTagGroups = [
 		name: 'Tournament Management',
 		tags: [
 			'Tourn',
+			'Timeslots',
 			'Backup and Restore',
 			'Category',
 			'Sites & Rooms',

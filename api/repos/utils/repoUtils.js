@@ -23,3 +23,27 @@ export function resolveAttributesFromFields(fields, FIELD_MAP) {
 		'opts.fields must be an array (include) or { exclude: [...] }'
 	);
 }
+
+/**
+ * Detect whether an error is a foreign-key constraint error and optionally
+ * whether it references a specific field or index identifier.
+ */
+export function isForeignKeyError(err, fkIdentifier) {
+	if (!err) return false;
+
+	const isFkErr =
+		err instanceof Error &&
+		(err.name === 'SequelizeForeignKeyConstraintError' || err.parent?.errno === 1452);
+
+	if (!isFkErr) return false;
+
+	if (!fkIdentifier) return true;
+
+	const fields = err.fields || {};
+	const fieldValues = Array.isArray(fields) ? fields : Object.values(fields);
+
+	return (
+		fieldValues.includes(fkIdentifier) ||
+		(typeof err.index === 'string' && err.index.includes(fkIdentifier))
+	);
+}
