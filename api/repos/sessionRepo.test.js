@@ -18,7 +18,6 @@ describe('sessionRepo', () => {
 			//Assert
 			expect(session).not.toBeNull();
 			expect(session.Person).toBeDefined();
-
 		});
 
 		it('includes su when requested', async () => {
