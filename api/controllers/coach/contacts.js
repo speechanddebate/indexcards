@@ -209,8 +209,8 @@ export async function userProfile(req, res) {
 		);
 	} else if (req.params.personId) {
 		return res.status(201).json({ message: 'Only admin staff may access another profile' });
-	} else if (req.session.person) {
-		result = await req.db.person.findByPk(req.session.person, {
+	} else if (req.session.personId) {
+		result = await req.db.person.findByPk(req.session.personId, {
 			include: [{
 				model: req.db.personSetting,
 				as: 'Settings',

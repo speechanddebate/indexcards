@@ -502,7 +502,7 @@ export async function postTournAttendance(req, res) {
 			}
 
 			await db.ballot.update({
-				started_by    : req.session.person,
+				started_by    : req.session.personId,
 				judge_started : now,
 			},{
 				where : {
@@ -553,7 +553,7 @@ export async function postTournAttendance(req, res) {
 			}
 
 			const log = {
-				marker 		: req.session.person,
+				marker 		: req.session.personId,
 				tag         : 'absent',
 				description : logMessage,
 				tourn       : tournId,
@@ -579,7 +579,7 @@ export async function postTournAttendance(req, res) {
 
 				error   : false,
 				message : logMessage,
-				marker  : req.session.person,
+				marker  : req.session.personId,
 
 				reclass : [
 					{	id          : targetType && targetType !== 'person' ? `${panel.id}_${targetType}_${targetId}` : `${panel.id}_${targetId}`,
@@ -615,7 +615,7 @@ export async function postTournAttendance(req, res) {
 			description : logMessage,
 			tourn       : tournId,
 			panel       : panel.id,
-			marker 		: req.session.person,
+			marker 		: req.session.personId,
 		};
 
 		if (targetType === 'student') {
@@ -633,7 +633,7 @@ export async function postTournAttendance(req, res) {
 		return res.status(201).json({
 			error   : false,
 			message : logMessage,
-			markerId: req.session.person,
+			markerId: req.session.personId,
 			reclass : [
 				{	id          : targetType && targetType !== 'person' ? `${panel.id}_${targetType}_${targetId}` : `${panel.id}_${targetId}`,
 					addClass	: 'greentext',

@@ -14,9 +14,9 @@ export async function getPersonTournPresence(req, res) {
 		categories : {},
 	};
 
-	tournPresence.entries = await getPersonTournEntries(req.session.person , req.params.tournId);
-	tournPresence.judges  = await getPersonTournJudges(req.session.person   , req.params.tournId);
-	tournPresence.schools = await getPersonTournSchools(req.session.person  , req.params.tournId);
+	tournPresence.entries = await getPersonTournEntries(req.session.personId, req.params.tournId);
+	tournPresence.judges  = await getPersonTournJudges(req.session.personId, req.params.tournId);
+	tournPresence.schools = await getPersonTournSchools(req.session.personId, req.params.tournId);
 
 	for (const entryId in tournPresence.entries) {
 		const entry = tournPresence.entries[entryId];

@@ -41,7 +41,7 @@ export async function blastSectionMessage(req, res) {
 	await db.changeLog.create({
 		tag         : 'blast',
 		description : `${req.body.message} sent to ${notifyResponse.push?.count || 0} web and ${notifyResponse.email?.count || 0} email recipients `,
-		person      : req.session.person,
+		person      : req.session.personId,
 		count       : notifyResponse.push?.count || 0,
 		panel       : req.params.sectionId,
 	});
@@ -83,7 +83,7 @@ export async function blastSectionPairing(req, res) {
 	await db.changeLog.create({
 		tag         : 'blast',
 		description : `Pairing individually sent to section : ${response.message} `,
-		person      : req.session.person,
+		person      : req.session.personId,
 		tourn       : req.params.tournId,
 		panel       : req.params.sectionId,
 	});

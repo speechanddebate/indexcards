@@ -147,7 +147,7 @@ getTabroomInstanceCounts.openapi = {
 export async function changeInstanceCount(req, res) {
 	const user = {
 		su    : req.session.su,
-		id    : req.session.person,
+		id    : req.session.personId,
 		name  : `${req.person.name}`,
 		email : req.person.email,
 	};
@@ -220,7 +220,7 @@ export async function rebootInstance(req, res) {
 	}
 
 	await req.db.changeLog.create({
-		person     : req.session.su || req.session.person,
+		person     : req.session.su || req.session.personId,
 		tag        : 'sitewide',
 		created_at : new Date(),
 		description: resultMessages.join('\n'),
@@ -260,7 +260,7 @@ const notifyCloudAdmins = async (req, log, subject) => {
 	if (req.session.su) {
 		sender = await req.db.summon(req.db.person, req.session.su);
 	} else {
-		sender = await req.db.summon(req.db.person, req.session.person);
+		sender = await req.db.summon(req.db.person, req.session.personId);
 	}
 
 	const adminIds = cloudAdmins.map( item => item.id );

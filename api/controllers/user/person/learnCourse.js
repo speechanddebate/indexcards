@@ -13,8 +13,8 @@ export const updateLearnCourses = {
 
 		if (req.params.personId && req.person.siteAdmin) {
 			targetPersonId = req.params.personId;
-		} else if (req.session.person) {
-			targetPersonId = req.session.person;
+		} else if (req.session.personId) {
+			targetPersonId = req.session.personId;
 		} else if (req.params.personId) {
 			return Forbidden(req, res, 'Only a site admin may check other the courses of other users');
 		} else {

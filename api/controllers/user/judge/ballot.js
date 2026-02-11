@@ -7,7 +7,7 @@ export async function checkActive(req, res) {
 
 	const judges = await db.sequelize.query(`
 		select
-		judge.active, judge.id, judge.person
+		judge.active, judge.id, judge.person personId
 		from judge
 		where judge.id = :judgeId
 	`, {
@@ -17,7 +17,7 @@ export async function checkActive(req, res) {
 		type : db.Sequelize.QueryTypes.SELECT,
 	});
 
-	if (judges && judges[0].person === req.session.person) {
+	if (judges && judges[0].person === req.session.personId) {
 		return (judges[0].active);
 	}
 };
@@ -28,7 +28,7 @@ export async function checkBallotAccess (req, res) {
 
 	const access = await db.sequelize.query(`
 		select
-			ballot.id, ballot.audit, judge.person
+			ballot.id, ballot.audit, judge.person personId
 			from ballot, judge
 		where ballot.judge = :judgeId
 			and ballot.panel = :sectionId
@@ -49,7 +49,7 @@ export async function checkBallotAccess (req, res) {
 		for (const ballot of access) {
 			if (stop < 1) {
 				if (!req.session?.person
-					|| (ballot.person !== req.session.person && !req.person.siteAdmin)
+					|| (ballot.personId !== req.session.personId && !req.person.siteAdmin)
 				) {
 					stop++;
 					return res.status(200).json({
