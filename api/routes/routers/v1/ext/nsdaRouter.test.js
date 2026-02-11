@@ -1,10 +1,10 @@
-/* eslint-disable jest/no-disabled-tests */
 import { assert } from 'chai';
 import request from 'supertest';
 import config from '../../../../../config/config.js';
 import db from '../../../../data/db.js';
 import server from '../../../../../app.js';
 import { testUserAPIKey, testStoreCartSetting } from '../../../../../tests/testFixtures.js';
+import { expectProblem } from '../../../../../tests/utils.js';
 
 const authHeader = Buffer.from(`69:${testUserAPIKey.value}`).toString('base64');
 
@@ -30,16 +30,17 @@ describe('Person History', () => {
 	}, 30000);
 
 	it('Errors on a missing person id', async () => {
-		const test = await request(server)
+		const res = await request(server)
 			.get(`/v1/ext/nsda/history?nsda_id=999999999`)
 			.set('Accept', 'application/json')
 			.set('Authorization', `Basic ${authHeader}`)
 			.expect('Content-Type', /json/)
 			.expect(404);
-	}, 30000);
+		expectProblem(res);
+	});
 });
 
-describe.skip('Payment Gateway', () => {
+describe.todo('Payment Gateway', () => {
 
 	let testTourn = {};
 

@@ -14,7 +14,7 @@ describe('Authorization Functions', () => {
 		const { req, res } = createContext({
 			req: {
 				person: {
-					id: userData.testUserSession.person
+					id: userData.testUserSession.person,
 				},
 				config,
 				params: {
@@ -54,7 +54,7 @@ describe('Authorization Functions', () => {
 			cookies : {
 				[config.COOKIE_NAME]: userData.testUserSession.userkey,
 			},
-			clearCookie: vi.fn()
+			clearCookie: vi.fn(),
 		};
 
 		const res = {};
@@ -74,13 +74,13 @@ describe('Authorization Functions', () => {
 	it('Finds a session for an GLP Admin user', async () => {
 		const req = {
 			person: {
-				id: userData.testAdminSession.person
+				id: userData.testAdminSession.person,
 			},
 			config,
 			cookies : {
 				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
 			},
-			clearCookie: vi.fn()
+			clearCookie: vi.fn(),
 		};
 
 		const res = {};
@@ -112,7 +112,7 @@ describe('Authorization Functions', () => {
 			cookies : {
 				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
 			},
-			clearCookie: vi.fn()
+			clearCookie: vi.fn(),
 		};
 
 		const res = {};

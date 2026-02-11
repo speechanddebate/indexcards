@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest';
+
 import { assert, check } from './validator.js';
 import { ValidationError } from './errors/errors.js';
 
@@ -31,10 +31,10 @@ describe('validator', () => {
 	});
 
 	describe('assert', () => {
-			it('should return when check passes', () => {
-				expect(assert.present('value', 'present failed')).toBe(true);
-				expect(assert.validDate('2024-01-15', 'validDate failed')).toBe(true);
-			});
+		it('should return when check passes', () => {
+			expect(assert.present('value', 'present failed')).toBe(true);
+			expect(assert.validDate('2024-01-15', 'validDate failed')).toBe(true);
+		});
 
 		it('should throw ValidationError with default message on failure', () => {
 			expect(() => assert.present(null)).toThrow(ValidationError);

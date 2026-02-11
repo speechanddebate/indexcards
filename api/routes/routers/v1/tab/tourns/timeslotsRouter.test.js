@@ -2,16 +2,15 @@
 import request from 'supertest';
 import app from '../../../../../../app.js';
 import factories from '../../../../../../tests/factories/index.js';
-import { testAdminSession } from '/tests/testFixtures.js';
+import { testAdminSession } from '../../../../../../tests/testFixtures.js';
+import { expectProblem } from '../../../../../../tests/utils.js';
 
-
-
- let tournId = null;
- let userkey = testAdminSession.userkey;
+let tournId = null;
+let userkey = testAdminSession.userkey;
 
 describe('Timeslots', () => {
 	beforeAll(async () => {
-		 ({tournId} = await factories.tourn.createTestTourn());
+		({tournId} = await factories.tourn.createTestTourn());
 	});
 
 	describe('POST /tourns/:tournId/timeslots', () => {
@@ -30,11 +29,12 @@ describe('Timeslots', () => {
 		});
 		it('returns 400 Bad Request for invalid data', async () => {
 			const invalidData = { name: '', start: 'invalid-date', end: 'invalid-date', tournId };
-			await request(app)
+			const res = await request(app)
 				.post(`/v1/tab/tourns/${tournId}/timeslots`)
 				.set('Authorization', `Bearer ${userkey}`)
 				.send(invalidData)
 				.expect(400);
+			expectProblem(res);
 		});
 	});
 	it('GET /tourns/:tournId/timeslots returns a list of timeslots for the tournament', async () => {

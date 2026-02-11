@@ -1,27 +1,27 @@
-import timeslotRepo, { timeslotInclude } from "./timeslotRepo.js";
+import timeslotRepo, { timeslotInclude } from './timeslotRepo.js';
 import factories from '../../tests/factories/index.js';
-import { describe, expect, it } from "vitest";
+
 import { ValidationError } from '../helpers/errors/errors.js';
 
-describe("TimeslotRepo", () => {
+describe('TimeslotRepo', () => {
 	describe('buildTimeslotQuery', () => {
 		it('does not include associations by default', async () => {
 			const { timeslotId } = await factories.timeslot.createTestTimeslot();
-		
+
 			const timeslot = await timeslotRepo.getTimeslot(timeslotId);
-		
+
 			expect(timeslot).toBeDefined();
 			expect(timeslot.Rounds).toBeUndefined();
 		});
 		it('includes rounds when requested', async () => {
 			const {timeslotId} = await factories.timeslot.createTestTimeslot();
-			const { roundId } = await factories.round.createTestRound({ timeslotId });
-		
+			await factories.round.createTestRound({ timeslotId });
+
 			const timeslot = await timeslotRepo.getTimeslot(
 				timeslotId,
 				{ include: { rounds: true } }
 			);
-		
+
 			expect(timeslot).toBeDefined();
 			expect(timeslot.Rounds).not.toBeNull();
 			expect(Array.isArray(timeslot.Rounds)).toBe(true);
@@ -89,7 +89,7 @@ describe("TimeslotRepo", () => {
 			const timeslot = factories.timeslot.createTimeslotData();
 			const resultId = await timeslotRepo.createTimeslot(timeslot);
 			expect(resultId).toBeDefined();
-			const result = await timeslotRepo.getTimeslot(resultId);	
+			const result = await timeslotRepo.getTimeslot(resultId);
 			expect(result).toBeDefined();
 			expect(result.name).toBe(timeslot.name);
 			expect(result.start.getTime()).toBe(timeslot.start.getTime());

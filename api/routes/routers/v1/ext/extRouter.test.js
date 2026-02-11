@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { assert } from 'chai';
-import { vi } from 'vitest';
+
 import server from '../../../../../app.js';
 import { testUserAPIKey } from '../../../../../tests/testFixtures.js';
 

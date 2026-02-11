@@ -2,7 +2,7 @@ import request from 'supertest';
 import { assert } from 'chai';
 import server from '../../../../app';
 
-describe.skip('Authorize.net', () => {
+describe.todo('Authorize.net', () => {
 	it('Processes an authorize.net payment', async () => {
 		const body = {
 			tourn: 24674,

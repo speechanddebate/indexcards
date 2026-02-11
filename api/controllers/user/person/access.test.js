@@ -4,7 +4,6 @@ import db from '../../../data/db';
 import config from '../../../../config/config';
 import server from '../../../../app';
 import { testUserSession } from '../../../../tests/testFixtures';
-import { beforeAll } from 'vitest';
 
 describe('Session Last Access Updated', () => {
 

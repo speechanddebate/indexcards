@@ -1,8 +1,8 @@
-import { describe, it, expect } from "vitest";
-import factories from "../../tests/factories/index.js";
-import personRepo, { personInclude } from "./personRepo.js";
 
-describe("PersonRepo", () => {
+import factories from '../../tests/factories/index.js';
+import personRepo, { personInclude } from './personRepo.js';
+
+describe('PersonRepo', () => {
 	describe('buildPersonQuery', () => {
 		it('excludes password by default', async () => {
 			// Arrange
@@ -18,7 +18,7 @@ describe("PersonRepo", () => {
 		it('includes password when requested via fields', async () => {
 			// Arrange
 			const { personId } = await factories.person.createTestPerson();
-			
+
 			// Act
 			const person = await personRepo.getPerson(personId, { fields: ['password'] });
 
@@ -29,7 +29,7 @@ describe("PersonRepo", () => {
 		it('excludes password even when other fields are excluded', async () => {
 			// Arrange
 			const { personId } = await factories.person.createTestPerson();
-			
+
 			// Act
 			const person = await personRepo.getPerson(personId, { fields: { exclude: ['firstName', 'lastName'] } });
 
@@ -107,32 +107,32 @@ describe("PersonRepo", () => {
 			}
 		});
 	});
-    describe("hasAreaAccess", () => {
-        it("returns true when person has access", async () => {
-            // Arrange
+	describe('hasAreaAccess', () => {
+		it('returns true when person has access', async () => {
+			// Arrange
 
-            const { personId } = await factories.person.createTestPerson({
+			const { personId } = await factories.person.createTestPerson({
 				settings: {
-					api_auth_caselist: "1",
-				}
+					api_auth_caselist: '1',
+				},
 			});
 
-            // Act
-            const result = await personRepo.hasAreaAccess(personId, "caselist");
+			// Act
+			const result = await personRepo.hasAreaAccess(personId, 'caselist');
 
-            // Assert
-            expect(result).toBe(true);
-        });
+			// Assert
+			expect(result).toBe(true);
+		});
 
-        it("returns false when person does not have access", async () => {
-            // Arrange
+		it('returns false when person does not have access', async () => {
+			// Arrange
 			const { personId } = await factories.person.createTestPerson();
 
-            // Act
-            const result = await personRepo.hasAreaAccess(personId, "caselist");
+			// Act
+			const result = await personRepo.hasAreaAccess(personId, 'caselist');
 
-            // Assert
-            expect(result).toBe(false);
-        });
-    });
+			// Assert
+			expect(result).toBe(false);
+		});
+	});
 });

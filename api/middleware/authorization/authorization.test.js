@@ -1,99 +1,99 @@
-import { beforeEach, describe, it, vi,expect } from "vitest";
-import factories from "../../../tests/factories/index.js";
+
+import factories from '../../../tests/factories/index.js';
 import personRepo from '../../repos/personRepo.js';
-import * as buildTargetModule from '../authorization/buildTarget.js';
-import { loadTournAuthContext } from "./authContext.js";
-import {requireAreaAccess, requireSiteAdmin, requireAccess, checkAccess} from "./authorization.js";
-import { createContext } from "../../../tests/httpMocks.js";
+import * as buildTargetModule from './buildTarget.js';
+import { loadTournAuthContext } from './authContext.js';
+import {requireAreaAccess, requireSiteAdmin, requireAccess, checkAccess} from './authorization.js';
+import { createContext } from '../../../tests/httpMocks.js';
 
-describe("Authorization Middleware", () => {
+describe('Authorization Middleware', () => {
 
-    describe("requireAreaAccess", () => {
-        it("deny access when no user", async () => {
-            // Arrange
-            const {req, res, next} = createContext();
-            // Act
-            await requireAreaAccess(req, res, next);
-            // Assert
-            
-            expect(res.status).toHaveBeenCalledWith(401);
-            expect(next).not.toHaveBeenCalled();
-        });
-        it("deny access when no area access", async () => {
-            // Arrange
-            const {req, res, next} = createContext({
-                req: {
-                    person: {id: 1},
-                    params: {area: 'caselist'},
-                },
-            });
+	describe('requireAreaAccess', () => {
+		it('deny access when no user', async () => {
+			// Arrange
+			const {req, res, next} = createContext();
+			// Act
+			await requireAreaAccess(req, res, next);
+			// Assert
 
-            vi.spyOn(personRepo, 'hasAreaAccess').mockResolvedValueOnce(false);
+			expect(res.status).toHaveBeenCalledWith(401);
+			expect(next).not.toHaveBeenCalled();
+		});
+		it('deny access when no area access', async () => {
+			// Arrange
+			const {req, res, next} = createContext({
+				req: {
+					person: {id: 1},
+					params: {area: 'caselist'},
+				},
+			});
 
-            // Act
-            await requireAreaAccess(req, res, next);
+			vi.spyOn(personRepo, 'hasAreaAccess').mockResolvedValueOnce(false);
 
-            // Assert
-            expect(res.status).toHaveBeenCalledWith(403);
-            expect(next).not.toHaveBeenCalled();
-        });
-        it("allow access when has area access", async () => {
-            // Arrange
-            const {req, res, next} = createContext({
-                req: {
-                    person: {id: 1},
-                    params: {area: 'caselist'},
-                },
-            });
+			// Act
+			await requireAreaAccess(req, res, next);
 
-            vi.spyOn(personRepo, 'hasAreaAccess').mockResolvedValueOnce(true);
+			// Assert
+			expect(res.status).toHaveBeenCalledWith(403);
+			expect(next).not.toHaveBeenCalled();
+		});
+		it('allow access when has area access', async () => {
+			// Arrange
+			const {req, res, next} = createContext({
+				req: {
+					person: {id: 1},
+					params: {area: 'caselist'},
+				},
+			});
 
-            // Act
-            await requireAreaAccess(req, res, next);
+			vi.spyOn(personRepo, 'hasAreaAccess').mockResolvedValueOnce(true);
 
-            // Assert
-            expect(next).toHaveBeenCalled();
-        });
-    });
-    describe('requireSiteAdmin', () => {
-        it('deny when unauthenticated', () => {
-            const {req, res, next} = createContext();
+			// Act
+			await requireAreaAccess(req, res, next);
 
-            requireSiteAdmin(req,res,next);
+			// Assert
+			expect(next).toHaveBeenCalled();
+		});
+	});
+	describe('requireSiteAdmin', () => {
+		it('deny when unauthenticated', () => {
+			const {req, res, next} = createContext();
 
-            expect(res.status).toHaveBeenCalledWith(401);
-            expect(next).not.toHaveBeenCalled();
-        });
-        it('deny when not siteAdmin', () => {
-            const {req, res, next} = createContext({
-                req: {
-                    person: {
-                        siteAdmin: false
-                    }
-                }
-            });
+			requireSiteAdmin(req,res,next);
 
-            requireSiteAdmin(req,res,next);
+			expect(res.status).toHaveBeenCalledWith(401);
+			expect(next).not.toHaveBeenCalled();
+		});
+		it('deny when not siteAdmin', () => {
+			const {req, res, next} = createContext({
+				req: {
+					person: {
+						siteAdmin: false,
+					},
+				},
+			});
 
-            expect(res.status).toHaveBeenCalledWith(403);
-            expect(next).not.toHaveBeenCalled();
-        });
-        it('allow when siteAdmin', () => {
-            const {req, res, next} = createContext({
-                req: {
-                    person: {
-                        siteAdmin: true
-                    }
-                }
-            });
+			requireSiteAdmin(req,res,next);
 
-            requireSiteAdmin(req,res,next);
+			expect(res.status).toHaveBeenCalledWith(403);
+			expect(next).not.toHaveBeenCalled();
+		});
+		it('allow when siteAdmin', () => {
+			const {req, res, next} = createContext({
+				req: {
+					person: {
+						siteAdmin: true,
+					},
+				},
+			});
 
-            expect(next).toHaveBeenCalled();
-        });
+			requireSiteAdmin(req,res,next);
 
-    });
-	
+			expect(next).toHaveBeenCalled();
+		});
+
+	});
+
 	describe('requireAccess', () => {
 
 		beforeEach(() => {
@@ -105,19 +105,19 @@ describe("Authorization Middleware", () => {
 
 		const cases = resources.flatMap(resource =>
 			capabilities.map(cap => [resource, cap])
-		  );
-		
+		);
+
 		it.each(cases)('denies access for %s:%s when not authenticated',async (resource, capability) => {
 			vi.spyOn(buildTargetModule, 'buildTarget').mockResolvedValueOnce({ id: 42, resource, circuitIds: []});
 			const { req, res, next } = createContext({
 				req: {
 					params: { [`${resource}Id`]: 42 },
-				}
+				},
 			});
-	
+
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess(resource, capability)(req, res, next);
-	
+
 			expect(res.status).toHaveBeenCalledWith(401);
 			expect(next).not.toHaveBeenCalled();
 		});
@@ -128,8 +128,8 @@ describe("Authorization Middleware", () => {
 				req: {
 					person: { id: 1, siteAdmin: true },
 					params: { tournId: 1 },
-					auth: { perms: [] }
-				}
+					auth: { perms: [] },
+				},
 			});
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess(resource, capability)(req, res, next);
@@ -144,11 +144,11 @@ describe("Authorization Middleware", () => {
 					params: { [`${resource}Id`]: 42 },
 					auth: {
 						perms: [
-						{ scope: resource, id: 42, role: 'owner' }
-					]
-				}
-			}});
-			
+							{ scope: resource, id: 42, role: 'owner' },
+						],
+					},
+				}});
+
 			await loadTournAuthContext(req, res, () => {});
 
 			for (const capability of capabilities) {
@@ -165,10 +165,10 @@ describe("Authorization Middleware", () => {
 					params: { tournId: 42 },
 					auth: {
 						perms: [
-						{ scope: 'tourn', id: 42, role: 'owner' }
-					]
-				}
-			}});
+							{ scope: 'tourn', id: 42, role: 'owner' },
+						],
+					},
+				}});
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'read')(req, res, next);
 			expect(next).toHaveBeenCalled();
@@ -181,10 +181,10 @@ describe("Authorization Middleware", () => {
 					params: { tournId: 42 },
 					auth: {
 						perms: [
-							{ scope: 'tourn', id: 99, role: 'owner' }
-						]
-					}
-				}
+							{ scope: 'tourn', id: 99, role: 'owner' },
+						],
+					},
+				},
 			});
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'read')(req, res, next);
@@ -199,10 +199,10 @@ describe("Authorization Middleware", () => {
 					params: { tournId: 42, categoryId: 7 },
 					auth: {
 						perms: [
-							{ scope: 'tourn', id: 42, role: 'owner' }
-						]
-					}
-				}
+							{ scope: 'tourn', id: 42, role: 'owner' },
+						],
+					},
+				},
 			});
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('category', 'read')(req, res, next);
@@ -216,10 +216,10 @@ describe("Authorization Middleware", () => {
 					params: { tournId: 42 },
 					auth: {
 						perms: [
-						{ scope: 'tourn', id: 42, role: 'tabber' }
-					]
-				}
-			}});
+							{ scope: 'tourn', id: 42, role: 'tabber' },
+						],
+					},
+				}});
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'owner')(req, res, next);
 			expect(next).not.toHaveBeenCalled();
@@ -231,27 +231,27 @@ describe("Authorization Middleware", () => {
 				req: {
 					person: { id: 1, siteAdmin: false },
 					params: { tournId: 42, categoryId: 7 },
-				auth: {
-					perms: [
-						{ scope: 'tourn', id: 42, role: 'owner' }
-					]
-				}
-			}});
+					auth: {
+						perms: [
+							{ scope: 'tourn', id: 42, role: 'owner' },
+						],
+					},
+				}});
 			requireAccess('category', 'write')(req, res, next);
 			expect(next).toHaveBeenCalled();
 		});
 
 		it('denies access if no matching permission', async () => {
 			const {req, res, next} = createContext({
-			req: {
-				person: { id: 1, siteAdmin: false },
-				params: { tournId: 42 },
-				auth: {
-					perms: [
-						{ scope: 'event', id: 99, role: 'owner' }
-					]
-				}
-			}});
+				req: {
+					person: { id: 1, siteAdmin: false },
+					params: { tournId: 42 },
+					auth: {
+						perms: [
+							{ scope: 'event', id: 99, role: 'owner' },
+						],
+					},
+				}});
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'read')(req, res, next);
 			expect(next).not.toHaveBeenCalled();
@@ -281,7 +281,7 @@ describe("Authorization Middleware", () => {
 			const person = factories.person.createPersonData();
 			const perms = [
 				{ scope: 'tourn', id: 42, role: 'owner' },
-				{ scope: 'event', id: 12, role: 'owner' }
+				{ scope: 'event', id: 12, role: 'owner' },
 			];
 			const granted = checkAccess('event', 'write', {id: 12, tournId: 44},person, perms);
 			expect(granted).toBe(true);

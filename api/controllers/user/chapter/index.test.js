@@ -6,7 +6,7 @@ import db from '../../../data/db';
 import {
 	testUserChapterPerm,
 	testUserSchoolContact,
-	testUserSession
+	testUserSession,
 } from '../../../../tests/testFixtures';
 
 describe('User Chapter', () => {

@@ -1,9 +1,8 @@
 import request from 'supertest';
 import { assert } from 'chai';
 import server from '../../../../app.js';
-import factories from "../../../../tests/factories/index.js";
+import factories from '../../../../tests/factories/index.js';
 import { hashPassword } from '../../../services/AuthService.js';
-
 
 describe('Auth Router', () => {
 	describe('/register' , () => {

@@ -1,4 +1,3 @@
-import { assert } from 'chai';
 import request from 'supertest';
 import server from '../../../../../app.js';
 import db from '../../../../data/db.js';
@@ -13,21 +12,21 @@ describe('Current ads', () => {
 			approved_by : 1,
 			approved : true,
 			start: new Date(Date.now() - 60 * 1000), // 1 min ago
-  			end:   new Date(Date.now() + 60 * 1000), // 1 min in the future
+			end:   new Date(Date.now() + 60 * 1000), // 1 min in the future
 		});
 
 		//Act
 		const res = await request(server)
-			.get(`/v1/rest/ads/published`)
-			.set('Accept', 'application/json')
-			.expect('Content-Type', /json/)
-			.expect(200);
+            .get(`/v1/rest/ads/published`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200);
 
 		//Assert
-		assert.typeOf(res.body, 'array', 'Array returned');
-		assert.isAtLeast(res.body.length, 1, 'At least one ad returned');
-		assert.typeOf(res.body[0].id, 'number', 'id of ad is a number');
-		assert.typeOf(res.body[0].filename, 'string', 'filename of ad is a string');
-		assert.typeOf(res.body[0].url, 'string', 'URL of ad is a string');
+		expect(Array.isArray(res.body)).toBe(true);
+		expect(res.body.length).toBeGreaterThanOrEqual(1);
+		expect(res.body[0].id).toEqual(expect.any(Number));
+		expect(res.body[0].filename).toEqual(expect.any(String));
+		expect(res.body[0].url).toEqual(expect.any(String));
 	});
 });

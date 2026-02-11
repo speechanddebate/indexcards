@@ -3,13 +3,13 @@ import request from 'supertest';
 import server from '../../../../app';
 
 import db from '../../../data/db';
-import { beforeEach, afterEach } from 'vitest';
+
 import config from '../../../../config/config';
 
 import {
 	testUserChapterPerm,
 	testUserSchoolContact,
-	testUserSession
+	testUserSession,
 } from '../../../../tests/testFixtures';
 
 describe ('getMySchoolsByTourn', () => {

@@ -1,38 +1,37 @@
-import sectionRepo, { sectionInclude } from "./sectionRepo.js";
+import sectionRepo, { sectionInclude } from './sectionRepo.js';
 import factories from '../../tests/factories/index.js';
-import { describe } from "vitest";
 
-describe("SectionRepo", () => {
+describe('SectionRepo', () => {
 	describe('buildSectionQuery', () => {
 		it('does not include associations by default', async () => {
 			const { sectionId } = await factories.section.createTestSection();
-		
+
 			const section = await sectionRepo.getSection(sectionId);
-		
+
 			expect(section).toBeDefined();
 			expect(section.round).toBeUndefined();
 			expect(section.ballots).toBeUndefined();
 		});
 		it('includes ballots when requested', async () => {
 			const { sectionId } = await factories.section.createTestSection();
-		
+
 			const section = await sectionRepo.getSection(
 				sectionId,
 				{ include: { ballots: true } }
 			);
-		
+
 			expect(section).toBeDefined();
 			expect(section.ballots).toBeDefined();
 			expect(Array.isArray(section.ballots)).toBe(true);
 		});
 		it('includes settings when requested', async () => {
 			const { sectionId } = await factories.section.createTestSection();
-		
+
 			const section = await sectionRepo.getSection(
 				sectionId,
 				{ settings: true }
 			);
-			
+
 			expect(section).toBeDefined();
 			expect(section.settings).toBeDefined();
 		});
@@ -86,7 +85,7 @@ describe("SectionRepo", () => {
 			const section = factories.section.createSectionData();
 			const resultId = await sectionRepo.createSection(section);
 			expect(resultId).toBeDefined();
-			const result = await sectionRepo.getSection(resultId);	
+			const result = await sectionRepo.getSection(resultId);
 			expect(result).toBeDefined();
 			expect(result.name).toBe(section.name);
 			expect(result.tournId).toBe(section.tournId);

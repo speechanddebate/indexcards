@@ -163,7 +163,7 @@ describe('Status Board', () => {
 
 });
 
-describe.skip('Event Dashboard', () => {
+describe.todo('Event Dashboard', () => {
 	it('Return a correct JSON status object for the event dashboard', async () => {
 		const res = await request(server)
 			.get(`/v1/tab/${testTourn.id}/status/dashboard`)

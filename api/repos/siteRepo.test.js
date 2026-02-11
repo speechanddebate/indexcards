@@ -1,14 +1,13 @@
-import siteRepo, { siteInclude } from "./siteRepo.js";
+import siteRepo, { siteInclude } from './siteRepo.js';
 import factories from '../../tests/factories/index.js';
-import { describe, expect } from "vitest";
 
-describe("SiteRepo", () => {
+describe('SiteRepo', () => {
 	describe('buildSiteQuery', () => {
 		it('does not include associations by default', async () => {
 			const { siteId } = await factories.site.createTestSite();
-		
+
 			const site = await siteRepo.getSite(siteId);
-		
+
 			expect(site).toBeDefined();
 			expect(site.rooms).toBeUndefined();
 			expect(site.circuit).toBeUndefined();
@@ -16,12 +15,12 @@ describe("SiteRepo", () => {
 		it('includes rooms when requested', async () => {
 			const {siteId} = await factories.site.createTestSite();
 			const { roomId } = await factories.room.createTestRoom({ siteId });
-		
+
 			const site = await siteRepo.getSite(
 				siteId,
 				{ include: { rooms: true } }
 			);
-		
+
 			expect(site).toBeDefined();
 			expect(site.rooms).not.toBeNull();
 			expect(Array.isArray(site.rooms)).toBe(true);
@@ -99,7 +98,7 @@ describe("SiteRepo", () => {
 			const site = factories.site.createSiteData();
 			const resultId = await siteRepo.createSite(site);
 			expect(resultId).toBeDefined();
-			const result = await siteRepo.getSite(resultId);	
+			const result = await siteRepo.getSite(resultId);
 			expect(result).toBeDefined();
 			expect(result.name).toBe(site.name);
 			expect(result.tournId).toBe(site.tournId);
@@ -116,7 +115,8 @@ describe("SiteRepo", () => {
 			expect(updated.name).toBe('new site name');
 		});
 		it('returns false when trying to update a non-existent site', async () => {
-			await siteRepo.updateSite(999999, { name: 'Non-existent' }); // unlikely siteId
+			const result = await siteRepo.updateSite(999999, { name: 'Non-existent' }); // unlikely siteId
+			expect(result).toBe(false);
 		});
 		it('throws an error when id is not provided', async () => {
 			await expect(siteRepo.updateSite(null, { name: 'No ID' })).rejects.toThrow();

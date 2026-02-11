@@ -1,6 +1,3 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import circuitRepo from '../../repos/circuitRepo.js';
-import tournRepo from '../../repos/tournRepo.js';
 import eventRepo from '../../repos/eventRepo.js';
 import categoryRepo from '../../repos/categoryRepo.js';
 import { buildTarget } from './buildTarget.js';

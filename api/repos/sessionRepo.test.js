@@ -1,4 +1,3 @@
-import { describe, it, expect, beforeAll } from 'vitest';
 
 import sessionRepo from './sessionRepo.js';
 import db from '../data/db.js';

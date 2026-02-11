@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import factories from '../../tests/factories/index.js';
+/* eslint-disable-next-line import/no-unresolved */
 import { encrypt } from 'unixcrypt';
 import { ValidationError } from '../helpers/errors/errors.js';
 vi.mock('../repos/personRepo.js', () => ({
@@ -31,27 +32,27 @@ describe('AuthService', () => {
 			const person = {
 				id: 1,
 				...factories.person.createPersonData({
-				password: encrypt(password),
-			})};
-	
+					password: encrypt(password),
+				})};
+
 			personRepo.getPersonByUsername.mockResolvedValue(person);
-	
+
 			sessionRepo.createSession.mockResolvedValue({ userkey: 'mocktoken' });
-	
+
 			//Act
 			const result = await AuthService.login(person.email, password);
-	
+
 			expect(result.token).toBe('mocktoken');
 			expect(result.person.id).toBe(person.id);
 		});
 		it('throws AUTH_INVALID when user is not found', async () => {
-	
+
 			personRepo.getPersonByUsername.mockResolvedValue(null);
-	
+
 			sessionRepo.createSession.mockResolvedValue({ userkey: 'mocktoken' });
-	
+
 			//Act
-			await expect(AuthService.login("username", 'password')).rejects.toBe(AUTH_INVALID);
+			await expect(AuthService.login('username', 'password')).rejects.toBe(AUTH_INVALID);
 		});
 		it('throws AUTH_INVALID for invalid credentials', async () => {
 			const password = 'mypassword';
@@ -59,11 +60,11 @@ describe('AuthService', () => {
 			const person = {
 				id: 1,
 				...factories.person.createPersonData({
-				password: encrypt(password),
-			})};
-	
+					password: encrypt(password),
+				})};
+
 			personRepo.getPersonByUsername.mockResolvedValue(person);
-	
+
 			await expect(AuthService.login(person.email, 'wrongpassword')).rejects.toBe(AUTH_INVALID);
 		});
 	});

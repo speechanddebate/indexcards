@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+
 import permissionRepo from './permissionRepo.js';
 import factories from '../../tests/factories/index.js';
 
@@ -31,7 +31,7 @@ describe('permissionRepo', () => {
 		it('should create a permission and retrieve it', async () => {
 			const permissionId = await permissionRepo.createPermission({ personId });
 			const permission = await permissionRepo.getPermission(permissionId);
-	
+
 			//ensure that id, updatedAt and createdAt are present and not null
 			expect(permission).toHaveProperty('id');
 			expect(permission.id).not.toBeNull();

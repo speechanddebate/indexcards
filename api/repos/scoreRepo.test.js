@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach, beforeAll } from 'vitest';
+
 import scoreRepo, { scoreInclude } from './scoreRepo.js';
 import factories from '../../tests/factories/index.js';
 
@@ -48,7 +48,7 @@ describe('scoreRepo', async () => {
 
 		it('should return an empty array if no scores exist for the ballot', async () => {
 			// unlikely ballotId
-			const scores = await scoreRepo.getScores({ ballotId: 999999 }); 
+			const scores = await scoreRepo.getScores({ ballotId: 999999 });
 			expect(Array.isArray(scores)).toBe(true);
 			expect(scores.length).toBe(0);
 		});
