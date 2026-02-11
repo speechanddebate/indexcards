@@ -25,10 +25,6 @@ export const toDomain = dbRow => {
 		domain.Person = personMapper.toDomain(dbRow.person_person);
 	}
 
-	if (dbRow.Person) {
-		domain.Person = personMapper.toDomain(dbRow.Person);
-	}
-
 	return domain;
 };
 
