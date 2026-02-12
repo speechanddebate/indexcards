@@ -1,19 +1,15 @@
 import { showDateTime } from '@speechanddebate/nsda-js-utils';
 import { flightTimes } from '../../../helpers/round.js';
 import { errorLogger } from '../../../helpers/logger.js';
-import { BadRequest, Forbidden, Unauthorized } from '../../../helpers/problem.js';
+import { BadRequest, Unauthorized } from '../../../helpers/problem.js';
 import db from '../../../data/db.js';
 
 //  Perms work done, needs testing
 
 export async function getTournAttendance(req, res) {
 	const tournId = req.params.tournId;
-	const perms = req.session.perms;
 
-	if (!perms.tourn[tournId]) {
-		res.status(200).json({ error: true, message: 'You do not have access to that tournament' });
-		return;
-	}
+	await req.actor.assert('tourn', 'read', tournId);
 
 	let queryLimit = '';
 
@@ -39,13 +35,13 @@ export async function getTournAttendance(req, res) {
 	}
 
 	// Limit those with only some access to those events they have access to.
-	if (
-		perms.tourn[tournId] !== 'owner'
-			&& perms.tourn[tournId] !== 'tabber'
-	) {
+	const allowedEvents = req.actor.allowedIds('event', 'read');
+	const allowedCategories = req.actor.allowedIds('category', 'read');
 
-		const eventIds = Object.keys(perms.event);
-		const categoryIds = Object.keys(perms.category);
+	// If not full access, filter to allowed events/categories
+	if (!allowedEvents.all) {
+		const eventIds = allowedEvents.ids;
+		const categoryIds = allowedCategories.ids;
 
 		if ( eventIds.length > 0 && categoryIds.length > 0) {
 			queryLimit += ` and (
@@ -409,12 +405,7 @@ getTournAttendance.openapi = {
 
 export async function postTournAttendance(req, res) {
 	const tournId = req.params.tournId;
-	const perms = req.session.perms;
-
-	if (!perms.tourn[tournId]) {
-		res.status(200).json({ error: true, message: 'You do not have access to that tournament' });
-		return;
-	}
+	await req.actor.assert('tourn', 'write', tournId);
 
 	try {
 
@@ -685,11 +676,7 @@ export async function getTournDashboard(req, res) {
 		return Unauthorized(req, res, 'You are not logged in to view the dashboard');
 	}
 
-	const perms = req.session.perms;
-
-	if (!perms.tourn[tournId]) {
-		return Forbidden(req, res,'You do not have access to that tournament');
-	}
+	await req.actor.assert('tourn', 'read', tournId);
 
 	const replacements = {
 		tournId,
@@ -698,14 +685,10 @@ export async function getTournDashboard(req, res) {
 	let queryLimit = '';
 
 	// Limit those with only some access to those events they have access to.
-	if (
-		perms.tourn[tournId] !== 'owner'
-			&& perms.tourn[tournId] !== 'tabber'
-			&& perms.tourn[tournId] !== 'checker'
-	) {
+	if (!req.actor.can('tourn', 'check', tournId)) {
 
-		const eventIds = Object.keys(perms.event);
-		const categoryIds = Object.keys(perms.category);
+		const eventIds = req.actor.allowedIds('event', 'check').ids;
+		const categoryIds = req.actor.allowedIds('category', 'check').ids;
 
 		if (eventIds.length > 0 && categoryIds.length > 0) {
 			queryLimit = ` and (

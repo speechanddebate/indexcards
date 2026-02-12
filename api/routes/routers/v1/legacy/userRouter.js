@@ -17,7 +17,7 @@ import getSessionMod from '../../../../controllers/user/person/session.js';
 import getProfileMod from '../../../../controllers/user/person/getProfile.js';
 import acceptPayPalMod from '../../../../controllers/user/enter/acceptPayPal.js';
 import processAuthorizeNetMod from '../../../../controllers/user/enter/processAuthorizeNet.js';
-import updateLastAccessMod from '../../../../controllers/user/person/access.js';
+import updateLastAccess from '../../../../controllers/user/person/access.js';
 import updateLearnCoursesMod from '../../../../controllers/user/person/learnCourse.js';
 
 const router = Router();
@@ -65,7 +65,7 @@ router.get('/profile', extractHandler(getProfileMod, 'GET'));
 router.get('/profile/:personId', extractHandler(getProfileMod, 'GET'));
 router.post('/enter/paypal', extractHandler(acceptPayPalMod, 'POST'));
 router.post('/enter/authorize', extractHandler(processAuthorizeNetMod, 'POST'));
-router.post('/updateLastAccess', extractHandler(updateLastAccessMod, 'GET'));
+router.get('/updateLastAccess', updateLastAccess);
 router.post('/updateLearn', extractHandler(updateLearnCoursesMod, 'GET'));
 router.post('/updateLearn/:personId', extractHandler(updateLearnCoursesMod, 'GET'));
 

@@ -85,9 +85,9 @@ describe('Status Board', () => {
 
 		// Mark Cayman as absent
 		await request(server)
-			.post(`/v1/tab/${testTourn.id}/all/attendance`)
+			.post(`/v1/tab/tourns/${testTourn.id}/all/attendance`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Authorization', `Bearer ${testUserSession.userkey}`)
 			.send({
 				targetId : testTourn.person,   	// person who was absent now present
 				panel    : testTourn.panel, 	// panel ID
@@ -98,9 +98,9 @@ describe('Status Board', () => {
 
 		// Mark LASA as absent
 		await request(server)
-			.post(`/v1/tab/${testTourn.id}/all/attendance`)
+			.post(`/v1/tab/tourns/${testTourn.id}/all/attendance`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Authorization', `Bearer ${testUserSession.userkey}`)
 			.send({
 				targetId   : testTourn.entry,
 				panel      : testTourn.panel,
@@ -112,9 +112,9 @@ describe('Status Board', () => {
 
 		// Mark Ediger ballot as started
 		await request(server)
-			.post(`/v1/tab/${testTourn.id}/all/attendance`)
+			.post(`/v1/tab/tourns/${testTourn.id}/all/attendance`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Authorization', `Bearer ${testUserSession.userkey}`)
 			.send({
 				targetId      : testTourn.judge,
 				panel         : 7212078,
@@ -126,9 +126,9 @@ describe('Status Board', () => {
 			.expect(201);
 
 		const newResponse = await request(server)
-			.get(`/v1/tab/${testTourn.id}/round/${testTourn.round}/attendance`)
+			.get(`/v1/tab/tourns/${testTourn.id}/rounds/${testTourn.round}/attendance`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Authorization', `Bearer ${testUserSession.userkey}`)
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -166,7 +166,7 @@ describe('Status Board', () => {
 describe.todo('Event Dashboard', () => {
 	it('Return a correct JSON status object for the event dashboard', async () => {
 		const res = await request(server)
-			.get(`/v1/tab/${testTourn.id}/status/dashboard`)
+			.get(`/v1/tab/tourns/${testTourn.id}/status/dashboard`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${userData.testUserSession.userkey}`])
 			.expect('Content-Type', /json/)

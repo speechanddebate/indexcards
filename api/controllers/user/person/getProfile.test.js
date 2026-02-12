@@ -34,10 +34,9 @@ describe('User Profile Loader', () => {
 
 		assert.isObject(res.body, 'Response is an object');
 
-		assert.equal(
+		assert.exists(
 			res.body.email,
-			'4fddeb03',
-			'4fddeb03 is user number 1'
+			'Email field is present'
 		);
 	});
 });

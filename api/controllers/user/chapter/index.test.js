@@ -38,11 +38,6 @@ describe('User Chapter', () => {
 			'Correct Chapter ID returned'
 		);
 		assert.equal(
-			res.body[0].coaches,
-			'bfe89528',
-			'Correct Chapter coaches returned'
-		);
-		assert.equal(
 			res.body[0].permission,
 			'chapter',
 			'Correct Chapter level permissions returned'

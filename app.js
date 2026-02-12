@@ -13,7 +13,6 @@ import v1Router from './api/routes/routers/v1/indexRouter.js';
 import { rateLimiterMiddleware } from './api/middleware/rateLimiter.js';
 
 import {
-	tabAuth,
 	coachAuth,
 	localAuth,
 } from './api/helpers/auth.js';
@@ -85,28 +84,6 @@ app.use('/v1',v1Router);
 app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
 	if (!req.person) {
 		return Unauthorized(req, res, 'User: You are not logged in.');
-	}
-	next();
-});
-
-const tabRoutes = [
-	'/v1/tab/:tournId/:subType/:typeId',
-	'/v1/tab/:tournId/:subType/:typeId/*',
-	'/v1/tab/:tournId/:subType/:typeId/*/*',
-	'/v1/tab/:tournId/:subType/:typeId/*/*/*',
-	'/v1/tab/:tournId/:subType',
-	'/v1/tab/:tournId',
-];
-
-app.all(tabRoutes, async (req, res, next) => {
-	if (!req.person) {
-		return Unauthorized(req, res, 'Tab: You are not logged in.');
-	}
-
-	req.session = await tabAuth(req, res);
-
-	if (typeof req.session?.perms !== 'object') {
-		return Forbidden(req, res, `You do not have access to that part of that tournament`);
 	}
 	next();
 });

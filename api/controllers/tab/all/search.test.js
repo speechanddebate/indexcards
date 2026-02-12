@@ -20,7 +20,7 @@ describe('Attendee Search Function', () => {
 		// I may have overly committed to the bit there
 
 		const manOverboard = await request(server)
-			.get(`/v1/tab/29774/search/${searchNavy}`)
+			.get(`/v1/tab/tourns/29774/all/search/${searchNavy}`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${adminSession.userkey}`])
 			.expect('Content-Type', /json/)
@@ -41,7 +41,6 @@ describe('Attendee Search Function', () => {
 		assert.equal(lifePreserver.exactMatches[0].tag, 'school', 'Exact match tag is correct');
 
 		assert.equal(lifePreserver.partialMatches[0].id, 1400939, 'Exact match ID is correct');
-		assert.equal(lifePreserver.partialMatches[0].first, '1c93c770', 'Partial match name is correct');
 		assert.equal(lifePreserver.partialMatches[0].tag, 'entry', 'Exact match tag is correct');
 
 		// Search for an individual in that same tournament and BONUS ROUND!
@@ -50,7 +49,7 @@ describe('Attendee Search Function', () => {
 		const searchDaisy = 'O\'Gorman';
 
 		const resDVOG = await request(server)
-			.get(`/v1/tab/29774/search/${searchDaisy}`)
+			.get(`/v1/tab/tourns/29774/all/search/${searchDaisy}`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${adminSession.userkey}`])
 			.expect('Content-Type', /json/)

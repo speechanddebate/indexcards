@@ -184,6 +184,37 @@ const CHILDREN = {
 	event: ['round'],               // Event has these direct children
 };
 
+/**
+ * Action hierarchy - higher actions grant lower actions
+ * read > check
+ *
+ * Example: If a user has 'read' permission, they can also perform 'check' actions.
+ * If denied 'read', they're also denied 'check'.
+ */
+const ACTION_HIERARCHY = {
+	read: ['check'],
+};
+
+/**
+ * Get all actions that would grant the requested action (including itself)
+ * e.g., for 'check' returns ['check', 'read', 'write', 'owner']
+ */
+function getActionChain(action) {
+	const chain = [action];
+
+	// Find which higher actions grant this action
+	for (const [higherAction, grantsActions] of Object.entries(ACTION_HIERARCHY)) {
+		if (grantsActions.includes(action)) {
+			chain.push(higherAction);
+			// Recursively add even higher actions
+			const higher = getActionChain(higherAction);
+			chain.push(...higher.filter(a => !chain.includes(a)));
+		}
+	}
+
+	return chain;
+}
+
 export function checkAccess(resource, action, target, person, perms){
 
 	if(!person){
@@ -205,8 +236,9 @@ function hasPermissionForResource(resource, action, target, perm, visited = new 
 	//Check direct match on this resource
 	if (!perm.id || (perm.scope === resource && perm.id === target.id)) {
 		for (const p of roleDef.permissions) {
-		// Denied takes precedence
-			if (p.notActions.some(pattern => actionMatches(pattern, targetResource, action))) {
+			// Denied takes precedence - check if any action in the chain is denied
+			const actionChain = getActionChain(action);
+			if (actionChain.some(act => p.notActions.some(pattern => actionMatches(pattern, targetResource, act)))) {
 				continue;
 			}
 			// Allowed patterns
@@ -231,7 +263,8 @@ function hasPermissionForResource(resource, action, target, perm, visited = new 
 			// Check if permission directly matches parent
 			if (perm.scope === parent && perm.id === id) {
 				for (const p of roleDef.permissions) {
-					if (p.notActions.some(pattern => actionMatches(pattern, targetResource, action))) continue;
+					const actionChain = getActionChain(action);
+					if (actionChain.some(act => p.notActions.some(pattern => actionMatches(pattern, targetResource, act)))) continue;
 					if (p.actions.some(pattern => actionMatches(pattern, targetResource, action))) return true;
 				}
 			}
@@ -261,8 +294,19 @@ function hasPermissionForResource(resource, action, target, perm, visited = new 
 function actionMatches(pattern, resource, action) {
 	const [resPattern, actPattern] = pattern.split('/');
 	const resMatch = resPattern === '*' || resPattern === resource;
-	const actMatch = actPattern === '*' || actPattern === action;
-	return resMatch && actMatch;
+
+	// Check exact match
+	if (actPattern === '*' || actPattern === action) {
+		return resMatch;
+	}
+
+	// Check if pattern action grants the requested action via hierarchy
+	const grantsActions = ACTION_HIERARCHY[actPattern] || [];
+	if (grantsActions.includes(action)) {
+		return resMatch;
+	}
+
+	return false;
 }
 
 function roleAllowsAction(roleDef, resource, action) {

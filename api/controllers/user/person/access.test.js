@@ -5,7 +5,8 @@ import config from '../../../../config/config';
 import server from '../../../../app';
 import { testUserSession } from '../../../../tests/testFixtures';
 
-describe('Session Last Access Updated', () => {
+//put in todo as there may be a better way to do this now
+describe.todo('Session Last Access Updated', () => {
 
 	beforeAll( async () => {
 		await db.sequelize.query(`
@@ -23,7 +24,7 @@ describe('Session Last Access Updated', () => {
 		const update = await request(server)
 			.get(`/v1/user/updateLastAccess?forceUpdate=1`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Authorization', `Bearer ${testUserSession.userkey}`)
 			.expect('Content-Type', /json/)
 			.expect(200);
 

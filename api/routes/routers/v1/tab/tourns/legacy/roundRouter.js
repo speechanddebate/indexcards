@@ -1,17 +1,19 @@
 import { Router } from 'express';
-import { requireAccess } from '../../../../../middleware/authorization/authorization.js';
-import { sideCounts, roundDecisionStatus } from '../../../../../controllers/tab/round/index.js';
-import { getRoundChangeLog } from '../../../../../controllers/tab/round/changeLog.js';
+import { requireAccess } from '../../../../../../middleware/authorization/authorization.js';
+import { sideCounts, roundDecisionStatus } from '../../../../../../controllers/tab/round/index.js';
+import { getRoundChangeLog } from '../../../../../../controllers/tab/round/changeLog.js';
 import {
 	blastRoundPairing,
 	blastRoundMessage,
 	roundBlastStatus,
-} from '../../../../../controllers/tab/round/blast.js';
-import { getTournDashboard, getTournAttendance } from '../../../../../controllers/tab/all/dashboard.js';
-import { makeShareRooms } from '../../../../../controllers/tab/round/share.js';
-import { mergeTimeslotRounds, unmergeTimeslotRounds } from '../../../../../controllers/tab/round/merge.js';
+} from '../../../../../../controllers/tab/round/blast.js';
+import { getTournDashboard, getTournAttendance } from '../../../../../../controllers/tab/all/dashboard.js';
+import { makeShareRooms } from '../../../../../../controllers/tab/round/share.js';
+import { mergeTimeslotRounds, unmergeTimeslotRounds } from '../../../../../../controllers/tab/round/merge.js';
 
-const router = Router();
+const router = Router({ mergeParams: true });
+
+//LEGACY ROUTES
 
 router.get('/:roundId/attendance', requireAccess('round', 'read'), getTournAttendance);
 

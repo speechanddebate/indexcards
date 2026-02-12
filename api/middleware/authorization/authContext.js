@@ -1,7 +1,8 @@
 import permissionRepo from '../../repos/permissionRepo.js';
 import eventRepo from '../../repos/eventRepo.js';
 import  { createActor } from './authorization.js';
-export async function loadTournAuthContext(req, res, next){
+
+export async function loadTournAuthContext(req, res, next, tournId){
 
 	req.actor = createActor(req);
 
@@ -13,8 +14,6 @@ export async function loadTournAuthContext(req, res, next){
 	const personId = req.person?.id;
 	if (!personId) return next();
 
-	//Tourn scoped request, load all of the perms for a tourn
-	const tournId = req.params.tournId;
 	if (tournId){
 		//fetch all or a persons perms for a tourn
 		const perms = await permissionRepo.getPermissions({ tournId, personId });
@@ -42,22 +41,22 @@ export async function loadTournAuthContext(req, res, next){
 			let categoryId = null;
 			let permTournId = null;
 
-			if (perm.event) {
+			if (perm.eventId) {
 				//event level perm
 				scope = 'event';
-				id = perm.event;
-				categoryId = eventMap.get(perm.event);
-				permTournId = perm.tourn; // already populated
+				id = perm.eventId;
+				categoryId = eventMap.get(perm.eventId);
+				permTournId = perm.tournId; // already populated
 			}
-			else if (perm.category) {
+			else if (perm.categoryId) {
 				scope = 'category';
-				id = perm.category;
-				permTournId = perm.tourn; // already populated
+				id = perm.categoryId;
+				permTournId = perm.tournId; // already populated
 			}
-			else if (perm.tourn) {
+			else if (perm.tournId) {
 				scope = 'tourn';
-				id = perm.tourn;
-				permTournId = perm.tourn;
+				id = perm.tournId;
+				permTournId = perm.tournId	;
 			}
 
 			if (scope && id) {
