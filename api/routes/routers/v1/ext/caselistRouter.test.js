@@ -3,7 +3,6 @@ import { assert } from 'chai';
 import server from '../../../../../app.js';
 import { testUserAPIKey } from '../../../../../tests/testFixtures';
 import db from '../../../../data/db.js';
-import { expectProblem } from '../../../../../tests/utils.js';
 
 const authHeader = Buffer.from(`69:${testUserAPIKey.value}`).toString('base64');
 const badAuthHeader = Buffer.from(`70:${testUserAPIKey.value}nopesauce`).toString('base64');
@@ -24,10 +23,9 @@ describe('Person Chapters', () => {
 			.get(`/v1/ext/caselist/chapters?person_id=17145`)
 			.set('Accept', 'application/json')
 			.set('Authorization', `Basic ${badAuthHeader}`)
-			.expect('Content-Type', /json/)
-			.expect(401);
+			.expect('Content-Type', /json/);
 
-		expectProblem(res);
+		expect(res).toBeProblemResponse(401);
 	});
 
 });

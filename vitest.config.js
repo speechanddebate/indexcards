@@ -4,6 +4,7 @@ export default defineConfig({
 	test: {
 		threads: true,
 		globals: true,
+		setupFiles: './tests/setup.js',
 		globalSetup: './tests/globalTestSetup.js',
 		coverage: {
 			cleanOnRerun: false,

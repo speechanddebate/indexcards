@@ -44,7 +44,7 @@ export function BadRequest(req, res, detail, extras = {}){
 		...extras,
 	});
 }
-//I hate that the 401 Unauthorized is technically for unauhenticated issues but we live in a society after all
+//I hate that the 401 Unauthorized is technically for unauthenticated issues but we live in a society after all
 export function Unauthorized(req, res, detail, extras = {}) {
 	return sendProblem(req, res, {
 		title: 'Invalid or Missing Credentials',

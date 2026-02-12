@@ -1,6 +1,5 @@
 
 import express from 'express';
-import { expectProblem } from '../../tests/utils.js';
 import request from 'supertest';
 
 vi.mock('../../config/config.js', () => ({
@@ -39,7 +38,7 @@ describe('rateLimiterMiddleware', () => {
 		await request(app).get('/v1/other').expect(200);
 
 		const res = await request(app).get('/v1/other').expect(429);
-		expectProblem(res);
+		expect(res).toBeProblemResponse(429);
 	});
 
 	it('applies search limiter', async () => {
@@ -47,7 +46,7 @@ describe('rateLimiterMiddleware', () => {
 
 		await request(app).get('/v1/public/search').expect(200);
 		const res = await request(app).get('/v1/public/search').expect(429);
-		expectProblem(res);
+		expect(res).toBeProblemResponse(429);
 	});
 
 	it('applies message limiter', async () => {
@@ -55,7 +54,7 @@ describe('rateLimiterMiddleware', () => {
 
 		await request(app).post('/v1/tab/123/message').expect(200);
 		const res = await request(app).post('/v1/tab/123/message').expect(429);
-		expectProblem(res);
+		expect(res).toBeProblemResponse(429);
 	});
 
 	it('does not apply message limiter to other routes', async () => {
@@ -64,6 +63,6 @@ describe('rateLimiterMiddleware', () => {
 		await request(app).post('/v1/tab/123/other').expect(200);
 		await request(app).post('/v1/tab/123/other').expect(200);
 		const res = await request(app).post('/v1/tab/123/other').expect(429);
-		expectProblem(res);
+		expect(res).toBeProblemResponse(429);
 	});
 });

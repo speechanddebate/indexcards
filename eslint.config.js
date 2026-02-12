@@ -66,7 +66,6 @@ export default [
 				assertFunctionNames: [
 				  'expect',
 				  'assert',
-				  'expectProblem', // helper function that calls expect internally
 				],
 			  },
 			],

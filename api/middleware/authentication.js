@@ -32,8 +32,8 @@ export async function Authenticate(req, res, next) {
 					id     : cookieSession.id,
 					person : cookieSession.personId,
 					su     : cookieSession.suId || null,
-					Su     : cookieSession.su || null,
-					Person : cookieSession.person || null,
+					Su     : cookieSession.Su || null,
+					Person : cookieSession.Person || null,
 				};
 
 				//req.person is what should be checked for every authorization decision

@@ -3,7 +3,6 @@ import request from 'supertest';
 import app from '../../../../../../app.js';
 import factories from '../../../../../../tests/factories/index.js';
 import { testAdminSession } from '../../../../../../tests/testFixtures.js';
-import { expectProblem } from '../../../../../../tests/utils.js';
 
 let tournId = null;
 let userkey = testAdminSession.userkey;
@@ -32,9 +31,9 @@ describe('Timeslots', () => {
 			const res = await request(app)
 				.post(`/v1/tab/tourns/${tournId}/timeslots`)
 				.set('Authorization', `Bearer ${userkey}`)
-				.send(invalidData)
-				.expect(400);
-			expectProblem(res);
+				.send(invalidData);
+
+			expect(res).toBeProblemResponse(400);
 		});
 	});
 	it('GET /tourns/:tournId/timeslots returns a list of timeslots for the tournament', async () => {

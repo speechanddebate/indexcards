@@ -4,7 +4,6 @@ import config from '../../../../../config/config.js';
 import db from '../../../../data/db.js';
 import server from '../../../../../app.js';
 import { testUserAPIKey, testStoreCartSetting } from '../../../../../tests/testFixtures.js';
-import { expectProblem } from '../../../../../tests/utils.js';
 
 const authHeader = Buffer.from(`69:${testUserAPIKey.value}`).toString('base64');
 
@@ -34,9 +33,9 @@ describe('Person History', () => {
 			.get(`/v1/ext/nsda/history?nsda_id=999999999`)
 			.set('Accept', 'application/json')
 			.set('Authorization', `Basic ${authHeader}`)
-			.expect('Content-Type', /json/)
-			.expect(404);
-		expectProblem(res);
+			.expect('Content-Type', /json/);
+
+		expect(res).toBeProblemResponse(404);
 	});
 });
 
