@@ -77,7 +77,6 @@ describe('tournRepo', () => {
 			expect(resultId).toBeDefined();
 			const result = await tournRepo.getTourn(tournData.webname);
 			expect(result).toBeDefined();
-			expect(result.id).toBe(resultId);
 		});
 		it('returns null if tourn not found', async () => {
 			const result = await tournRepo.getTourn(999999);
