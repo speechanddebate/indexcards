@@ -21,7 +21,7 @@ describe('sessionRepo', () => {
 
 		it('includes su when requested', async () => {
 			//Arrange
-			const { personId: suId }      = await factories.person.createTestPerson();
+			const { personId: suId } = await factories.person.createTestPerson();
 			const { sessionId } = await factories.session.createTestSession({ suId, personId });
 
 			//Act

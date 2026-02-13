@@ -104,7 +104,7 @@ export const tabAuth = async (req) => {
 
 	} else {
 
-		perms = await tournPerms(tournId, req.session.person);
+		perms = await tournPerms(tournId, req.session.personId);
 
 		if (!perms || !perms.tourn[tournId]) {
 			return req.session;
@@ -454,7 +454,7 @@ export const coachAuth = async (req) => {
 		`, {
 			replacements: {
 				chapterId,
-				personId: req.session.person,
+				personId: req.session.personId,
 			},
 			type: db.sequelize.QueryTypes.SELECT,
 		});
@@ -495,7 +495,7 @@ export const localAuth = async (req) => {
 		`, {
 			replacements : {
 				localId,
-				personId: req.session.person,
+				personId: req.session.personId,
 			},
 			type: db.sequelize.queryTypes.SELECT,
 		});
@@ -531,7 +531,7 @@ export const checkJudgePerson = async (req, judgeId) => {
 
 	const judge = await db.summon(db.judge, judgeId);
 
-	if (judge.person === req.session.person) {
+	if (judge.person === req.session.personId) {
 		return true;
 	}
 
@@ -564,7 +564,7 @@ export const checkPerms = async (req, res, query, replacements) => {
 			and permission.tourn = :tournId
 	`, {
 		replacements: {
-			personId: req.session.person,
+			personId: req.session.personId,
 			tournId: permsData.tourn,
 		},
 		type: db.sequelize.QueryTypes.SELECT,

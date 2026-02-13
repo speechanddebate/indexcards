@@ -66,7 +66,7 @@ export async function blastTimeslotMessage(req, res) {
 
 		const pushPromise = db.changeLog.create({
 			tag    : 'blast',
-			person : req.session.person,
+			person : req.session.personId,
 			count  : notifyResponse.push?.count || 0,
 			round  : round.id,
 			description : `${req.body.message} sent to whole timeslot. ${notifyResponse.inbox || 0} recipients`,
@@ -255,7 +255,7 @@ export async function messageFreeJudges(req, res) {
 		const promise = db.changeLog.create({
 			tag         : 'blast',
 			description : `${req.body.message} sent to ${totals.judges} people: ${totals.web} push and ${totals.email} emails`,
-			person      : req.session.person,
+			person      : req.session.personId,
 			round       : round.id,
 		});
 
@@ -367,7 +367,7 @@ export async function messageReleasedJudges(req, res) {
 			tag         : 'blast',
 			description : `${req.body.message} sent to ${totals.web + totals.email}
 					judges ${totals.web} push and ${totals.email} emails`,
-			person      : req.session.person,
+			person      : req.session.personId,
 			count       : totals.web + totals.emails,
 			round       : round.id,
 		});

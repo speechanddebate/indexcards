@@ -7,6 +7,7 @@ function buildPersonQuery(opts = {}) {
 
 	// Exclude password by default unless opts.includePassword is true
 	let attributes = resolveAttributesFromFields(opts.fields, FIELD_MAP);
+
 	if (!opts.includePassword) {
 		if (!attributes) {
 			attributes = { exclude: ['password'] };

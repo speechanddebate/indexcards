@@ -29,15 +29,15 @@ export async function Authenticate(req, res, next) {
 				 */
 
 				req.session = {
-					id     : cookieSession.id,
-					person : cookieSession.personId,
-					su     : cookieSession.suId || null,
-					Su     : cookieSession.Su || null,
-					Person : cookieSession.Person || null,
+					id       : cookieSession.id,
+					personId : cookieSession.personId,
+					suId     : cookieSession.suId || null,
+					Su       : cookieSession.Su || null,
+					Person   : cookieSession.Person || null,
 				};
 
 				//req.person is what should be checked for every authorization decision
-				req.person = await personRepo.getPerson(req.session.person);
+				req.person = await personRepo.getPerson(req.session.personId);
 				req.authType = 'cookie';
 				req.session.csrfToken = authService.generateCSRFToken(cookie);
 			}
