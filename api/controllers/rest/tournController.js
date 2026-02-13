@@ -2,6 +2,7 @@ import { NotFound } from '../../helpers/problem.js';
 import tournRepo from '../../repos/tournRepo.js';
 import eventRepo from '../../repos/eventRepo.js';
 import { ToPublicPage } from '../mappers/pageMapper.js';
+import fileRepo from '../../repos/fileRepo.js';
 
 //TODO remove all references
 import db from '../../data/db.js';
@@ -38,6 +39,7 @@ export async function getTournInvite(req, res) {
 	invite = await tournRepo.getTourn(req.params.tournId, {
 		include: {
 			pages: true,
+			files: true,
 		},
 	});
 
@@ -46,7 +48,7 @@ export async function getTournInvite(req, res) {
 	}
 
 	invite.webpages = (invite.webpages ?? []).map(ToPublicPage);
-	invite.files = (await tournRepo.getFiles(invite.id)).map(file => {
+	invite.files = (invite.files ?? []).map(file => {
 		return {
 			id        : file.id,
 			tag       : file.tag,
@@ -100,7 +102,7 @@ getSchedule.openapi = {
 };
 
 export async function getPublishedFiles(req, res) {
-	const files = await tournRepo.getFiles(req.params.tournId);
+	const files = await fileRepo.getFiles({ tournId: req.params.tournId });
 	return res.status(200).json(files);
 };
 getPublishedFiles.openapi = {

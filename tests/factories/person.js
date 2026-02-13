@@ -11,7 +11,7 @@ export function createPersonData(overrides = {}) {
 		lastName: faker.person.lastName(),
 		state: faker.location.state({abbreviated: true}),
 		country: faker.location.countryCode(),
-		timezone: faker.location.timeZone(),
+		tz: faker.location.timeZone(),
 		...overrides,
 	};
 }

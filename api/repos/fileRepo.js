@@ -10,7 +10,7 @@ function buildFileQuery(opts = {}) {
 		order: [['tag', 'ASC'],['label', 'ASC']],
 	};
 
-	if (!opts.includeUnpublished) {
+	if (!opts.unpublished) {
 		query.where.published = 1;
 	}
 

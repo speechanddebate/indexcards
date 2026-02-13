@@ -44,7 +44,7 @@ export async function register(userData, context = {}) {
 		lastName: userData.lastName,
 		state: userData.state,
 		country: userData.country,
-		timezone: userData.timezone,
+		tz: userData.tz,
 	};
 	const personId = await personRepo.createPerson(newPersonData);
 

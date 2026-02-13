@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 
 export function createCircuitData(overrides = {}) {
 	return {
-		timezone: faker.location.timeZone(),
+		tz: faker.location.timeZone(),
 		...overrides,
 	};
 }

@@ -38,7 +38,7 @@ export async function generateBackup(tournId, scope, scopeId, opts = {}) {
 
 async function backupTournament(tournId, opts = {}) {
 	const tourn = await tournRepo.getTourn(tournId, { settings: opts.settings });
-	tourn.webpages = await webpageRepo.getWebpages({ scope: { tournId }, opts: { includeUnpublished: true } });
+	tourn.webpages = await webpageRepo.getWebpages({ scope: { tournId }, opts: { unpublished: true } });
 	tourn.sites = await siteRepo.getSites({ tournId },{include: {rooms: true}});
 	tourn.categories = await categoryRepo.getCategories({ tournId }, {
 		settings: true,

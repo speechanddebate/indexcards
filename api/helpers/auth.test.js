@@ -95,7 +95,7 @@ describe('Authorization Functions', () => {
 		const session = req.session;
 
 		assert.typeOf(session, 'object');
-		assert.equal(session.person, '70');
+		assert.equal(session.personId, '70');
 		assert.equal(req.person.siteAdmin, true);
 		assert.equal(req.person.email, 'i.am.god@speechanddebate.org');
 	});

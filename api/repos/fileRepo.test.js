@@ -13,10 +13,10 @@ describe('FileRepo', () => {
 			expect(file).toBeNull();
 		});
 
-		it('returns unpublished files when includeUnpublished is true', async () => {
+		it('returns unpublished files when unpublished is true', async () => {
 			const { fileId } = await factories.file.createTestFile({published: false});
 			// Arrange
-			const file = await fileRepo.getFile(fileId, { includeUnpublished: true });
+			const file = await fileRepo.getFile(fileId, { unpublished: true });
 
 			// Assert
 			expect(file).toBeDefined();
@@ -73,7 +73,7 @@ describe('FileRepo', () => {
 	describe('createFiles', async () => {
 		it('creates files successfully', async () => {
 			const fileId = await fileRepo.createFile();
-			const file = await fileRepo.getFile(fileId,{includeUnpublished: true});
+			const file = await fileRepo.getFile(fileId,{unpublished: true});
 
 			//ensure that id, updatedAt and createdAt are present and not null
 			expect(file).toHaveProperty('id');

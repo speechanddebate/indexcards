@@ -18,13 +18,14 @@ export async function saveSettings({
 		return;
 	}
 
-	await model.bulkCreate(rows, {
+	const createdRows =await model.bulkCreate(rows, {
 		updateOnDuplicate : [
 			'value',
 			'value_text',
 			'value_date',
 		],
 	});
+	return createdRows;
 }
 
 /**

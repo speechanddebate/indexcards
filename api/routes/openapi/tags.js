@@ -37,7 +37,7 @@ export const tags = [
 		description: 'Endpoints for external access to Mason data',
 	},
 	{
-		name: 'Tourn',
+		name: 'Tournament',
 		description: 'Endpoints for managing tournaments',
 	},
 	{
@@ -82,7 +82,7 @@ export const declaredTagGroups = [
 	{
 		name: 'Tournament Management',
 		tags: [
-			'Tourn',
+			'Tournament',
 			'Timeslots',
 			'Backup and Restore',
 			'Category',

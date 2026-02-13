@@ -1,5 +1,5 @@
 import db from '../data/db.js';
-import  fileRepo  from './fileRepo.js';
+import { fileInclude }  from './fileRepo.js';
 import { webpageInclude }  from './webpageRepo.js';
 import { FIELD_MAP, toDomain, toPersistence } from './mappers/tournMapper.js';
 import { saveSettings, withSettingsInclude } from './utils/settings.js';
@@ -19,6 +19,13 @@ function buildTournQuery(opts = {}) {
 		query.include.push({
 			...webpageInclude(opts.include.pages),
 			as: 'webpages',
+			required: false,
+		});
+	}
+	if(opts.include?.files){
+		query.include.push({
+			...fileInclude(opts.include.files),
+			as: 'files',
 			required: false,
 		});
 	}
@@ -49,21 +56,21 @@ export function tournInclude(opts = {}) {
  * @returns {Promise<Object|null>}
  *   The tournament domain object, or null if not found.
  */
-export async function getTourn(tournId,opts = {}) {
+async function getTourn(tournId,opts = {}) {
 	const query = buildTournQuery(opts);
 
 	// ---- ID vs webname ----
 	if (typeof tournId === 'number' || !isNaN(parseInt(tournId))) {
-		query.where.id = parseInt(tournId, 10);
+		query.where.id = parseInt(tournId);
 	} else {
-		query.where.webname = tournId.replace(/\W/g, '');
+		query.where.webname = tournId;
 	}
 
 	const tourn = await db.tourn.findOne(query);
 
 	return toDomain(tourn);
 }
-export async function createTourn(tourn) {
+async function createTourn(tourn) {
 	const created = await db.tourn.create(
 		toPersistence(tourn)
 	);
@@ -77,6 +84,38 @@ export async function createTourn(tourn) {
 	return created.id;
 }
 
+async function updateTourn(tournId, updates) {
+	if (!tournId) throw new Error('updateTourn: tournId is required');
+	if (!updates) throw new Error('updateTourn: updates are required');
+
+	const [rows] = await db.tourn.update(
+		toPersistence(updates),
+		{
+			where: { id: tournId },
+		}
+	);
+
+	let updated = rows > 0;
+	let settingsUpdated = false;
+	if (updates.settings) {
+		settingsUpdated = await saveSettings({
+			model: db.tournSetting,
+			settings: updates.settings,
+			ownerKey: 'tourn',
+			ownerId: tournId,
+		});
+	}
+	updated = updated || settingsUpdated.length > 0;
+	return updated;
+}
+async function deleteTourn(tournId) {
+	if (!tournId) throw new Error('deleteTourn: tournId is required');
+	const rows = await db.tourn.destroy({
+		where: { id: tournId },
+	});
+	return rows > 0;
+}
+
 async function addSite(tournId, siteId) {
 	if (!tournId) throw new Error('addSite: tournId is required');
 	if (!siteId) throw new Error('addSite: siteId is required');
@@ -86,18 +125,6 @@ async function addSite(tournId, siteId) {
 	});
 	return true;
 }
-
-/**
- * Get files scoped to a tournament.
- *
- * @param {number} tournId - Tournament ID to scope files to
- * @param {Object} [opts] - Optional query options
- * @param {boolean} [opts.includeUnpublished=false] - Include unpublished files
- * @returns {Promise<Array<Object>>} List of files
- */
-export async function getFiles(tournId, opts = {}) {
-	return await fileRepo.getFiles({ tournId: tournId }, opts);
-};
 export async function getSchedule(tournId){
 	const schedule = await db.sequelize.query(`
 			select
@@ -123,7 +150,7 @@ export async function getSchedule(tournId){
  *
  * @param {number} tournId - Tournament ID to scope webpages to
  * @param {Object} [opts] - Optional query options
- * @param {boolean} [opts.includeUnpublished=false] - Include unpublished webpages
+ * @param {boolean} [opts.unpublished=false] - Include unpublished webpages
  * @returns {Promise<Array<Object>>} List of webpages
  */
 
@@ -147,8 +174,9 @@ export async function getContacts(tournId) {
 export default {
 	getTourn,
 	createTourn,
+	updateTourn,
+	deleteTourn,
 	addSite,
-	getFiles,
 	getSchedule,
 	getContacts,
 };
