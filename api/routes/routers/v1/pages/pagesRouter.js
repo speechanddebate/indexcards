@@ -3,6 +3,7 @@ import * as inviteController from '../../../../controllers/pages/invite/inviteCo
 
 const router = Router();
 
+router.get('/invite/nsdaCodes',inviteController.getNSDAEventCategories);
 router.get('/invite/upcoming',inviteController.getFutureTourns);
 router.get('/invite/:circuit',inviteController.getFutureTourns);
 router.get('/invite/nextweek',inviteController.getThisWeekTourns);
