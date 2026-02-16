@@ -29,7 +29,9 @@ debugLogger.info('Initializing API...');
 debugLogger.info(`Loading environment ${process.env?.NODE_ENV}`);
 
 // Enable Helmet security
-app.use(helmet());
+app.use(helmet({
+	contentSecurityPolicy: false, //helmet v3 had this off by default
+}));
 
 // Add a unique UUID to every request, and add the configuration for easy
 // transport

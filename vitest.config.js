@@ -7,10 +7,9 @@ export default defineConfig({
 		setupFiles: './tests/setup.js',
 		globalSetup: './tests/globalTestSetup.js',
 		coverage: {
-			cleanOnRerun: false,
 			include: ['api/**/*.{js,ts,tsx}'],
 			exclude: ['**/data/models/**'],
-			reportOnFailure: true
+			cleanOnRerun: false,
 			},
 	},
 });
