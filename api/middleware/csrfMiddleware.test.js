@@ -40,7 +40,7 @@ describe('csrfMiddleware', () => {
 			req: {
 				authType: 'cookie',
 				method: 'POST',
-				path: '/auth/login',
+				path: '/v1/auth/login',
 			},
 		});
 
