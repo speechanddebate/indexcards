@@ -201,8 +201,8 @@ export const BackupRequest = {
 	},
 	additionalProperties: false,
 
-	examples: [
-		{
+	examples: {
+		example1: {
 			scope: {
 				type: 'tournament',
 			},
@@ -210,7 +210,7 @@ export const BackupRequest = {
 				ignoreComments: true,
 			},
 		},
-		{
+		example2: {
 			tournId: 123,
 			scope: {
 				type: 'event',
@@ -220,5 +220,5 @@ export const BackupRequest = {
 				ignoreBallots: true,
 			},
 		},
-	],
+	},
 };

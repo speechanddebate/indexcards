@@ -269,13 +269,13 @@ processAuthorizeNet.POST.apiDoc = {
 	requestBody: {
 		description: 'The order details',
 		required: true,
-		content: { '*/*': { schema: { type: 'object' } } },
+		content: {'application/json': { schema: { type: 'object' } } },
 	},
 	responses: {
 		200: {
 			description: 'Authorize payment',
 			content: {
-				'*/*': {
+				'application/json': {
 					schema: {
 						type: 'string',
 					},

@@ -15,6 +15,7 @@ getTourn.openapi = {
 	tags: ['Tournament'],
 	responses: {
 		200: {
+			description: 'Tournament information',
 			content: {
 				'application/json': {
 					schema: {
@@ -53,6 +54,7 @@ createTourn.openapi = {
 	},
 	responses: {
 		201: {
+			description: 'Tournament created',
 			content: {
 				'application/json': {
 					schema: {

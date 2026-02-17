@@ -24,10 +24,10 @@ describe('tournsRouter', () => {
 			expect(response.body).toMatchObject({
 				...data,
 				id: tournId,
-				startDate: data.startDate?.toISOString(),
-				endDate: data.endDate?.toISOString(),
-				regStartDate: data.regStartDate?.toISOString(),
-				regEndDate: data.regEndDate?.toISOString(),
+				start: data.start?.toISOString(),
+				end: data.end?.toISOString(),
+				regStart: data.regStart?.toISOString(),
+				regEnd: data.regEnd?.toISOString(),
 			});
 
 			const updates = { name: 'Updated Tournament Name' };

@@ -10,8 +10,8 @@ export const Category = {
 		createdAt: { type: 'string', format: 'date-time' },
 		updatedAt: { type: 'string', format: 'date-time' },
 	},
-	examples: [
-		{
+	examples: {
+		example1: {
 			id: 1,
 			name: 'Lincoln-Douglas',
 			abbr: 'LD',
@@ -21,5 +21,5 @@ export const Category = {
 			createdAt: '2023-01-01T00:00:00Z',
 			updatedAt: '2023-01-02T00:00:00Z',
 		},
-	],
+	},
 };

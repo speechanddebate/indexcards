@@ -36,42 +36,6 @@ export async function categoryCheckin(req, res) {
 categoryCheckin.openapi = {
 	summary     : 'Given a category lists the judges who are present or absent for judge checkin',
 	operationId : 'categoryCheckin',
-	parameters  : [
-		{
-			in          : 'path',
-			name        : 'tournId',
-			description : 'Tournament ID',
-			required    : true,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},
-		{
-			in          : 'path',
-			name        : 'categoryId',
-			description : 'Judge Category ID',
-			required    : true,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},
-	],
-	responses: {
-		200: {
-			description: 'Judge IDs and Status',
-			content: {
-				'*/*': {
-					schema: {
-						type: 'object',
-						items: { $ref: '#/components/schemas/Judge' },
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
 	tags: ['tab/all'],
 };
 

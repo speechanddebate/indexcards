@@ -18,10 +18,10 @@ export function createTournData(overrides = {}) {
 		])
 				: 'UTC'),
 		webname: toWebName(name),
-		startDate: noMs(faker.date.past()),
-		endDate: noMs(faker.date.future()),
-		regStartDate: noMs(faker.date.past()),
-		regEndDate: noMs(faker.date.future()),
+		start: noMs(faker.date.past()),
+		end: noMs(faker.date.future()),
+		regStart: noMs(faker.date.past()),
+		regEnd: noMs(faker.date.future()),
 		...overrides,
 	};
 }

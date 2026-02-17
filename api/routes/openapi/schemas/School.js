@@ -15,8 +15,8 @@ export const School = {
 		createdAt: { type: 'string', readOnly: true, format: 'date-time', description: 'Creation timestamp' },
 	},
 	additionalProperties: false,
-	examples: [
-		{
+	examples: {
+		example1: {
 			id: 1985,
 			name: 'Shermer High School',
 			code: 'SHS',
@@ -30,7 +30,7 @@ export const School = {
 			updatedAt: '2024-01-15T12:34:56Z',
 			createdAt: '2023-09-01T08:00:00Z',
 		},
-	],
+	},
 };
 export const CreateSchool = {
 	type: 'object',
@@ -45,8 +45,8 @@ export const CreateSchool = {
 		settings: { type: 'object', description: 'School settings object' },
 	},
 	additionalProperties: false,
-	examples: [
-		{
+	examples: {
+		example1: {
 			name: 'Shermer High School',
 			code: 'SHS',
 			onsite: true,
@@ -55,7 +55,7 @@ export const CreateSchool = {
 			regionId: 789,
 			settings: { allowGuests: true },
 		},
-	],
+	},
 };
 export const UpdateSchool = {
 	type: 'object',
@@ -68,8 +68,8 @@ export const UpdateSchool = {
 		settings: { type: 'object', description: 'School settings object' },
 	},
 	additionalProperties: false,
-	examples: [
-		{
+	examples: {
+		example1: {
 			name: 'Shermer High School',
 			code: 'SHS',
 			onsite: true,
@@ -77,5 +77,5 @@ export const UpdateSchool = {
 			regionId: 789,
 			settings: { allowGuests: true },
 		},
-	],
+	},
 };

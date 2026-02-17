@@ -58,8 +58,8 @@ export const RegisterRequest = {
 			description: 'The IANA timezone of the new user',
 		},
 	},
-	examples: [
-		{
+	examples: {
+		example1: {
 			email: 'john.doe@example.com',
 			password: 'SecurePassw0rd!',
 			firstName: 'John',
@@ -70,5 +70,5 @@ export const RegisterRequest = {
 			country: 'US',
 			tz: 'America/Chicago',
 		},
-	],
+	},
 };

@@ -15,9 +15,9 @@ function buildTournQuery(opts = {}) {
 	if (!opts.unpublished){
 		query.where.hidden = 0;
 	}
-	if(opts.include?.pages) {
+	if(opts.include?.webpages) {
 		query.include.push({
-			...webpageInclude(opts.include.pages),
+			...webpageInclude(opts.include.webpages),
 			as: 'webpages',
 			required: false,
 		});

@@ -34,7 +34,7 @@ getProfile.GET.apiDoc = {
 			in          : 'path',
 			name        : 'personId',
 			description : 'ID of user whose profile you wish to access.  Defaults to present session.',
-			required    : false,
+			required    : true,
 			schema      : {
 				type    : 'integer',
 				minimum : 1,

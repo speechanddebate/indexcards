@@ -13,6 +13,7 @@ getCategory.openapi = {
 	tags: ['Category'],
 	responses: {
 		200: {
+			description: 'Category details',
 			content: {
 				'application/json': {
 					schema: {
@@ -36,6 +37,7 @@ getCategories.openapi = {
 	tags: ['Category'],
 	responses: {
 		200: {
+			description: 'List of categories',
 			content: {
 				'application/json': {
 					schema: {

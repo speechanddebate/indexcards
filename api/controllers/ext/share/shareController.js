@@ -88,7 +88,7 @@ sendShareFile.openapi = {
 	requestBody: {
 		description : 'Initialize the doc chain room and emails',
 		required    : true,
-		content: { '*/*': { schema: { $ref: '#/components/schemas/Share' } } },
+		content: { 'application/json': { schema: { $ref: '#/components/schemas/Share' } } },
 	},
 	responses: {
 		201: {

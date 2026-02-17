@@ -22,7 +22,7 @@ getTourn.openapi = {
 			content: {
 				'application/json': {
 					schema: {
-						$ref: '#/components/schemas/Tournament',
+						$ref: '#/components/schemas/Tourn',
 					},
 				},
 			},
@@ -38,7 +38,7 @@ export async function getTournInvite(req, res) {
 
 	invite = await tournRepo.getTourn(req.params.tournId, {
 		include: {
-			pages: true,
+			webpages: true,
 			files: true,
 		},
 	});
@@ -68,6 +68,7 @@ export async function getTournInvite(req, res) {
 };
 getTournInvite.openapi = {
 	summary: 'Get Tournament Invite',
+	operationId: 'getTournInvite',
 	description: 'Retrieve a public invite for a specific tournament, including pages, files, events, and contacts.',
 	tags: ['Tournaments'],
 	responses: {
@@ -88,7 +89,7 @@ getTournInvite.openapi = {
 			$ref: '#/components/responses/NotFound',
 		},
 		default: {
-			$ref: '#/components/responses/Error',
+			$ref: '#/components/responses/ErrorResponse',
 		},
 	},
 };
@@ -162,13 +163,6 @@ getTournPublishedResults.openapi = {
 	responses: {
 		200: {
 			description: 'Array of events',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'array',
-					},
-				},
-			},
 		},
 	},
 	tags: ['invite', 'public', 'results'],

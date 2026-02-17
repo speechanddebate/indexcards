@@ -32,7 +32,7 @@ describe('tournRepo', () => {
 		it('includes associations when specified', async () => {
 			const { tournId } = await factories.tourn.createTestTourn();
 
-			let tourn = await tournRepo.getTourn(tournId, { include: { pages: true } });
+			let tourn = await tournRepo.getTourn(tournId, { include: { webpages: true } });
 
 			expect(tourn).toBeDefined();
 			expect(tourn.webpages).toBeDefined();
