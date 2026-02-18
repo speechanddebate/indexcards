@@ -8,7 +8,7 @@ export const FIELD_MAP = {
 	lastName      : 'last',
 	state         : 'state',
 	country       : 'country',
-	timezone      : 'tz',
+	tz            : 'tz',
 	nsda          : 'nsda',
 	phone         : 'phone',
 	gender        : 'gender',

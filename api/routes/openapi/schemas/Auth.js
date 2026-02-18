@@ -53,13 +53,13 @@ export const RegisterRequest = {
 			type : 'string',
 			description: 'The 2 letter country code of the new user',
 		},
-		timezone: {
+		tz: {
 			type : 'string',
 			description: 'The IANA timezone of the new user',
 		},
 	},
-	examples: [
-		{
+	examples: {
+		example1: {
 			email: 'john.doe@example.com',
 			password: 'SecurePassw0rd!',
 			firstName: 'John',
@@ -68,7 +68,7 @@ export const RegisterRequest = {
 			phoneNumber: '555-123-4567',
 			state: 'CA',
 			country: 'US',
-			timezone: 'America/Chicago',
+			tz: 'America/Chicago',
 		},
-	],
+	},
 };

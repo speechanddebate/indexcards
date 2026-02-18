@@ -25,7 +25,7 @@ export const inboxList = {
 				message.created_at,
 				message.subject
 		`, {
-			replacements: { personId: req.session.person },
+			replacements: { personId: req.session.personId },
 			type: req.db.Sequelize.QueryTypes.SELECT,
 		});
 
@@ -45,7 +45,7 @@ export const unreadCount = {
 				and message.deleted_at IS NULL
 				and message.visible_at < NOW()
 		`, {
-			replacements: { personId: req.session.person },
+			replacements: { personId: req.session.personId },
 			type: req.db.Sequelize.QueryTypes.SELECT,
 		});
 
@@ -64,7 +64,7 @@ export const markAllMessagesRead = {
 				and message.read_at IS NULL
 				and message.visible_at < NOW()
 		`, {
-			replacements: { personId: req.session.person },
+			replacements: { personId: req.session.personId },
 			type: req.db.Sequelize.QueryTypes.UPDATE,
 		});
 

@@ -354,38 +354,7 @@ export async function getTournAttendance(req, res) {
 	return res.status(200).json(status);
 }
 getTournAttendance.openapi = {
-	summary: 'Room attedance and start status of a round or timeslot',
-	operationId: 'tournAttendance',
-	parameters: [
-		{
-			in		  : 'path',
-			name		: 'tournId',
-			description : 'Tournament ID',
-			required	: true,
-			schema	  : {
-				type	: 'integer',
-				minimum : 1,
-			},
-		},{
-			in          : 'path',
-			name        : 'roundId',
-			description : 'Round ID',
-			required    : false,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},{
-			in          : 'path',
-			name        : 'timeslotId',
-			description : 'Timeslot ID',
-			required    : false,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},
-	],
+	summary: 'Room attendance and start status of a round or timeslot',
 	responses: {
 		200: {
 			description: 'Status Data',
@@ -650,7 +619,6 @@ export async function postTournAttendance(req, res) {
 }
 postTournAttendance.openapi = {
 	summary: 'Mark or unmark a member of a room as present',
-	operationId: 'tournAttendance',
 	tags: ['tab/all'],
 	responses: {
 		200: {
@@ -872,18 +840,6 @@ export async function getTournDashboard(req, res) {
 getTournDashboard.openapi = {
 	summary     : 'Event by event status for the tournament dashboard',
 	operationId : 'tournDashboard',
-	parameters  : [
-		{
-			in          : 'path',
-			name        : 'tournId',
-			description : 'Tournament ID',
-			required    : false,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},
-	],
 	responses: {
 		200: {
 			description: 'Event Current Status Data',

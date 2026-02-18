@@ -287,7 +287,7 @@ export async function blastRoundPairing(req, res) {
 		Promise.resolve(blast).then((blastResponse) => {
 			const replacements = {
 				tournId: req.params.tournId,
-				personId: req.session.person || '',
+				personId: req.session.personId || '',
 				description: `Pairing blast sent. ${blastResponse?.message} ${req.session?.person ? '' : 'by autoblast'} `,
 				roundId,
 			};

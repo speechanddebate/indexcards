@@ -38,7 +38,7 @@ getPersonChapters.openapi = {
 		200: {
 			description: 'Person Chapters',
 			content: {
-				'*/*': {
+				'application/json': {
 					schema: {
 						type: 'array',
 						items: { $ref: '#/components/schemas/Chapter' },
@@ -195,7 +195,7 @@ getPersonRounds.openapi = {
 		200: {
 			description: 'Person Rounds',
 			content: {
-				'*/*': {
+				'application/json': {
 					schema: {
 						type: 'array',
 						items: { $ref: '#/components/schemas/Round' },
@@ -258,7 +258,7 @@ getPersonStudents.openapi = {
 		200: {
 			description: 'Person Students',
 			content: {
-				'*/*': {
+				'application/json': {
 					schema: {
 						type: 'array',
 						items: { $ref: '#/components/schemas/Student' },
@@ -285,13 +285,13 @@ postCaselistLink.openapi = {
 	requestBody: {
 		description: 'The caselist link',
 		required: true,
-		content: { '*/*': { schema: { $ref: '#/components/schemas/CaselistLink' } } },
+		content: { 'application/json': { schema: { $ref: '#/components/schemas/CaselistLink' } } },
 	},
 	responses: {
 		200: {
 			description: 'Caselist Link',
 			content: {
-				'*/*': {
+				'application/json': {
 					schema: {
 						type: 'array',
 						items: { $ref: '#/components/schemas/CaselistLink' },

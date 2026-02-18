@@ -2,6 +2,7 @@ import { NotFound } from '../../helpers/problem.js';
 import tournRepo from '../../repos/tournRepo.js';
 import eventRepo from '../../repos/eventRepo.js';
 import { ToPublicPage } from '../mappers/pageMapper.js';
+import fileRepo from '../../repos/fileRepo.js';
 
 //TODO remove all references
 import db from '../../data/db.js';
@@ -21,7 +22,7 @@ getTourn.openapi = {
 			content: {
 				'application/json': {
 					schema: {
-						$ref: '#/components/schemas/Tournament',
+						$ref: '#/components/schemas/Tourn',
 					},
 				},
 			},
@@ -37,7 +38,8 @@ export async function getTournInvite(req, res) {
 
 	invite = await tournRepo.getTourn(req.params.tournId, {
 		include: {
-			pages: true,
+			webpages: true,
+			files: true,
 		},
 	});
 
@@ -46,7 +48,7 @@ export async function getTournInvite(req, res) {
 	}
 
 	invite.webpages = (invite.webpages ?? []).map(ToPublicPage);
-	invite.files = (await tournRepo.getFiles(invite.id)).map(file => {
+	invite.files = (invite.files ?? []).map(file => {
 		return {
 			id        : file.id,
 			tag       : file.tag,
@@ -66,6 +68,7 @@ export async function getTournInvite(req, res) {
 };
 getTournInvite.openapi = {
 	summary: 'Get Tournament Invite',
+	operationId: 'getTournInvite',
 	description: 'Retrieve a public invite for a specific tournament, including pages, files, events, and contacts.',
 	tags: ['Tournaments'],
 	responses: {
@@ -86,7 +89,7 @@ getTournInvite.openapi = {
 			$ref: '#/components/responses/NotFound',
 		},
 		default: {
-			$ref: '#/components/responses/Error',
+			$ref: '#/components/responses/ErrorResponse',
 		},
 	},
 };
@@ -100,7 +103,7 @@ getSchedule.openapi = {
 };
 
 export async function getPublishedFiles(req, res) {
-	const files = await tournRepo.getFiles(req.params.tournId);
+	const files = await fileRepo.getFiles({ tournId: req.params.tournId });
 	return res.status(200).json(files);
 };
 getPublishedFiles.openapi = {
@@ -160,13 +163,6 @@ getTournPublishedResults.openapi = {
 	responses: {
 		200: {
 			description: 'Array of events',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'array',
-					},
-				},
-			},
 		},
 	},
 	tags: ['invite', 'public', 'results'],

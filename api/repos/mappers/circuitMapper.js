@@ -6,7 +6,7 @@ export const FIELD_MAP = {
 	id: 'id',
 	name: 'name',
 	abbr: 'abbr',
-	timezone: 'timezone',
+	tz: 'tz',
 	active: { db: 'active', toDomain: fromBool, toPersistence: toBool },
 	state: 'state',
 	country: 'country',

@@ -23,7 +23,7 @@ export default {
 		return {
 			CallExpression(node) {
 			// Only enforce on /v1/tab files
-				if (!filename.includes('/tab/')) return;
+				if (!filename.includes('/tab/tourns')) return;
 
 				// Simple router.method(...)
 				if (
@@ -31,6 +31,13 @@ export default {
 			node.callee.object.name === 'router' &&
 			['get', 'post', 'put', 'delete', 'all', 'patch'].includes(node.callee.property.name)
 				) {
+					// Get the path from the first argument
+					const pathArg = node.arguments[0];
+					const path = pathArg?.value || '';
+
+					// Skip if path doesn't include tournId
+					if (!path.includes('tournId')) return;
+
 					const middlewares = node.arguments.slice(1);
 					if (!hasRequireAccess(middlewares)) {
 						context.report({
@@ -50,6 +57,13 @@ export default {
 			node.callee.object.callee.property.name === 'route' &&
 			['get', 'post', 'put', 'delete', 'all', 'patch'].includes(node.callee.property.name)
 				) {
+					// Get the path from router.route(path)
+					const pathArg = node.callee.object.arguments[0];
+					const path = pathArg?.value || '';
+
+					// Skip if path doesn't include tournId
+					if (!path.includes('tournId')) return;
+
 					// Check for .all(...)
 					if (node.callee.property.name === 'all') {
 						const middlewares = node.arguments;

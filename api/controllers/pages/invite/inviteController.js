@@ -231,7 +231,7 @@ getThisWeekTourns.openapi = {
 	responses: {
 		200: {
 			description: "List of this week's tournaments, with some stats",
-			content: { '*/*': { schema: { $ref: '#/components/schemas/tourn' } } },
+			content: { 'application/json': { schema: { $ref: '#/components/schemas/Tourn' } } },
 		},
 	},
 	tags: ['invite', 'public'],
@@ -609,7 +609,6 @@ export async function getFutureTourns(req,res){
 
 getFutureTourns.openapi = {
 	summary     : 'Returns the public listing of upcoming tournaments',
-	operationId : 'getFutureTourns',
 	responses   : {
 		200: {
 			description: 'List of public upcoming tournaments',

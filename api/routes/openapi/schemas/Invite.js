@@ -4,7 +4,7 @@ export const TournInvite = {
 		{
 			type: 'object',
 			properties: {
-				pages: {
+				webpages: {
 					type: 'array',
 					items: { $ref: '#/components/schemas/WebPage' },
 				},

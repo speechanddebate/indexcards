@@ -19,9 +19,9 @@ describe('webpageRepo', () => {
 				])
 			);
 		});
-		it('includes unpublished webpages when includeUnpublished is true', async () => {
+		it('includes unpublished webpages when unpublished is true', async () => {
 			const { webpageId: unpublishedPageId } = await factories.webpage.createTestWebpage({ published: false });
-			const result = await webpageRepo.getWebpage(unpublishedPageId, { includeUnpublished: true });
+			const result = await webpageRepo.getWebpage(unpublishedPageId, { unpublished: true });
 			expect(result).toEqual(
 				expect.objectContaining({ id: unpublishedPageId }),
 			);
@@ -102,8 +102,8 @@ describe('webpageRepo', () => {
 				])
 			);
 		});
-		it('returns unpublished pages when includeUnpublished is true', async () => {
-			const result = await webpageRepo.getWebpages({}, { includeUnpublished: true });
+		it('returns unpublished pages when unpublished is true', async () => {
+			const result = await webpageRepo.getWebpages({}, { unpublished: true });
 			expect(result).toEqual(
 				expect.arrayContaining([
 					expect.objectContaining({ id: unpublishedPageId }),

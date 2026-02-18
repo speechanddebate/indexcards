@@ -10,7 +10,7 @@ function buildWebpageQuery(opts = {}) {
 		order: [['page_order', 'ASC']],
 	};
 
-	if (!opts.includeUnpublished) {
+	if (!opts.unpublished) {
 		query.where.published = 1;
 	}
 

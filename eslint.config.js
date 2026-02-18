@@ -6,7 +6,7 @@ import tabroom from './config/eslint-tabroom.js';
 
 import globals from 'globals';
 
-import tabRequireAccess from './eslint-rules/tab-require-access.js';
+import tabRequireAccess from './config/eslint-rules/tab-require-access.js';
 
 export default [
 	jslint.configs.recommended,

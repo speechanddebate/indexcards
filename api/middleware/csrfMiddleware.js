@@ -11,7 +11,7 @@ export default async function csrfMiddleware(req,res,next){
 	}
 
 	// Skip endpoints that don't require CSRF
-	if (req.path === '/auth/login') {
+	if (req.path === '/v1/auth/login') {
 		return next();
 	}
 
