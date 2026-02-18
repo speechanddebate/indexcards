@@ -34,9 +34,13 @@ export default class sweepEvent extends Model {
 						type: DataTypes.ENUM('all','open','jv','novice','champ','es-open','es-novice','middle'),
 						allowNull: true
 				},
-				nsda_event_category: {
+				nsda_category: {
 						type: DataTypes.INTEGER,
 						allowNull: true
+						references: {
+							model: 'nsda_category',
+							key: 'id',
+						}
 				},
 				sweep_award_event: {
 						type: DataTypes.INTEGER,

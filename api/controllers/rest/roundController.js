@@ -53,7 +53,7 @@ export async function getPublishedRounds(req, res){
 		include: {
 			event: {
 				fields: ['id', 'name', 'abbr','type', 'level'],
-				settings: ['nsda_event_category'],
+				settings: ['min_entry'],
 			},
 		},
 	});

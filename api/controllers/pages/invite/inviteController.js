@@ -369,12 +369,8 @@ export async function getFutureTourns(req,res){
 				on nats.tourn = tourn.id
 				and nats.tag = 'nsda_nats'
 
-			left join event_setting nsda_event_category
-				on nsda_event_category.event = event.id
-				and nsda_event_category.tag = 'nsda_event_category'
-
 			left join nsda_category
-				on nsda_category.code = nsda_event_category.value
+				on event.nsda_category = nsda_category.id
 
 			left join school on tourn.id = school.tourn
 
@@ -498,12 +494,8 @@ export async function getFutureTourns(req,res){
 
 			left join school on tourn.id = school.tourn
 
-			left join event_setting nsda_event_category
-				on nsda_event_category.event = event.id
-				and nsda_event_category.tag = 'nsda_event_category'
-
 			left join nsda_category
-				on nsda_category.code = nsda_event_category.value
+				on nsda_category.id = event.nsda_category
 
 			left join tourn_circuit tc
 				on tc.tourn = tourn.id

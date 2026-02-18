@@ -52,6 +52,14 @@ export default class event extends Model {
 						type: DataTypes.INTEGER,
 						allowNull: true
 				},
+				nsda_category: {
+						type: DataTypes.INTEGER,
+						allowNull: true,
+						references: {
+							model: 'nsda_category',
+							key: 'id',
+						}
+				},
 				timestamp: {
 						type: DataTypes.DATE,
 						allowNull: false,

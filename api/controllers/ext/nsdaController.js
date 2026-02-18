@@ -265,13 +265,12 @@ export async function natsIndividualHonors(req, res) {
             school.id schoolId, school.name schoolName, chapter.nsda chapterNSDA,
             result.rank, result.place,
             round.name roundName, round.label roundLabel,
-            event.abbr eventAbbr, event.name eventName, nsda_code.value nsdaCode,
+            event.abbr eventAbbr, event.name eventName,
+			event.nsda_category eventNsdaCategory,
             tourn.name tournName, tourn.start tournDate
 
         from (entry, result, result_set, entry_student es, student, event, tourn, tourn_setting ts, ballot, panel, round)
-            left join event_setting nsda_code
-                on nsda_code.event = event.id
-                and nsda_code.tag = 'nsda_event_category'
+
             left join school on entry.school = school.id
             left join chapter on school.chapter = chapter.id
 
@@ -303,10 +302,12 @@ export async function natsIndividualHonors(req, res) {
 
 	res.status(200).json(studentResults);
 };
+
 natsIndividualHonors.openapi = {
 	security: [{ extApiKey: [] }],
 	tags: ['Ext : NSDA'],
 };
+
 export async function getPayment(req, res) {
 	const tourn = await db.summon(db.tourn, req.params.tournId);
 

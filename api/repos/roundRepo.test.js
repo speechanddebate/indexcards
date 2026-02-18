@@ -37,7 +37,7 @@ describe('getRounds', () => {
 			include: {
 				event: {
 					fields: ['id', 'name', 'abbr', 'level'], // exclude 'type'
-					settings: ['nsda_event_category'],
+					settings: ['max_entry'],
 				},
 			},
 		});
