@@ -276,10 +276,11 @@ export async function getFutureTourns(req,res){
 		endLimit = ` limit ${req.query.limit} `;
 	}
 
-	const future = await db.sequelize.query(`
+	const futureTourns = await db.sequelize.query(`
 		select
 			CONCAT(tourn.id, '-', '0') as id,
 			tourn.id tournId, tourn.webname, tourn.name, tourn.tz,
+			'No' as district,
 			tourn.city as location, tourn.state, tourn.country,
 			tourn.start start,
 			tourn.end end,
@@ -288,7 +289,7 @@ export async function getFutureTourns(req,res){
 			msnats.value as msnats,
 			nats.value as nats,
 			closed.value as closed,
-			count(distinct school.id) as schoolcount,
+			count(distinct school.id) as schoolCount,
 			YEAR(tourn.start) as year,
 			WEEK(CONVERT_TZ(tourn.start, '+00:00', tourn.tz), 3) as week,
 			GROUP_CONCAT(DISTINCT(circuit.abbr) SEPARATOR ', ') as circuits,
@@ -403,7 +404,7 @@ export async function getFutureTourns(req,res){
 			)
 
 			group by tourn.id
-			order by tourn.end, schoolcount DESC
+			order by tourn.end, schoolCount DESC
 			${ endLimit }
 	`, {
 		type : db.sequelize.QueryTypes.SELECT,
@@ -413,14 +414,14 @@ export async function getFutureTourns(req,res){
 		select
 			CONCAT(tourn.id, '-', weekend.id) as id,
 			tourn.id tournId, tourn.webname, tourn.name, tourn.tz,
-			weekend.id as districts,
+			'Yes' as district,
 			weekend.id weekendId, weekend.name weekendName, weekend.city as location, weekend.state, tourn.country,
 			site.name site,
 			weekend.start start,
 			weekend.end end,
 			weekend.reg_end regEnd,
 			weekend.reg_start regStart,
-			count(distinct school.id) as schoolcount,
+			count(distinct school.id) as schoolCount,
 			YEAR(weekend.start) as year,
 			WEEK(CONVERT_TZ(weekend.start, '+00:00', tourn.tz), 3) as week,
 			GROUP_CONCAT(DISTINCT(circuit.abbr) SEPARATOR ', ') as circuits,
@@ -528,14 +529,14 @@ export async function getFutureTourns(req,res){
 		type : db.sequelize.QueryTypes.SELECT,
 	});
 
-	future.push(...futureDistricts);
+	futureTourns.push(...futureDistricts);
 
 	const shortOptions = {
 		month : 'numeric',
 		day   : 'numeric',
 	};
 
-	const formattedFuture = future.map( (tourn) => {
+	const formattedFutureTourns = futureTourns.map( (tourn) => {
 
 		// These functions will feel like something the frontend should do. But
 		// no, in order to enable searching and filtering, they must be in the
@@ -545,7 +546,7 @@ export async function getFutureTourns(req,res){
 			tourn.week = thisWeekDT;
 		}
 
-		tourn.sortnumeric = parseInt(`${tourn.year}${tourn.week.toString().padStart(2, '0')}${9999999 - tourn.schoolcount}`);
+		tourn.sortnumeric = parseInt(`${tourn.year}${tourn.week.toString().padStart(2, '0')}${9999999 - tourn.schoolCount}`);
 		const tournStart = convertTZ(tourn.start, tourn.tz);
 		const tournEnd   = convertTZ(tourn.end, tourn.tz);
 		tourn.tzCode     = shortZone(tourn.tz);
@@ -587,9 +588,7 @@ export async function getFutureTourns(req,res){
 			eventTypes,
 			fullDates: tournDateRange.fullOutput,
 		};
-	});
-
-	formattedFuture.sort( (a, b) => {
+	}).sort( (a, b) => {
 		return a.sortnumeric - b.sortnumeric;
 	});
 
@@ -597,14 +596,14 @@ export async function getFutureTourns(req,res){
 	// separate things from individual tournaments.
 
 	if (req.query.limit > 0) {
-		if (future.length > req.query.limit) {
-			future.length = req.query.limit;
+		if (formattedFutureTourns.length > req.query.limit) {
+			formattedFutureTourns.length = req.query.limit;
 		}
-	} else if (future.length > 256) {
-		future.length = 256;
+	} else if (formattedFutureTourns.length > 512) {
+		formattedFutureTourns.length = 512;
 	}
 
-	return res.status(200).json(formattedFuture);
+	return res.status(200).json(formattedFutureTourns);
 }
 
 getFutureTourns.openapi = {

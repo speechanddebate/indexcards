@@ -46,7 +46,7 @@ export async function getEventInvites(tournId) {
             select
                 event.id, event.abbr, event.name, event.fee, event.type,
                 event.nsda_category nsdaCategory,
-                nsda_category.name nsdaCategoryName
+                nsda_category.name nsdaCategoryName,
                 category.id categoryId, category.name categoryName, category.abbr categoryAbbr,
                 judge_field_report.value judgeFieldReport,
                 cap.value cap,
@@ -58,7 +58,7 @@ export async function getEventInvites(tournId) {
                 live_updates.value liveUpdates,
                 description.value_text description,
                 currency.value currency,
-                count(entry.id) as entryCount,
+                count(entry.id) as entryCount
 
             from (event, category)
 

@@ -103,6 +103,10 @@ export async function getScheduleByEvent(req,res) {
 
 export async function getEventByAbbr(req, res){
 
+	if (!req.params.eventId) {
+		return NotFound(req, res, `No valid eventID sent`);
+	}
+
 	const eventData = await db.sequelize.query(`
 		select
 			event.name eventName,
