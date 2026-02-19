@@ -68,7 +68,7 @@
 		"csv-stringify": "^5.3.0",
 		"dayjs": "^1.11.13",
 		"dotenv": "^8.2.0",
-		"express": "^4.17.1",
+		"express": "^5.2.1",
 		"express-rate-limit": "^3.4.1",
 		"express-winston": "^4.2.0",
 		"full-name-splitter": "^1.1.1",

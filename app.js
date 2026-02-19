@@ -83,19 +83,14 @@ app.use(rateLimiterMiddleware);
 app.use(csrfMiddleware);
 app.use('/v1',v1Router);
 
-app.all(['/v1/user/*', '/v1/user/:dataType/:id', '/v1/user/:dataType/:id/*'], async (req, res, next) => {
+app.use('/v1/user', (req, res, next) => {
 	if (!req.person) {
 		return Unauthorized(req, res, 'User: You are not logged in.');
 	}
 	next();
 });
 
-const coachRoutes = [
-	'/v1/coach/:chapterId',
-	'/v1/coach/:chapterId/*',
-];
-
-app.all(coachRoutes, async (req, res, next) => {
+app.use('/v1/coach', async (req, res, next) => {
 
 	// apis related to the coach or directors of a program.  Prefs only access
 	// is in the /user/prefs directory because it's such a bizarre one off
@@ -115,12 +110,7 @@ app.all(coachRoutes, async (req, res, next) => {
 	next();
 });
 
-const localRoutes = [
-	'/v1/local/:localType/:localId',
-	'/v1/local/:localType/:localId/*',
-];
-
-app.all(localRoutes, async (req, res, next) => {
+app.use('/v1/local', async (req, res, next) => {
 
 	// APIs related to administrators of districts (the committee), or a
 	// region, or an NCFL diocese, or a circuit.
@@ -131,15 +121,13 @@ app.all(localRoutes, async (req, res, next) => {
 
 	const response = await localAuth(req, res);
 
-	if (typeof answer === 'object') {
+	if (typeof response === 'object') {
 		req[req.params.localType] = response.local;
 		req.session.perms = { ...req.session.perms, ...response.perms };
 		next();
 	} else {
 		return Forbidden(req, res, `Admin : You do not have the access required.`);
 	}
-
-	next();
 });
 
 // Log global errors with Winston
