@@ -39,6 +39,7 @@ export async function login(req, res) {
 
 login.openapi = {
 	summary: 'Login',
+	operationId: 'login',
 	description: 'Logs in a user and creates a session.',
 	tags: ['Auth', 'Public'],
 	security: [],
@@ -70,6 +71,7 @@ export async function logout(req, res){
 
 logout.openapi = {
 	summary: 'Logout',
+	operationId: 'logout',
 	description: 'Logs out the current user and invalidates the session.',
 	tags: ['Auth'],
 };
@@ -96,6 +98,7 @@ export async function register(req,res){
 }
 register.openapi = {
 	summary: 'Register',
+	operationId: 'register',
 	description: 'Registers a new user.',
 	tags: ['Auth'],
 	security: [],
