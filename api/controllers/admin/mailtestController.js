@@ -7,17 +7,6 @@ import config from '../../../config/config.js';
 export async function throwTestError(req, res) {
 	throw new Error(`I have been called to create an error and i have!`);
 }
-throwTestError.openapi = {
-	summary: 'Undocumented Endpoint',
-	tags: ['Admin : Mail'],
-	security: [{ basic: [] }],
-	responses: {
-		'200': {
-			description: 'OK',
-		},
-		'401' : { $ref: '#/components/responses/Unauthorized' },
-	},
-};
 // This route tests the Tabroom integration to the slack channel.
 
 export async function testSlackNotification(req, res) {
@@ -34,14 +23,4 @@ export async function testSlackNotification(req, res) {
 
 	const emailResponse = await notify(message);
 	return res.status(200).json(emailResponse);
-};
-testSlackNotification.openapi = {
-	summary: 'Undocumented Endpoint',
-	tags: ['Admin : Mail'],
-	responses: {
-		'200': {
-			description: 'OK',
-		},
-		'401' : { $ref: '#/components/responses/Unauthorized' },
-	},
 };

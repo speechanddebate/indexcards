@@ -18,37 +18,6 @@ export async function getPersonChapters(req, res) {
 
 	return res.status(200).json([...student[0], ...advisor[0]]);
 };
-getPersonChapters.openapi = {
-	summary: 'Load chapters for a person ID',
-	security: [{ extApiKey: [] }],
-	tags: ['Ext : Caselist'],
-	parameters: [
-		{
-			in          : 'query',
-			name        : 'person_id',
-			description : 'ID of person whose chapters you wish to access',
-			required    : true,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},
-	],
-	responses: {
-		200: {
-			description: 'Person Chapters',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'array',
-						items: { $ref: '#/components/schemas/Chapter' },
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-};
 export async function getPersonRounds(req, res) {
 	if (!req.query.person_id && !req.query.slug) {
 		return BadRequest(req, res, 'One of person_id or slug is required');
@@ -158,54 +127,6 @@ export async function getPersonRounds(req, res) {
 
 	return res.status(200).json(rounds);
 };
-getPersonRounds.openapi = {
-	summary: 'Load rounds for a person ID',
-	security: [{ extApiKey: [] }],
-	tags: ['Ext : Caselist'],
-	parameters: [
-		{
-			in          : 'query',
-			name        : 'person_id',
-			description : 'Person ID to get rounds for',
-			required    : false,
-			schema      : {
-				type    : 'integer',
-			},
-		},
-		{
-			in          : 'query',
-			name        : 'slug',
-			description : 'Slug of page to match rounds',
-			required    : false,
-			schema      : {
-				type    : 'string',
-			},
-		},
-		{
-			in          : 'query',
-			name        : 'current',
-			description : 'Whether to return only current rounds',
-			required    : false,
-			schema      : {
-				type    : 'boolean',
-			},
-		},
-	],
-	responses: {
-		200: {
-			description: 'Person Rounds',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'array',
-						items: { $ref: '#/components/schemas/Round' },
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-};
 
 export async function getPersonStudents(req, res) {
 	// Get all students on the same roster as the person,
@@ -238,38 +159,6 @@ export async function getPersonStudents(req, res) {
 	return res.status(200).json([...students[0]]);
 };
 
-getPersonStudents.openapi = {
-	summary: 'Load students for a person ID',
-	security: [{ extApiKey: [] }],
-	tags: ['Ext : Caselist'],
-	parameters: [
-		{
-			in          : 'query',
-			name        : 'person_id',
-			description : 'ID of person whose students you wish to access',
-			required    : true,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},
-	],
-	responses: {
-		200: {
-			description: 'Person Students',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'array',
-						items: { $ref: '#/components/schemas/Student' },
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-};
-
 export async function postCaselistLink(req, res) {
 	await db.sequelize.query(`
         INSERT INTO caselist (slug, eventcode, person)
@@ -277,28 +166,4 @@ export async function postCaselistLink(req, res) {
     `, { replacements: [req.body.slug.trim(), parseInt(req.body.eventcode) || 0, req.body.person_id] });
 
 	return res.status(201).json({ message: 'Successfully created caselist link' });
-};
-postCaselistLink.openapi = {
-	summary: 'Create a link to a caselist page',
-	security: [{ extApiKey: [] }],
-	tags: ['Ext : Caselist'],
-	requestBody: {
-		description: 'The caselist link',
-		required: true,
-		content: { 'application/json': { schema: { $ref: '#/components/schemas/CaselistLink' } } },
-	},
-	responses: {
-		200: {
-			description: 'Caselist Link',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'array',
-						items: { $ref: '#/components/schemas/CaselistLink' },
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
 };

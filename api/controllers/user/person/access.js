@@ -41,22 +41,3 @@ export async function updateLastAccess(req,res) {
 };
 
 export default updateLastAccess;
-
-updateLastAccess.openapi = {
-	summary     : 'Updates the last time a user last accessed Tabroom',
-	operationId : 'updateLastAccess',
-	responses: {
-		200: {
-			description: 'Session Query Response',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'object',
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-	tags: ['person'],
-};

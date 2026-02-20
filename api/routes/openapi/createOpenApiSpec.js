@@ -70,30 +70,31 @@ export function createOpenApiSpec(apiRouter) {
 /**
  * Recursively collect OpenAPI paths and tags from an Express router
  */
-export function collectOpenApi(router, basePath = '') {
+export function collectOpenApi(router) {
 	const paths = {};
 	const usedTags = new Set();
 
 	for (const layer of router.stack) {
-		// Case 1: HTTP method route
 		if (layer.route) {
 
-			const routePath = joinPaths(basePath, layer.route.path);
-
 			for (const method of Object.keys(layer.route.methods)) {
-				const handler = findHandlerForMethod(
-					layer.route.stack,
-					method
-				);
+				// Get .openapi metadata from the route
+				const openapi = layer.route.openapi;
+
+				// Routes must have explicit .openapi.path set at definition time
+				if (!openapi?.path) {
+					console.warn(`Warning: Route ${layer.route.path} missing .openapi.path, skipping`);
+					continue;
+				}
 
 				const op = normalizeOperation(
 					method,
-					routePath,
-					handler?.openapi
+					openapi.path,
+					openapi
 				);
 
-				paths[routePath] ??= {};
-				paths[routePath][method] = op;
+				paths[openapi.path] ??= {};
+				paths[openapi.path][method] = op;
 
 				for (const tag of op.tags) {
 					usedTags.add(tag);
@@ -103,11 +104,7 @@ export function collectOpenApi(router, basePath = '') {
 
 		// Case 2: Nested router
 		if (layer.name === 'router' && layer.handle?.stack) {
-			const mountPath = extractMountPath(layer);
-			const child = collectOpenApi(
-				layer.handle,
-				joinPaths(basePath, mountPath)
-			);
+			const child = collectOpenApi(layer.handle);
 
 			Object.assign(paths, child.paths);
 			child.usedTags.forEach(t => usedTags.add(t));
@@ -119,50 +116,38 @@ export function collectOpenApi(router, basePath = '') {
 
 function normalizeOperation(method, routePath, openapi) {
 	const params = extractPathParams(routePath);
-	let op = openapi;
 
-	const endsWithId = /\{[A-Za-z0-9_]+\}$/.test(routePath);
-
-	if (isMultiOperation(openapi)) {
-		if (!endsWithId && openapi.list) {
-			op = openapi.list;
-		} else if (endsWithId && openapi.get) {
-			op = openapi.get;
-		} else if (openapi.default) {
-			op = openapi.default;
-		} else {
-			op = {};
-		}
-	}
-
-	op ??= {};
+	// Exclude path property (used for routing, not OpenAPI)
+	const opWithoutPath = Object.fromEntries(
+		Object.entries(openapi).filter(([key]) => key !== 'path')
+	);
 
 	return {
-		...op,
+		...opWithoutPath,
 		summary:
-			op.summary ??
+			openapi.summary ??
 			`${method.toUpperCase()} ${routePath}`,
 
 		description:
-			op.description ??
+			openapi.description ??
 			`${method.toUpperCase()} ${routePath} is undocumented. Need to add .openapi to handler`,
 
 		tags:
-			Array.isArray(op.tags) ? op.tags : [],
+			Array.isArray(openapi.tags) ? openapi.tags : [],
 
 		parameters: [
-			...(op.parameters ?? []),
+			...(openapi.parameters ?? []),
 			...params,
 		],
 		//add a 401 and 500 error to every endpoint and a 200 if nothing was defined
 		responses: {
-			...(op.responses ?? { 200: { description: 'Success' } }),
+			...(openapi.responses ?? { 200: { description: 'Success' } }),
 			...Object.fromEntries(
 				Object.entries({
 					500 : { $ref: '#/components/responses/ErrorResponse' },
 					401 : { $ref : '#/components/responses/Unauthorized'},
 				})
-					.filter(([code]) => !(op.responses && code in op.responses))
+					.filter(([code]) => !(openapi.responses && code in openapi.responses))
 			),
 		},
 	};
@@ -187,32 +172,6 @@ function extractPathParams(path) {
 	});
 }
 
-function extractMountPath(layer) {
-	if (!layer.regexp) return '';
-
-	let path = layer.regexp.source
-		.replace(/\\\//g, '/')      // unescape slashes
-		.replace('(?:/([^/]+?))', ':param') // convert unnamed capture groups
-		.replace('/?(?=/|$)', '');           // remove lookahead at end
-
-	// Replace layer.keys with param names if available
-	if (layer.keys && layer.keys.length) {
-		layer.keys.forEach((key) => {
-			path = path.replace(`:param`, `/:${key.name}`);
-		});
-	}
-
-	const result = path.startsWith('^') ? path.slice(1) : path;
-	return result;
-}
-
-function joinPaths(base, path) {
-	return (`${base}/${path}`)
-	.replace(/\/+/g, '/')            // collapse //
-	.replace(/\/$/, '')              // trim trailing slash
-	.replace(/:([A-Za-z0-9_]+)/g, '{$1}') // :param → {param}
-	|| '/';
-}
 function buildTagGroups(tagGroups, usedTags) {
 	const grouped = new Set(
 		tagGroups.flatMap(g => g.tags)
@@ -232,40 +191,4 @@ function buildTagGroups(tagGroups, usedTags) {
 	}
 
 	return finalGroups;
-}
-
-/** Determines if the .openapi for the route has multiple specs
- */
-function isMultiOperation(openapi) {
-
-	if (!openapi || typeof openapi !== 'object') return false;
-
-	const MULTI_OP_KEYS = new Set([
-		'get',
-		'list',
-	]);
-
-	return Object.keys(openapi).some(k => MULTI_OP_KEYS.has(k));
-}
-
-function findHandlerForMethod(stack, method) {
-	method = method.toLowerCase();
-
-	// Prefer a handler for THIS method that defines .openapi
-	for (let i = stack.length - 1; i >= 0; i--) {
-		const layer = stack[i];
-		if (layer.method === method && layer.handle?.openapi) {
-			return layer.handle;
-		}
-	}
-
-	// Fallback: the handler for THIS method
-	for (let i = stack.length - 1; i >= 0; i--) {
-		const layer = stack[i];
-		if (layer.method === method) {
-			return layer.handle;
-		}
-	}
-
-	return null;
 }

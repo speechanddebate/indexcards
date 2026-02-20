@@ -11,36 +11,6 @@ async function getSite(req, res) {
 	}
 	return res.json(site);
 }
-getSite.openapi = {
-	summary: 'Get site',
-	tags: ['Sites & Rooms'],
-	responses: {
-		200: {
-			description: 'A site object',
-			content: {
-				'application/json': {
-					schema: { $ref: '#/components/schemas/SiteResponse' },
-					examples: {
-						site: {
-							summary: 'Example response',
-							value: {
-								id: 1,
-								name: 'Lincoln High School',
-								online: false,
-								directions: '123 Main St, Anytown, USA',
-								dropoff: 'Use the side entrance on 2nd Ave.',
-								hostId: 5,
-								circuitId: 2,
-								createdAt: '2023-01-01T00:00:00Z',
-								updatedAt: '2023-01-02T00:00:00Z',
-							},
-						},
-					},
-				},
-			},
-		},
-	},
-};
 //tourns/:tournId/sites
 async function getSites(req, res) {
 	if (!req.params.tournId) return BadRequest(req,res,'tournId is required');
@@ -49,65 +19,19 @@ async function getSites(req, res) {
 	return res.json(sites);
 
 }
-getSites.openapi = {
-	summary: 'Get sites',
-	tags: ['Sites & Rooms'],
-	responses: {
-		200: {
-			description: 'A list of sites for the tourn',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'array',
-						items: { $ref: '#/components/schemas/SiteResponse' },
-					},
-					examples: {
-						sites: {
-							summary: 'Example response',
-							value: [
-								{
-									id: 1,
-									name: 'Lincoln High School',
-									online: false,
-									directions: '123 Main St, Anytown, USA',
-									dropoff: 'Use the side entrance on 2nd Ave.',
-									hostId: 5,
-									circuitId: 2,
-									createdAt: '2023-01-01T00:00:00Z',
-									updatedAt: '2023-01-02T00:00:00Z',
-								},
-							],
-						},
-					},
-				},
-			},
-		},
-	},
-};
 //tourns/:tournId/sites
 async function createSite(req, res) {
 	return NotImplemented(req,res,'this feature is not implemented yet');
 }
-createSite.openapi = {
-	summary: 'Create site',
-	tags: ['Sites & Rooms'],
-};
+
 //tourns/:tournId/sites/:siteId
 async function updateSite(req, res) {
 	return NotImplemented(req,res,'this feature is not implemented yet');
 }
-updateSite.openapi = {
-	summary: 'Update site',
-	tags: ['Sites & Rooms'],
-};
 //tourns/:tournId/sites/:siteId
 async function deleteSite(req, res) {
 	return NotImplemented(req,res,'this feature is not implemented yet');
 }
-deleteSite.openapi = {
-	summary: 'Delete site',
-	tags: ['Sites & Rooms'],
-};
 
 //tourns/:tournId/sites/:siteId/rooms/:roomId
 async function getRoom(req, res) {
@@ -125,10 +49,6 @@ async function getRoom(req, res) {
 	}
 	return res.json(room);
 }
-getRoom.openapi = {
-	summary: 'Get room',
-	tags: ['Sites & Rooms'],
-};
 
 //tourns/:tournId/sites/:siteId/rooms
 async function getRooms(req, res) {
@@ -140,34 +60,18 @@ async function getRooms(req, res) {
 	}
 	return res.json(rooms);
 }
-getRooms.openapi = {
-	summary: 'Get rooms',
-	tags: ['Sites & Rooms'],
-};
 
 async function createRoom(req, res) {
 	return NotImplemented(req,res,'this feature is not implemented yet');
 }
-createRoom.openapi = {
-	summary: 'Create room',
-	tags: ['Sites & Rooms'],
-};
 
 async function updateRoom(req, res) {
 	return NotImplemented(req,res,'this feature is not implemented yet');
 }
-updateRoom.openapi = {
-	summary: 'Update room',
-	tags: ['Sites & Rooms'],
-};
 
 async function deleteRoom(req, res) {
 	return NotImplemented(req,res,'this feature is not implemented yet');
 }
-deleteRoom.openapi = {
-	summary: 'Delete room',
-	tags: ['Sites & Rooms'],
-};
 
 export default {
 	getSite,

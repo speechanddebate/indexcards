@@ -20,16 +20,6 @@ export async function getInstances(req, res) {
 	const tabroomMachines = await getLinodeInstances();
 	return res.status(200).json(tabroomMachines);
 };
-getInstances.openapi = {
-	summary: 'TODO write spec',
-	tags: ['Admin : Servers'],
-	responses: {
-		'200': {
-			description: 'OK',
-		},
-		'401' : { $ref: '#/components/responses/Unauthorized' },
-	},
-};
 
 // Shows CPU and memory load data from the machines themselves, as well as
 // up/down data from the haproxy JSON dump.
@@ -38,30 +28,10 @@ export async function getInstanceStatus(req, res) {
 	const proxyMachineStatus = await getProxyStatus([]);
 	return res.status(200).json(proxyMachineStatus);
 };
-getInstanceStatus.openapi = {
-	summary: 'TODO write spec',
-	tags: ['Admin : Servers'],
-	responses: {
-		'200': {
-			description: 'OK',
-		},
-		'401' : { $ref: '#/components/responses/Unauthorized' },
-	},
-};
 
 export async function getInstanceStatusPOST(req, res) {
 	const proxyMachineStatus = await getProxyStatus(req.body.existingMachines);
 	return res.status(200).json(proxyMachineStatus);
-};
-getInstanceStatusPOST.openapi = {
-	summary: 'TODO write spec',
-	tags: ['Admin : Servers'],
-	responses: {
-		'200': {
-			description: 'OK',
-		},
-		'401' : { $ref: '#/components/responses/Unauthorized' },
-	},
 };
 
 // Returns data about the current 24 hour period's projected tabroom usage.
@@ -71,16 +41,6 @@ export async function getTabroomUsage(req, res) {
 // thing, too.
 	const usageData = await showTabroomUsage();
 	return res.status(200).json(usageData);
-};
-getTabroomUsage.openapi = {
-	summary: 'TODO write spec',
-	tags: ['Admin : Servers'],
-	responses: {
-		'200': {
-			description: 'OK',
-		},
-		'401' : { $ref: '#/components/responses/Unauthorized' },
-	},
 };
 
 // Show data about an individual machine; this is useful mostly in bringing up
@@ -103,16 +63,6 @@ export async function getTabroomInstance(req, res) {
 
 	return res.status(200).json(linodeData.data);
 };
-getTabroomInstance.openapi = {
-	summary: 'TODO write spec',
-	tags: ['Admin : Servers'],
-	responses: {
-		'200': {
-			description: 'OK',
-		},
-		'401' : { $ref: '#/components/responses/Unauthorized' },
-	},
-};
 
 // Simple counter of how many servers are currently running to display in the
 // header of cloud service administrators.
@@ -132,16 +82,6 @@ export async function getTabroomInstanceCounts(req, res) {
 		return res.status(200).json({ ...tabwebCount[0] });
 	}
 };
-getTabroomInstanceCounts.openapi = {
-	summary: 'TODO write spec',
-	tags: ['Admin : Servers'],
-	responses: {
-		'200': {
-			description: 'OK',
-		},
-		'401' : { $ref: '#/components/responses/Unauthorized' },
-	},
-};
 
 // API facing functions that will bring up or destroy machines.
 export async function changeInstanceCount(req, res) {
@@ -160,16 +100,6 @@ export async function changeInstanceCount(req, res) {
 		const response = await decreaseLinodeCount(user, serverCount);
 		return res.status(200).json(response);
 	}
-};
-changeInstanceCount.openapi = {
-	summary: 'TODO write spec',
-	tags: ['Admin : Servers'],
-	responses: {
-		'200': {
-			description: 'OK',
-		},
-		'401' : { $ref: '#/components/responses/Unauthorized' },
-	},
 };
 
 export async function rebootInstance(req, res) {
@@ -231,16 +161,6 @@ export async function rebootInstance(req, res) {
 	return res.status(200).json({
 		message: resultMessages.join('<br />'),
 	});
-};
-rebootInstance.openapi = {
-	summary: 'TODO write spec',
-	tags: ['Admin : Servers'],
-	responses: {
-		'200': {
-			description: 'OK',
-		},
-		'401' : { $ref: '#/components/responses/Unauthorized' },
-	},
 };
 
 const notifyCloudAdmins = async (req, log, subject) => {

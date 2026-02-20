@@ -353,24 +353,6 @@ export async function getTournAttendance(req, res) {
 
 	return res.status(200).json(status);
 }
-getTournAttendance.openapi = {
-	summary: 'Room attendance and start status of a round or timeslot',
-	responses: {
-		200: {
-			description: 'Status Data',
-			content: {
-				'*/*': {
-					schema: {
-						type: 'object',
-						items: { $ref: '#/components/schemas/Event' },
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-	tags: ['tab/all'],
-};
 
 export async function postTournAttendance(req, res) {
 	const tournId = req.params.tournId;
@@ -617,24 +599,6 @@ export async function postTournAttendance(req, res) {
 		errorLogger.info(err);
 	}
 }
-postTournAttendance.openapi = {
-	summary: 'Mark or unmark a member of a room as present',
-	tags: ['tab/all'],
-	responses: {
-		200: {
-			description: 'Status Deltas',
-			content: {
-				'*/*': {
-					schema: {
-						type: 'object',
-						items: { $ref: '#/components/schemas/Person' },
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-};
 
 // Enables the overall listing of event status for the entire tournament
 export async function getTournDashboard(req, res) {
@@ -837,22 +801,3 @@ export async function getTournDashboard(req, res) {
 
 	return res.status(200).json(status);
 }
-getTournDashboard.openapi = {
-	summary     : 'Event by event status for the tournament dashboard',
-	operationId : 'tournDashboard',
-	responses: {
-		200: {
-			description: 'Event Current Status Data',
-			content: {
-				'*/*': {
-					schema: {
-						type: 'object',
-						items: { $ref: '#/components/schemas/Event' },
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-	tags: ['tab/all'],
-};

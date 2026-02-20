@@ -9,37 +9,6 @@ async function getTimeslot(req, res) {
 	if (!timeslot) return NotFound(req,res,'Timeslot not found');
 	return res.json(timeslot);
 }
-getTimeslot.openapi = {
-	summary: 'Get a timeslot by ID',
-	description: 'Returns a timeslot object for the given ID.',
-	tags: ['Timeslots'],
-	responses: {
-		200: {
-			description: 'A timeslot object',
-			content: {
-				'application/json': {
-					schema: {
-						$ref: '#/components/schemas/TimeslotResponse',
-					},
-					examples: {
-						timeslotResponse: {
-							summary: 'Example response',
-							value: {
-								id: 1,
-								name: 'Round 1',
-								start: '2023-01-01T09:00:00Z',
-								end: '2023-01-01T10:00:00Z',
-								tournId: 42,
-								createdAt: '2023-01-01T00:00:00Z',
-								updatedAt: '2023-01-02T00:00:00Z',
-							},
-						},
-					},
-				},
-			},
-		},
-	},
-};
 
 //tourns/:tournId/timeslots
 async function getTimeslots(req, res) {
@@ -49,49 +18,6 @@ async function getTimeslots(req, res) {
 	return res.json(timeslots);
 
 }
-getTimeslots.openapi = {
-	summary: 'Get all timeslots for a tournament',
-	description: 'Returns an array of timeslot objects for the given tournament.',
-	tags: ['Timeslots'],
-	responses: {
-		200: {
-			description: 'An array of timeslot objects',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'array',
-						items: { $ref: '#/components/schemas/TimeslotResponse' },
-					},
-					examples: {
-						timeslotsResponse: {
-							summary: 'Example response',
-							value: [
-								{
-									id: 1,
-									name: 'Round 1',
-									start: '2023-01-01T09:00:00Z',
-									end: '2023-01-01T10:00:00Z',
-									tournId: 42,
-									createdAt: '2023-01-01T00:00:00Z',
-									updatedAt: '2023-01-02T00:00:00Z',
-								},
-								{
-									id: 2,
-									name: 'Round 2',
-									start: '2023-01-01T10:30:00Z',
-									end: '2023-01-01T11:30:00Z',
-									tournId: 42,
-									createdAt: '2023-01-01T00:00:00Z',
-									updatedAt: '2023-01-02T00:00:00Z',
-								},
-							],
-						},
-					},
-				},
-			},
-		},
-	},
-};
 
 //tourns/:tournId/timeslots
 async function createTimeslot(req, res) {
@@ -109,32 +35,6 @@ async function createTimeslot(req, res) {
 		throw err;
 	}
 }
-createTimeslot.openapi = {
-	summary: 'Create a new timeslot',
-	description: 'Creates a new timeslot with the provided data and returns the created object.',
-	tags: ['Timeslots'],
-	requestBody: {
-		required: true,
-		content: {
-			'application/json': {
-				schema: {
-					$ref: '#/components/schemas/TimeslotRequest',
-				},
-				examples: {
-					timeslotRequest: {
-						summary: 'Example request',
-						value: {
-							name: 'Round 1',
-							start: '2023-01-01T09:00:00Z',
-							end: '2023-01-01T10:00:00Z',
-							tournId: 42,
-						},
-					},
-				},
-			},
-		},
-	},
-};
 
 //tourns/:tournId/timeslots/:timeslotId
 async function updateTimeslot(req, res) {
@@ -156,32 +56,6 @@ async function updateTimeslot(req, res) {
 		throw err;
 	}
 }
-updateTimeslot.openapi = {
-	summary: 'Update an existing timeslot',
-	description: 'Updates the timeslot with the given ID using the provided data and returns the updated object.',
-	tags: ['Timeslots'],
-	requestBody: {
-		required: true,
-		content: {
-			'application/json': {
-				schema: {
-					$ref: '#/components/schemas/TimeslotRequest',
-				},
-				examples: {
-					timeslotRequest: {
-						summary: 'Example request',
-						value: {
-							name: 'Round 1 - Updated',
-							start: '2023-01-01T09:30:00Z',
-							end: '2023-01-01T10:30:00Z',
-							tournId: 42,
-						},
-					},
-				},
-			},
-		},
-	},
-};
 
 //tourns/:tournId/timeslots/:timeslotId
 async function deleteTimeslot(req, res) {
@@ -193,11 +67,6 @@ async function deleteTimeslot(req, res) {
 	return res.status(204).send();
 
 }
-deleteTimeslot.openapi = {
-	summary: 'Delete a timeslot',
-	description: 'Deletes the timeslot with the given ID and returns a success message.',
-	tags: ['Timeslots'],
-};
 
 /**
  * Upsert a timeslot (create or update based on existence)

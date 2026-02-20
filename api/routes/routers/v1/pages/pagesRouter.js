@@ -3,10 +3,65 @@ import * as inviteController from '../../../../controllers/pages/invite/inviteCo
 
 const router = Router();
 
-router.get('/invite/nsdaCodes',inviteController.getNSDAEventCategories);
-router.get('/invite/upcoming',inviteController.getFutureTourns);
-router.get('/invite/:circuit',inviteController.getFutureTourns);
-router.get('/invite/nextweek',inviteController.getThisWeekTourns);
-router.get('/invite/webname/:webname',inviteController.getTournIdByWebname);
+router.route('/invite/nsdaCodes').get(inviteController.getNSDAEventCategories).openapi = {
+	path: '/pages/invite/nsdaCodes',
+	summary: 'Get NSDA Event Categories',
+	description: 'Retrieve a list of NSDA event categories.',
+	tags: ['Invite', 'Public'],
+	responses: {
+		200: {
+			description: 'List of NSDA event categories',
+		},
+	},
+};
+
+router.route('/invite/upcoming').get(inviteController.getFutureTourns).openapi = {
+	path: '/pages/invite/upcoming',
+	summary     : 'Returns the public listing of upcoming tournaments',
+	responses   : {
+		200: {
+			description: 'List of public upcoming tournaments',
+			content: { 'application/json': { schema: { $ref: '#/components/schemas/Tourn' } } },
+		},
+	},
+	tags: ['futureTourns', 'invite', 'public'],
+};
+
+router.route('/invite/:circuit').get(inviteController.getFutureTourns).openapi = {
+	path: '/pages/invite/{circuit}',
+	summary     : 'Returns the public listing of upcoming tournaments',
+	responses   : {
+		200: {
+			description: 'List of public upcoming tournaments',
+			content: { 'application/json': { schema: { $ref: '#/components/schemas/Tourn' } } },
+		},
+	},
+	tags: ['futureTourns', 'invite', 'public'],
+};
+
+router.route('/invite/nextweek').get(inviteController.getThisWeekTourns).openapi = {
+	path: '/pages/invite/nextweek',
+	summary	 : 'Returns the public listing of upcoming tournaments in this week',
+	operationId : 'listWeeksTourns',
+	responses: {
+		200: {
+			description: "List of this week's tournaments, with some stats",
+			content: { 'application/json': { schema: { $ref: '#/components/schemas/Tourn' } } },
+		},
+	},
+	tags: ['invite', 'public'],
+};
+
+router.route('/invite/webname/:webname').get(inviteController.getTournIdByWebname).openapi = {
+	path: '/pages/invite/webname/{webname}',
+	summary: 'Get Tournament ID by Webname',
+	description: 'Retrieve the tournament ID and details by webname.',
+	tags: ['Invite', 'Public'],
+	responses: {
+		200: {
+			description: 'Tournament information',
+		},
+	},
+};
 
 export default router;

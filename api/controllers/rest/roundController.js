@@ -27,24 +27,6 @@ export async function getRound(req,res){
 
 	return res.status(200).json(round);
 }
-getRound.openapi = {
-	summary     : 'Returns round information given an ID if it is public',
-	operationId : 'getRound',
-	responses: {
-		200: {
-			description: 'Object of Round with public information on it',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'object',
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-	tags: ['invite', 'public', 'schematics', 'rounds', 'pairings'],
-};
 
 export async function getPublishedRounds(req, res){
 	const rounds = await roundRepo.getRounds({
@@ -209,21 +191,3 @@ export async function getSchematic(req,res){
 	delete round.includeRoomNotes;
 	return res.status(200).json(round);
 }
-getSchematic.openapi = {
-	summary     : 'Returns public round information necessary to create a full schematic',
-	operationId : 'getSchematic',
-	responses: {
-		200: {
-			description: 'Object of Round with public information on it for a schematic, which includes a list of entries or sections as appropriate.',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'object',
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-	tags: ['invite', 'public', 'schematics', 'rounds', 'pairings'],
-};

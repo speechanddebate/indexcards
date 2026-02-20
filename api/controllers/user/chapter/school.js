@@ -173,16 +173,3 @@ export async function getMySchoolsByTourn(req, res) {
 
 	return res.status(200).json(tournSchools);
 };
-getMySchoolsByTourn.openapi = {
-
-	summary     : 'Returns the schools with entries and events you can access for a tournament',
-	operationId : 'getMySchoolsByTourn',
-	responses: {
-		200: {
-			description: 'Listing of schools with events and entry IDs to highlight',
-			content: { '*/*': { schema: { $ref: '#/components/schemas/Invite' } } },
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-	tags: ['invite', 'schools', 'entries', 'events'],
-};

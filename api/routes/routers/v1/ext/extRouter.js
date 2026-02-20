@@ -11,7 +11,15 @@ import {ipLocation} from '../../../../controllers/rest/personController.js';
 
 const router = Router();
 
-router.post('/login', login);
+router.route('/login').post(login).openapi = {
+	path: '/ext/login',
+	summary: 'External login',
+	tags: ['Ext'],
+	responses: {
+		200: { description: 'Login successful' },
+		default: { $ref: '#/components/responses/ErrorResponse' },
+	},
+};
 
 router.use('/:area',requireAreaAccess);
 router.use('/caselist', caselist);

@@ -96,39 +96,3 @@ export async function userChaptersByTourn(req, res)  {
 };
 
 export default userChapters;
-
-userChapters.openapi = {
-	summary: 'List the chapters and permissions level given a person ID',
-	operationId: 'userChapters',
-	responses: {
-		200: {
-			description: 'Chapter',
-			content: {
-				'*/*': {
-					schema: {
-						type: 'string',
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-};
-
-userChaptersByTourn.openapi = {
-	summary: 'List the chapters and permissions level given a person ID',
-	operationId: 'userChaptersByTourn',
-	responses: {
-		200: {
-			description: 'Chapter with School Metadata',
-			content: {
-				'*/*': {
-					schema: {
-						type: 'string',
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-};
