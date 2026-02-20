@@ -19,7 +19,7 @@ getTournEvents.openapi = {
 	},
 };
 
-export async function getEntryFieldByEvent(req,res){
+export async function getEntryFieldByEvent(req,res) {
 
 	const entries = await db.sequelize.query(`
         select
@@ -62,11 +62,16 @@ export async function getEntryFieldByEvent(req,res){
 	});
 
 	if (entries && entries.length > 0 && !entries[0].fieldWaitlist) {
-		const noWaitlist = entries.filter( (entry) => !entry.waitlist);
-		return res.status(200).json(noWaitlist);
+		const noWaitlist = entries.filter( (entry) => !entry.waitlist ).map( (entry) => {
+			delete entry.fieldWaitlist;
+			delete entry.waitlist;
+			return entry;
+		});
+
+		return res.status(200).json({ entries: noWaitlist, showWaitlist: false});
 	}
 
-	return res.status(200).json(entries);
+	return res.status(200).json({entries, showWaitlist: true});
 };
 
 export async function getScheduleByEvent(req,res) {
@@ -103,15 +108,16 @@ export async function getScheduleByEvent(req,res) {
 
 export async function getEventByAbbr(req, res){
 
-	if (!req.params.eventId) {
-		return NotFound(req, res, `No valid eventID sent`);
+	if (!req.params.eventAbbr) {
+		return NotFound(req, res, `No valid event abbreviation sent`);
 	}
 
 	const eventData = await db.sequelize.query(`
 		select
-			event.name eventName,
-			event.id eventId,
-			event.type eventType
+			event.id,
+			event.name,
+			event.type,
+			event.code_style
 		from event
 		where 1=1
 			and event.tourn = :tournId
@@ -122,7 +128,11 @@ export async function getEventByAbbr(req, res){
 	});
 
 	if (!eventData || eventData.length !== 1) {
-		return NotFound(req, res, `No event ${req.params.eventAbbr} found in tournament ${req.params.tournId}`);
+		return NotFound(
+			req,
+			res,
+			`No event ${req.params.eventAbbr} found in tournament ${req.params.tournId}`
+		);
 	}
 
 	// Latch to the one event
@@ -130,10 +140,11 @@ export async function getEventByAbbr(req, res){
 
 	event.rounds = await db.sequelize.query(`
 		select
-			round.name roundNumber,
-			round.id roundId,
-			round.label roundLabel,
-			round.type roundType
+			round.id,
+			round.name,
+			round.label,
+			round.type,
+			round.published
 		from round
 		where 1=1
 			and round.event = :eventId
