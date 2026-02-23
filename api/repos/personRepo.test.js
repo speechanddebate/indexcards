@@ -57,11 +57,50 @@ describe('PersonRepo', () => {
 			expect(person.password).toBeDefined();
 			expect(person.password).toBe(password);
 		});
+		it('excludes banned persons when excludeBanned is true', async () => {
+			// Arrange
+			const { personId } = await factories.person.createTestPerson({
+				settings: {
+					banned: '1',
+				},
+			});
+
+			// Act
+			const person = await personRepo.getPerson(personId, { excludeBanned: true });
+
+			// Assert
+			expect(person).toBeNull();
+		});
+
+		it('excludes persons with unconfirmed emails when excludeUnconfirmedEmail is true', async () => {
+			// Arrange
+			const { personId } = await factories.person.createTestPerson({
+				settings: {
+					email_unconfirmed: '1',
+				},
+			});
+			// Act
+			const person = await personRepo.getPerson(personId, { excludeUnconfirmedEmail: true });
+
+			// Assert
+			expect(person).toBeNull();
+		});
+		describe('filters by hasValidParadigm', () => {
+			it('excludes persons without a paradigm setting', async () => {
+				// Arrange
+				const { personId } = await factories.person.createTestPerson();
+				// Act
+				const person = await personRepo.getPerson(personId, { hasValidParadigm: true });
+				// Assert
+				expect(person).toBeNull();
+			});
+			it.todo('excludes persons with a paradigm setting that has not been updated since the last paradigm review cutoff');
+		});
 	});
 
 	describe('personInclude', () => {
-		it('returns base person include config', () => {
-			const inc = personInclude();
+		it('returns base person include config', async () => {
+			const inc = await personInclude();
 			expect(inc.model).toBeDefined();
 			expect(Array.isArray(inc.include)).toBe(true);
 		});
@@ -82,6 +121,34 @@ describe('PersonRepo', () => {
 			const result = await personRepo.getPerson(999999);
 			// Assert
 			expect(result).toBeNull();
+		});
+	});
+
+	describe('personSearch', () => {
+		it('returns persons matching the search query', async () => {
+			// Arrange
+			const personData = factories.person.createPersonData();
+			const { personId } = await factories.person.createTestPerson(personData);
+
+			// Act
+			const results = await personRepo.personSearch(`${personData.firstName} ${personData.lastName}`);
+
+			// Assert: expect the search results to include the created person
+			expect(Array.isArray(results)).toBe(true);
+			expect(results.length).toBeGreaterThan(0);
+			expect(results[0].id).toBe(personId);
+		});
+		it('returns an empty array when no persons match the search query', async () => {
+			// Arrange
+			const personData = factories.person.createPersonData();
+			await factories.person.createTestPerson(personData);
+
+			// Act
+			const results = await personRepo.personSearch('Nonexistent Name');
+
+			// Assert
+			expect(Array.isArray(results)).toBe(true);
+			expect(results.length).toBe(0);
 		});
 	});
 

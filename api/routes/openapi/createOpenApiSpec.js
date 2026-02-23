@@ -167,7 +167,7 @@ function extractPathParams(path) {
 			name,
 			in: 'path',
 			required: true,
-			schema: { type: 'string' },
+			schema: { type: name.endsWith('Id') ? 'integer' : 'string' },
 		};
 	});
 }

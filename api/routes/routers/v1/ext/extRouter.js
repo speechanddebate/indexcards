@@ -7,7 +7,7 @@ import nsda from './nsdaRouter.js';
 import mason from './masonRouter.js';
 
 import { login } from '../../../../controllers/ext/loginController.js';
-import {ipLocation} from '../../../../controllers/rest/personController.js';
+import {ipLocation} from '../../../../controllers/rest/personsController.js';
 
 const router = Router();
 

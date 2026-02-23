@@ -5,6 +5,10 @@ export function resolveAttributesFromFields(fields, FIELD_MAP) {
 
 	// Include mode
 	if (Array.isArray(fields)) {
+		// Empty array explicitly means: select 0 columns
+		if (fields.length === 0) {
+			return [];
+		}
 		return fields
 			.map(f => FIELD_MAP[f])
 			.filter(Boolean);

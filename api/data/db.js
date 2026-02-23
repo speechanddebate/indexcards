@@ -20,6 +20,10 @@ db.session.belongsTo(db.person, { as: 'su_person', foreignKey: 'su' });
 db.round.belongsTo(db.timeslot, { as: 'timeslot_timeslot', foreignKey: 'timeslot' });
 db.timeslot.hasMany(db.round, { as: 'rounds', foreignKey: 'timeslot' });
 
+// Ensure chapterJudge <-> person association exists
+db.chapterJudge.belongsTo(db.person, { as: 'person_person', foreignKey: 'person' });
+db.person.hasMany(db.chapterJudge, { as: 'chapter_judges', foreignKey: 'person' });
+
 // By default Sequelize wants you to try...catch every single database call
 // for Reasons?  Otherwise all your database errors just go unprinted and you
 // get a random unfathomable 500 error.  Yeah, because that's great.  This will
