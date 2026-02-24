@@ -12,27 +12,6 @@ export async function getTourn(req, res) {
 	return res.status(200).json(tourn);
 };
 
-getTourn.openapi = {
-	summary: 'Get Public Tournament',
-	description: 'Retrieve public information about a specific tournament.',
-	tags: ['Tournaments'],
-	responses: {
-		200: {
-			description: 'Tournament information',
-			content: {
-				'application/json': {
-					schema: {
-						$ref: '#/components/schemas/Tourn',
-					},
-				},
-			},
-		},
-		404: {
-			$ref: '#/components/responses/NotFound',
-		},
-	},
-};
-
 export async function getTournInvite(req, res) {
 	var invite = {};
 
@@ -67,70 +46,14 @@ export async function getTournInvite(req, res) {
 	return res.status(200).json(invite);
 };
 
-getTournInvite.openapi = {
-	summary: 'Get Tournament Invite',
-	operationId: 'getTournInvite',
-	description: 'Retrieve a public invite for a specific tournament, including pages, files, events, and contacts.',
-	tags: ['Tournaments','test'],
-	responses: {
-		200: {
-			description: 'Public facing page data for a given tournament',
-			content: {
-				'application/json': {
-					schema: {
-						$ref: '#/components/schemas/TournInvite',
-					},
-				},
-			},
-		},
-		401 : {
-			$ref : '#/components/responses/Unauthorized',
-		},
-		404: {
-			$ref: '#/components/responses/NotFound',
-		},
-		default: {
-			$ref: '#/components/responses/ErrorResponse',
-		},
-	},
-};
-
 export async function getSchedule(req,res){
 	const schedule = await tournRepo.getSchedule(req.params.tournId);
 	return res.status(200).json(schedule);
 };
 
-getSchedule.openapi = {
-	tags: ['Tournaments'],
-};
-
 export async function getPublishedFiles(req, res) {
 	const files = await fileRepo.getFiles({ tournId: req.params.tournId });
 	return res.status(200).json(files);
-};
-
-getPublishedFiles.openapi = {
-	summary: 'Get Tournament Files',
-	description: 'Retrieve a list of published files associated with a specific tournament.',
-	tags: ['Tournaments'],
-	responses: {
-		200: {
-			description: 'List of tournament files',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'array',
-						items: {
-							$ref: '#/components/schemas/File',
-						},
-					},
-				},
-			},
-		},
-		404: {
-			$ref: '#/components/responses/NotFound',
-		},
-	},
 };
 
 export async function getTournPublishedResults(req,res) {
@@ -158,15 +81,4 @@ export async function getTournPublishedResults(req,res) {
 	});
 
 	res.status(200).json(results);
-};
-
-getTournPublishedResults.openapi = {
-	summary     : 'Returns an array of result_sets that are published in a tournament',
-	operationId : 'getTournPublishedResults',
-	responses: {
-		200: {
-			description: 'Array of events',
-		},
-	},
-	tags: ['invite', 'public', 'results'],
 };

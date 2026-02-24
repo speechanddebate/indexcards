@@ -8,23 +8,6 @@ export async function getCategory(req, res) {
 		return NotFound(req,res,'Category not found');
 	res.json(category);
 }
-getCategory.openapi = {
-	summary: 'Get category',
-	tags: ['Category'],
-	responses: {
-		200: {
-			description: 'Category details',
-			content: {
-				'application/json': {
-					schema: {
-						$ref: '#/components/schemas/Category',
-					},
-				},
-			},
-		},
-		404: {$ref: '#/components/responses/NotFound'},
-	},
-};
 export async function getCategories(req, res) {
 	const { tournId } = req.params;
 	if (!tournId) return BadRequest(req,res,'Tournament ID is required');
@@ -32,30 +15,9 @@ export async function getCategories(req, res) {
 
 	res.json(categories);
 }
-getCategories.openapi = {
-	summary: 'Get categories',
-	tags: ['Category'],
-	responses: {
-		200: {
-			description: 'List of categories',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'array',
-						items: { $ref: '#/components/schemas/Category' },
-					},
-				},
-			},
-		},
-	},
-};
 export function createCategory(req, res) {
 	throw new NotImplemented(req,res,'function not implemented');
 }
-createCategory.openapi = {
-	summary: 'Create category',
-	tags: ['Category'],
-};
 
 export async function deleteCategory(req, res) {
 	if (!req.params.tournId) return BadRequest(req,res,'Tournament ID is required');
@@ -68,18 +30,10 @@ export async function deleteCategory(req, res) {
 
 	res.status(204).send();
 }
-deleteCategory.openapi = {
-	summary: 'Delete category',
-	tags: ['Category'],
-};
 
 export function updateCategory(req, res) {
 	throw new NotImplemented(req,res,'function not implemented');
 }
-updateCategory.openapi = {
-	summary: 'Update category',
-	tags: ['Category'],
-};
 
 export default {
 	getCategory,

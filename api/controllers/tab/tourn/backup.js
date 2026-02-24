@@ -310,9 +310,6 @@ export async function backupTourn(req,res) {
 	// And the real monster: categories, judges, events, rounds, and results.
 	return res.status(200).json(tourn);
 };
-backupTourn.openapi = {
-	tags       : ['Backup and Restore'],
-};
 
 export async function restoreTourn(req,res) {
 	const tournData = req.body;
@@ -330,9 +327,6 @@ export async function restoreTourn(req,res) {
 	// actually destructive
 
 	return res.status(501).json({ message: 'This feature is a stub and not yet implemented' });
-};
-restoreTourn.openapi = {
-	tags       : ['Backup and Restore'],
 };
 
 export async function Backup(req, res, next) {
@@ -352,20 +346,4 @@ export async function Backup(req, res, next) {
 	} catch (err) {
 		return handleDomainError(err, req, res, next);
 	}
-}
-Backup.openapi = {
-	summary	 : 'Tournament Backup',
-	description: 'Creates a backup dump of the tournament data in JSON format',
-	tags       : ['Backup and Restore'],
-	requestBody: {
-		description: 'Parameters for the backup request',
-		required: true,
-		content: {
-			'application/json': {
-				schema: {
-					$ref: '#/components/schemas/BackupRequest',
-				},
-			},
-		},
-	},
 };

@@ -7,39 +7,6 @@ import db from '../../../data/db.js';
 export async function createAccess(req, res) {
 	return NotImplemented(req, res, 'This endpoint is not yet implemented');
 }
-createAccess.openapi= {
-	summary     : 'Change, delete and add category access permissions for users',
-	operationId : 'listSchools',
-	parameters: [
-		{
-			in          : 'parameters',
-			name        : 'personId',
-			description : 'Person ID',
-			required    : true,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},
-		{
-			in          : 'parameters',
-			name        : 'categoryId',
-			description : 'Category ID',
-			required    : true,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},
-	],
-	responses: {
-		200: {
-			description: 'Success! Messages included',
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-	tags: ['tab/category/access'],
-};
 
 // Alter existing permissions (update)
 export async function updateAccess(req, res) {
@@ -137,37 +104,6 @@ export async function deleteAccess(req, res) {
 		message: log.description,
 	});
 }
-deleteAccess.openapi = {
-	summary     : 'Change, delete and add category-level permissions for user accounts',
-	operationId : 'listSchools',
-	parameters: [
-		{
-			in          : 'parameters',
-			name        : 'categoryId',
-			description : 'Category ID',
-			required    : true,
-			schema      : {
-				type    : 'integer',
-			},
-		},
-		{
-			in          : 'parameters',
-			name        : 'personId',
-			description : 'Person ID',
-			required    : true,
-			schema      : {
-				type    : 'integer',
-			},
-		},
-	],
-	responses: {
-		200: {
-			description: 'Success! Messages included',
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-	tags: ['tab/category/access'],
-};
 
 // Create backup follower for a whole tournament
 export async function createBackupAccess(req, res) {

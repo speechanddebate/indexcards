@@ -33,11 +33,6 @@ export async function categoryCheckin(req, res) {
 		return Forbidden(req, res, 'You do not have access to that tournament or category');
 	}
 };
-categoryCheckin.openapi = {
-	summary     : 'Given a category lists the judges who are present or absent for judge checkin',
-	operationId : 'categoryCheckin',
-	tags: ['tab/all'],
-};
 
 export async function eventCheckin(req, res) {
 	const perms = req.session.perms;

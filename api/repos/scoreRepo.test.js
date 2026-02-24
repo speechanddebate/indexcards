@@ -66,7 +66,9 @@ describe('scoreRepo', async () => {
 		it('should return all scores when no scope is provided', async () => {
 			// Create at least one score to ensure there is data
 			await scoreRepo.createScore({ ballotId });
-			const scores = await scoreRepo.getScores();
+			const scores = await scoreRepo.getScores({}, {
+				limit: 10,
+			});
 			expect(Array.isArray(scores)).toBe(true);
 			expect(scores.length).toBeGreaterThan(0);
 		});

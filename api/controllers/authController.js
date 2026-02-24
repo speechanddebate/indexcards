@@ -34,25 +34,6 @@ export async function login(req, res) {
 	res.cookie(config.COOKIE_NAME, token, authService.getAuthCookieOptions());
 	res.cookie(config.CSRF.COOKIE_NAME, authService.generateCSRFToken(token), authService.getCSRFCookieOptions());
 	return res.json(response);
-
-};
-
-login.openapi = {
-	summary: 'Login',
-	operationId: 'login',
-	description: 'Logs in a user and creates a session.',
-	tags: ['Auth', 'Public'],
-	security: [],
-	requestBody: {
-		required: true,
-		content: {
-			'application/json': {
-				schema: {
-					$ref: '#/components/schemas/LoginRequest',
-				},
-			},
-		},
-	},
 };
 
 export async function logout(req, res){
@@ -69,12 +50,6 @@ export async function logout(req, res){
 	res.status(204).send();
 }
 
-logout.openapi = {
-	summary: 'Logout',
-	operationId: 'logout',
-	description: 'Logs out the current user and invalidates the session.',
-	tags: ['Auth'],
-};
 export async function register(req,res){
 	let result = null;
 	try {
@@ -96,20 +71,3 @@ export async function register(req,res){
 	res.cookie(config.CSRF.COOKIE_NAME, authService.generateCSRFToken(token), authService.getCSRFCookieOptions());
 	return res.json(response);
 }
-register.openapi = {
-	summary: 'Register',
-	operationId: 'register',
-	description: 'Registers a new user.',
-	tags: ['Auth'],
-	security: [],
-	requestBody: {
-		required: true,
-		content: {
-			'application/json': {
-				schema: {
-					$ref: '#/components/schemas/RegisterRequest',
-				},
-			},
-		},
-	},
-};

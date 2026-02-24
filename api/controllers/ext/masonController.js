@@ -28,10 +28,6 @@ export async function blastMessage(req, res) {
 		message : notifyResponse.message,
 	});
 };
-blastMessage.openapi = {
-	security: [{ extApiKey: [] }],
-	tags: ['Ext : Mason'],
-};
 
 export async function blastPairing(req, res) {
 	const queryData = {};
@@ -79,14 +75,6 @@ export async function blastPairing(req, res) {
 	res.status(200).json(reply);
 
 };
-blastPairing.openapi = {
-	security: [{ extApiKey: [] }],
-	tags: ['Ext : Mason'],
-};
 export async function blastExtRoundPairing(req, res) {
 	blastRoundPairing.POST(req, res);
-};
-blastExtRoundPairing.openapi = {
-	security: [{ extApiKey: [] }],
-	tags: ['Ext : Mason'],
 };

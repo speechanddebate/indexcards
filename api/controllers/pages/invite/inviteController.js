@@ -225,17 +225,6 @@ export async function getThisWeekTourns(req,res){
 	}
 	return res.status(200).json(totals);
 }
-getThisWeekTourns.openapi = {
-	summary	 : 'Returns the public listing of upcoming tournaments in this week',
-	operationId : 'listWeeksTourns',
-	responses: {
-		200: {
-			description: "List of this week's tournaments, with some stats",
-			content: { 'application/json': { schema: { $ref: '#/components/schemas/Tourn' } } },
-		},
-	},
-	tags: ['invite', 'public'],
-};
 
 export async function getFutureTourns(req,res){
 	let limit = '';
@@ -605,14 +594,3 @@ export async function getFutureTourns(req,res){
 
 	return res.status(200).json(formattedFutureTourns);
 }
-
-getFutureTourns.openapi = {
-	summary     : 'Returns the public listing of upcoming tournaments',
-	responses   : {
-		200: {
-			description: 'List of public upcoming tournaments',
-			content: { '*/*': { schema: { $ref: '#/components/schemas/Tourn' } } },
-		},
-	},
-	tags: ['futureTourns', 'invite', 'public'],
-};

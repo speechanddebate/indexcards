@@ -75,36 +75,6 @@ export async function getPersonTournPresence(req, res) {
 	return res.status(200).json(tournPresence);
 };
 
-getPersonTournPresence.openapi = {
-	summary     : 'Lists all the entries, judges, events, categories, and schools a Tabroom account cares about at a tournament',
-	operationId : 'getPersonTournPresence',
-	parameters  : [
-		{
-			in          : 'path',
-			name        : 'tournId',
-			description : 'ID of tournament so targeted.',
-			required    : true,
-			schema      : {
-				type    : 'integer',
-				minimum : 1,
-			},
-		},
-	],
-	responses: {
-		200: {
-			description: 'Object of objects of the relevant data types',
-			content: {
-				'*/*': {
-					schema: {
-						type: 'object',
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-};
-
 export const getPersonTournEntries = async (personId, tournId) => {
 
 	const entryArray = await db.sequelize.query(`

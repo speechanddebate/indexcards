@@ -4,22 +4,24 @@ import { FIELD_MAP,toDomain, toPersistence } from './mappers/sessionMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { personInclude } from './personRepo.js';
 
-function buildSessionQuery(opts = {}) {
+async function buildSessionQuery(opts = {}) {
 	const query = {
 		where: {},
 		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
 		include: [],
 	};
 	if(opts.include?.person){
+		const personInc = await personInclude(opts.include.person);
 		query.include.push({
-			...personInclude(opts.include.person),
+			...personInc,
 			as: 'person_person',
 			required: false,
 		});
 	}
 	if(opts.include?.su){
+		const suInc = await personInclude(opts.include.su);
 		query.include.push({
-			...personInclude(opts.include.su),
+			...suInc,
 			as: 'su_person',
 			required: false,
 		});
@@ -28,7 +30,7 @@ function buildSessionQuery(opts = {}) {
 }
 
 async function findByUserKey(key, opts = {}) {
-	const query = buildSessionQuery(opts);
+	const query = await buildSessionQuery(opts);
 	query.where.userkey = key;
 	const s = await db.session.findOne(query);
 	return toDomain(s);
@@ -36,7 +38,7 @@ async function findByUserKey(key, opts = {}) {
 
 async function getSession(id, opts = {}) {
 	if (!id) throw new Error('getSession: id is required');
-	const query = buildSessionQuery(opts);
+	const query = await buildSessionQuery(opts);
 	query.where = { id, ...query.where };
 	const dbRow = await db.session.findOne(query);
 	if (!dbRow) return null;

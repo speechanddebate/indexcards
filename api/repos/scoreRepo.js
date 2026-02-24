@@ -9,6 +9,13 @@ function buildScoreQuery(opts = {}) {
 		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
 		include: [],
 	};
+	if(opts.limit){
+		query.limit = opts.limit;
+	}
+	if(opts.offset){
+		query.offset = opts.offset;
+	}
+
 	if(opts?.include?.ballot){
 		query.include.push({
 			...ballotInclude(opts?.include?.ballot),

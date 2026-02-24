@@ -5,20 +5,6 @@ export async function getTournEvents(req, res) {
 	return NotImplemented(req,res,'Not implemented');
 };
 
-getTournEvents.openapi = {
-	summary: 'Get Tournament Events',
-	description: 'Retrieve a list of events associated with a specific tournament.',
-	tags: ['Tournaments'],
-	responses: {
-		200: {
-			description: 'List of tournament events',
-		},
-		404: {
-			$ref: '#/components/responses/NotFound',
-		},
-	},
-};
-
 export async function getEntryFieldByEvent(req,res) {
 
 	const events = await db.sequelize.query(`
@@ -178,22 +164,4 @@ export async function getEventByAbbr(req, res){
 	});
 
 	return res.status(200).json(event);
-};
-
-getEventByAbbr.openapi = {
-	summary     : 'Returns some limited data about an event together with published rounds by event abbreviation',
-	operationId : 'getEventByAbbr',
-	responses: {
-		200: {
-			description: 'Event and Round in JSON format for parsing',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'object',
-					},
-				},
-			},
-		},
-	},
-	tags: ['invite', 'public', 'event', 'eventAbbr', 'rounds'],
 };
