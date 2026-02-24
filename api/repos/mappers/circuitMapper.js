@@ -7,13 +7,13 @@ export const FIELD_MAP = {
 	name: 'name',
 	abbr: 'abbr',
 	tz: 'tz',
-	active: { db: 'active', toDomain: fromBool, toPersistence: toBool },
+	active: { db: 'active', toDomain: fromBool, toDb: toBool },
 	state: 'state',
 	country: 'country',
 	webname: 'webname',
 	settings: 'circuit_settings',
-	updatedAt: { db: 'timestamp' , toPersistence: undefined},
-	createdAt: { db: 'created_at', toPersistence: undefined },
+	updatedAt: { db: 'timestamp' , toDb: undefined},
+	createdAt: { db: 'created_at', toDb: undefined },
 };
 
 export const toDomain = dbRow => {
