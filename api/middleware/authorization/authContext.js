@@ -71,8 +71,10 @@ export async function loadTournAuthContext(req, res, next, tournId){
 			}
 		}
 
-		//TODO need to fetch all circuit level perms and attach those as well for proper RBAC to work,
-		// but this is a start and covers the most common use case of checking perms within a tourn
+		// TODO need to fetch all circuit level perms and attach those as well
+		// for proper RBAC to work, but this is a start and covers the most
+		// common use case of checking perms within a tourn
+
 	}
 	return next();
 }

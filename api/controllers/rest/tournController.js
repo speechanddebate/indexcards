@@ -9,9 +9,9 @@ import db from '../../data/db.js';
 
 export async function getTourn(req, res) {
 	var tourn = req.tourn;
-
 	return res.status(200).json(tourn);
 };
+
 getTourn.openapi = {
 	summary: 'Get Public Tournament',
 	description: 'Retrieve public information about a specific tournament.',
@@ -66,6 +66,7 @@ export async function getTournInvite(req, res) {
 
 	return res.status(200).json(invite);
 };
+
 getTournInvite.openapi = {
 	summary: 'Get Tournament Invite',
 	operationId: 'getTournInvite',
@@ -98,6 +99,7 @@ export async function getSchedule(req,res){
 	const schedule = await tournRepo.getSchedule(req.params.tournId);
 	return res.status(200).json(schedule);
 };
+
 getSchedule.openapi = {
 	tags: ['Tournaments'],
 };
@@ -106,6 +108,7 @@ export async function getPublishedFiles(req, res) {
 	const files = await fileRepo.getFiles({ tournId: req.params.tournId });
 	return res.status(200).json(files);
 };
+
 getPublishedFiles.openapi = {
 	summary: 'Get Tournament Files',
 	description: 'Retrieve a list of published files associated with a specific tournament.',

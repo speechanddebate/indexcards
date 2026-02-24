@@ -21,8 +21,31 @@ getTournEvents.openapi = {
 
 export async function getEntryFieldByEvent(req,res) {
 
+	const events = await db.sequelize.query(`
+		select
+			event.id, event.name,
+			event.abbr, event.type
+		from event
+		where 1=1
+            and event.tourn = :tournId
+            and event.abbr  = :eventAbbr
+		limit 1
+	`, {
+		replacements: {
+			tournId   : req.params.tournId,
+			eventAbbr : req.params.eventAbbr,
+		},
+		type: req.db.Sequelize.QueryTypes.SELECT,
+	});
+
+	let event = {};
+
+	if (events.length > 0) {
+		event = events[0];
+	}
+
 	const entries = await db.sequelize.query(`
-        select
+        SELECT
             entry.id, entry.code, entry.name,
             entry.active, entry.waitlist,
             school.name schoolName, school.code schoolCode,
@@ -37,12 +60,9 @@ export async function getEntryFieldByEvent(req,res) {
             left join event_setting field_waitlist
                 on field_waitlist.event = event.id
                 and field_waitlist.tag = 'field_waitlist'
-
         where 1=1
-
-            and event.tourn = :tournId
-            and event.abbr  = :eventAbbr
-            and event.id = entry.event
+            and event.id = :eventId
+			and event.id = entry.event
             and exists (
                 select fr.id
                 from event_setting fr
@@ -55,8 +75,7 @@ export async function getEntryFieldByEvent(req,res) {
         order by entry.code, entry.name
     `, {
 		replacements: {
-			tournId   : req.params.tournId,
-			eventAbbr : req.params.eventAbbr,
+			eventId   : event.id,
 		},
 		type: req.db.Sequelize.QueryTypes.SELECT,
 	});
@@ -68,10 +87,10 @@ export async function getEntryFieldByEvent(req,res) {
 			return entry;
 		});
 
-		return res.status(200).json({ entries: noWaitlist, showWaitlist: false});
+		return res.status(200).json({ entries: noWaitlist, showWaitlist: false, ...event});
 	}
 
-	return res.status(200).json({entries, showWaitlist: true});
+	return res.status(200).json({entries, showWaitlist: true, ...event});
 };
 
 export async function getScheduleByEvent(req,res) {
