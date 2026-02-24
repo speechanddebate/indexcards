@@ -86,7 +86,7 @@ export async function getTournIdByWebname(req,res){
 	return res.status(200).json(reply);
 }
 
-export async function getNSDAEventCategories(req, res) {
+export async function getNSDACategories(req, res) {
 	const eventCodes = await db.sequelize.query(`
 		select
 			nsda.code, nsda.name
@@ -266,25 +266,58 @@ export async function getFutureTourns(req,res){
 	}
 
 	const futureTourns = await db.sequelize.query(`
-		select
+		SELECT
 			CONCAT(tourn.id, '-', '0') as id,
 			tourn.id tournId, tourn.webname, tourn.name, tourn.tz,
-			'No' as district,
+			'false' as district,
 			tourn.city as location, tourn.state, tourn.country,
 			tourn.start start,
 			tourn.end end,
 			tourn.reg_end regEnd,
 			tourn.reg_start regStart,
-			msnats.value as msnats,
-			nats.value as nats,
-			closed.value as closed,
-			count(distinct school.id) as schoolCount,
 			YEAR(tourn.start) as year,
 			WEEK(CONVERT_TZ(tourn.start, '+00:00', tourn.tz), 3) as week,
-			GROUP_CONCAT(DISTINCT(circuit.abbr) SEPARATOR ', ') as circuits,
-			GROUP_CONCAT(DISTINCT(nsda_category.name) SEPARATOR ', ') as nsdaEventCodes,
-			GROUP_CONCAT(DISTINCT(event.abbr) SEPARATOR ', ') as events,
-			GROUP_CONCAT(DISTINCT(event.type) SEPARATOR ', ') as eventTypes,
+			(
+				select ts.value
+				from tourn_setting ts
+				where ts.tourn = tourn.id
+				and ts.tag = "closed_entry"
+			) as closed,
+			(
+				select ts.value
+				from tourn_setting ts
+				where ts.tourn = tourn.id
+				and ts.tag IN ('ncfl', 'nsda_nats', 'nsda_ms_nats')
+			) as special,
+
+			(
+				select count(school.id)
+				from school
+				where school.tourn = tourn.id
+			) as schoolCount,
+			(
+				select GROUP_CONCAT(distinct(circuit.abbr) SEPARATOR ', ')
+					from tourn_circuit tc, circuit
+				where tc.tourn = tourn.id
+				and tc.circuit = circuit.id
+			) as circuits,
+			(
+				select GROUP_CONCAT(distinct(nsda_category.name) SEPARATOR ', ')
+					from event, nsda_category
+				where event.tourn = tourn.id
+				and event.nsda_category = nsda_category.id
+			) as nsdaCategories,
+			(
+				select GROUP_CONCAT(DISTINCT(event.type) SEPARATOR ', ')
+					from event
+				where event.tourn = tourn.id
+			) as eventTypes,
+			(
+				select GROUP_CONCAT(event.abbr SEPARATOR ', ')
+				from event
+				where event.tourn = tourn.id
+			) as events,
+
 			( select GROUP_CONCAT(signup.abbr SEPARATOR ', ')
 					from category signup
 				where signup.tourn = tourn.id
@@ -347,29 +380,6 @@ export async function getFutureTourns(req,res){
 
 		from (tourn, event)
 
-			left join tourn_setting closed
-				on closed.tourn = tourn.id
-				and closed.tag = 'closed_entry'
-
-			left join tourn_setting msnats
-				on msnats.tourn = tourn.id
-				and msnats.tag = 'nsda_ms_nats'
-
-			left join tourn_setting nats
-				on nats.tourn = tourn.id
-				and nats.tag = 'nsda_nats'
-
-			left join nsda_category
-				on event.nsda_category = nsda_category.id
-
-			left join school on tourn.id = school.tourn
-
-			left join tourn_circuit tc
-				on tc.tourn = tourn.id
-
-			left join circuit
-				on tc.circuit = circuit.id
-
 		where 1=1
 
 			and tourn.hidden = 0
@@ -400,116 +410,142 @@ export async function getFutureTourns(req,res){
 	});
 
 	const futureDistricts = await db.sequelize.query(`
-		select
-			CONCAT(tourn.id, '-', weekend.id) as id,
+		SELECT
+			CONCAT(tourn.id, '-', '0') as id,
 			tourn.id tournId, tourn.webname, tourn.name, tourn.tz,
-			'Yes' as district,
-			weekend.id weekendId, weekend.name weekendName, weekend.city as location, weekend.state, tourn.country,
+			'true' as districts,
+			weekend.id weekendId, weekend.name weekendName,
+				weekend.city as location, weekend.state, tourn.country,
 			site.name site,
 			weekend.start start,
 			weekend.end end,
 			weekend.reg_end regEnd,
 			weekend.reg_start regStart,
-			count(distinct school.id) as schoolCount,
 			YEAR(weekend.start) as year,
+
 			WEEK(CONVERT_TZ(weekend.start, '+00:00', tourn.tz), 3) as week,
-			GROUP_CONCAT(DISTINCT(circuit.abbr) SEPARATOR ', ') as circuits,
-			GROUP_CONCAT(DISTINCT(nsda_category.name) SEPARATOR ', ') as nsdaEventCodes,
-			GROUP_CONCAT(DISTINCT(event.abbr) SEPARATOR ', ') as events,
-			GROUP_CONCAT(DISTINCT(event.type) SEPARATOR ', ') as eventTypes,
-			( select GROUP_CONCAT(signup.abbr SEPARATOR ', ')
-					from category signup
-				where signup.tourn = tourn.id
-					and signup.abbr IS NOT NULL
-					and signup.abbr != ''
-					and exists ( select cs.id
-						from category_setting cs
-						where cs.category = signup.id
-						and cs.tag = 'public_signups'
+
+			( SELECT COUNT(school.id)
+				FROM school
+				WHERE 1=1
+				AND school.tourn = tourn.id
+				AND EXISTS (
+					SELECT e1.id
+					FROM entry e1, event_setting es
+					WHERE e1.school = school.id
+					AND e1.dropped != 1
+					AND e1.event = es.event
+					AND es.tag = 'weekend'
+					AND es.value = weekend.id
+				)
+			) as schoolCount,
+
+			(
+				select GROUP_CONCAT(distinct(nsda_category.name))
+					from event, nsda_category
+					where event.tourn = tourn.id
+					and event.nsda_category = nsda_category.id
+			) as nsdaCategories,
+
+			( SELECT GROUP_CONCAT(DISTINCT(e1.type) SEPARATOR ', ')
+					FROM event e1
+				WHERE 1=1
+					AND e1.tourn = tourn.id
+					AND EXISTS (
+						SELECT es.id
+							FROM event_setting es
+						WHERE 1=1
+							AND es.event = e1.id
+							AND es.tag = 'weekend'
+							AND es.value = weekend.id
 					)
-					and exists (
-						select csd.id
-						from category_setting csd
-						where csd.category = signup.id
-						and csd.tag = 'public_signups_deadline'
-						and csd.value_date > ${timeScope}
+			) as eventTypes,
+
+			( SELECT GROUP_CONCAT(event.abbr SEPARATOR ', ')
+					FROM event
+				WHERE 1=1
+				AND event.tourn = tourn.id
+					AND EXISTS (
+						SELECT es.id
+							FROM event_setting es
+						WHERE 1=1
+							AND es.event = event.id
+							AND es.tag = 'weekend'
+							AND es.value = weekend.id
 					)
-					and not exists (
-						select csd.id
-						from category_setting csd
-						where csd.category = signup.id
-						and csd.tag = 'private_signup_link'
-					)
-			) as signup,
+			) as events,
 
 			( SELECT
 				count(online.id)
-				from event online, event_setting eso
-				where online.tourn = tourn.id
-				and online.id = eso.event
-				and eso.tag = 'online_mode'
-				and not exists (
-					select hybridno.id
-					from event_setting hybridno
-					where hybridno.event = online.id
-					and hybridno.tag = 'online_hybrid'
-				)
+					FROM event online, event_setting eso
+				WHERE online.tourn = tourn.id
+					AND online.id = eso.event
+					AND eso.tag = 'online_mode'
+					AND NOT exists (
+						SELECT hybridno.id
+						FROM event_setting hybridno
+						WHERE hybridno.event = online.id
+						AND hybridno.tag = 'online_hybrid'
+					)
 			) as online,
 
 			( SELECT
 				count(in_person.id)
-				from event in_person
-				where in_person.tourn = tourn.id
-				and in_person.type != 'attendee'
-				and not exists (
-					select esno.id
-					from event_setting esno
-					where esno.event = in_person.id
-					and esno.tag = 'online_mode'
-				)
-
+					FROM event in_person
+				WHERE in_person.tourn = tourn.id
+					AND in_person.type != 'attendee'
+					AND NOT exists (
+						SELECT esno.id
+						FROM event_setting esno
+						WHERE esno.event = in_person.id
+						AND esno.tag = 'online_mode'
+					)
 			) as inPerson,
 
 			( SELECT
 				count(hybrid.id)
-				from event hybrid, event_setting esh
-				where hybrid.tourn = tourn.id
-				and hybrid.id = esh.event
-				and esh.tag = 'online_hybrid'
-			) as hybrid
+					FROM event hybrid, event_setting esh
+				WHERE hybrid.tourn = tourn.id
+					AND hybrid.id = esh.event
+					AND esh.tag = 'online_hybrid'
+			) as hybrid,
 
-		from (tourn, weekend, event, event_setting ew)
+			( SELECT GROUP_CONCAT(signup.abbr SEPARATOR ', ')
+					FROM category signup
+				WHERE signup.tourn = tourn.id
+					AND signup.abbr IS NOT NULL
+					AND signup.abbr != ''
+					AND exists ( SELECT cs.id
+							FROM category_setting cs
+						WHERE cs.category = signup.id
+						AND cs.tag = 'public_signups'
+					)
+					AND exists (
+						SELECT csd.id
+							FROM category_setting csd
+						WHERE csd.category = signup.id
+						AND csd.tag = 'public_signups_deadline'
+						AND csd.value_date > ${timeScope}
+					)
+					AND NOT exists (
+						SELECT csd.id
+							FROM category_setting csd
+						WHERE csd.category = signup.id
+						AND csd.tag = 'private_signup_link'
+					)
+			) as signup
 
-			left join site on weekend.site = site.id
+		FROM (tourn, weekend)
 
-			left join school on tourn.id = school.tourn
+			left join site on weekend.site  = site.id
 
-			left join nsda_category
-				on nsda_category.id = event.nsda_category
+		WHERE 1=1
+			AND tourn.hidden = 0
+			AND tourn.end > ${timeScope}
 
-			left join tourn_circuit tc
-				on tc.tourn = tourn.id
-
-			left join circuit
-				on tc.circuit = circuit.id
-
-		where 1=1
 			and tourn.hidden = 0
 			and weekend.end > ${timeScope}
 			and weekend.tourn = tourn.id
-
-			and exists (
-				select timeslot.id
-				from timeslot
-				where 1=1
-				and timeslot.tourn = tourn.id
-				and timeslot.end > ${timeScope}
-			)
-
-			and event.tourn = tourn.id
-			and event.id = ew.event
-			and ew.tag = 'weekend'
-			and ew.value = weekend.id
 
 		group by weekend.id
 		order by weekend.start
@@ -525,7 +561,9 @@ export async function getFutureTourns(req,res){
 		day   : 'numeric',
 	};
 
-	const formattedFutureTourns = futureTourns.map( (tourn) => {
+	const formattedFutureTourns = futureTourns.filter((tourn) => {
+		if (tourn.events) return tourn;
+	}).map( (tourn) => {
 
 		// These functions will feel like something the frontend should do. But
 		// no, in order to enable searching and filtering, they must be in the
@@ -540,7 +578,7 @@ export async function getFutureTourns(req,res){
 		const tournEnd   = convertTZ(tourn.end, tourn.tz);
 		tourn.tzCode     = shortZone(tourn.tz);
 
-		tourn.nsdaEventCodes = tourn.nsdaEventCodes || '';
+		tourn.nsdaCategories = tourn.nsdaCategories || '';
 
 		tourn.modes = '';
 		if (tourn.inPerson) tourn.modes += 'In Person ';

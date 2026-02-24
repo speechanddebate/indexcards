@@ -1215,7 +1215,7 @@
         "description": "POST /ext/mason/section/{sectionId}/blastPairing is undocumented. Need to add .openapi to handler"
       }
     },
-    "/pages/invite/nsdaCodes": {
+    "/pages/invite/nsdaCategories": {
       "get": {
         "summary": "Get NSDA Event Categories",
         "description": "Retrieve a list of NSDA event categories.",

@@ -3,8 +3,10 @@ import * as inviteController from '../../../../controllers/pages/invite/inviteCo
 
 const router = Router();
 
-router.route('/invite/nsdaCodes').get(inviteController.getNSDAEventCategories).openapi = {
-	path: '/pages/invite/nsdaCodes',
+// These paths are bolted onto /v1/pages
+
+router.route('/invite/nsdaCategories').get(inviteController.getNSDACategories).openapi = {
+	path: '/pages/invite/nsdaCategories',
 	summary: 'Get NSDA Event Categories',
 	description: 'Retrieve a list of NSDA event categories.',
 	tags: ['Invite', 'Public'],
