@@ -269,7 +269,7 @@ export async function getFutureTourns(req,res){
 		SELECT
 			CONCAT(tourn.id, '-', '0') as id,
 			tourn.id tournId, tourn.webname, tourn.name, tourn.tz,
-			'false' as district,
+			'No' as districts,
 			tourn.city as location, tourn.state, tourn.country,
 			tourn.start start,
 			tourn.end end,
@@ -411,9 +411,9 @@ export async function getFutureTourns(req,res){
 
 	const futureDistricts = await db.sequelize.query(`
 		SELECT
-			CONCAT(tourn.id, '-', '0') as id,
+			CONCAT(tourn.id, '-', weekend.id) as id,
 			tourn.id tournId, tourn.webname, tourn.name, tourn.tz,
-			'true' as districts,
+			'Yes' as districts,
 			weekend.id weekendId, weekend.name weekendName,
 				weekend.city as location, weekend.state, tourn.country,
 			site.name site,
