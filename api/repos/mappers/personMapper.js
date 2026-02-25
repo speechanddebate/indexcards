@@ -1,5 +1,6 @@
 import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
 import { toDomain as chapterJudgeToDomain } from './chapterJudgeMapper.js';
+import { toDomain as judgeToDomain } from './judgeMapper.js';
 
 export const FIELD_MAP = {
 	id            : 'id',
@@ -30,6 +31,9 @@ export const toDomain = dbRow => {
 	var person = genericToDomain(dbRow, FIELD_MAP);
 	if (dbRow.chapter_judges && Array.isArray(dbRow.chapter_judges)) {
 		person.ChapterJudges = dbRow.chapter_judges.map(chapterJudgeToDomain);
+	}
+	if (dbRow.judges && Array.isArray(dbRow.judges)) {
+		person.Judges = dbRow.judges.map(judgeToDomain);
 	}
 
 	return person;

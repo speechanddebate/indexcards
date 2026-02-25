@@ -31,7 +31,8 @@ router.route('/').get(controller.getParadigms).openapi = {
 							properties: {
 								id: { type: 'integer' },
 								name: { type: 'string', description: 'Full name' },
-								chapters: {
+								tournJudged: { type: 'integer', description: 'Number of tournaments judged' },
+								schools: {
 									type: 'array',
 									items: {
 										type: 'object',
@@ -76,13 +77,30 @@ router.route('/:personId').get(controller.getParadigmByPersonId).openapi = {
 						properties: {
 							id: { type: 'integer' },
 							name: { type: 'string', description: 'Full name' },
+							lastReviewed: { type: 'string', format: 'date-time', description: 'Last reviewed timestamp' },
 							paradigm: { type: 'string', description: 'Paradigm content' },
+							record: {
+								type: 'array',
+								items: {
+									type: 'object',
+									properties: {
+									},
+								},
+							},
+							certifications: {
+								type: 'array',
+								items: {
+									type: 'object',
+									properties: {
+									},
+								},
+							},
 						},
 					},
 				},
 			},
 		},
-		404: { $ref: '#/components/responses/NotFoundResponse' },
+		404: { $ref: '#/components/responses/NotFound' },
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
 };

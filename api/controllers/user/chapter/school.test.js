@@ -15,7 +15,7 @@ import {
 describe ('getMySchoolsByTourn', () => {
 
 	beforeEach(async () => {
-		await db.permission.create(testUserChapterPerm);
+		await db.permission.upsert(testUserChapterPerm);
 		await db.contact.create(testUserSchoolContact);
 	});
 	afterEach(async () => {

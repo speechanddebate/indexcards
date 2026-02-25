@@ -1,5 +1,5 @@
 import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
-
+import { toDomain as schoolToDomain } from './schoolMapper.js';
 export const FIELD_MAP = {
 	id: 'id',
 	code: 'code',
@@ -24,7 +24,14 @@ export const FIELD_MAP = {
 	createdAt: { db: 'created_at', toDb: () => undefined },
 };
 
-export const toDomain = dbRow => genericToDomain(dbRow, FIELD_MAP);
+export const toDomain = dbRow => {
+	if (!dbRow) return null;
+	const judge = genericToDomain(dbRow, FIELD_MAP);
+	if (dbRow.school_school) {
+		judge.School = schoolToDomain(dbRow.school_school);
+	}
+	return judge;
+};
 export const toPersistence = domainObj => genericToPersistence(domainObj, FIELD_MAP);
 
 export default {

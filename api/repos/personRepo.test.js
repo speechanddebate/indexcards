@@ -1,4 +1,3 @@
-
 import factories from '../../tests/factories/index.js';
 import personRepo, { personInclude } from './personRepo.js';
 
@@ -46,7 +45,7 @@ describe('PersonRepo', () => {
 
 		it('includes password when requested', async () => {
 			// Arrange
-			const password = 'testpassword';
+			const password = 'test password';
 			const { personId } = await factories.person.createTestPerson({ password });
 
 			// Act
@@ -85,6 +84,39 @@ describe('PersonRepo', () => {
 			// Assert
 			expect(person).toBeNull();
 		});
+		it('paradigm search filters', async () => {
+			//set the cutoff to the future
+			//await db.tabroomSetting.delete( tag: 'paradigm_review_cutoff', value: 'date');
+			// Arrange
+			// Create person with paradigm setting timestamp between review start and cutoff
+			const { personId } = await factories.person.createTestPerson({
+				settings: {
+					paradigm: 'Some paradigm',
+				},
+			});
+			// Act
+			const person = await personRepo.getPerson(personId, {
+				excludeBanned: true,
+				excludeUnconfirmedEmail: true,
+				hasValidParadigm: true,
+				include: {
+					judges: {
+						fields: ['id'],
+						include: {
+							school: {
+								fields: ['id','name'],
+							},
+						},
+					},
+				},
+			});
+
+			// Assert
+			expect(person).toBeDefined();
+			expect(person.id).toBe(personId);
+			expect(person.Judges).toBeDefined();
+			expect(Array.isArray(person.Judges)).toBe(true);
+		});
 		describe('filters by hasValidParadigm', () => {
 			it('excludes persons without a paradigm setting', async () => {
 				// Arrange
@@ -94,7 +126,6 @@ describe('PersonRepo', () => {
 				// Assert
 				expect(person).toBeNull();
 			});
-			it.todo('excludes persons with a paradigm setting that has not been updated since the last paradigm review cutoff');
 		});
 	});
 

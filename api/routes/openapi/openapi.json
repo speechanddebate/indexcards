@@ -3135,7 +3135,11 @@
                         "type": "string",
                         "description": "Full name"
                       },
-                      "chapters": {
+                      "tournJudged": {
+                        "type": "integer",
+                        "description": "Number of tournaments judged"
+                      },
+                      "schools": {
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -3209,9 +3213,28 @@
                       "type": "string",
                       "description": "Full name"
                     },
+                    "lastReviewed": {
+                      "type": "string",
+                      "format": "date-time",
+                      "description": "Last reviewed timestamp"
+                    },
                     "paradigm": {
                       "type": "string",
                       "description": "Paradigm content"
+                    },
+                    "record": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    },
+                    "certifications": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {}
+                      }
                     }
                   }
                 }
@@ -3222,7 +3245,7 @@
             "$ref": "#/components/responses/Unauthorized"
           },
           "404": {
-            "$ref": "#/components/responses/NotFoundResponse"
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/ErrorResponse"

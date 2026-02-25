@@ -20,6 +20,14 @@ function buildSchoolQuery(opts = {}){
 	return query;
 }
 
+export function schoolInclude(opts = {}) {
+	return {
+		model: db.school,
+		as: 'schools',
+		...buildSchoolQuery(opts),
+	};
+}
+
 async function getSchool(id, opts = {}) {
 	const dbRow = await db.school.findByPk(id, buildSchoolQuery(opts));
 

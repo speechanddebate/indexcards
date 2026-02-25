@@ -23,6 +23,12 @@ db.timeslot.hasMany(db.round, { as: 'rounds', foreignKey: 'timeslot' });
 // Ensure chapterJudge <-> person association exists
 db.chapterJudge.belongsTo(db.person, { as: 'person_person', foreignKey: 'person' });
 db.person.hasMany(db.chapterJudge, { as: 'chapter_judges', foreignKey: 'person' });
+// judge to school
+db.judge.belongsTo(db.school, { as: 'school_school', foreignKey: 'school' });
+db.school.hasMany(db.judge, { as: 'judges', foreignKey: 'school' });
+// person to judge
+db.person.hasMany(db.judge, { as: 'judges', foreignKey: 'person' });
+db.judge.belongsTo(db.person, { as: 'person_person', foreignKey: 'person' });
 
 // By default Sequelize wants you to try...catch every single database call
 // for Reasons?  Otherwise all your database errors just go unprinted and you

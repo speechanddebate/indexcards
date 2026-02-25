@@ -1,5 +1,5 @@
 import personRepo from '../../repos/personRepo.js';
-import { BadRequest } from '../../helpers/problem.js';
+import { BadRequest, NotFound } from '../../helpers/problem.js';
 
 async function getParadigms(req, res) {
 	//get the search query from the query params
@@ -7,15 +7,18 @@ async function getParadigms(req, res) {
 	if (!search) {
 		throw new BadRequest(req, res, 'Search query is required');
 	}
+
 	const paradigms = await personRepo.personSearch(search, {
 		excludeBanned: true,
 		excludeUnconfirmedEmail: true,
 		hasValidParadigm: true,
+		hasJudged: true,
+		limit: 50,
 		include: {
-			chapterJudges: {
+			judges: {
 				fields: ['id'],
 				include: {
-					chapter: {
+					school: {
 						fields: ['id','name'],
 					},
 				},
@@ -25,17 +28,26 @@ async function getParadigms(req, res) {
 
 	const results = paradigms.map(p => {
 		const nameParts = [p.firstName, p.middleName, p.lastName].filter(Boolean);
+		// Get all schools from Judges
+		const schools = p.Judges
+			? p.Judges
+				.filter(j => j && j.School)
+				.map(j => ({
+					id: j.School.id,
+					name: j.School.name,
+				}))
+			: [];
+
+		// Deduplicate schools by id
+		const distinctSchools = Array.from(
+			new Map(schools.map(s => [s.name, s])).values()
+		);
+
 		return {
 			id: p.id,
 			name: nameParts.join(' '),
-			chapters: p.ChapterJudges
-				? p.ChapterJudges
-					.filter(cj => cj && cj.Chapter)
-					.map(cj => ({
-						id: cj.Chapter.id,
-						name: cj.Chapter.name,
-					}))
-				: [],
+			tournJudged: p.Judges ? p.Judges.length : 0,
+			schools: distinctSchools,
 		};
 	});
 	res.json(results);
@@ -50,16 +62,16 @@ async function getParadigmByPersonId(req, res) {
 		excludeBanned: true,
 		excludeUnconfirmedEmail: true,
 		hasValidParadigm: true,
-		settings: ['paradigm'],
+		settings: ['paradigm', 'paradigm_timestamp'],
 	});
 
 	if (!person) {
-		res.status(404).json({ message: 'Person not found or does not have a valid paradigm' });
-		return;
+		return NotFound(req, res, 'Person not found or does not have a valid paradigm');
 	}
 	res.json({
 		id: person.id,
 		name: [person.firstName, person.middleName, person.lastName].filter(Boolean).join(' '),
+		lastReviewed: person.settings['paradigm_timestamp'] || null,
 		paradigm: person.settings['paradigm'] || null,
 
 	});
