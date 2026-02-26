@@ -3,14 +3,15 @@ import { toDomain as genericToDomain, toPersistence as genericToPersistence } fr
 import {toDomain as roundToDomain} from './roundMapper.js';
 
 export const FIELD_MAP = {
-	id: 'id',
-	name: 'name',
-	abbr: 'abbr',
-	type: 'type',
-	level: 'level',
-	categoryId: 'category',
-	tournId: 'tourn',
-	settings: 'event_settings',
+	id           : 'id',
+	name         : 'name',
+	abbr         : 'abbr',
+	type         : 'type',
+	level        : 'level',
+	categoryId   : 'category',
+	tournId      : 'tourn',
+	nsdaCategory : 'nsda_category',
+	settings     : 'event_settings',
 };
 
 export const toDomain = dbRow => {

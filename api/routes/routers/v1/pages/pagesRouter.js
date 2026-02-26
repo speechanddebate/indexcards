@@ -66,4 +66,16 @@ router.route('/invite/webname/:webname').get(inviteController.getTournIdByWebnam
 	},
 };
 
+router.route('/invite/:tournId/').get(inviteController.getTournIdByWebname).openapi = {
+	path: '/pages/invite/webname/{webname}',
+	summary: 'Get Tournament ID by Webname',
+	description: 'Retrieve the tournament ID and details by webname.',
+	tags: ['Invite', 'Public'],
+	responses: {
+		200: {
+			description: 'Tournament information',
+		},
+	},
+};
+
 export default router;

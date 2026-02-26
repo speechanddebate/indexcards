@@ -111,7 +111,7 @@ export async function getScheduleByEvent(req,res) {
 	return res.status(200).json(rounds);
 };
 
-export async function getEventByAbbr(req, res){
+export async function getEventByAbbr(req, res) {
 
 	if (!req.params.eventAbbr) {
 		return NotFound(req, res, `No valid event abbreviation sent`);

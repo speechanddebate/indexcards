@@ -1,7 +1,8 @@
 import { NotFound } from '../../helpers/problem.js';
 import roundRepo from '../../repos/roundRepo.js';
 
-export async function getRound(req,res){
+export async function getRound(req,res) {
+
 	const round = await roundRepo.getRound(req.params.roundId);
 
 	if (!round) {
@@ -51,9 +52,9 @@ export async function getSchematic(req,res){
 
 	let sections = await roundRepo.getSectionsByRound(round.id);
 
-	// If things are anonymous, just cut all identifying information out
-	// now. I do this here and not within sections because a lot of it is
-	// keyed to aspects of the round settings
+	// If things are anonymous, just cut all identifying information out now. I
+	// do this here and not within sections because a lot of it is keyed to
+	// aspects of the round settings
 
 	if (round.anonymous_public) {
 
@@ -108,7 +109,6 @@ export async function getSchematic(req,res){
 	}
 
 	// If I'm here it's a true pairing and therefore needs populated sections.
-
 	round.sections = {};
 
 	for (const section of sections) {

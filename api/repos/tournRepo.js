@@ -129,9 +129,10 @@ export async function getSchedule(tournId){
 	const schedule = await db.sequelize.query(`
 			select
 				round.id, round.name, round.label, round.type, round.start_time startTime,
-				event.id eventId, event.abbr eventAbbr,
-				round.published,
-				timeslot.id timeslotId, timeslot.start timeslotStart
+				event.id eventId, event.abbr eventAbbr, event.type eventType,
+				round.published, round.post_primary,
+				timeslot.id timeslotId,
+					timeslot.start timeslotStart, timeslot.end timeslotEnd
 			from (round, event, timeslot)
 			where 1=1
 				and event.tourn = :tournId
@@ -143,7 +144,29 @@ export async function getSchedule(tournId){
 		replacements: { tournId },
 		type: db.Sequelize.QueryTypes.SELECT,
 	});
-	return schedule;
+
+	return schedule.map( (round) => {
+		return {
+			id          : round.id,
+			type        : round.type,
+			name        : round.name,
+			label       : round.label,
+			published   : round.published,
+			postPrimary : round.post_primary,
+			startTime   : round.startTime,
+			Event: {
+				id   : round.eventId,
+				name : round.eventName,
+				abbr : round.eventAbbr,
+				type : round.eventType,
+			},
+			Timeslot  : {
+				id    : round.timeslotId,
+				start : round.timeslotStart,
+				end   : round.timeslotEnd,
+			},
+		};
+	});
 };
 /**
  * Get webpages scoped to a tournament.
