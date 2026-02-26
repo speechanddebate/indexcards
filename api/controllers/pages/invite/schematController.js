@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 import db from '../../../data/db.js';
 import { NotFound } from '../../../helpers/problem.js';
 
