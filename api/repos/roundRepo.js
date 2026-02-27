@@ -15,6 +15,11 @@ function buildRoundQuery(opts = {}) {
 	if(!opts.unpublished){
 		query.where.published = 1;
 	}
+	//only include rounds where the primary result is public and the round is published
+	if(opts.publicPrimaryResults) {
+		query.where.post_primary = { [db.Sequelize.Op.gte]: 3 };
+		query.where.published = { [db.Sequelize.Op.gt]: 0 };
+	}
 
 	query.include.push(
 		...withSettingsInclude({
@@ -24,11 +29,11 @@ function buildRoundQuery(opts = {}) {
 		})
 	);
 
-	if (opts.include?.event) {
+	if (opts.include?.Event) {
 		const eventOpts =
-			opts.include.event === true
+			opts.include.Event === true
 				? { fields: ['id','name','abbr','type','level'], settings: [] }
-				: opts.include.event;
+				: opts.include.Event;
 
 		query.include.push({
 			...eventInclude({

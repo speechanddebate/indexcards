@@ -1,5 +1,7 @@
 import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
 import { toDomain as schoolToDomain } from './schoolMapper.js';
+import { toDomain as ballotToDomain } from './ballotMapper.js';
+import { toDomain as categoryToDomain } from './categoryMapper.js';
 export const FIELD_MAP = {
 	id: 'id',
 	code: 'code',
@@ -27,8 +29,14 @@ export const FIELD_MAP = {
 export const toDomain = dbRow => {
 	if (!dbRow) return null;
 	const judge = genericToDomain(dbRow, FIELD_MAP);
+	if (dbRow.category_category) {
+		judge.Category = categoryToDomain(dbRow.category_category);
+	}
 	if (dbRow.school_school) {
 		judge.School = schoolToDomain(dbRow.school_school);
+	}
+	if (dbRow.ballots && Array.isArray(dbRow.ballots)) {
+		judge.Ballots = dbRow.ballots.map(ballotToDomain);
 	}
 	return judge;
 };

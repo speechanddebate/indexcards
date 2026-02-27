@@ -1,5 +1,6 @@
 import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
 import { toDomain as ballotToDomain } from './ballotMapper.js';
+import { toDomain as roundToDomain } from './roundMapper.js';
 
 export const FIELD_MAP = {
 	id: 'id',
@@ -19,8 +20,11 @@ export const FIELD_MAP = {
 export const toDomain = dbRow => {
 	if(!dbRow) return null;
 	const domain = genericToDomain(dbRow, FIELD_MAP);
+	if(dbRow.round_round){
+		domain.Round = roundToDomain(dbRow.round_round);
+	}
 	if(dbRow.ballots){
-		domain.ballots = dbRow.ballots.map(ballotToDomain);
+		domain.Ballots = dbRow.ballots.map(ballotToDomain);
 	};
 	return domain;
 };

@@ -1,6 +1,13 @@
 import personRepo from '../../repos/personRepo.js';
 import { buildTarget } from './buildTarget.js';
 import { Unauthorized, Forbidden } from '../../helpers/problem.js';
+//requires login - use before any route that needs authentication
+export function requireLogin(req, res, next) {
+	if (!req.person) {
+		return Unauthorized(req, res,'User not Authenticated');
+	}
+	next();
+}
 // used for ext routes
 export async function requireAreaAccess(req, res, next) {
 	if (!req.person) {

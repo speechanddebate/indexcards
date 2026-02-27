@@ -2,6 +2,7 @@
 import { toDomain as genericToDomain, toPersistence as genericToPersistence } from './mapperUtils.js';
 import { toDomain as judgeDomain } from './judgeMapper.js';
 import { toDomain as jPoolDomain } from './jPoolMapper.js';
+import { toDomain as tournDomain } from './tournMapper.js';
 
 export const FIELD_MAP = {
 	id: 'id',
@@ -17,6 +18,9 @@ export const FIELD_MAP = {
 export const toDomain = dbRow => {
 	if(!dbRow) return null;
 	const domain = genericToDomain(dbRow, FIELD_MAP);
+	if(dbRow.tourn_tourn) {
+		domain.Tourn = tournDomain(dbRow.tourn_tourn);
+	}
 	if(Array.isArray(dbRow.judges)) {
 		domain.judges = dbRow.judges.map(judge => judgeDomain(judge));
 	}

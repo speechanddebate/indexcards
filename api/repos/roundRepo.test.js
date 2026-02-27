@@ -20,14 +20,14 @@ describe('getRounds', () => {
 		//Act
 		var rounds = await roundRepo.getRounds({tournId},{
 			include: {
-				event: true,
+				Event: true,
 			},
 		});
 
 		rounds.forEach((round, i) => {
 			assert.equal(round.published, 1, `Round at index ${i} (roundId=${round.roundId}) is not published`);
-			assert.ok(round.event, `Round at index ${i} (id=${round.id}) is missing an event`);
-			assert.typeOf(round.event.id, 'number', `Round at index ${i} (id=${round.id}) has no event.id`);
+			assert.ok(round.Event, `Round at index ${i} (id=${round.id}) is missing an event`);
+			assert.typeOf(round.Event.id, 'number', `Round at index ${i} (id=${round.id}) has no event.id`);
 		});
 	});
 	it('returns only requested event fields and settings when includeEvent is object', async () => {
@@ -35,7 +35,7 @@ describe('getRounds', () => {
 
 		const rounds = await roundRepo.getRounds({ tournId },{
 			include: {
-				event: {
+				Event: {
 					fields: ['id', 'name', 'abbr', 'level'], // exclude 'type'
 					settings: ['max_entry'],
 				},
@@ -48,19 +48,19 @@ describe('getRounds', () => {
 			assert.typeOf(round.id, 'number', `Round at index ${i} has no id`);
 
 			// Event object
-			assert.ok(round.event, `Round at index ${i} (id=${round.id}) is missing an event`);
+			assert.ok(round.Event, `Round at index ${i} (id=${round.id}) is missing an event`);
 
 			// Check requested fields exist
 			['id', 'name', 'abbr', 'level'].forEach(field => {
-				assert.ok(field in round.event, `Event field "${field}" missing for round ${round.id}`);
+				assert.ok(field in round.Event, `Event field "${field}" missing for round ${round.id}`);
 			});
 
 			// Ensure excluded fields are NOT present
-			assert.strictEqual(round.event.type, undefined, `Event field "type" should be undefined for round ${round.id}`);
+			assert.strictEqual(round.Event.type, undefined, `Event field "type" should be undefined for round ${round.id}`);
 
 			// Assert event.settings has at least one property
-			if (round.event.settings) {
-				const hasSettings = Object.keys(round.event.settings).length > 0;
+			if (round.Event.settings) {
+				const hasSettings = Object.keys(round.Event.settings).length > 0;
 				assert.ok(hasSettings, `Round at index ${i} (id=${round.id}) has no event settings`);
 			};
 		});

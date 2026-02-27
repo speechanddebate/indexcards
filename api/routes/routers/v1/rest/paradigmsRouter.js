@@ -1,7 +1,11 @@
 import controller from '../../../../controllers/rest/paradigmsController.js';
+import { requireLogin } from '../../../../middleware/authorization/authorization.js';
 import { Router } from 'express';
 
 const router = Router();
+
+//searching paradigms requires a user to be logged in
+router.use(requireLogin);
 
 router.route('/').get(controller.getParadigms).openapi = {
 	path: '/rest/paradigms',
@@ -16,6 +20,29 @@ router.route('/').get(controller.getParadigms).openapi = {
 			required: true,
 			schema: {
 				type: 'string',
+			},
+		},
+		{
+			name: 'limit',
+			in: 'query',
+			description: 'Maximum number of paradigms to return',
+			required: false,
+			schema: {
+				type: 'integer',
+				minimum: 1,
+				default: 50,
+				maximum: 100,
+			},
+		},
+		{
+			name: 'offset',
+			in: 'query',
+			description: 'Number of paradigms to skip before starting to return results',
+			required: false,
+			schema: {
+				type: 'integer',
+				minimum: 0,
+				default: 0,
 			},
 		},
 	],
@@ -48,7 +75,6 @@ router.route('/').get(controller.getParadigms).openapi = {
 				},
 			},
 		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
 };
 router.route('/:personId').get(controller.getParadigmByPersonId).openapi = {
@@ -72,31 +98,7 @@ router.route('/:personId').get(controller.getParadigmByPersonId).openapi = {
 			description: 'Paradigm details for the specified person ID',
 			content: {
 				'application/json': {
-					schema: {
-						type: 'object',
-						properties: {
-							id: { type: 'integer' },
-							name: { type: 'string', description: 'Full name' },
-							lastReviewed: { type: 'string', format: 'date-time', description: 'Last reviewed timestamp' },
-							paradigm: { type: 'string', description: 'Paradigm content' },
-							record: {
-								type: 'array',
-								items: {
-									type: 'object',
-									properties: {
-									},
-								},
-							},
-							certifications: {
-								type: 'array',
-								items: {
-									type: 'object',
-									properties: {
-									},
-								},
-							},
-						},
-					},
+					schema: {'$ref': '#/components/schemas/ParadigmDetails'},
 				},
 			},
 		},

@@ -2,6 +2,7 @@
 import db from '../data/db.js';
 import { withSettingsInclude } from './utils/settings.js';
 import { FIELD_MAP,toDomain, toPersistence } from './mappers/categoryMapper.js';
+import { tournInclude } from './tournRepo.js';
 import { judgeInclude } from './judgeRepo.js';
 import { jPoolInclude } from './jpoolRepo.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
@@ -12,6 +13,14 @@ function buildCategoryQuery(opts = {}) {
 		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
 		include: [],
 	};
+
+	if (opts?.include?.Tourn) {
+		query.include.push({
+			...tournInclude(opts.include.Tourn),
+			as: 'tourn_tourn',
+			required: opts.include.Tourn.required ?? false,
+		});
+	}
 
 	if (opts?.include?.judges) {
 		const judge = judgeInclude(opts.include.judges);

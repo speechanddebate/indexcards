@@ -100,7 +100,7 @@ describe('PersonRepo', () => {
 				excludeUnconfirmedEmail: true,
 				hasValidParadigm: true,
 				include: {
-					judges: {
+					Judges: {
 						fields: ['id'],
 						include: {
 							school: {

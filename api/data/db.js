@@ -7,7 +7,9 @@ const sequelize = new Sequelize(
 	config.DB_DATABASE,
 	config.DB_USER,
 	config.DB_PASS,
-	config.sequelizeOptions
+	{
+		...config.sequelizeOptions,
+	}
 );
 
 // initalize all models created by sequelize-auto
@@ -29,6 +31,17 @@ db.school.hasMany(db.judge, { as: 'judges', foreignKey: 'school' });
 // person to judge
 db.person.hasMany(db.judge, { as: 'judges', foreignKey: 'person' });
 db.judge.belongsTo(db.person, { as: 'person_person', foreignKey: 'person' });
+// personQuiz to person and quiz
+db.personQuiz.belongsTo(db.person, { as: 'person_quiz', foreignKey: 'person' });
+db.person.hasMany(db.personQuiz, { as: 'personQuizzes', foreignKey: 'person' });
+db.personQuiz.belongsTo(db.quiz, { as: 'personQuiz_quiz', foreignKey: 'quiz' });
+db.quiz.hasMany(db.personQuiz, { as: 'personQuizzes', foreignKey: 'quiz' });
+// ballot to entry
+db.ballot.belongsTo(db.entry, { as: 'entry_entry', foreignKey: 'entry' });
+db.entry.hasMany(db.ballot, { as: 'ballots', foreignKey: 'entry' });
+// ballot to score
+db.ballot.hasMany(db.score, { as: 'ballot_scores', foreignKey: 'ballot' });
+// score to ballot in init-models
 
 // By default Sequelize wants you to try...catch every single database call
 // for Reasons?  Otherwise all your database errors just go unprinted and you

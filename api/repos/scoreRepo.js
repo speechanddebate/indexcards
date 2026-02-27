@@ -9,6 +9,9 @@ function buildScoreQuery(opts = {}) {
 		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
 		include: [],
 	};
+	if (opts.winloss) {
+		query.where.tag = 'winloss';
+	}
 	if(opts.limit){
 		query.limit = opts.limit;
 	}

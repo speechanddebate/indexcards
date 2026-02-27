@@ -34,7 +34,7 @@ export async function getPublishedRounds(req, res){
 		tournId: req.params.tournId,
 	},{
 		include: {
-			event: {
+			Event: {
 				fields: ['id', 'name', 'abbr','type', 'level'],
 				settings: ['min_entry'],
 			},

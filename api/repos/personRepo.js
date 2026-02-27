@@ -5,6 +5,7 @@ import { withSettingsInclude, saveSettings } from './utils/settings.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { chapterJudgeInclude } from './chapterJudge.js';
 import { judgeInclude } from './judgeRepo.js';
+import { personQuizInclude } from './personQuizRepo.js';
 
 async function buildPersonQuery(opts = {}) {
 
@@ -69,24 +70,30 @@ async function buildPersonQuery(opts = {}) {
 		query.include.push(settingsInclude);
 	}
 
-	// Add chapter join when requested
 	if (opts.include?.chapterJudges) {
 		query.include.push(chapterJudgeInclude(opts.include.chapterJudges));
 	}
-	if (opts.include?.judges){
+	if (opts.include?.Judges){
 		query.include.push({
-			...judgeInclude(opts.include.judges),
+			...judgeInclude(opts.include.Judges),
 			as: 'judges',
 			required: false,
 		});
 	}
-
-	if (Number.isInteger(opts.limit)) {
-		query.limit = opts.limit;
+	if (opts.include?.PersonQuizzes) {
+		query.include.push({
+			...personQuizInclude(opts.include.PersonQuizzes),
+			as: 'personQuizzes',
+			required: false,
+		});
 	}
 
-	if (Number.isInteger(opts.offset)) {
-		query.offset = opts.offset;
+	if (opts.limit) {
+		query.limit = Number(opts.limit);
+	}
+
+	if (opts.offset) {
+		query.offset = Number(opts.offset);
 	}
 
 	return query;
