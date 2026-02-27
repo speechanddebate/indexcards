@@ -56,6 +56,8 @@ async function getParadigms(req, res) {
 	});
 	res.json(results);
 };
+
+//NOTE, I also hate this and will fix it, I was just seeing if it would work well. it didn't. RCT
 async function getParadigmByPersonId(req, res) {
 	const { personId } = req.params;
 	if (!personId) {
