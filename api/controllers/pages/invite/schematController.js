@@ -280,7 +280,7 @@ export async function getSchematic(req,res) {
 			};
 
 			if (ballot.studentPersonIds) {
-				ballot.studentPersons = ballot.studentPersonIds.split(',');
+				ballot.studentPersons = ballot.studentPersonIds.split(',').map(Number);
 			}
 
 			if (req.person
