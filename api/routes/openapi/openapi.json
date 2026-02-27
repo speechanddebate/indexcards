@@ -108,6 +108,14 @@
       "description": "Auto-discovered tag"
     },
     {
+      "name": "Schematic",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "Round",
+      "description": "Auto-discovered tag"
+    },
+    {
       "name": "admin",
       "description": "Auto-discovered tag"
     },
@@ -198,7 +206,9 @@
         "Paradigms",
         "Public",
         "Push Notifications",
+        "Round",
         "Rounds",
+        "Schematic",
         "Tournaments",
         "admin",
         "ads",
@@ -1358,6 +1368,50 @@
         "parameters": [
           {
             "name": "webname",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ]
+      }
+    },
+    "/pages/invite/{tournId}/{eventAbbr}/{roundName}": {
+      "get": {
+        "summary": "Get Schematic Data for a Published Round",
+        "description": "Gives everything needed for a public round display",
+        "tags": [
+          "Invite",
+          "Public",
+          "Schematic",
+          "Round"
+        ],
+        "responses": {
+          "200": {
+            "description": "Round Information"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "eventAbbr",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "roundName",
             "in": "path",
             "required": true,
             "schema": {

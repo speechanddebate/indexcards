@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as inviteController from '../../../../controllers/pages/invite/inviteController.js';
+import * as schematController from '../../../../controllers/pages/invite/schematController.js';
 
 const router = Router();
 
@@ -74,6 +75,18 @@ router.route('/invite/:tournId/').get(inviteController.getTournIdByWebname).open
 	responses: {
 		200: {
 			description: 'Tournament information',
+		},
+	},
+};
+
+router.route('/invite/:tournId/:eventAbbr/:roundName').get(schematController.getSchematic).openapi = {
+	path: '/pages/invite/{tournId}/{eventAbbr}/{roundName}',
+	summary: 'Get Schematic Data for a Published Round',
+	description: 'Gives everything needed for a public round display',
+	tags: ['Invite', 'Public', 'Schematic', 'Round'],
+	responses: {
+		200: {
+			description: 'Round Information',
 		},
 	},
 };

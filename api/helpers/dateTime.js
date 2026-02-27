@@ -65,6 +65,10 @@ export const parseDateTime = ( dateProps) => {
 		date = DateTime.local();
 	}
 
+	if (dateProps.offset) {
+		return date.plus( dateProps.offset );
+	}
+
 	return date;
 };
 
@@ -80,6 +84,7 @@ export const shortZone = (tzString = 'UTC', locale = 'en-US') => {
 // Helper function to get the week of the year by ISO reckoning.  Used for sorting.
 
 export const getWeek = (date) => {
+
 	if (!(date instanceof Date)) date = new Date();
 
 	// ISO week date weeks start on Monday, so correct the day number
@@ -119,7 +124,7 @@ export const getPast = ({ days, months, years, hours, minutes }) => {
 	return lastWeek;
 };
 
-export const getFuture = ({ days, months, years, hours, minutes }) => {
+export const getFuture = ({days, months, years, hours, minutes }) => {
 
 	const today = new Date();
 
@@ -135,7 +140,7 @@ export const getFuture = ({ days, months, years, hours, minutes }) => {
 };
 
 // Format a Date only
-export const showDate =  (dateProps) => {
+export const showDate = (dateProps) => {
 
 	const dt = dateProps.dateTime || parseDateTime(dateProps);
 	if (!dt) return '';
@@ -241,6 +246,7 @@ export const showDateTime =  (dateProps) => {
 	}
 
 	const newProps = {...dateProps, dateTime: dt};
+
 	let fullDate = showDate(newProps);
 	fullDate += ` ${dateProps.joinWord || ''}`;
 	fullDate += ` ${showTime(newProps)}`;
