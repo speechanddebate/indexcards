@@ -18,7 +18,7 @@ export function fromBool(v) {
 //   ...
 // }
 // repos/mappers/mapperUtils.js
-import { flattenSettings } from '../utils/settings.js';
+import { flattenSettings, flattenSettingsTimestamps } from '../utils/settings.js';
 /**
  * Generic function to convert a DB row to a domain object
  * @param {Object} dbRow - Sequelize row or plain object
@@ -50,6 +50,7 @@ export function toDomain(dbRow, fieldMap) {
 
 		if (dbKey.endsWith('_settings') && Array.isArray(value)) {
 			domain[domainKey] = flattenSettings(value);
+			domain[domainKey + 'Timestamps'] = flattenSettingsTimestamps(value);
 		} else {
 			domain[domainKey] = transform(value);
 		}

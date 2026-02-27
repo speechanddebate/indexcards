@@ -58,7 +58,7 @@ async function backupTournament(tournId, opts = {}) {
 				include: {
 					sections: {
 						include: {
-							ballots: {
+							Ballots: {
 
 							},
 						},

@@ -10,19 +10,19 @@ describe('SectionRepo', () => {
 
 			expect(section).toBeDefined();
 			expect(section.round).toBeUndefined();
-			expect(section.ballots).toBeUndefined();
+			expect(section.Ballots).toBeUndefined();
 		});
 		it('includes ballots when requested', async () => {
 			const { sectionId } = await factories.section.createTestSection();
 
 			const section = await sectionRepo.getSection(
 				sectionId,
-				{ include: { ballots: true } }
+				{ include: { Ballots: true } }
 			);
 
 			expect(section).toBeDefined();
-			expect(section.ballots).toBeDefined();
-			expect(Array.isArray(section.ballots)).toBe(true);
+			expect(section.Ballots).toBeDefined();
+			expect(Array.isArray(section.Ballots)).toBe(true);
 		});
 		it('includes settings when requested', async () => {
 			const { sectionId } = await factories.section.createTestSection();

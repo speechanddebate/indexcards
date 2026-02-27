@@ -10,7 +10,12 @@ export function resolveAttributesFromFields(fields, FIELD_MAP) {
 			return [];
 		}
 		return fields
-			.map(f => FIELD_MAP[f])
+			.map(f => {
+				const config = FIELD_MAP[f];
+				if (typeof config === 'string') return config;
+				if (typeof config === 'object' && config.db) return config.db;
+				return undefined;
+			})
 			.filter(Boolean);
 	}
 
@@ -18,7 +23,12 @@ export function resolveAttributesFromFields(fields, FIELD_MAP) {
 	if (typeof fields === 'object' && Array.isArray(fields.exclude)) {
 		return {
 			exclude: fields.exclude
-				.map(f => FIELD_MAP[f])
+				.map(f => {
+					const config = FIELD_MAP[f];
+					if (typeof config === 'string') return config;
+					if (typeof config === 'object' && config.db) return config.db;
+					return undefined;
+				})
 				.filter(Boolean),
 		};
 	}

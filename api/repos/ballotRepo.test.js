@@ -38,24 +38,24 @@ describe('ballotRepo', async () => {
 
 			const ballot = await ballotRepo.getBallot(
 				ballotId,
-				{ include: { scores: true } }
+				{ include: { Scores: true } }
 			);
 
 			expect(ballot).toBeDefined();
-			expect(ballot.scores).toBeDefined();
-			expect(Array.isArray(ballot.scores)).toBe(true);
+			expect(ballot.Scores).toBeDefined();
+			expect(Array.isArray(ballot.Scores)).toBe(true);
 		});
 		it('includes section when requested', async () => {
 			const ballotId = await ballotRepo.createBallot({sectionId});
 
 			const ballot = await ballotRepo.getBallot(
 				ballotId,
-				{ include: { section: true } }
+				{ include: { Section: true } }
 			);
 
 			expect(ballot).toBeDefined();
-			expect(ballot.section).toBeDefined();
-			expect(ballot.section.id).toBeDefined();
+			expect(ballot.Section).toBeDefined();
+			expect(ballot.Section.id).toBeDefined();
 		});
 	});
 	describe('ballotInclude', () => {

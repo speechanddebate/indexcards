@@ -19,8 +19,8 @@ describe('GET /rounds', () => {
 			expect(round.published).toBe(1);
 			expect(typeof round.id).toBe('number');
 			expect(typeof round.eventId).toBe('number');
-			expect(typeof round.event.name).toBe('string');
-			expect(typeof round.event.abbr).toBe('string');
+			expect(typeof round.Event.name).toBe('string');
+			expect(typeof round.Event.abbr).toBe('string');
 		});
 
 		expect(body).toHaveLength(29);

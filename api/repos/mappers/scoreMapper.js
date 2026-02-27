@@ -5,7 +5,7 @@ import { toDomain as ballotToDomain } from './ballotMapper.js';
 export const FIELD_MAP = {
 	id: 'id',
 	tag: 'tag',
-	value: 'code',
+	value: 'value',
 	content: 'onsite',
 	topic: 'tourn',
 	speech: 'chapter',

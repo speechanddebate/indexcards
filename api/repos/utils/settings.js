@@ -1,3 +1,4 @@
+
 export async function saveSettings({
 	model,
 	settings,
@@ -118,6 +119,26 @@ export function flattenSettings(settingRows) {
 		} else {
 			out[setting.tag] = setting.value;
 		}
+	}
+
+	return out;
+}
+/**
+ * Converts setting rows from DB into an object mapping tag to { createdAt, updatedAt }
+ * @param {Array} settingRows - rows from DB
+ * @returns {Object} { tag: { createdAt, updatedAt }, ... }
+ */
+export function flattenSettingsTimestamps(settingRows) {
+	if (!settingRows) return;
+
+	const out = {};
+
+	for (const s of settingRows) {
+		const setting = s.dataValues || s;
+		out[setting.tag] = {
+			createdAt: setting.created_at,
+			updatedAt: setting.timestamp,
+		};
 	}
 
 	return out;

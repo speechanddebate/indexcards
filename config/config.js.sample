@@ -25,7 +25,7 @@ export const config = {
 	SHARE_SMTP_PASS       : 'sharepass',
 	IPLOCATION            : '/var/lib/GeoIP/GeoLite2-City.mmdb',
 	IPISP                 : '/var/lib/GeoIP/GeoIP2-ISP.mmdb',
-	S3_URL				  : 'https://s3.amazonaws.com/tabroom-files/tourns',
+	S3_URL				  : 'https://s3.amazonaws.com/tabroom-files/',
 	COOKIE_NAME           : 'TabroomLocal',
 	COOKIE_DOMAIN         : '.dev.tabroom.com',
 	CSRF                  : {
