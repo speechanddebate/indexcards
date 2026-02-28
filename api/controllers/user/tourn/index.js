@@ -16,6 +16,7 @@ export async function getPersonTournPresence(req, res) {
 			events     : [],
 			judges     : [],
 			categories : [],
+			rounds     : [],
 		},
 		mine: {
 			entries    : [],
@@ -31,7 +32,6 @@ export async function getPersonTournPresence(req, res) {
 
 	// Unique lists of stuff that is me as an individual
 	Object.keys(tournPresence.me).forEach( (key) => {
-		console.log(`Tagging key ${key} with entry data ${edata[key]}`);
 		tournPresence.me[key] =Array.from(new Set([
 			...edata[key],
 			...jdata[key],
@@ -74,6 +74,7 @@ export const getPersonTournEntries = async (personId, tournId) => {
 		events     : [],
 		judges     : [],
 		categories : [],
+		rounds     : [],
 	};
 
 	edata.entries = entryArray.map( (entry) => entry.id );
@@ -92,7 +93,14 @@ export const getPersonTournJudges = async (personId, tournId) => {
 				where ballot.judge = judge.id
 					and ballot.panel = panel.id
 					and panel.round = round.id
-			) as events
+			) as events,
+			(
+				select (GROUP_CONCAT(distinct round.id))
+					from ballot, panel, round
+				where ballot.judge = judge.id
+					and ballot.panel = panel.id
+					and panel.round = round.id
+			) as rounds
 		from (judge, category)
 		where 1=1
 			and judge.person   = :personId
@@ -109,13 +117,15 @@ export const getPersonTournJudges = async (personId, tournId) => {
 		categories : [],
 		events     : [],
 		entries    : [],
+		rounds     : [],
 	};
 
 	judgeArray.forEach( (judge) => {
 		jdata.judges.push(judge.id);
 		jdata.categories.push(judge.category);
 		if (judge.altCategory) jdata.categories.push(judge.category);
-		if (judge.events) jdata.events.push(judge.events.split(',').map(Number));
+		if (judge.events) jdata.events.push(...judge.events.split(',').map(Number));
+		if (judge.rounds) jdata.rounds.push(...judge.rounds.split(',').map(Number));
 	});
 	return jdata;
 };

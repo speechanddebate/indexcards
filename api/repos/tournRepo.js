@@ -99,10 +99,10 @@ async function updateTourn(tournId, updates) {
 	let settingsUpdated = false;
 	if (updates.settings) {
 		settingsUpdated = await saveSettings({
-			model: db.tournSetting,
-			settings: updates.settings,
-			ownerKey: 'tourn',
-			ownerId: tournId,
+			model    : db.tournSetting,
+			settings : updates.settings,
+			ownerKey : 'tourn',
+			ownerId  : tournId,
 		});
 	}
 	updated = updated || settingsUpdated.length > 0;
@@ -130,6 +130,7 @@ export async function getSchedule(tournId){
 			select
 				round.id, round.name, round.label, round.type, round.start_time startTime,
 				event.id eventId, event.abbr eventAbbr, event.type eventType,
+				event.nsda_category nsdaCategory,
 				round.published, round.post_primary,
 				timeslot.id timeslotId,
 					timeslot.start timeslotStart, timeslot.end timeslotEnd
@@ -155,10 +156,11 @@ export async function getSchedule(tournId){
 			postPrimary : round.post_primary,
 			startTime   : round.startTime,
 			Event: {
-				id   : round.eventId,
-				name : round.eventName,
-				abbr : round.eventAbbr,
-				type : round.eventType,
+				id           : round.eventId,
+				name         : round.eventName,
+				abbr         : round.eventAbbr,
+				type         : round.eventType,
+				nsdaCategory : round.nsdaCategory,
 			},
 			Timeslot  : {
 				id    : round.timeslotId,

@@ -35,8 +35,8 @@ export async function getPublishedRounds(req, res){
 	},{
 		include: {
 			Event: {
-				fields: ['id', 'name', 'abbr','type', 'level'],
-				settings: ['min_entry'],
+				fields   : ['id', 'name', 'abbr', 'type', 'level', 'nsdaCategory'],
+				settings : ['min_entry'],
 			},
 		},
 	});

@@ -8,6 +8,7 @@ export async function getSchematic(req,res) {
 	const roundData = await db.sequelize.query(`
 		select
 			event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
+			event.nsda_category nsdaCategory,
 			round.id, round.name, round.label, round.start_time startTime, round.flighted,
 			round.type,
 			round.published, round.post_primary postPrimary,
@@ -76,11 +77,12 @@ export async function getSchematic(req,res) {
 				useNormalRooms   : round.useNormalRooms,
 			},
 			Event    : {
-				id   : round.eventId,
-				name : round.eventName,
-				abbr : round.eventAbbr,
-				type : round.eventType,
-				settings: {},
+				id           : round.eventId,
+				name         : round.eventName,
+				abbr         : round.eventAbbr,
+				type         : round.eventType,
+				nsdaCategory : round.nsdaCategory,
+				settings     : {},
 			},
 		};
 	});
@@ -234,14 +236,7 @@ export async function getSchematic(req,res) {
 			ballot.side, ballot.speakerorder, ballot.chair,
 			entry.id entryId, entry.code entryCode,
 			judge.id judgeId, judge.first judgeFirst, judge.last judgeLast,
-			judge.code judgeCode,
-			judge.person judgePersonId,
-			(
-				SELECT GROUP_CONCAT(student.person SEPARATOR ',')
-					from entry_student es, student
-				where es.entry = ballot.entry
-					and es.student = student.id
-			) as studentPersonIds
+			judge.code judgeCode
 
 		from (ballot, panel section, entry)
 			left join judge on judge.id = ballot.judge
@@ -266,48 +261,31 @@ export async function getSchematic(req,res) {
 
 		let orderKey = ballot.side || ballot.speakerorder;
 
-		if (!round.Sections[ballot.sectionId].entries) {
-			round.Sections[ballot.sectionId].entries = {};
-			round.Sections[ballot.sectionId].judges = {};
+		if (!round.Sections[ballot.sectionId].Entries) {
+			round.Sections[ballot.sectionId].Entries  = {};
+			round.Sections[ballot.sectionId].entryIds = [];
+			round.Sections[ballot.sectionId].Judges   = {};
+			round.Sections[ballot.sectionId].judgeIds = [];
 		}
 
-		if (!round.Sections[ballot.sectionId].entries[orderKey]) {
-
-			round.Sections[ballot.sectionId].entries[orderKey] = {
+		if (!round.Sections[ballot.sectionId].Entries[orderKey]) {
+			round.Sections[ballot.sectionId].entryIds.push(ballot.entryId);
+			round.Sections[ballot.sectionId].Entries[orderKey] = {
 				id           : ballot.entryId,
 				code         : ballot.entryCode,
 				speakerorder : ballot.speakerorder,
 			};
-
-			if (ballot.studentPersonIds) {
-				ballot.studentPersons = ballot.studentPersonIds.split(',').map(Number);
-			}
-
-			if (req.person
-				&& ballot.studentPersons
-				&& ballot.studentPersons.includes(req.person.id)
-			) {
-				round.Sections[ballot.sectionId].me = true;
-				round.Sections[ballot.sectionId].entries[orderKey].me = true;
-			}
 		}
 
-		if (!round.Sections[ballot.sectionId].judges[ballot.judgeId]) {
-			let me = false;
+		if (!round.Sections[ballot.sectionId].Judges[ballot.judgeId]) {
 
-			if (req.person && ballot.judgePersonId == req.person.id) {
-				round.Sections[ballot.sectionId].me = true;
-				me = true;
-			}
-
-			round.Sections[ballot.sectionId].judges[ballot.judgeId] = {
+			round.Sections[ballot.sectionId].judgeIds.push(ballot.judgeId);
+			round.Sections[ballot.sectionId].Judges[ballot.judgeId] = {
 				id     : ballot.id,
 				first  : ballot.judgeFirst,
 				last   : ballot.judgeLast,
 				code   : ballot.judgeCode,
 				chair  : ballot.chair,
-				person : ballot.person,
-				me,
 			};
 
 			if (round.Event.settings.anonymousPublic) {

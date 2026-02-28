@@ -7,6 +7,7 @@ export const FIELD_MAP = {
 	name         : 'name',
 	abbr         : 'abbr',
 	type         : 'type',
+	fee          : 'fee',
 	level        : 'level',
 	categoryId   : 'category',
 	tournId      : 'tourn',
