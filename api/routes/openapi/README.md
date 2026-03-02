@@ -1,24 +1,58 @@
 # Documenting API Endpoints
 
-This directory contains documentation for our API endpoints using the OpenAPI specification.
+This directory defines our OpenAPI source snippets.
+Those snippets are combined into the final API document, which the frontend uses with [Orval](https://orval.dev) to generate:
 
-## How We Document Endpoints
+- typed API clients
+- [MSW](https://mswjs.io/) mock handlers/data
 
-- **Specification Format:**  
-    All endpoints are documented in JSON format following the [OpenAPI 3.1](https://swagger.io/specification/) standard.
+Because Orval generates code directly from this spec, schema quality and consistency are critical.
 
-- **Location:**  
-    Each endpoint is defined in the corresponding controller for the endpoint. Then some helper code generates a big document
-    from those definitions
+## OpenAPI Standard
 
-- **Structure:**  
-    Each OpenAPI definition <b>MUST</b> include:
-    - A summary field describing the operation. ex: Get all ads, Create pairing
-    - A description of the operation. Ex: returns all the current ads in the DB
-    - all relevant tags. Please check/modify tags.js to avoid duplicates.
-    - all possible responses with a complete schema attached, preferably with example values. schemas and responses should be
-    stored in their corresponding directories.
+Use [OpenAPI 3.1](https://swagger.io/specification/) conventions in endpoint definitions and shared schemas.
 
-- **Updating Documentation:**  
-    When you add or modify an endpoint, update the corresponding OpenAPI json snippet.
-    Ensure all fields are accurate and examples are up to date.
+## Where Definitions Live
+
+- Endpoint operation snippets live with their corresponding routers. The definition for a route should live directly on the route in question.
+- Shared schemas and response objects live in this `openapi` area.
+- Build the generated OpenAPI document with:
+
+```bash
+npm run build:openapi
+```
+
+## Required For Every Operation
+
+Each operation MUST include:
+
+- `operationId` (unique and stable)
+- `description`
+- relevant `tags` (use existing tags when possible; avoid duplicates)
+- complete `responses` with schema references and practical examples
+
+## Orval-Focused Rules
+
+These are the most important rules for frontend generation and mocks:
+
+1. **Keep `operationId` stable.**
+    - Orval uses this as the generated method name.
+    - Changing it is a frontend breaking change.
+
+2. **Declare `required` explicitly at the object level.**
+    - Non-required fields are treated as optional and can become `undefined` in mocks.
+
+3. **Model nullability intentionally.**
+    - If a field can be null, declare it (`nullable: true` or OpenAPI 3.1 equivalent such as `type: ['string', 'null']`).
+    - Do not rely on consumers guessing from examples.
+
+4. **Use `readOnly`/`writeOnly` when schemas are reused.**
+    - Example: `id` should be `readOnly` in create/update request contexts.
+
+5. **Provide realistic examples.**
+    - Include examples for response bodies, nested arrays, and enums/labels.
+
+6. **Set `additionalProperties` intentionally.**
+    - Use `additionalProperties: false` when object shape is strict.
+    - Leave it open only when extra keys are truly expected.
+

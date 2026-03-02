@@ -4484,6 +4484,15 @@
       },
       "ParadigmDetails": {
         "type": "object",
+        "required": [
+          "id",
+          "name",
+          "lastReviewed",
+          "paradigm",
+          "record",
+          "certifications"
+        ],
+        "additionalProperties": false,
         "properties": {
           "id": {
             "type": "integer"
@@ -4559,6 +4568,11 @@
             "type": "array",
             "items": {
               "type": "object",
+              "required": [
+                "title",
+                "description"
+              ],
+              "additionalProperties": false,
               "properties": {
                 "title": {
                   "type": "string"

@@ -17,6 +17,8 @@ export const Person = {
 
 export const ParadigmDetails = {
 	type: 'object',
+	required: ['id', 'name', 'lastReviewed', 'paradigm', 'record', 'certifications'],
+	additionalProperties: false,
 	properties: {
 		id: { type: 'integer' },
 		name: { type: 'string', description: 'Full name' },
@@ -46,6 +48,8 @@ export const ParadigmDetails = {
 			type: 'array',
 			items: {
 				type: 'object',
+				required: ['title', 'description'],
+				additionalProperties: false,
 				properties: {
 					title: { type: 'string' },
 					description: { type: 'string'},
