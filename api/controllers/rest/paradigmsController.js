@@ -23,7 +23,7 @@ async function getParadigms(req, res) {
 			Judges: {
 				fields: ['id'],
 				include: {
-					school: {
+					School: {
 						fields: ['id','name'],
 					},
 				},
