@@ -57,6 +57,14 @@ export default class school extends Model {
 						allowNull: true,
 						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
 				}
+				registered_by: {
+						type: DataTypes.INTEGER,
+						allowNull: true,
+						references: {
+								model: 'person',
+								key: 'id'
+						}
+				},
 		}, {
 				tableName: 'school',
 				timestamps: false,

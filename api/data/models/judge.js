@@ -78,6 +78,19 @@ export default class judge extends Model {
 						type: DataTypes.INTEGER,
 						allowNull: true
 				},
+				registered_by: {
+						type: DataTypes.INTEGER,
+						allowNull: true,
+						references: {
+								model: 'person',
+								key: 'id'
+						}
+				},
+				created_at: {
+						type: DataTypes.DATE,
+						allowNull: true,
+						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
+				}
 				timestamp: {
 						type: DataTypes.DATE,
 						allowNull: false,
@@ -91,11 +104,6 @@ export default class judge extends Model {
 						type: DataTypes.STRING(63),
 						allowNull: true
 				},
-				created_at: {
-						type: DataTypes.DATE,
-						allowNull: true,
-						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
-				}
 		}, {
 				tableName: 'judge',
 				timestamps: false,

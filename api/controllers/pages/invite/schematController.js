@@ -117,6 +117,9 @@ export async function getSchematic(req,res) {
 				'online_hybrid',
 				'online_public',
 				'flight_offset',
+				'aff_label',
+				'neg_label',
+				'prep_offset',
 			],
 		},
 		type: db.Sequelize.QueryTypes.SELECT,
@@ -158,6 +161,19 @@ export async function getSchematic(req,res) {
 			dt : round.startTime,
 			offset,
 		});
+
+		// Prep Room Draw time offset for Extemp.
+		if (round.Event.settings.prepOffset) {
+			offset.minutes = -1 * round.Event.settings.prepOffset;
+			if (round.Event.settings.flightOffset && tick > 0) {
+				offset.minutes += tick * parseInt(round.Event.settings.flightOffset);
+			}
+
+			flightTimes.draw = parseDateTime({
+				dt : round.startTime,
+				offset,
+			});
+		}
 
 		// Timezones.  For online tournaments show both user and tournament.
 		// Frontend handles translation here, just need to tag which ones to
