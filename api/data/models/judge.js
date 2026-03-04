@@ -90,7 +90,7 @@ export default class judge extends Model {
 						type: DataTypes.DATE,
 						allowNull: true,
 						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
-				}
+				},
 				timestamp: {
 						type: DataTypes.DATE,
 						allowNull: false,
