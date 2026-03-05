@@ -1,5 +1,9 @@
 ## Indexcards
 
+- [Testing](./testing.md)
+- [Project Dependencies](./dependencies.md)
+- [Auth](./auth.md)
+
 # Adding a new Path
 
 ## defining the route
