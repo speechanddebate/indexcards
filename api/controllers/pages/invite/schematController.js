@@ -181,6 +181,7 @@ export async function getSchematic(req,res) {
 
 		flightTimes.tz = [round.tz];
 		if ( round.Event.settings.onlineMode
+			&& req.person?.tz
 			&& req.person.tz !== round.tz
 		) {
 			flightTimes.tz.push(req.person.tz);

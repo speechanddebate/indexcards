@@ -88,6 +88,8 @@ ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
 		path             : req.path,
 		stack            : err.stack,
 		env              : process.env,
+		status           : 500,
+		error            : true,
 	});
 };
 

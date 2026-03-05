@@ -2,48 +2,28 @@ import os from 'os';
 import config from '../../../config/config.js';
 import { packageData } from '../../../config/json-loader.js';
 
-export const systemStatus = {
-	GET: async (req, res) => {
-		return res.status(200).json({
-			message  : 'OK',
-			name     : packageData.name,
-			version  : packageData.version,
-			webhost  : config.DOCKERHOST || config.HOST || 'undefined',
-			server   : os.hostname(),
-			load     : os.loadavg(),
-			uptime   : os.uptime(),
-			freemem  : os.freemem(),
-			totalmem : os.totalmem(),
-			node     : process.version,
-			runtime  : process.env?.NODE_ENV,
-			database : config.DB_DATABASE,
-		});
-	},
-	POST: async (req, res) => {
-		return res.status(200).json({
-			message  : 'OK',
-			name     : packageData.name,
-			version  : packageData.version,
-			webhost  : config.DOCKERHOST || config.HOST || 'undefined',
-			server   : os.hostname(),
-			load     : os.loadavg(),
-			uptime   : os.uptime(),
-			freemem  : os.freemem(),
-			totalmem : os.totalmem(),
-			node     : process.version,
-			runtime  : process.env?.NODE_ENV,
-			database : config.DB_DATABASE,
-		});
-	},
+export const systemStatus = (req, res) => {
+	return res.status(200).json({
+		message  : 'OK',
+		name     : packageData.name,
+		version  : packageData.version,
+		webhost  : config.DOCKERHOST || config.HOST || 'undefined',
+		server   : os.hostname(),
+		load     : os.loadavg(),
+		uptime   : os.uptime(),
+		freemem  : os.freemem(),
+		totalmem : os.totalmem(),
+		node     : process.version,
+		runtime  : process.env?.NODE_ENV,
+		database : config.DB_DATABASE,
+	});
 };
 
-export const barfPlease = {
-	GET: async (req, res) => {
-		throw new Error('OMG, we are not happy, because an error has happened!');
-	},
+export const barfPlease = (req, res) => {
+	throw new Error('OMG, we are not happy, because an error has happened!');
 };
 
-systemStatus.GET.apiDoc = {
+systemStatus.apiDoc = {
 	summary     : 'Responds with a 200 if up, with some system data',
 	operationId : 'getStatus',
 	responses   : {
@@ -56,7 +36,7 @@ systemStatus.GET.apiDoc = {
 	tags: ['systemStatus'],
 };
 
-systemStatus.POST.apiDoc = {
+systemStatus.apiDoc = {
 	summary     : 'Responds with a 200 if up, with some system data',
 	operationId : 'postStatus',
 	responses: {

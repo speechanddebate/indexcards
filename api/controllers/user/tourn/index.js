@@ -10,6 +10,10 @@ import db from '../../../data/db.js';
 
 export async function getPersonTournPresence(req, res) {
 
+	if (!req.session) {
+		return res.status(200).json({ message: 'You are not logged in'});
+	};
+
 	const tournPresence = {
 		me: {
 			entries    : [],
