@@ -65,7 +65,7 @@ export function createActor(req) {
 		allowedIds: auth.allowedIds,
 	};
 }
-
+// this is a misnomer, I should rename it RT
 function createAuthContext(req) {
 
 	// Per-request cache
