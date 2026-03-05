@@ -39,6 +39,7 @@ router.use(
 		url: '/v1',
 		orderSchemaPropertiesBy: 'preserve',
 		persistAuth: true,
+		showOperationId: true,
 		metaData: {
 			title: 'Tabroom.com API Reference',
 		},
