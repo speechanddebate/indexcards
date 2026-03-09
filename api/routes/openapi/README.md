@@ -1,6 +1,6 @@
 # Indexcards Openapi
 
-Indexcards uses an [OpenAPI 3.1](https://swagger.io/specification/) document to define it's endpoints. This document is used to:
+Indexcards uses an [OpenAPI 3.1](https://swagger.io/specification/) document to define its endpoints. This document is used to:
 - communicate the structure of the API to our community
 - serve a scalar instance at `/v1/reference` to aid in development of the api.
 - generate code on the schmats frontend for interacting with the api. (see schemats docs for more info).
