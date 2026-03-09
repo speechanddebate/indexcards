@@ -3,6 +3,7 @@
 - [Testing](./testing.md)
 - [Project Dependencies](./dependencies.md)
 - [Auth](./auth.md)
+- [OpenAPI](/api/routes/openapi/README.md)
 
 # Adding a new Path
 

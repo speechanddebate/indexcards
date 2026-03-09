@@ -5,9 +5,9 @@ The API element of the new Tabroom.com 4.0.
 > [!CAUTION]
 > This is a prerelease version of the new api. This api is not live currently and even when it is released in beta, no guarantees are made to the stability or availability of the endpoints.
 
-For information related to the sister project, the Tabroom.com frontend re-write, see the [schemats project.](https://github.com/speechanddebate/schemats).
+### For information related to the sister project, the Tabroom.com frontend re-write, see the [schemats project.](https://github.com/speechanddebate/schemats)
 
-for information on the project structure and norms see the [project docs](/docs/README.md)
+### for information on the project structure and norms see the [project docs](/docs/README.md)
 
 ## Getting setup
 

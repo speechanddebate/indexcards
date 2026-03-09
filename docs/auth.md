@@ -7,10 +7,10 @@ All user authentication is handled under `/auth` routes for example `/auth/login
 TODO: add more details on how each of these work
 
 
-## Internal Auth
+# Internal Auth
 This section describes auth as it is relevant to a developer working on indexcards.
 
-# Auth flow
+## Auth flow
 ## Authentication
 When a request comes in to indexcards, it first passes through the [<b>Authentication Middleware</b>](/api/middleware/authentication.js). where, if the user supplied credentials, they are validated and a couple of bits or information are attached to the request:
 - `req.person`: the person who is making the request
