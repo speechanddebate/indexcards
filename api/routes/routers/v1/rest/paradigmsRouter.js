@@ -80,19 +80,8 @@ router.route('/').get(controller.getParadigms).openapi = {
 router.route('/:personId').get(controller.getParadigmByPersonId).openapi = {
 	path: '/rest/paradigms/{personId}',
 	summary: 'Get paradigm details by person ID',
-	operationId: 'getParadigmByPersonId',
+	operationId: 'getParadigm',
 	tags: ['Paradigms'],
-	parameters: [
-		{
-			name: 'personId',
-			in: 'path',
-			description: 'ID of the person to retrieve paradigm details for',
-			required: true,
-			schema: {
-				type: 'integer',
-			},
-		},
-	],
 	responses: {
 		200: {
 			description: 'Paradigm details for the specified person ID',

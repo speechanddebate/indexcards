@@ -6,6 +6,7 @@ import * as Chapter from './Chapter.js';
 import * as Event from './Event.js';
 import * as File from './File.js';
 import * as Invite from './Invite.js';
+import * as Judge from './Judge.js';
 import * as Legacy from './Legacy.js';
 import * as Problem from './Problem.js';
 import * as Site from './Site.js';
@@ -23,6 +24,7 @@ export default {
 	...Event,
 	...File,
 	...Invite,
+	...Judge,
 	...Legacy,
 	...Problem,
 	...Site,
