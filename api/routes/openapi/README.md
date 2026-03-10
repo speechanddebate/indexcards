@@ -18,7 +18,7 @@ There are a couple of things the should be defined on each endpoint:
 - **`path:`** The full path after the version identifier with path parameters replaced. If the endpoint can be called at `/v1/foo/:barId` the path should be `path: 'foo/{barId}`
 	> [!NOTE]
 	> This is not actually put in the openapi document but it is how the generator function builds the document
-- **`OperationId:`** The programmatic name of the operation, used to generate code on the frontend. see [a dialogue on operation naming](#a-dialogue-on-operation-naming) for more information
+- **`OperationId:`** The programmatic name of the operation, used to generate code on the frontend. The operationId should match the path in the following form. If the path is `/tab/foo/{fooId}/bars` then the operationId should be `tabFooBars`.
 - **`summary:`** A human readable name for the operation. Likely a non-camelCase version of the operationId.
 - **`description:`** This can be a longer form explanation of the endpoint.
 - **`tags:`** Tags are how endpoints are organized in scalar
@@ -93,7 +93,4 @@ These are the most important rules for frontend generation and mocks:
 
 - Use `additionalProperties: false` when object shape is strict.
 - Leave it open only when extra keys are truly expected.
-
-## A Dialogue on Operation Naming
-There is a duel mandate when giving an endpoint an operationId. An operationId should contain enough information to make it distinct from other operations, but, because these operationIds get turned into function calls in schemats, they should also be as brief as possible. Generally the operationId should describe the resource being returned and only get into the *how* if there are conflicting methods.
 

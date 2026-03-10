@@ -10,7 +10,7 @@ router.use(requireLogin);
 router.route('/').get(controller.getParadigms).openapi = {
 	path: '/rest/paradigms',
 	summary: 'Search paradigms',
-	operationId: 'searchParadigms',
+	operationId: 'restParadigms',
 	tags: ['Paradigms'],
 	parameters: [
 		{
@@ -80,7 +80,7 @@ router.route('/').get(controller.getParadigms).openapi = {
 router.route('/:personId').get(controller.getParadigmByPersonId).openapi = {
 	path: '/rest/paradigms/{personId}',
 	summary: 'Get paradigm details by person ID',
-	operationId: 'getParadigm',
+	operationId: 'restParadigm',
 	tags: ['Paradigms'],
 	responses: {
 		200: {

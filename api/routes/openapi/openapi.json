@@ -230,7 +230,7 @@
     "/auth/login": {
       "post": {
         "summary": "Login",
-        "operationId": "login",
+        "operationId": "authLogin",
         "description": "Logs in a user and creates a session.",
         "tags": [
           "Auth",
@@ -264,7 +264,7 @@
     "/auth/logout": {
       "post": {
         "summary": "Logout",
-        "operationId": "logout",
+        "operationId": "authLogout",
         "description": "Logs out the current user and invalidates the session.",
         "tags": [
           "Auth"
@@ -286,7 +286,7 @@
     "/auth/register": {
       "post": {
         "summary": "Register",
-        "operationId": "register",
+        "operationId": "authRegister",
         "description": "Registers a new user.",
         "tags": [
           "Auth"
@@ -3157,7 +3157,7 @@
     "/rest/paradigms": {
       "get": {
         "summary": "Search paradigms",
-        "operationId": "searchParadigms",
+        "operationId": "restParadigms",
         "tags": [
           "Paradigms"
         ],
@@ -3249,7 +3249,7 @@
     "/rest/paradigms/{personId}": {
       "get": {
         "summary": "Get paradigm details by person ID",
-        "operationId": "getParadigm",
+        "operationId": "restParadigm",
         "tags": [
           "Paradigms"
         ],

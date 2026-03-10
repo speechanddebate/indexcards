@@ -6,7 +6,7 @@ const router = Router();
 router.route('/login').post(controller.login).openapi = {
 	path: '/auth/login',
 	summary: 'Login',
-	operationId: 'login',
+	operationId: 'authLogin',
 	description: 'Logs in a user and creates a session.',
 	tags: ['Auth', 'Public'],
 	security: [],
@@ -25,7 +25,7 @@ router.route('/login').post(controller.login).openapi = {
 router.route('/logout').post(controller.logout).openapi = {
 	path: '/auth/logout',
 	summary: 'Logout',
-	operationId: 'logout',
+	operationId: 'authLogout',
 	description: 'Logs out the current user and invalidates the session.',
 	tags: ['Auth'],
 };
@@ -33,7 +33,7 @@ router.route('/logout').post(controller.logout).openapi = {
 router.route('/register').post(controller.register).openapi = {
 	path: '/auth/register',
 	summary: 'Register',
-	operationId: 'register',
+	operationId: 'authRegister',
 	description: 'Registers a new user.',
 	tags: ['Auth'],
 	security: [],
