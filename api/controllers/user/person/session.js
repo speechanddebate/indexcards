@@ -1,8 +1,9 @@
 export const getSession = {
 
 	GET: async (req, res) => {
+
 		if (!req.session) {
-			return res.status(201).json({ error: true, message: 'You have no active user session' });
+			return res.status(201).json({ error: true, message: 'You have no active user session.' });
 		}
 		return res.status(200).json(req.session);
 	},

@@ -11,10 +11,12 @@ export async function Authenticate(req, res, next) {
 
 		// COOKIE AUTHENTICATION
 		const cookieName = config.COOKIE_NAME;
-		const cookie = req.cookies[cookieName];
+		const cookie = req.cookies[cookieName] || req.headers[config.SESSION_HEADER];
 
 		if (cookie) {
+
 			let cookieSession = await sessionRepo.findByUserKey(cookie, {include: {su: true, person: true}});
+
 			if (!cookieSession) {
 				res.clearCookie(cookieName);  //invalid cookie, clear it
 			} else {

@@ -1,6 +1,6 @@
 import db from '../data/db.js';
 import crypto from 'crypto';
-/* eslint-disable-next-line import/no-unresolved */
+// eslint-disable-next-line import/no-unresolved
 import { encrypt, verify } from 'unixcrypt';
 import { FIELD_MAP,toDomain, toPersistence } from './mappers/sessionMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';

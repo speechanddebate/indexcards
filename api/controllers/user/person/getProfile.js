@@ -5,7 +5,7 @@ export const getProfile = {
 	GET: async (req, res) => {
 
 		if (!req.person) {
-			return Unauthorized(req, res, 'You have no active user session');
+			return Unauthorized(req, res, 'You have no active user session.  Zounds!');
 		}
 		let person;
 
