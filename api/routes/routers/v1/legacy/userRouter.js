@@ -157,10 +157,19 @@ router.post('/inbox/markDeleted', extractHandler(markMessageDeleted, 'POST')).op
 };
 
 // User session/profile/payment/learn
-router.get('/session', extractHandler(getSessionMod, 'GET')).openapi = {
+router.route('/session').get(extractHandler(getSessionMod, 'GET')).openapi = {
 	path: '/user/session',
-	tags: ['legacy', 'User Session'],
-	responses: { 200: { description: 'User session' }, default: { $ref: '#/components/responses/ErrorResponse' } },
+	operationId: 'UserSession',
+	tags: ['legacy', 'User Session', 'Orval'],
+	responses: {
+		200: {
+			description: 'User session',
+			content: {
+				'application/json': {
+					schema: { $ref: '#/components/schemas/Session' },
+				},
+			},
+		}, default: { $ref: '#/components/responses/ErrorResponse' } },
 };
 router.get('/profile', extractHandler(getProfileMod, 'GET')).openapi = {
 	path: '/user/profile',

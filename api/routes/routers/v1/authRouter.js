@@ -8,7 +8,7 @@ router.route('/login').post(controller.login).openapi = {
 	summary: 'Login',
 	operationId: 'authLogin',
 	description: 'Logs in a user and creates a session.',
-	tags: ['Auth', 'Public'],
+	tags: ['Auth', 'Public', 'Orval'],
 	security: [],
 	requestBody: {
 		required: true,
@@ -27,7 +27,7 @@ router.route('/logout').post(controller.logout).openapi = {
 	summary: 'Logout',
 	operationId: 'authLogout',
 	description: 'Logs out the current user and invalidates the session.',
-	tags: ['Auth'],
+	tags: ['Auth', 'Orval'],
 };
 
 router.route('/register').post(controller.register).openapi = {
@@ -35,7 +35,7 @@ router.route('/register').post(controller.register).openapi = {
 	summary: 'Register',
 	operationId: 'authRegister',
 	description: 'Registers a new user.',
-	tags: ['Auth'],
+	tags: ['Auth', 'Orval'],
 	security: [],
 	requestBody: {
 		required: true,
