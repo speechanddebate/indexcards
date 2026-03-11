@@ -11,7 +11,7 @@ router.route('/').get(controller.getParadigms).openapi = {
 	path: '/rest/paradigms',
 	summary: 'Search paradigms',
 	operationId: 'restParadigms',
-	tags: ['Paradigms'],
+	tags: ['Paradigms', 'Orval'],
 	parameters: [
 		{
 			name: 'search',
@@ -81,7 +81,7 @@ router.route('/:personId').get(controller.getParadigmByPersonId).openapi = {
 	path: '/rest/paradigms/{personId}',
 	summary: 'Get paradigm details by person ID',
 	operationId: 'restParadigm',
-	tags: ['Paradigms'],
+	tags: ['Paradigms', 'Orval'],
 	responses: {
 		200: {
 			description: 'Paradigm details for the specified person ID',

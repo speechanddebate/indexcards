@@ -12,6 +12,59 @@ export const Person = {
 			format: 'email',
 			example: 'johndoe@tabroom.com',
 		},
+		firstName: {
+			type: 'string',
+			example: 'John',
+		},
+		middleName: {
+			type: 'string',
+			nullable: true,
+			example: 'Quincy',
+		},
+		lastName: {
+			type: 'string',
+			example: 'Doe',
+		},
+		state: {
+			type: 'string',
+			example: 'CA',
+		},
+		country: {
+			type: 'string',
+			example: 'USA',
+		},
+		tz: {
+			type: 'string',
+			example: 'America/Los_Angeles',
+		},
+	},
+};
+
+export const Session = {
+	type: 'object',
+	description: 'A user session',
+	additionalProperties: false,
+	properties: {
+		id: {
+			type: 'integer',
+			example: 111111,
+		},
+		personId: {
+			type: 'integer',
+			example: 42,
+		},
+		suId: {
+			type: 'integer',
+			nullable: true,
+			example: 7,
+		},
+		Su: {
+			nullable: true,
+			$ref: '#/components/schemas/Person',
+		},
+		Person: {
+			$ref: '#/components/schemas/Person',
+		},
 	},
 };
 

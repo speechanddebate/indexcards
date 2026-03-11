@@ -88,6 +88,10 @@
       "description": "Auto-discovered tag"
     },
     {
+      "name": "Orval",
+      "description": "Auto-discovered tag"
+    },
+    {
       "name": "Ext",
       "description": "Auto-discovered tag"
     },
@@ -166,6 +170,10 @@
     {
       "name": "Push Notifications",
       "description": "Auto-discovered tag"
+    },
+    {
+      "name": "User Session",
+      "description": "Auto-discovered tag"
     }
   ],
   "x-tagGroups": [
@@ -203,6 +211,7 @@
         "Auth",
         "Events",
         "Invite",
+        "Orval",
         "Paradigms",
         "Public",
         "Push Notifications",
@@ -210,6 +219,7 @@
         "Rounds",
         "Schematic",
         "Tournaments",
+        "User Session",
         "admin",
         "ads",
         "event",
@@ -234,7 +244,8 @@
         "description": "Logs in a user and creates a session.",
         "tags": [
           "Auth",
-          "Public"
+          "Public",
+          "Orval"
         ],
         "security": [],
         "requestBody": {
@@ -267,7 +278,8 @@
         "operationId": "authLogout",
         "description": "Logs out the current user and invalidates the session.",
         "tags": [
-          "Auth"
+          "Auth",
+          "Orval"
         ],
         "parameters": [],
         "responses": {
@@ -289,7 +301,8 @@
         "operationId": "authRegister",
         "description": "Registers a new user.",
         "tags": [
-          "Auth"
+          "Auth",
+          "Orval"
         ],
         "security": [],
         "requestBody": {
@@ -3159,7 +3172,8 @@
         "summary": "Search paradigms",
         "operationId": "restParadigms",
         "tags": [
-          "Paradigms"
+          "Paradigms",
+          "Orval"
         ],
         "parameters": [
           {
@@ -3251,7 +3265,8 @@
         "summary": "Get paradigm details by person ID",
         "operationId": "restParadigm",
         "tags": [
-          "Paradigms"
+          "Paradigms",
+          "Orval"
         ],
         "responses": {
           "200": {
@@ -3335,6 +3350,40 @@
         },
         "summary": "DELETE /user/push/find",
         "description": "DELETE /user/push/find is undocumented. Need to add .openapi to handler",
+        "parameters": []
+      }
+    },
+    "/user/session": {
+      "get": {
+        "operationId": "UserSession",
+        "tags": [
+          "legacy",
+          "User Session",
+          "Orval"
+        ],
+        "responses": {
+          "200": {
+            "description": "User session",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Session"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "GET /user/session",
+        "description": "GET /user/session is undocumented. Need to add .openapi to handler",
         "parameters": []
       }
     }
@@ -3981,6 +4030,31 @@
             "type": "string",
             "format": "email",
             "example": "johndoe@tabroom.com"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John"
+          },
+          "middleName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Quincy"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "state": {
+            "type": "string",
+            "example": "CA"
+          },
+          "country": {
+            "type": "string",
+            "example": "USA"
+          },
+          "tz": {
+            "type": "string",
+            "example": "America/Los_Angeles"
           }
         }
       },
@@ -4631,6 +4705,33 @@
               }
             }
           ]
+        }
+      },
+      "Session": {
+        "type": "object",
+        "description": "A user session",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 111111
+          },
+          "personId": {
+            "type": "integer",
+            "example": 42
+          },
+          "suId": {
+            "type": "integer",
+            "nullable": true,
+            "example": 7
+          },
+          "Su": {
+            "nullable": true,
+            "$ref": "#/components/schemas/Person"
+          },
+          "Person": {
+            "$ref": "#/components/schemas/Person"
+          }
         }
       },
       "CreateSchool": {

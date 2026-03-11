@@ -66,26 +66,6 @@ export const getSession = {
 	},
 };
 
-getSession.GET.apiDoc = {
-	summary: 'Load the curent active session of the logged in user',
-	operationId: 'getSession',
-	responses: {
-		200: {
-			description: 'Session Profile',
-			content: {
-				'*/*': {
-					schema: {
-						type: 'array',
-						items: { $ref: '#/components/schemas/Session' },
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-	tags: ['accounts', 'session'],
-};
-
 getSession.POST.apiDoc = {
 	summary: 'Given a Session Key delivers the corresponding session and personal data',
 	operationId: 'findSession',
