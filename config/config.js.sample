@@ -28,6 +28,7 @@ export const config = {
 	S3_URL				  : 'https://s3.amazonaws.com/tabroom-files/',
 	COOKIE_NAME           : 'TabroomLocal',
 	COOKIE_DOMAIN         : '.dev.tabroom.com',
+	SESSION_SHARED        : 'random_string'
 	CSRF                  : {
 		COOKIE_NAME   : 'CSRF_Token',
 		HEADER_NAME   : 'x-csrf-token'

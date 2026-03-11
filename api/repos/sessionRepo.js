@@ -37,6 +37,7 @@ async function findByUserKey(key, opts = {}) {
 	query.where.userkey = key;
 	const s = await db.session.findOne(query);
 
+	if (!s) return null;
 	// Check for validity
 	const verified = verify(`${s.id}${config.SESSION_SHARED}`, s.userkey);
 	console.log(`Verify status ${verified} with ${s.id}${config.SESSION_SHARED} and salt key ${s.userkey}`);
