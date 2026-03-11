@@ -3,7 +3,7 @@ import request from 'supertest';
 import server from '../../../../../app';
 
 describe('getTournByWebname Human to ID', () => {
-	it('Returns the proper tournament given a webname string', async () => {
+	it('Returns the most current tournament corresponding to a webname string', async () => {
 		const res = await request(server)
 			.get(`/v1/pages/invite/webname/newengland`)
 			.set('Accept', 'application/json')

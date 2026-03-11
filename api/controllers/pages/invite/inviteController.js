@@ -89,7 +89,7 @@ export async function getTournIdByWebname(req,res){
 export async function getNSDACategories(req, res) {
 	const eventCodes = await db.sequelize.query(`
 		select
-			nsda.code, nsda.name
+			nsda.*
 		from nsda_category nsda
 			order by nsda.name
 	`, {

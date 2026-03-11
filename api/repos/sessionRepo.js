@@ -1,8 +1,11 @@
 import db from '../data/db.js';
 import crypto from 'crypto';
+/* eslint-disable-next-line import/no-unresolved */
+import { encrypt, verify } from 'unixcrypt';
 import { FIELD_MAP,toDomain, toPersistence } from './mappers/sessionMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { personInclude } from './personRepo.js';
+import { config } from '../../config/config.js';
 
 async function buildSessionQuery(opts = {}) {
 	const query = {
@@ -33,7 +36,12 @@ async function findByUserKey(key, opts = {}) {
 	const query = await buildSessionQuery(opts);
 	query.where.userkey = key;
 	const s = await db.session.findOne(query);
-	return toDomain(s);
+
+	// Check for validity
+	const verified = verify(`${s.id}${config.SESSION_SHARED}`, s.userkey);
+	console.log(`Verify status ${verified} with ${s.id}${config.SESSION_SHARED} and salt key ${s.userkey}`);
+
+	if (verified) return toDomain(s);
 }
 
 async function getSession(id, opts = {}) {
@@ -44,14 +52,21 @@ async function getSession(id, opts = {}) {
 	if (!dbRow) return null;
 	return toDomain(dbRow);
 }
+
 async function createSession(session){
-	const userkey = crypto.randomBytes(32).toString('hex');
+	const userSalt = crypto.randomBytes(8).toString('hex');
 	const created = await db.session.create({
 		...toPersistence(session),
-		userkey: userkey,
 	});
-	return { id: created.id, userkey  };
+
+	// I don't defend this but it preserves backwards compat -- CLP
+	created.set({
+		userkey: encrypt(`${created.id}${config.SESSION_SHARED}`, '$6$'+userSalt),
+	});
+	await created.save();
+	return { id: created.id, userkey: created.userkey  };
 }
+
 /**
  * Deletes a session if it exists by its ID.
  *

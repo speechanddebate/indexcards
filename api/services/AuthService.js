@@ -2,6 +2,7 @@ import personRepo from '../repos/personRepo.js';
 /* eslint-disable-next-line import/no-unresolved */
 import { verify, encrypt } from 'unixcrypt';
 import crypto from 'crypto';
+import config from '../../config/config.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import { ValidationError } from '../helpers/errors/errors.js';
 
@@ -19,9 +20,9 @@ export async function login(username, password, context = {}) {
 	}
 
 	const { userkey: userkey } = await sessionRepo.createSession({
-		personId: person.id,
-		ip: ip,
-		agentData: agentData,
+		personId  : person.id,
+		ip        : ip,
+		agentData : agentData,
 	});
 	//TODO enforce limits
 
@@ -37,14 +38,14 @@ export async function register(userData, context = {}) {
 	if(!userData.password) throw new ValidationError('Password is required');
 
 	const newPersonData = {
-		email: userData.email,
-		password: hashPassword(userData.password),
-		firstName: userData.firstName,
-		middleName: userData.middleName,
-		lastName: userData.lastName,
-		state: userData.state,
-		country: userData.country,
-		tz: userData.tz,
+		email      : userData.email,
+		password   : hashPassword(userData.password),
+		firstName  : userData.firstName,
+		middleName : userData.middleName,
+		lastName   : userData.lastName,
+		state      : userData.state,
+		country    : userData.country,
+		tz         : userData.tz,
 	};
 	const personId = await personRepo.createPerson(newPersonData);
 
@@ -72,17 +73,19 @@ export function getAuthCookieOptions() {
 	return {
 		httpOnly: true,
 		secure,
-		sameSite: 'lax',
-		path: '/',
+		sameSite : 'lax',
+		domain   : config.COOKIE_DOMAIN,
+		path     : '/',
 	};
 };
 export function getCSRFCookieOptions() {
 	const secure = process.env.NODE_ENV === 'production';
 	return {
-		httpOnly: false,
+		httpOnly : false,
 		secure,
-		sameSite: 'lax',
-		path: '/',
+		sameSite : 'lax',
+		domain   : config.COOKIE_DOMAIN,
+		path     : '/',
 	};
 }
 
