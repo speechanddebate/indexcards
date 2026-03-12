@@ -1,5 +1,4 @@
 import request from 'supertest';
-import { assert } from 'chai';
 import server from '../../../../app.js';
 import factories from '../../../../tests/factories/index.js';
 import { hashPassword } from '../../../services/AuthService.js';
@@ -44,5 +43,22 @@ describe('Auth Router', () => {
 			assert.isObject(res.body, 'Response is an object');
 			assert.containsAllKeys(res.body, ['person', 'token'], 'Response has person object and session token');
 		});
+		it('Fails to log in with incorrect password', async () => {
+			const person = await (await factories.person.createTestPerson({
+				password: hashPassword('securepassword'),
+			})).getPerson();
+
+			const res = await request(server)
+				.post('/v1/auth/login')
+				.send({
+					username: person.email,
+					password: 'wrongpassword',
+				})
+				.set('Accept', 'application/json')
+				.expect('Content-Type', /json/);
+
+			expect(res).toBeProblemResponse(401);
+		});
+
 	});
 });
