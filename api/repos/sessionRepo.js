@@ -1,7 +1,7 @@
 import db from '../data/db.js';
 import crypto from 'crypto';
 // eslint-disable-next-line import/no-unresolved
-import { encrypt, verify } from 'unixcrypt';
+import { encrypt, verify} from 'unixcrypt';
 import { FIELD_MAP,toDomain, toPersistence } from './mappers/sessionMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { personInclude } from './personRepo.js';
@@ -36,11 +36,7 @@ async function findByUserKey(key, opts = {}) {
 	const query = await buildSessionQuery(opts);
 	query.where.userkey = key;
 	const s = await db.session.findOne(query);
-
-	// Check for validity
 	const verified = verify(`${s.id}${config.SESSION_SHARED}`, s.userkey);
-	console.log(`Verify status ${verified} with ${s.id}${config.SESSION_SHARED} and salt key ${s.userkey}`);
-
 	if (verified) return toDomain(s);
 }
 

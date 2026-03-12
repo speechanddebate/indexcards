@@ -1,6 +1,6 @@
 import db from '../data/db.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
-import { FIELD_MAP,toDomain, toPersistence } from './mappers/webpageMapper.js';
+import { FIELD_MAP, toDomain, toPersistence } from './mappers/webpageMapper.js';
 
 function buildWebpageQuery(opts = {}) {
 	const query = {
@@ -51,6 +51,8 @@ async function getWebpages(scope, opts = {}) {
 	}
 
 	const webpages = await db.webpage.findAll(query);
+
+	console.log(webpages);
 	return webpages.map(toDomain);
 };
 

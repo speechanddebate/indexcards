@@ -5,16 +5,14 @@ import { ToPublicPage } from '../mappers/pageMapper.js';
  */
 export async function getPublicPages(req,res){
 	const scope = {
-		sitewide: true,
+		sitewide  : true,
 	};
 
 	if (req.params.slug) {
 		scope.slug = req.params.slug;
 	}
 
-	const pages = await webpageRepo.getWebpages({
-		scope,
-	});
+	const pages = await webpageRepo.getWebpages(scope);
 
 	if (req.params.slug) {
 		if (!pages.length) {
