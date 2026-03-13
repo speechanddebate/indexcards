@@ -42,6 +42,10 @@ async function getMessages(personId) {
  * @returns {Promise<Int>} - The count of unread messages for the specified person
  */
 async function getUnreadCount(personId) {
+	if (personId === undefined || personId === null) {
+		throw new Error('personId is required');
+	}
+
 	return db.message.count({
 		distinct: true,
 		col: 'id',

@@ -49,6 +49,10 @@ describe('messageRepo',() =>{
 			const count = await messageRepo.getUnreadCount(personId);
 			expect(count).toBe(2);
 		});
+		it('should throw an error if personId is not provided', async () => {
+			await expect(messageRepo.getUnreadCount()).rejects.toThrow('personId is required');
+		});
+
 	});
 	describe('markMessageDeleted',() =>{
 		it('should mark a message as deleted for a specific person', async () => {

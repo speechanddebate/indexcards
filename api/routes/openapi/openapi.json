@@ -3409,15 +3409,87 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
-          "404": {
-            "$ref": "#/components/responses/NotFoundResponse"
-          },
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
         },
         "summary": "GET /user/inbox/unread",
         "description": "GET /user/inbox/unread is undocumented. Need to add .openapi to handler",
+        "parameters": []
+      }
+    },
+    "/user/inbox/markRead": {
+      "post": {
+        "tags": [
+          "legacy",
+          "Inbox"
+        ],
+        "responses": {
+          "200": {
+            "description": "Message marked as read"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "POST /user/inbox/markRead",
+        "description": "POST /user/inbox/markRead is undocumented. Need to add .openapi to handler",
+        "parameters": []
+      }
+    },
+    "/user/inbox/markAllRead": {
+      "post": {
+        "tags": [
+          "legacy",
+          "Inbox"
+        ],
+        "responses": {
+          "200": {
+            "description": "All messages marked as read"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "POST /user/inbox/markAllRead",
+        "description": "POST /user/inbox/markAllRead is undocumented. Need to add .openapi to handler",
+        "parameters": []
+      }
+    },
+    "/user/inbox/markDeleted": {
+      "post": {
+        "tags": [
+          "legacy",
+          "Inbox"
+        ],
+        "responses": {
+          "200": {
+            "description": "Message marked as deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "POST /user/inbox/markDeleted",
+        "description": "POST /user/inbox/markDeleted is undocumented. Need to add .openapi to handler",
         "parameters": []
       }
     },
