@@ -1,5 +1,37 @@
 import { expect } from 'vitest';
 
+function toMariaDbSecondPrecision(dateValue) {
+	const timestamp = new Date(dateValue).getTime();
+	if (Number.isNaN(timestamp)) {
+		return null;
+	}
+
+	return Math.floor(timestamp / 1000);
+}
+/**
+ * maria db chops off milliseconds from datetime values so this helps compare dates at second precision
+ */
+expect.extend({
+	toEqualDate(received, expected) {
+		const receivedSeconds = toMariaDbSecondPrecision(received);
+		const expectedSeconds = toMariaDbSecondPrecision(expected);
+		const hasInvalidDate = receivedSeconds === null || expectedSeconds === null;
+		const pass = !hasInvalidDate && receivedSeconds === expectedSeconds;
+
+		return {
+			pass,
+			message: () => {
+				if (hasInvalidDate) {
+					return `expected valid dates but received ${String(received)} and ${String(expected)}`;
+				}
+
+				return pass
+					? `expected ${String(received)} not to equal ${String(expected)} at MariaDB second precision`
+					: `expected ${String(received)} to equal ${String(expected)} at MariaDB second precision`;
+			},
+		};
+	},
+});
 /**
  * determines if the response is a problem response and has the expected structure
  */

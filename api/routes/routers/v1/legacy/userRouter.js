@@ -12,7 +12,7 @@ import { getSubscribe, pushSubscribe, pushSync } from '../../../../controllers/u
 import { getSubscription, deleteSubscription } from '../../../../controllers/user/blast.js';
 import { checkBallotAccess, checkActive, getBallotSides, saveRubric } from '../../../../controllers/user/judge/ballot.js';
 import { getPersonTournPresence } from '../../../../controllers/user/tourn/index.js';
-import { inboxList, unreadCount, markMessageRead, markAllMessagesRead, markMessageDeleted } from '../../../../controllers/user/inbox.js';
+import { inboxList, getUnreadCount, markMessageRead, markAllMessagesRead, markMessageDeleted } from '../../../../controllers/user/inbox.js';
 import getSessionMod from '../../../../controllers/user/person/session.js';
 import getProfileMod from '../../../../controllers/user/person/getProfile.js';
 import acceptPayPalMod from '../../../../controllers/user/enter/acceptPayPal.js';
@@ -130,15 +130,31 @@ router.get('/tourn/:tournId', getPersonTournPresence).openapi = {
 };
 
 // User inbox
-router.get('/inbox/list', extractHandler(inboxList, 'GET')).openapi = {
+router.route('/inbox/list').get(extractHandler(inboxList, 'GET')).openapi = {
 	path: '/user/inbox/list',
 	tags: ['legacy', 'Inbox'],
 	responses: { 200: { description: 'Inbox list' }, default: { $ref: '#/components/responses/ErrorResponse' } },
 };
-router.get('/inbox/unread', extractHandler(unreadCount, 'GET')).openapi = {
+router.route('/inbox/unread').get(getUnreadCount).openapi = {
 	path: '/user/inbox/unread',
-	tags: ['legacy', 'Inbox'],
-	responses: { 200: { description: 'Unread count' }, default: { $ref: '#/components/responses/ErrorResponse' } },
+	operationId: 'UserInboxUnread',
+	tags: ['Inbox','Orval'],
+	responses: {
+		200: {
+			description: 'Unread count',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'object',
+						properties: {
+							count: { type: 'integer' },
+						},
+					},
+				},
+			},
+		},
+		404: { $ref: '#/components/responses/NotFoundResponse' },
+	},
 };
 router.post('/inbox/markRead', extractHandler(markMessageRead, 'POST')).openapi = {
 	path: '/user/inbox/markRead',
