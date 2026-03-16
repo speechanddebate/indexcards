@@ -12,13 +12,14 @@ import { getSubscribe, pushSubscribe, pushSync } from '../../../../controllers/u
 import { getSubscription, deleteSubscription } from '../../../../controllers/user/blast.js';
 import { checkBallotAccess, checkActive, getBallotSides, saveRubric } from '../../../../controllers/user/judge/ballot.js';
 import { getPersonTournPresence } from '../../../../controllers/user/tourn/index.js';
-import { inboxList, unreadCount, markMessageRead, markAllMessagesRead, markMessageDeleted } from '../../../../controllers/user/inbox.js';
 import getSessionMod from '../../../../controllers/user/person/session.js';
 import getProfileMod from '../../../../controllers/user/person/getProfile.js';
 import acceptPayPalMod from '../../../../controllers/user/enter/acceptPayPal.js';
 import processAuthorizeNetMod from '../../../../controllers/user/enter/processAuthorizeNet.js';
 import updateLastAccess from '../../../../controllers/user/person/access.js';
 import updateLearnCoursesMod from '../../../../controllers/user/person/learnCourse.js';
+
+import inboxRouter from '../user/inboxRouter.js';
 
 const router = Router();
 
@@ -129,32 +130,8 @@ router.get('/tourn/:tournId', getPersonTournPresence).openapi = {
 	responses: { 200: { description: 'Person tournament presence' }, default: { $ref: '#/components/responses/ErrorResponse' } },
 };
 
-// User inbox
-router.get('/inbox/list', extractHandler(inboxList, 'GET')).openapi = {
-	path: '/user/inbox/list',
-	tags: ['legacy', 'Inbox'],
-	responses: { 200: { description: 'Inbox list' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
-router.get('/inbox/unread', extractHandler(unreadCount, 'GET')).openapi = {
-	path: '/user/inbox/unread',
-	tags: ['legacy', 'Inbox'],
-	responses: { 200: { description: 'Unread count' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
-router.post('/inbox/markRead', extractHandler(markMessageRead, 'POST')).openapi = {
-	path: '/user/inbox/markRead',
-	tags: ['legacy', 'Inbox'],
-	responses: { 200: { description: 'Message marked as read' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
-router.post('/inbox/markAllRead', extractHandler(markAllMessagesRead, 'POST')).openapi = {
-	path: '/user/inbox/markAllRead',
-	tags: ['legacy', 'Inbox'],
-	responses: { 200: { description: 'All messages marked as read' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
-router.post('/inbox/markDeleted', extractHandler(markMessageDeleted, 'POST')).openapi = {
-	path: '/user/inbox/markDeleted',
-	tags: ['legacy', 'Inbox'],
-	responses: { 200: { description: 'Message marked as deleted' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
+//User inbox
+router.use('/inbox', inboxRouter);
 
 // User session/profile/payment/learn
 router.route('/session').get(extractHandler(getSessionMod, 'GET')).openapi = {

@@ -172,6 +172,10 @@
       "description": "Auto-discovered tag"
     },
     {
+      "name": "Inbox",
+      "description": "Auto-discovered tag"
+    },
+    {
       "name": "User Session",
       "description": "Auto-discovered tag"
     }
@@ -210,6 +214,7 @@
       "tags": [
         "Auth",
         "Events",
+        "Inbox",
         "Invite",
         "Orval",
         "Paradigms",
@@ -3350,6 +3355,141 @@
         },
         "summary": "DELETE /user/push/find",
         "description": "DELETE /user/push/find is undocumented. Need to add .openapi to handler",
+        "parameters": []
+      }
+    },
+    "/user/inbox/list": {
+      "get": {
+        "tags": [
+          "legacy",
+          "Inbox"
+        ],
+        "responses": {
+          "200": {
+            "description": "Inbox list"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "GET /user/inbox/list",
+        "description": "GET /user/inbox/list is undocumented. Need to add .openapi to handler",
+        "parameters": []
+      }
+    },
+    "/user/inbox/unread": {
+      "get": {
+        "operationId": "UserInboxUnread",
+        "tags": [
+          "Inbox",
+          "Orval"
+        ],
+        "responses": {
+          "200": {
+            "description": "Unread count",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "count": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "GET /user/inbox/unread",
+        "description": "GET /user/inbox/unread is undocumented. Need to add .openapi to handler",
+        "parameters": []
+      }
+    },
+    "/user/inbox/markRead": {
+      "post": {
+        "tags": [
+          "legacy",
+          "Inbox"
+        ],
+        "responses": {
+          "200": {
+            "description": "Message marked as read"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "POST /user/inbox/markRead",
+        "description": "POST /user/inbox/markRead is undocumented. Need to add .openapi to handler",
+        "parameters": []
+      }
+    },
+    "/user/inbox/markAllRead": {
+      "post": {
+        "tags": [
+          "legacy",
+          "Inbox"
+        ],
+        "responses": {
+          "200": {
+            "description": "All messages marked as read"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "POST /user/inbox/markAllRead",
+        "description": "POST /user/inbox/markAllRead is undocumented. Need to add .openapi to handler",
+        "parameters": []
+      }
+    },
+    "/user/inbox/markDeleted": {
+      "post": {
+        "tags": [
+          "legacy",
+          "Inbox"
+        ],
+        "responses": {
+          "200": {
+            "description": "Message marked as deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "summary": "POST /user/inbox/markDeleted",
+        "description": "POST /user/inbox/markDeleted is undocumented. Need to add .openapi to handler",
         "parameters": []
       }
     },
