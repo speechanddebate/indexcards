@@ -51,8 +51,6 @@ async function getWebpages(scope, opts = {}) {
 	}
 
 	const webpages = await db.webpage.findAll(query);
-
-	console.log(webpages);
 	return webpages.map(toDomain);
 };
 

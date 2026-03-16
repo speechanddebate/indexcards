@@ -36,6 +36,8 @@ async function findByUserKey(key, opts = {}) {
 	const query = await buildSessionQuery(opts);
 	query.where.userkey = key;
 	const s = await db.session.findOne(query);
+	if (!s) return null;
+	// Check for validity
 	const verified = verify(`${s.id}${config.SESSION_SHARED}`, s.userkey);
 	if (verified) return toDomain(s);
 }
