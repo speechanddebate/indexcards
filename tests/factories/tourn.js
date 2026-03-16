@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
 import { fakeTournName, toWebName, noMs } from './factoryUtils.js';
 import tournRepo from '../../api/repos/tournRepo.js';
+import db from '../../api/data/db.js';
 
 export function createTournData(overrides = {}) {
 	const name = overrides.name ?? fakeTournName();
@@ -29,6 +30,10 @@ export function createTournData(overrides = {}) {
 export async function createTestTourn(overrides = {}) {
 	const data = createTournData(overrides);
 	const tournId = await tournRepo.createTourn(data);
+
+	if(overrides.circuit) {
+		await db.tournCircuit.create({ tourn: tournId, circuit: overrides.circuit, approved: true });
+	}
 
 	return {
 		tournId,

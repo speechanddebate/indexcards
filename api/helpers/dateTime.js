@@ -468,4 +468,17 @@ export const showDateRange = (rangeProps) => {
 	};
 };
 
+/** gets the start and end dates of a school year
+ * @param {*} date? the date to get the school year for or the current year if undefined
+ * @returns an tuple containing the start and end date
+ */
+export function schoolYearDateRange(date = Date.now()){
+	const d = new Date(date);
+	const year = d.getFullYear();
+	const startYear = d.getMonth() >= 6 ? year : year - 1; // on/after July → current year starts the range
+	const start = new Date(startYear, 6, 1);       // July 1st
+	const end   = new Date(startYear + 1, 5, 30);  // June 30th of the following year
+	return { start, end };
+}
+
 export default showDateRange;

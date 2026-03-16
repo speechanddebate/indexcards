@@ -3,7 +3,12 @@ import { faker } from '@faker-js/faker';
 
 export function createCircuitData(overrides = {}) {
 	return {
+		name: faker.lorem.sentence(),
+		abbr: faker.string.alpha(4),
+		state: faker.location.state({ abbreviated: true }),
+		country: faker.location.countryCode(),
 		tz: faker.location.timeZone(),
+		active: true,
 		...overrides,
 	};
 }
