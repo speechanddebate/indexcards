@@ -77,7 +77,7 @@ export async function getRounds(scope = {}, opts = {}) {
 		if (eventIncIdx === -1) {
 			query.include.push({
 				model      : db.event,
-				as         : 'Event',
+				as         : 'event_event',
 				attributes : [], // join-only include
 				required   : true,
 				where      : {

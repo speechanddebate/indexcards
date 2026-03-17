@@ -4,7 +4,7 @@ import { activeCircuits } from '../../../../controllers/rest/circuitsController.
 const router = Router();
 
 router.route('/active').get(activeCircuits).openapi = {
-	path: 'rest/circuits/active',
+	path: '/rest/circuits/active',
 	summary: 'get active circuits',
 	description: 'gets the active circuits for the current school year',
 	operationId: 'restCircuitsActive',

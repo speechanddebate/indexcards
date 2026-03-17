@@ -3,7 +3,7 @@ import { faker } from '@faker-js/faker';
 
 export function createCircuitData(overrides = {}) {
 	return {
-		name: faker.lorem.sentence(),
+		name: faker.string.alpha({ length: { min: 5, max: 63 } }),
 		abbr: faker.string.alpha(4),
 		state: faker.location.state({ abbreviated: true }),
 		country: faker.location.countryCode(),

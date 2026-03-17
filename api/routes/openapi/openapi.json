@@ -2748,7 +2748,7 @@
         "parameters": []
       }
     },
-    "rest/circuits/active": {
+    "/rest/circuits/active": {
       "get": {
         "summary": "get active circuits",
         "description": "gets the active circuits for the current school year",
@@ -2812,6 +2812,90 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/rest/tourns": {
+      "get": {
+        "summary": "Get Public Tournaments",
+        "operationId": "RestTourns",
+        "description": "Retrieve public information about tournaments.",
+        "tags": [
+          "Tournaments",
+          "Orval"
+        ],
+        "parameters": [
+          {
+            "name": "circuit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Filter tournaments to those approved in this circuit."
+          },
+          {
+            "name": "startAfter",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Return tournaments with start date after this UTC timestamp."
+          },
+          {
+            "name": "startBefore",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "description": "Return tournaments with start date before this UTC timestamp."
+          },
+          {
+            "name": "fields",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated tournament fields. Example: id,name,start"
+          },
+          {
+            "name": "fields[events]",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Comma-separated event fields to include when requesting events."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of tournaments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Tourn"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
           "500": {
             "$ref": "#/components/responses/ErrorResponse"

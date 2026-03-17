@@ -4,7 +4,6 @@ import { schoolYearDateRange } from '../../helpers/dateTime.js';
 export async function activeCircuits(req, res) {
 	const { state, country } = req.query;
 	const { start, end } = schoolYearDateRange();
-	console.log(`Fetching active circuits from ${start} to ${end} for state: ${state}, country: ${country}`);
 	const circuits = await circuitRepo.getActiveCircuits({ startDate: start, endDate: end, state, country });
 
 	return res.json(circuits.map(circuit => ({

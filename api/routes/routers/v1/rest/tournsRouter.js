@@ -1,10 +1,73 @@
 import { Router } from 'express';
-import * as controller from '../../../../controllers/rest/tournController.js';
+import * as controller from '../../../../controllers/rest/tournsController.js';
 import { requirePublicTourn } from '../../../../policy/tournPolicy.js';
 import roundRouter from './roundRouter.js';
 import eventRouter from './eventRouter.js';
 
 const router = Router({ mergeParams: true });
+
+router.route('/').get(controller.getTourns).openapi = {
+	path: '/rest/tourns',
+	summary: 'Get Public Tournaments',
+	operationId: 'RestTourns',
+	description: 'Retrieve public information about tournaments.',
+	tags: ['Tournaments','Orval'],
+	parameters: [
+		{
+			name: 'circuit',
+			in: 'query',
+			required: false,
+			schema: { type: 'integer' },
+			description: 'Filter tournaments to those approved in this circuit.',
+		},
+		{
+			name: 'startAfter',
+			in: 'query',
+			required: false,
+			schema: { type: 'string', format: 'date-time' },
+			description: 'Return tournaments with start date after this UTC timestamp.',
+		},
+		{
+			name: 'startBefore',
+			in: 'query',
+			required: false,
+			schema: { type: 'string', format: 'date-time' },
+			description: 'Return tournaments with start date before this UTC timestamp.',
+		},
+		{
+			name: 'fields',
+			in: 'query',
+			required: false,
+			schema: { type: 'string' },
+			description: 'Comma-separated tournament fields. Example: id,name,start',
+		},
+		{
+			name: 'fields[events]',
+			in: 'query',
+			required: false,
+			schema: { type: 'string' },
+			description: 'Comma-separated event fields to include when requesting events.',
+		},
+	],
+	responses: {
+		200: {
+			description: 'List of tournaments',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'array',
+						items: {
+							$ref: '#/components/schemas/Tourn',
+						},
+					},
+				},
+			},
+		},
+		404: {
+			$ref: '#/components/responses/NotFound',
+		},
+	},
+};
 
 router.use('/:tournId', requirePublicTourn);
 

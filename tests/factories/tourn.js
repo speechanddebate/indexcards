@@ -19,6 +19,7 @@ export function createTournData(overrides = {}) {
 		])
 				: 'UTC'),
 		webname: toWebName(name),
+		hidden: 0,
 		start: noMs(faker.date.past()),
 		end: noMs(faker.date.future()),
 		regStart: noMs(faker.date.past()),

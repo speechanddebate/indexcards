@@ -42,6 +42,9 @@ db.entry.hasMany(db.ballot, { as: 'ballots', foreignKey: 'entry' });
 // ballot to score
 db.ballot.hasMany(db.score, { as: 'ballot_scores', foreignKey: 'ballot' });
 // score to ballot in init-models
+//event -> tourn
+db.event.belongsTo(db.tourn, { as: 'tourn_tourn', foreignKey: 'tourn' });
+db.tourn.hasMany(db.event, { as: 'events', foreignKey: 'tourn' });
 
 // By default Sequelize wants you to try...catch every single database call
 // for Reasons?  Otherwise all your database errors just go unprinted and you
