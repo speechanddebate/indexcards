@@ -124,5 +124,71 @@ export async function getEntryRecord(req,res) {
 		});
 	});
 
+	const rawResults = await db.Sequelize.query(`
+
+		select
+			round.id, round.name, round.label, round.type,
+
+			round.published, round.postPrimary, round.postSecondary,
+
+			panel.bye panelBye,
+			ballot.side side, ballot.speakerorder speakerorder,
+			ballot.bye ballotBye, ballot.forfeit ballotForfeit,
+			ballot.entry entryId,
+
+			judge.id judgeId, judge.first judgeFirst, judge.last judgeLast,
+
+			winloss.id winlossId,
+			winloss.value winloss,
+			rank.value rank, rank.student rankStudent,
+			point.value point, point.value pointStudent,
+
+			opp_entry.id oppId,
+			opp_entry.code oppCode
+
+		from (round, panel, ballot)
+
+			left join judge on ballot.judge = judge.id
+
+			left join ballot opp_ballot
+				on opp_ballot.panel = panel.id
+				and opp_ballot.judge = judge.id
+				and opp_ballot.id != ballot.id
+				and opp_ballot.entry != ballot.entry
+
+			left join entry opp_entry
+				on opp_entry.id = opp_ballot.entry
+
+			left join score winloss
+				on winloss.ballot = ballot.id
+				and winloss.tag   = 'winloss'
+				and winloss.value = 1
+
+			left join score rank
+				on rank.ballot = ballot.id
+				and rank.tag   = 'rank'
+
+			left join score point
+				on point.ballot = ballot.id
+				and point.tag   = 'point'
+
+		where 1=1
+
+			and ballot.entry    = ?
+			and ballot.panel    = panel.id
+			and panel.round     = round.id
+			and round.published = 1
+
+		group by ballot.id
+		order by round.name DESC
+	`, {
+		replacements: { ...req.params },
+		type: db.Sequelize.QueryTypes.SELECT,
+	});
+
+	entryResult.rawResult = rawResults;
+	// obviously not but I wanted to check in mid progress for this unused API
+	// and the linter woudln't STFU
+
 	return res.status(200).json(entryResult);
 };
