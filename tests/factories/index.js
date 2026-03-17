@@ -1,6 +1,7 @@
 import ballot from './ballot.js';
 import category from './category.js';
 import circuit from './circuit.js';
+import event from './event.js';
 import file from './file.js';
 import judge from './judge.js';
 import message from './message.js';
@@ -19,6 +20,7 @@ const factories = {
 	ballot,
 	category,
 	circuit,
+	event,
 	file,
 	judge,
 	message,

@@ -4,6 +4,7 @@ import { webpageInclude }  from './webpageRepo.js';
 import { FIELD_MAP, toDomain, toPersistence } from './mappers/tournMapper.js';
 import { saveSettings, withSettingsInclude } from './utils/settings.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
+import { eventInclude } from './eventRepo.js';
 
 function buildTournQuery(opts = {}) {
 	const query = {
@@ -26,6 +27,13 @@ function buildTournQuery(opts = {}) {
 		query.include.push({
 			...fileInclude(opts.include.files),
 			as: 'files',
+			required: false,
+		});
+	}
+	if(opts.include?.events) {
+		query.include.push({
+			...eventInclude(opts.include.events),
+			as: 'events',
 			required: false,
 		});
 	}
@@ -70,6 +78,33 @@ async function getTourn(tournId,opts = {}) {
 
 	return toDomain(tourn);
 }
+async function getTourns(scope={}, opts = {}) {
+	const query = buildTournQuery(opts);
+	if (scope.circuit) {
+		// Tourn → tournCircuit → circuit join
+		query.include.push({
+			model: db.tournCircuit,
+			as: 'tourn_circuits',
+			attributes: [],
+			required: true,
+			where: { circuit: scope.circuit, approved: 1 },
+		});
+	}
+	if(scope.startAfter){
+		query.where.start = {
+			[db.Sequelize.Op.gt]: scope.startAfter,
+		};
+	}
+	if(scope.startBefore){
+		query.where.start = {
+			...query.where.start,
+			[db.Sequelize.Op.lt]: scope.startBefore,
+		};
+	}
+	const tourns = await db.tourn.findAll(query,{raw: true});
+	return tourns;
+}
+
 async function createTourn(tourn) {
 	const created = await db.tourn.create(
 		toPersistence(tourn)
@@ -198,6 +233,7 @@ export async function getContacts(tournId) {
 
 export default {
 	getTourn,
+	getTourns,
 	createTourn,
 	updateTourn,
 	deleteTourn,

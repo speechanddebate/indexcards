@@ -1,6 +1,6 @@
 import db from '../data/db.js';
-import { withSettingsInclude } from './utils/settings.js';
-import { FIELD_MAP, toDomain } from './mappers/eventMapper.js';
+import { withSettingsInclude, saveSettings } from './utils/settings.js';
+import { FIELD_MAP, toDomain, toPersistence } from './mappers/eventMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { roundInclude } from './roundRepo.js';
 
@@ -133,8 +133,23 @@ export async function getEvents(scope = {}, opts = {}){
 	return results.map(toDomain);
 }
 
+async function createEvent(event) {
+	const created = await db.event.create(
+		toPersistence(event)
+	);
+
+	await saveSettings({
+		model: db.eventSetting,
+		settings: event.settings,
+		ownerKey: 'event',
+		ownerId: created.id,
+	});
+	return created.id;
+}
+
 export default {
 	getEvent,
 	getEvents,
 	getEventInvites,
+	createEvent,
 };

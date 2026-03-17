@@ -12,6 +12,35 @@ export async function getTourn(req, res) {
 	return res.status(200).json(tourn);
 };
 
+export async function getTourns(req,res) {
+	const fields = {};
+	//These should probably be handled by a distinct function in the future RCT
+	if(req.query.fields){
+		fields.root = req.query.fields.split(',').map(f => f.trim());
+	}
+	if(req.query['fields[events]']){
+		fields.events = req.query['fields[events]'].split(',').map(f => f.trim())
+		.filter(field => ['id','name','type','abbr','level'].includes(field)); //list of allowed fields
+	}
+	const { circuit, startBefore, startAfter } = req.query;
+	const opts = {
+		fields: fields.root,
+	};
+
+	if (fields.events?.length) {
+		opts.include = {
+			events: {
+				fields: fields.events,
+			},
+		};
+	}
+
+	const tourns = await tournRepo.getTourns({ circuit, startBefore, startAfter },
+		opts
+	);
+	return res.status(200).json(tourns);
+}
+
 export async function getTournInvite(req, res) {
 	var invite = {};
 

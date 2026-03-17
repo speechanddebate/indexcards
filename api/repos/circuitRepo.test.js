@@ -1,5 +1,7 @@
 
 import circuitRepo, { circuitInclude} from './circuitRepo.js';
+import { faker } from '@faker-js/faker';
+import factories from '../../tests/factories';
 
 describe('circuitRepo', () => {
 	describe('buildCircuitQuery', () => {
@@ -62,6 +64,78 @@ describe('circuitRepo', () => {
 			expect(found).toBeDefined();
 		});
 	});
+	describe('getActiveCircuits', () => {
+		it('should return active circuits within a date range', async () => {
+			const { circuitId } = await factories.circuit.createTestCircuit();
+			await factories.tourn.createTestTourn({ circuit: circuitId, start: new Date() });
+			await factories.tourn.createTestTourn({ circuit: circuitId, start: new Date() });
+			const circuits = await circuitRepo.getActiveCircuits({ startDate: faker.date.past(), endDate: faker.date.future() });
+			expect(Array.isArray(circuits)).toBe(true);
+			const circuit = circuits.find(c => c.id === circuitId);
+
+			expect(circuit).toBeDefined();
+			expect(circuit.tourns).toBe(2);
+
+		});
+		it('should apply state and country filters', async () => {
+			const { circuitId: noLocale } = await factories.circuit.createTestCircuit();
+			await factories.tourn.createTestTourn({ circuit: noLocale, start: new Date() });
+			const { circuitId: rightState } = await factories.circuit.createTestCircuit({ state: 'MN', country: 'US'});
+			await factories.tourn.createTestTourn({ circuit: rightState, start: new Date() });
+			const { circuitId: wrongState } = await factories.circuit.createTestCircuit({ state: 'WI', country: 'US'});
+			await factories.tourn.createTestTourn({ circuit: wrongState, start: new Date() });
+			const { circuitId: wrongCountry } = await factories.circuit.createTestCircuit({ state: 'MN', country: 'CA'});
+			await factories.tourn.createTestTourn({ circuit: wrongCountry, start: new Date() });
+
+			let res = await circuitRepo.getActiveCircuits({
+				startDate: faker.date.past(),
+				endDate: faker.date.future(),
+				state: 'MN',
+				country: 'US',
+			});
+			expect(res).toBeDefined();
+			//expect to contain rightState and none of the others
+			expect(res.some(c => c.id === rightState)).toBe(true);
+			expect(res.some(c => c.id === noLocale)).toBe(false);
+			expect(res.some(c => c.id === wrongState)).toBe(false);
+			expect(res.some(c => c.id === wrongCountry)).toBe(false);
+
+			res = await circuitRepo.getActiveCircuits({
+				startDate: faker.date.past(),
+				endDate: faker.date.future(),
+				country: 'US',
+			});
+			expect(res).toBeDefined();
+			expect(res.some(c => c.id === rightState)).toBe(true);
+			expect(res.some(c => c.id === noLocale)).toBe(false);
+			expect(res.some(c => c.id === wrongState)).toBe(true);
+			expect(res.some(c => c.id === wrongCountry)).toBe(false);
+
+			res = await circuitRepo.getActiveCircuits({
+				startDate: faker.date.past(),
+				endDate: faker.date.future(),
+				state: 'WI',
+			});
+			expect(res).toBeDefined();
+			expect(res.some(c => c.id === rightState)).toBe(false);
+			expect(res.some(c => c.id === noLocale)).toBe(false);
+			expect(res.some(c => c.id === wrongState)).toBe(true);
+			expect(res.some(c => c.id === wrongCountry)).toBe(false);
+		});
+		it('does not return circuits outside the date range', async () => {
+			const { circuitId } = await factories.circuit.createTestCircuit();
+			await factories.tourn.createTestTourn({ circuit: circuitId, start: new Date() });
+			const circuits = await circuitRepo.getActiveCircuits({ startDate: faker.date.future(), endDate: faker.date.future() });
+			expect(circuits.some(c => c.id === circuitId)).toBe(false);
+		});
+		it('throws an error if startDate or endDate is missing', async () => {
+			await expect(circuitRepo.getActiveCircuits({ startDate: faker.date.past() })).rejects.toThrow('getActiveCircuits: startDate and endDate are required');
+			await expect(circuitRepo.getActiveCircuits({ endDate: faker.date.future() })).rejects.toThrow('getActiveCircuits: startDate and endDate are required');
+			await expect(circuitRepo.getActiveCircuits()).rejects.toThrow('getActiveCircuits: startDate and endDate are required');
+		});
+
+	});
+
 	describe('createCircuit', async () => {
 		it('should create a circuit and retrieve it', async () => {
 			const circuitId = await circuitRepo.createCircuit();

@@ -66,6 +66,82 @@ async function getCircuits(scope = {}, opts = {}){
 	return results.map(toDomain);
 }
 
+/** Returns active circuits and the number of approved tournaments in the given date range.
+ * used for the circuits page
+ * @param {{
+ * 	startDate
+ * 	endDate
+ * 	state?
+ * 	country?
+ * }} params
+ * @returns {Promise<Array<{
+ * 	id: number,
+ * 	abbr: string|null,
+ * 	name: string|null,
+ * 	state: string|null,
+ * 	country: string|null,
+ * 	tournCount: number,
+ * }>>}
+ */
+async function getActiveCircuits(params = {}){
+	const {
+		startDate,
+		endDate,
+		state = null,
+		country = null,
+	} = params;
+
+	if (!startDate || !endDate) {
+		throw new Error('getActiveCircuits: startDate and endDate are required');
+	}
+
+	const where = { active: 1 };
+
+	if (state) {
+		where.state = state;
+	}
+
+	if (country) {
+		where.country = country;
+	}
+
+	const result = await db.circuit.findAll({
+		where,
+		attributes: [
+			'id',
+			'abbr',
+			'name',
+			'state',
+			'country',
+			[db.Sequelize.fn('COUNT', db.Sequelize.col('tourn_circuits.id')), 'tourns'],
+		],
+		include: [{
+			model: db.tournCircuit,
+			as: 'tourn_circuits',
+			attributes: [],
+			required: true,
+			where: { approved: 1 },
+			include: [{
+				model: db.tourn,
+				as: 'tourn_tourn',
+				attributes: [],
+				required: true,
+				where: {
+					start: {
+						[db.Sequelize.Op.gt]: startDate,
+						[db.Sequelize.Op.lt]: endDate,
+					},
+				},
+			}],
+		}],
+		group: ['circuit.id', 'circuit.abbr', 'circuit.name', 'circuit.state', 'circuit.country'],
+		order: [['name', 'ASC']],
+		raw: true,
+	});
+
+	return result;
+}
+
 async function getCircuit(circuitId, opts = {}) {
 	const query = buildCircuitQuery(opts);
 	query.where.id = circuitId;
@@ -88,6 +164,7 @@ export async function createCircuit(circuit = {}) {
 }
 export default {
 	getCircuits,
+	getActiveCircuits,
 	getCircuit,
 	createCircuit,
 };

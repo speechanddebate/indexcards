@@ -2,14 +2,16 @@
 import request from 'supertest';
 import app from '../../../../../../app.js';
 import factories from '../../../../../../tests/factories/index.js';
-import { testAdminSession } from '../../../../../../tests/testFixtures.js';
 
 let tournId = null;
-let userkey = testAdminSession.userkey;
+let personId = null;
+let userkey = null;
 
 describe('Timeslots', () => {
 	beforeAll(async () => {
 		({tournId} = await factories.tourn.createTestTourn());
+		({personId} = await factories.person.createTestPerson({siteAdmin: true}));
+		({userkey} = await factories.session.createTestSession({personId}));
 	});
 
 	describe('POST /tourns/:tournId/timeslots', () => {
