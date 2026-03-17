@@ -31,14 +31,17 @@ router.route('/active').get(activeCircuits).openapi = {
 			content: {
 				'application/json': {
 					schema: {
-						type: 'object',
-						properties: {
-							id: { type: 'int' },
-							abbr: { type: 'string' },
-							name: { type: 'string' },
-							state: { type: 'string' },
-							country: { type: 'string' },
-							tournCount: { type: 'integer' },
+						type: 'array',
+						items: {
+							type: 'object',
+							properties: {
+								id: { type: 'integer' },
+								abbr: { type: 'string' },
+								name: { type: 'string' },
+								state: { type: 'string' },
+								country: { type: 'string' },
+								tournCount: { type: 'integer' },
+							},
 						},
 					},
 				},

@@ -1,3 +1,4 @@
+import ad from './ad.js';
 import ballot from './ballot.js';
 import category from './category.js';
 import circuit from './circuit.js';
@@ -17,6 +18,7 @@ import student from './student.js';
 import webpage from './webpage.js';
 
 const factories = {
+	ad,
 	ballot,
 	category,
 	circuit,

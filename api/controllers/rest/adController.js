@@ -1,5 +1,5 @@
 import db from '../../data/db.js';
-
+import config from '../../../config/config.js';
 export async function getAds(req, res) {
 	return res.status(503);
 };
@@ -16,5 +16,9 @@ export async function getPublishedAds(req,res) {
 		type: db.sequelize.QueryTypes.SELECT,
 	});
 
-	return res.status(200).json(currentAds);
+	return res.status(200).json(currentAds.map(ad => ({
+		url: ad.url,
+		imgSrc: `${config.S3_URL}/ads/${ad.id}/${ad.filename}`,
+		background: ad.background,
+	})));
 };

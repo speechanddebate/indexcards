@@ -120,7 +120,7 @@
       "description": "Auto-discovered tag"
     },
     {
-      "name": "admin",
+      "name": "Ads",
       "description": "Auto-discovered tag"
     },
     {
@@ -216,6 +216,7 @@
     {
       "name": "Other",
       "tags": [
+        "Ads",
         "Auth",
         "Circuits",
         "Events",
@@ -230,8 +231,6 @@
         "Schematic",
         "Tournaments",
         "User Session",
-        "admin",
-        "ads",
         "event",
         "eventAbbr",
         "futureTourns",
@@ -2679,10 +2678,10 @@
       "get": {
         "summary": "Get ads",
         "description": "returns an array of ads",
-        "operationId": "getAds",
+        "operationId": "restAds",
         "tags": [
-          "ads",
-          "admin"
+          "Ads",
+          "Orval"
         ],
         "responses": {
           "200": {
@@ -2692,44 +2691,18 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/Ad"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          },
-          "default": {
-            "$ref": "#/components/responses/ErrorResponse"
-          }
-        },
-        "parameters": []
-      }
-    },
-    "/rest/ads/published": {
-      "get": {
-        "summary": "GET public ads",
-        "description": "returns an array of current, approved ads to be displayed on the tabroom homepage.",
-        "operationId": "getPublishedAds",
-        "tags": [
-          "ads",
-          "public"
-        ],
-        "security": [],
-        "responses": {
-          "200": {
-            "description": "An array of Ads to be displayed",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/PublicAd"
+                    "type": "object",
+                    "properties": {
+                      "url": {
+                        "type": "string"
+                      },
+                      "imgSrc": {
+                        "type": "string"
+                      },
+                      "background": {
+                        "type": "string"
+                      }
+                    }
                   }
                 }
               }
@@ -2785,25 +2758,28 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "int"
-                    },
-                    "abbr": {
-                      "type": "string"
-                    },
-                    "name": {
-                      "type": "string"
-                    },
-                    "state": {
-                      "type": "string"
-                    },
-                    "country": {
-                      "type": "string"
-                    },
-                    "tournCount": {
-                      "type": "integer"
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "integer"
+                      },
+                      "abbr": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "state": {
+                        "type": "string"
+                      },
+                      "country": {
+                        "type": "string"
+                      },
+                      "tournCount": {
+                        "type": "integer"
+                      }
                     }
                   }
                 }
