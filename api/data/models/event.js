@@ -19,7 +19,7 @@ export default class event extends Model {
 				allowNull: true
 			},
 			type: {
-				type: DataTypes.ENUM('speech','congress','debate','wudc','wsdc','attendee','mock_trial'),
+				type: DataTypes.ENUM('speech','congress','debate','wudc','wsdc','attendee','mock_trial','academic'),
 				allowNull: false,
 				defaultValue: "attendee"
 			},

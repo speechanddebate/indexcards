@@ -3978,6 +3978,13 @@
       "EventInvite": {
         "type": "object",
         "description": "An event associated with a tournament invite",
+        "required": [
+          "id",
+          "name",
+          "abbr",
+          "type",
+          "categoryid"
+        ],
         "properties": {
           "id": {
             "type": "integer"
@@ -3992,7 +3999,17 @@
             "type": "number"
           },
           "type": {
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "debate",
+              "speech",
+              "mock_trial",
+              "congress",
+              "wsdc",
+              "wudc",
+              "attendee",
+              "academic"
+            ]
           },
           "categoryId": {
             "type": "integer"
@@ -4051,8 +4068,9 @@
           "entryCount": {
             "type": "integer"
           },
-          "nsdaCode": {
-            "type": "string"
+          "nsdaCategory": {
+            "type": "number",
+            "default": 0
           },
           "nsdaName": {
             "type": "string"

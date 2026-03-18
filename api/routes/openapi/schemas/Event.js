@@ -1,9 +1,10 @@
 export const EventInvite ={
-	type: 'object',
-	description: 'An event associated with a tournament invite',
-	properties: {
+	type        : 'object',
+	description : 'An event associated with a tournament invite',
+	required    : ['id', 'name', 'abbr', 'type', 'categoryid'],
+	properties  : {
 		id: {
-			type: 'integer',
+			type : 'integer',
 		},
 		abbr: {
 			type: 'string',
@@ -16,6 +17,7 @@ export const EventInvite ={
 		},
 		type: {
 			type: 'string',
+			enum: ['debate', 'speech', 'mock_trial', 'congress', 'wsdc', 'wudc', 'attendee', 'academic'],
 		},
 		categoryId: {
 			type: 'integer',
@@ -74,8 +76,9 @@ export const EventInvite ={
 		entryCount: {
 			type: 'integer',
 		},
-		nsdaCode: {
-			type: 'string',
+		nsdaCategory: {
+			type: 'number',
+			default: 0,
 		},
 		nsdaName: {
 			type: 'string',
