@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as c from '../../../../controllers/rest/circuitsController.js';
+import { restCircuit } from '../../../openapi/schemas/Circuit.js';
 
 const router = Router();
 router.route('/active').get(c.activeCircuits).openapi = {
@@ -59,16 +60,7 @@ router.route('/:circuitId').get(c.getCircuit).openapi = {
 			description: 'Circuit details',
 			content: {
 				'application/json': {
-					schema: {
-						type: 'object',
-						properties: {
-							id: { type: 'integer' },
-							abbr: { type: 'string' },
-							name: { type: 'string' },
-							state: { type: 'string' },
-							country: { type: 'string' },
-						},
-					},
+					schema: restCircuit,
 				},
 			},
 		},
