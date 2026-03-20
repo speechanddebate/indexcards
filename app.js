@@ -47,7 +47,12 @@ app.use((req, res, next) => {
 });
 
 // Enable getting forwarded client IP from proxy
-app.enable('trust proxy', 1);
+const proxyNumber = config.PROXY_NUMBER;
+
+if (proxyNumber !== 0) {
+	app.enable('trust proxy', proxyNumber);
+}
+
 app.get('/v1/ip', (request, response) => response.send(request.ip));
 
 // Enable CORS Access, hopefully in a way that means I don't
