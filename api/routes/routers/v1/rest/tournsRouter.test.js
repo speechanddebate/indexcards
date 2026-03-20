@@ -24,8 +24,8 @@ describe('GET /rest/tourns', () => {
 		expect(Array.isArray(body)).toBe(true);
 		const tourn = body.find(t => t.id === tournId);
 		expect(tourn).toBeDefined();
-		expect(tourn.events).toBeDefined();
-		expect(tourn.events.some(e => e.abbr === 'ABBR')).toBe(true);
-		expect(tourn.events.some(e => e.type)).toBe(true);
+		expect(tourn.Events).toBeDefined();
+		expect(tourn.Events.some(e => e.abbr === 'ABBR')).toBe(true);
+		expect(tourn.Events.some(e => e.type)).toBe(true);
 	});
 });
