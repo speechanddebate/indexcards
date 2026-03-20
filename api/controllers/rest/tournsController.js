@@ -46,11 +46,12 @@ export async function getTourns(req,res) {
 			city: t.city,
 			state: t.state,
 			country: t.country,
+			tz: t.tz,
 			webname: t.webname,
 			start: t.start,
 			end: t.end,
-			regStart: t.regStart,
-			regEnd: t.regEnd,
+			regStart: t.reg_start,
+			regEnd: t.reg_end,
 			Events: t.events,
 		};
 	}));
