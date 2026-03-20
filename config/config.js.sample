@@ -100,6 +100,7 @@ switch (env) {
 		config.DB_PASS          = '';
 		config.MESSAGE_RATE_MAX = '1000000000';
 		config.LOG_PATH         = '/var/log/indexcards';
+		config.PROXY_NUMBER = 1;
 		break;
 
 	case 'development':
@@ -109,6 +110,7 @@ switch (env) {
 		config.MESSAGE_RATE_MAX = '1000000000';
 		config.sequelizeOptions.logging = false;
 		config.LOG_PATH         = '/var/log/indexcards';
+		config.PROXY_NUMBER = 0;
 		break;
 
 	case 'test':
@@ -118,6 +120,7 @@ switch (env) {
 		config.MESSAGE_RATE_MAX         = '1000000000';
 		config.sequelizeOptions.logging = false;
 		config.MODE                     = 'test';
+		config.PROXY_NUMBER = 0;
 		break;
 
 	default:
