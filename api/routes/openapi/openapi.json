@@ -2795,6 +2795,65 @@
         }
       }
     },
+    "/rest/circuits/{circuitId}": {
+      "get": {
+        "summary": "get a circuit",
+        "description": "gets a circuit by ID",
+        "operationId": "RestCircuit",
+        "tags": [
+          "Circuits",
+          "Orval"
+        ],
+        "responses": {
+          "200": {
+            "description": "Circuit details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer"
+                    },
+                    "abbr": {
+                      "type": "string"
+                    },
+                    "name": {
+                      "type": "string"
+                    },
+                    "state": {
+                      "type": "string"
+                    },
+                    "country": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Circuit not found"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "parameters": [
+          {
+            "name": "circuitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
     "/rest/tourns": {
       "get": {
         "summary": "Get Public Tournaments",

@@ -11,6 +11,10 @@ function buildCircuitQuery(opts = {}) {
 		include: [],
 	};
 
+	if(opts.active){
+		query.where.active = 1;
+	}
+
 	if (opts.include?.tourns) {
 		query.include.push({
 			model: db.tournCircuit,
@@ -145,7 +149,7 @@ async function getActiveCircuits(params = {}){
 async function getCircuit(circuitId, opts = {}) {
 	const query = buildCircuitQuery(opts);
 	query.where.id = circuitId;
-	const circuit = await db.circuit.findOne(query);
+	const circuit = await db.circuit.findOne(query,{raw: true});
 	return toDomain(circuit);
 }
 

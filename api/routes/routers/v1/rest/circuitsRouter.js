@@ -1,9 +1,8 @@
 import { Router } from 'express';
-import { activeCircuits } from '../../../../controllers/rest/circuitsController.js';
+import * as c from '../../../../controllers/rest/circuitsController.js';
 
 const router = Router();
-
-router.route('/active').get(activeCircuits).openapi = {
+router.route('/active').get(c.activeCircuits).openapi = {
 	path: '/rest/circuits/active',
 	summary: 'get active circuits',
 	description: 'gets the active circuits for the current school year',
@@ -46,6 +45,35 @@ router.route('/active').get(activeCircuits).openapi = {
 					},
 				},
 			},
+		},
+	},
+};
+router.route('/:circuitId').get(c.getCircuit).openapi = {
+	path: '/rest/circuits/{circuitId}',
+	summary: 'get a circuit',
+	description: 'gets a circuit by ID',
+	operationId: 'RestCircuit',
+	tags: ['Circuits', 'Orval'],
+	responses: {
+		200: {
+			description: 'Circuit details',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'object',
+						properties: {
+							id: { type: 'integer' },
+							abbr: { type: 'string' },
+							name: { type: 'string' },
+							state: { type: 'string' },
+							country: { type: 'string' },
+						},
+					},
+				},
+			},
+		},
+		404: {
+			description: 'Circuit not found',
 		},
 	},
 };
