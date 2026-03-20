@@ -1,4 +1,4 @@
-export const WebPage = {
+export const Webpage = {
 	type : 'object',
 	description: 'A webpage',
 	properties: {

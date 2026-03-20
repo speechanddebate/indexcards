@@ -1,6 +1,7 @@
 export const Tourn = {
 	type : 'object',
 	description: 'A tournament',
+	required: ['id', 'name', 'tz', 'webname', 'start', 'end'],
 	properties: {
 		id: {
 			type: 'integer',
@@ -33,7 +34,7 @@ export const Tourn = {
 			description: 'The IANA timezone of the tournament location',
 			example: 'America/Chicago',
 		},
-		webName: {
+		webname: {
 			type: 'string',
 			description: 'The web name of the tournament',
 			example: 'nationals',
@@ -62,6 +63,42 @@ export const Tourn = {
 			description: 'The registration end date and time of the tournament',
 			example: '2023-06-02T06:59:00.000Z',
 		},
+		Contacts: {
+			type: 'array',
+			items: { $ref: '#/components/schemas/Contact' },
+		},
+		Categories: {
+			type: 'array',
+			items: { $ref: '#/components/schemas/Category' },
+		},
+		Events : {
+			type: 'array',
+			items: { $ref: '#/components/schemas/Event' },
+		},
+		Schools : {
+			type: 'array',
+			items: { $ref: '#/components/schemas/School' },
+		},
+		Webpages : {
+			type: 'array',
+			items: { $ref: '#/components/schemas/Webpage' },
+		},
+		Files : {
+			type: 'array',
+			items: { $ref: '#/components/schemas/File' },
+		},
+		Emails : {
+			type: 'array',
+			items: { $ref: '#/components/schemas/Email' },
+		},
+		createdAt: {
+			type        : 'string',
+			readOnly    : true,
+			format      : 'date-time',
+			description : 'Creation timestamp',
+		},
+		settings  : { type : 'object', additionalProperties: { type: ['string', 'integer', 'boolean'] } } ,
+		metadata  : { type : 'object', additionalProperties: { type: ['string', 'integer', 'boolean'] } } ,
 	},
 };
 export const TournRequest = {
@@ -93,7 +130,7 @@ export const TournRequest = {
 			description: 'The IANA timezone of the tournament location',
 			example: 'America/Chicago',
 		},
-		webName: {
+		webname: {
 			type: 'string',
 			description: 'The web name of the tournament',
 			example: 'nationals',

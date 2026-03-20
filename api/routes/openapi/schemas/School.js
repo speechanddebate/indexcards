@@ -1,18 +1,68 @@
 export const School = {
 	type: 'object',
 	properties: {
-		id: { type: 'integer', readOnly: true, description: 'Unique identifier for the school' },
-		name: { type: 'string', description: 'Name of the school' },
-		code: { type: 'string', description: 'School code' },
-		onsite: { type: 'boolean', description: 'Whether the school is onsite' },
-		tournId: { type: 'integer', description: 'Tournament ID' },
-		chapterId: { type: 'integer', description: 'Chapter ID' },
-		state: { type: 'string', description: 'State abbreviation' },
-		regionId: { type: 'integer', description: 'Region ID' },
-		districtId: { type: 'integer', description: 'District ID' },
-		settings: { type: 'object', description: 'School settings object' },
-		updatedAt: { type: 'string', readOnly: true, format: 'date-time', description: 'Last modified timestamp' },
-		createdAt: { type: 'string', readOnly: true, format: 'date-time', description: 'Creation timestamp' },
+		id: {
+			type: 'integer',
+			readOnly: true,
+			description: 'Unique identifier for the school',
+		},
+		name: {
+			type: 'string',
+			description: 'Name of the school',
+		},
+		code: {
+			type: 'string',
+			description: 'School code',
+		},
+		onsite: {
+			type: 'boolean',
+			description: 'Whether the school is onsite',
+		},
+		tournId: {
+			type: 'integer',
+			description: 'Tournament ID',
+		},
+		chapterId: {
+			type: 'integer',
+			description: 'Chapter ID',
+		},
+		state: {
+			type: 'string',
+			description: 'State abbreviation',
+		},
+		regionId: {
+			type: 'integer',
+			description: 'Region ID',
+		},
+		districtId: {
+			type: 'integer',
+			description: 'District ID',
+		},
+		updatedAt: {
+			type: 'string',
+			readOnly: true,
+			format: 'date-time',
+			description: 'Last modified timestamp',
+		},
+		createdAt: {
+			type        : 'string',
+			readOnly    : true,
+			format      : 'date-time',
+			description : 'Creation timestamp',
+		},
+		Chapter: {
+			$ref: '#/components/schemas/Chapter',
+		},
+		Entries: {
+			type: 'array',
+			items: { $ref: '#/components/schemas/Entry' },
+		},
+		Judges: {
+			type: 'array',
+			items: { $ref: '#/components/schemas/Judge' },
+		},
+		settings  : { type : 'object', additionalProperties: { type: ['string', 'integer', 'boolean'] } } ,
+		metadata  : { type : 'object', additionalProperties: { type: ['string', 'integer', 'boolean'] } } ,
 	},
 	additionalProperties: false,
 	examples: {

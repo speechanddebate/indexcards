@@ -2,6 +2,7 @@ export const Person = {
 	type : 'object',
 	description: 'A person (user) in tabroom',
 	additionalProperties: false,
+	required: ['id', 'email', 'firstName', 'lastName'],
 	properties : {
 		id: {
 			type: 'integer',
@@ -37,6 +38,14 @@ export const Person = {
 			type: 'string',
 			example: 'America/Los_Angeles',
 		},
+		createdAt: {
+			type        : 'string',
+			readOnly    : true,
+			format      : 'date-time',
+			description : 'Creation timestamp',
+		},
+		settings  : { type : 'object', additionalProperties: { type: 'string' } } ,
+		metadata  : { type : 'object', additionalProperties: { type: 'string' } } ,
 	},
 };
 

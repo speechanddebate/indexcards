@@ -57,8 +57,6 @@ export const getSession = {
 			delete session.nsda;
 			delete session.accesses;
 
-			console.log(session);
-
 			return res.status(200).json(session);
 		}
 

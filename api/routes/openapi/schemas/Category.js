@@ -1,14 +1,23 @@
 export const Category = {
 	type: 'object',
+	required: ['id', 'name', 'abbr', 'tournId'],
 	properties: {
-		id: { type: 'integer' },
-		name: { type: 'string' },
-		abbr: { type: 'string' },
-		tournId: { type: 'integer' },
-		patternId: { type: 'integer', nullable: true },
-		settings: { type: 'array', items: { type: 'object' } },
-		createdAt: { type: 'string', format: 'date-time' },
-		updatedAt: { type: 'string', format: 'date-time' },
+		id        : { type : 'integer' } ,
+		name      : { type : 'string' }  ,
+		abbr      : { type : 'string' }  ,
+		tournId   : { type : 'integer' } ,
+		pattern   : { type : 'integer'   , nullable : true }                ,
+		settings  : { type : 'array'     , items     : { type: 'object' } } ,
+		createdAt : { type : 'string'    , format    : 'date-time' }        ,
+		updatedAt : { type : 'string'    , format    : 'date-time' }        ,
+		Events: {
+			type: 'array',
+			items: { $ref: '#/components/schemas/Event' },
+		},
+		Judges: {
+			type: 'array',
+			items: { $ref: '#/components/schemas/Event' },
+		},
 	},
 	examples: {
 		example1: {

@@ -4,19 +4,19 @@ export const TournInvite = {
 		{
 			type: 'object',
 			properties: {
-				webpages: {
+				Webpages: {
 					type: 'array',
-					items: { $ref: '#/components/schemas/WebPage' },
+					items: { $ref: '#/components/schemas/Webpage' },
 				},
-				files: {
+				Files: {
 					type: 'array',
 					items: { $ref: '#/components/schemas/File' },
 				},
-				events: {
+				Events: {
 					type: 'array',
 					items: { $ref: '#/components/schemas/EventInvite' },
 				},
-				contacts: {
+				Contacts: {
 					type: 'array',
 					items: { $ref: '#/components/schemas/TournContact' },
 				},

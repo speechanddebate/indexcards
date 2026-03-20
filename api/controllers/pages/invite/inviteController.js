@@ -7,83 +7,67 @@ import {
 	showDateRange,
 } from '../../../helpers/dateTime.js';
 import { ucfirst } from '../../../helpers/text.js';
+import { NotFound } from '../../../helpers/problem.js';
 
 export async function getTournIdByWebname(req,res){
 
+	// Remove non alphanumerics.
 	const webname = req.params.webname.replace(/\W/g, '');
-	const reply = {
-		tournId   : 0,
-		name      : '',
-		start     : '',
-		webname   : '',
-		multiYear : false,
-	};
-
-	// Find the most recent tournament that answers to that name.
 
 	const results = await db.sequelize.query(`
 		select
-			tourn.id, tourn.webname, tourn.name, tourn.start
+			tourn.*
 		from tourn
 		where 1=1
+			and tourn.hidden != 1
 			and (tourn.webname = :webname OR tourn.id = :webname)
 		ORDER BY tourn.start DESC
-		LIMIT 1
 	`, {
 		replacements : {webname},
 		type         : db.sequelize.QueryTypes.SELECT,
 	});
 
-	if (results.length > 0) {
-
-		const tourn = results[0];
-
-		// If I'm searching by ID number, find the webname
-		if (tourn.webname !== webname) {
-			const nameCheck = await db.sequelize.query(`
-				select
-					tourn.id, tourn.webname, tourn.name, tourn.start
-				from tourn
-				where 1=1
-					and tourn.webname = :webname
-				ORDER BY tourn.start DESC
-				LIMIT 1
-			`, {
-				replacements: {webname: tourn.webname},
-				type		 : db.sequelize.QueryTypes.SELECT,
-			});
-
-			if (nameCheck[0].id !== tourn.id) {
-				// I am the current instance of webname
-				reply.webname = tourn.webname;
-				reply.tournId = tourn.id;
-				reply.name    = tourn.name;
-				reply.start   = tourn.start;
-			} else {
-				// I am not the current instance of webname, so all URLs must be ID encoded
-				reply.webname = tourn.id.toString();
-				reply.tournId = tourn.id;
-				reply.name    = tourn.name;
-				reply.start   = tourn.start;
-			}
-
-			if (nameCheck.length > 1) {
-				reply.multiYear = true;
-			}
-
-		} else {
-			// If I'm searching by webname, deliver the current ID number
-			reply.webname = tourn.webname;
-			reply.tournId = tourn.id;
-			reply.name    = tourn.name;
-			reply.start   = tourn.start;
-			if (results.length > 1) {
-				reply.multiYear = true;
-			}
-		}
+	if (results.length < 1) {
+		return NotFound(req, res, 'No such tournament found');
 	}
 
-	return res.status(200).json(reply);
+	const tourn = results?.shift();
+	tourn.settings = {
+		multiYear: false,
+	};
+
+	// If the original query was by ID I need to find the webname and other
+	// parallel tournaments that go with it.
+	if (parseInt(webname) === tourn.id) {
+
+		const others = await db.sequelize.query(`
+			select
+				tourn.*
+			from tourn
+			where 1=1
+				and tourn.hidden != 1
+				and tourn.webname = :webname
+				and tourn.id != :tournId
+			ORDER BY tourn.start DESC
+		`, {
+			replacements : {
+				webname: tourn.webname,
+				tournId: tourn.id,
+			},
+			type         : db.sequelize.QueryTypes.SELECT,
+		});
+
+		if (others.length > 0) {
+			tourn.settings.multiYear = true;
+			if (others[0].start > tourn.start) {
+				tourn.settings.notCurrent = true;
+			}
+		}
+	} else if (results.length > 0) {
+		tourn.settings.multiYear = true;
+	}
+
+	return res.status(200).json(tourn);
 }
 
 export async function getNSDACategories(req, res) {

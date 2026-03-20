@@ -1,7 +1,7 @@
-export const EventInvite ={
+export const Event ={
 	type        : 'object',
-	description : 'An event associated with a tournament invite',
-	required    : ['id', 'name', 'abbr', 'type', 'categoryid'],
+	description : 'An event',
+	required    : ['id', 'name', 'abbr', 'type', 'categoryId', 'tournId'],
 	properties  : {
 		id: {
 			type : 'integer',
@@ -17,71 +17,32 @@ export const EventInvite ={
 		},
 		type: {
 			type: 'string',
-			enum: ['debate', 'speech', 'mock_trial', 'congress', 'wsdc', 'wudc', 'attendee', 'academic'],
+			enum: ['debate', 'speech', 'mockTrial', 'congress', 'wsdc', 'wudc', 'attendee', 'academic'],
 		},
 		categoryId: {
 			type: 'integer',
 		},
-		categoryName: {
-			type: 'string',
+		settings  : { type : 'object', additionalProperties: { type: 'string' } } ,
+		metadata  : { type : 'object', additionalProperties: { type: 'string' } } ,
+		Tourn: {
+			$ref: '#/components/schemas/Category',
 		},
-		categoryAbbr: {
-			type: 'string',
+		Category: {
+			$ref: '#/components/schemas/Category',
 		},
-		judgeFieldReport: {
-			type: 'string',
+		Topic: {
+			$ref: '#/components/schemas/Topic',
 		},
-		cap: {
-			type: 'integer',
-			nullable: true,
+		Entries: {
+			type  : 'array',
+			items : { $ref:'#/components/schemas/Entry' },
 		},
-		schoolCap: {
-			type: 'integer',
-			nullable: true,
+		nsdaCategoryId: {
+			type     : 'integer',
+			nullable : true,
 		},
-		topicSource: {
-			type: 'string',
-			nullable: true,
-		},
-		topicEventType: {
-			type: 'string',
-			nullable: true,
-		},
-		topicTag: {
-			type: 'string',
-			nullable: true,
-		},
-		topicText: {
-			type: 'string',
-			nullable: true,
-		},
-		fieldReport: {
-			type: 'string',
-			nullable: true,
-		},
-		anonymousPublic: {
-			type: 'boolean',
-			nullable: true,
-		},
-		liveUpdates: {
-			type: 'string',
-		},
-		description: {
-			type: 'string',
-			nullable: true,
-		},
-		currency: {
-			type: 'string',
-		},
-		entryCount: {
-			type: 'integer',
-		},
-		nsdaCategory: {
-			type: 'number',
-			default: 0,
-		},
-		nsdaName: {
-			type: 'string',
+		NSDACategory: {
+			$ref: '#/components/schemas/NSDACategory',
 		},
 	},
 };

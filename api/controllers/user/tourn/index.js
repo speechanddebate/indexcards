@@ -40,8 +40,6 @@ export async function getPersonTournPresence(req, res) {
 			...edata[key],
 			...jdata[key],
 		]));
-
-		console.log(tournPresence.me);
 	});
 
 	// Unique lists of stuff that is mine as a coach

@@ -3847,6 +3847,12 @@
       },
       "Category": {
         "type": "object",
+        "required": [
+          "id",
+          "name",
+          "abbr",
+          "tournId"
+        ],
         "properties": {
           "id": {
             "type": "integer"
@@ -3860,7 +3866,7 @@
           "tournId": {
             "type": "integer"
           },
-          "patternId": {
+          "pattern": {
             "type": "integer",
             "nullable": true
           },
@@ -3877,6 +3883,18 @@
           "updatedAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "Events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Event"
+            }
+          },
+          "Judges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Event"
+            }
           }
         },
         "examples": {
@@ -3975,15 +3993,106 @@
           }
         }
       },
-      "EventInvite": {
+      "Contact": {
         "type": "object",
-        "description": "An event associated with a tournament invite",
+        "description": "A tournament contact for a school",
+        "required": [
+          "id",
+          "schoolId",
+          "personId"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 42
+          },
+          "schoolId": {
+            "type": "integer"
+          },
+          "personId": {
+            "type": "integer"
+          },
+          "official": {
+            "type": "boolean",
+            "description": "True if the contact is a designated official contact for the school"
+          },
+          "onsite": {
+            "type": "boolean",
+            "description": "True if the contact will be physically present at the tournament"
+          },
+          "email": {
+            "type": "boolean",
+            "description": "True if the contact should get mass emails for the school"
+          },
+          "book": {
+            "type": "boolean",
+            "description": "True if the contact should appear in the Nationals TBook"
+          },
+          "nsda": {
+            "type": "integer",
+            "description": "NSDA ID number of the contact if they are a coach"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "John"
+          },
+          "middleName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Quincy"
+          },
+          "lastName": {
+            "type": "string",
+            "example": "Doe"
+          },
+          "state": {
+            "type": "string",
+            "example": "CA"
+          },
+          "country": {
+            "type": "string",
+            "example": "USA"
+          },
+          "tz": {
+            "type": "string",
+            "example": "America/Los_Angeles"
+          },
+          "createdAt": {
+            "type": "string",
+            "readOnly": true,
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "Person": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "School": {
+            "$ref": "#/components/schemas/School"
+          }
+        }
+      },
+      "Event": {
+        "type": "object",
+        "description": "An event",
         "required": [
           "id",
           "name",
           "abbr",
           "type",
-          "categoryid"
+          "categoryId",
+          "tournId"
         ],
         "properties": {
           "id": {
@@ -4003,7 +4112,7 @@
             "enum": [
               "debate",
               "speech",
-              "mock_trial",
+              "mockTrial",
               "congress",
               "wsdc",
               "wudc",
@@ -4014,66 +4123,39 @@
           "categoryId": {
             "type": "integer"
           },
-          "categoryName": {
-            "type": "string"
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
           },
-          "categoryAbbr": {
-            "type": "string"
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
           },
-          "judgeFieldReport": {
-            "type": "string"
+          "Tourn": {
+            "$ref": "#/components/schemas/Category"
           },
-          "cap": {
+          "Category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "Topic": {
+            "$ref": "#/components/schemas/Topic"
+          },
+          "Entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            }
+          },
+          "nsdaCategoryId": {
             "type": "integer",
             "nullable": true
           },
-          "schoolCap": {
-            "type": "integer",
-            "nullable": true
-          },
-          "topicSource": {
-            "type": "string",
-            "nullable": true
-          },
-          "topicEventType": {
-            "type": "string",
-            "nullable": true
-          },
-          "topicTag": {
-            "type": "string",
-            "nullable": true
-          },
-          "topicText": {
-            "type": "string",
-            "nullable": true
-          },
-          "fieldReport": {
-            "type": "string",
-            "nullable": true
-          },
-          "anonymousPublic": {
-            "type": "boolean",
-            "nullable": true
-          },
-          "liveUpdates": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string",
-            "nullable": true
-          },
-          "currency": {
-            "type": "string"
-          },
-          "entryCount": {
-            "type": "integer"
-          },
-          "nsdaCategory": {
-            "type": "number",
-            "default": 0
-          },
-          "nsdaName": {
-            "type": "string"
+          "NSDACategory": {
+            "$ref": "#/components/schemas/NSDACategory"
           }
         }
       },
@@ -4129,6 +4211,147 @@
           }
         }
       },
+      "Email": {
+        "type": "object",
+        "description": "An email sent to a tournament",
+        "required": [
+          "id",
+          "subject",
+          "content",
+          "metadata"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The unique identifier",
+            "readOnly": true,
+            "example": 123
+          },
+          "subject": {
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "metadata": {
+            "type": "string"
+          },
+          "sentTo": {
+            "type": "string"
+          },
+          "hidden": {
+            "type": "boolean"
+          },
+          "senderRaw": {
+            "type": "string"
+          },
+          "sentAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "tournId": {
+            "type": "integer"
+          },
+          "personId": {
+            "type": "integer"
+          },
+          "senderId": {
+            "type": "integer"
+          },
+          "Tourn": {
+            "$ref": "#/components/schemas/Tourn"
+          },
+          "Person": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "Sender": {
+            "$ref": "#/components/schemas/Person"
+          }
+        }
+      },
+      "Entry": {
+        "type": "object",
+        "description": "An entry",
+        "required": [
+          "id",
+          "code",
+          "eventId"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "ada": {
+            "type": "boolean"
+          },
+          "active": {
+            "type": "boolean"
+          },
+          "dropped": {
+            "type": "boolean"
+          },
+          "waitlist": {
+            "type": "boolean"
+          },
+          "unconfirmed": {
+            "type": "boolean"
+          },
+          "eventId": {
+            "type": "integer"
+          },
+          "schoolId": {
+            "type": "integer"
+          },
+          "registeredById": {
+            "type": "integer"
+          },
+          "RegisteredBy": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "Event": {
+            "$ref": "#/components/schemas/Event"
+          },
+          "School": {
+            "$ref": "#/components/schemas/School"
+          },
+          "Students": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Student"
+            }
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "readOnly": true,
+            "format": "date-time",
+            "description": "Creation timestamp"
+          }
+        }
+      },
       "TournInvite": {
         "allOf": [
           {
@@ -4137,25 +4360,25 @@
           {
             "type": "object",
             "properties": {
-              "webpages": {
+              "Webpages": {
                 "type": "array",
                 "items": {
-                  "$ref": "#/components/schemas/WebPage"
+                  "$ref": "#/components/schemas/Webpage"
                 }
               },
-              "files": {
+              "Files": {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/File"
                 }
               },
-              "events": {
+              "Events": {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/EventInvite"
                 }
               },
-              "contacts": {
+              "Contacts": {
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/TournContact"
@@ -4236,72 +4459,6 @@
           }
         }
       },
-      "Event": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "name": {
-            "type": "string",
-            "nullable": true
-          },
-          "abbr": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "type": "string",
-            "nullable": false,
-            "enum": [
-              "speech",
-              "congress",
-              "debate",
-              "wudc",
-              "wsdc"
-            ]
-          },
-          "level": {
-            "type": "string",
-            "nullable": false,
-            "enum": [
-              "open",
-              "jv",
-              "novice",
-              "champ",
-              "es-open",
-              "es-novice",
-              "middle"
-            ]
-          },
-          "fee": {
-            "type": "number",
-            "format": "float",
-            "nullable": true
-          },
-          "tourn": {
-            "type": "integer",
-            "nullable": true
-          },
-          "category": {
-            "type": "integer",
-            "nullable": true
-          },
-          "pattern": {
-            "type": "integer",
-            "nullable": true
-          },
-          "rating_subset": {
-            "type": "integer",
-            "nullable": true
-          },
-          "timestamp": {
-            "type": "string",
-            "nullable": true,
-            "pattern": "^([0-9]{2,4})-([0-1][0-9])-([0-3][0-9])(?:( [0-2][0-9]):([0-5][0-9]):([0-5][0-9]))?$"
-          }
-        }
-      },
       "Invite": {
         "type": "object",
         "properties": {
@@ -4315,6 +4472,12 @@
         "type": "object",
         "description": "A person (user) in tabroom",
         "additionalProperties": false,
+        "required": [
+          "id",
+          "email",
+          "firstName",
+          "lastName"
+        ],
         "properties": {
           "id": {
             "type": "integer",
@@ -4349,6 +4512,24 @@
           "tz": {
             "type": "string",
             "example": "America/Los_Angeles"
+          },
+          "createdAt": {
+            "type": "string",
+            "readOnly": true,
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
           }
         }
       },
@@ -4397,29 +4578,37 @@
       },
       "Student": {
         "type": "object",
+        "required": [
+          "id",
+          "firstName",
+          "lastName",
+          "chapterId"
+        ],
         "properties": {
           "id": {
-            "type": "integer"
+            "type": "integer",
+            "readOnly": true,
+            "description": "Unique identifier for the student"
           },
-          "first": {
+          "firstName": {
             "type": "string",
-            "nullable": true
+            "description": "First name of the student"
           },
-          "middle": {
+          "middleName": {
             "type": "string",
-            "nullable": true
+            "description": "Middle name of the student"
           },
-          "last": {
+          "lastName": {
             "type": "string",
-            "nullable": true
+            "description": "Last name of the student"
           },
           "phonetic": {
             "type": "string",
-            "nullable": true
+            "description": "Pronunciation guide"
           },
-          "grad_year": {
+          "gradYear": {
             "type": "integer",
-            "nullable": true
+            "description": "Full Year of student graduation"
           },
           "novice": {
             "type": "boolean"
@@ -4428,46 +4617,85 @@
             "type": "boolean"
           },
           "gender": {
-            "type": "string",
-            "nullable": true
-          },
-          "diet": {
-            "type": "string",
-            "nullable": true
-          },
-          "birthdate": {
-            "type": "string",
-            "nullable": true,
-            "pattern": "^([0-9]{2,4})-([0-1][0-9])-([0-3][0-9])(?:( [0-2][0-9]):([0-5][0-9]):([0-5][0-9]))?$"
-          },
-          "school_sid": {
-            "type": "string",
-            "nullable": true
-          },
-          "race": {
-            "type": "string",
-            "nullable": true
+            "type": "string"
           },
           "nsda": {
             "type": "integer",
-            "nullable": true
+            "description": "NSDA Member ID Number"
           },
-          "chapter": {
+          "chapterId": {
             "type": "integer",
-            "nullable": true
+            "description": "Chapter School that the student belongs to"
           },
-          "person": {
+          "personId": {
             "type": "integer",
-            "nullable": true
+            "description": "Tabroom Person the student is linked to"
           },
-          "person_request": {
-            "type": "integer",
-            "nullable": true
+          "Chapter": {
+            "$ref": "#/components/schemas/Chapter"
           },
-          "timestamp": {
+          "Person": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "createdAt": {
             "type": "string",
-            "nullable": true,
-            "pattern": "^([0-9]{2,4})-([0-1][0-9])-([0-3][0-9])(?:( [0-2][0-9]):([0-5][0-9]):([0-5][0-9]))?$"
+            "readOnly": true,
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "integer",
+                "boolean"
+              ]
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "integer",
+                "boolean"
+              ]
+            }
+          }
+        }
+      },
+      "NSDACategory": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "type",
+          "code"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "code": {
+            "type": "integer"
+          },
+          "nationals": {
+            "type": "boolean"
+          }
+        },
+        "examples": {
+          "example1": {
+            "id": 202,
+            "name": "Extemporaneous",
+            "type": "s",
+            "code": 202
           }
         }
       },
@@ -4673,6 +4901,14 @@
       "Tourn": {
         "type": "object",
         "description": "A tournament",
+        "required": [
+          "id",
+          "name",
+          "tz",
+          "webname",
+          "start",
+          "end"
+        ],
         "properties": {
           "id": {
             "type": "integer",
@@ -4705,7 +4941,7 @@
             "description": "The IANA timezone of the tournament location",
             "example": "America/Chicago"
           },
-          "webName": {
+          "webname": {
             "type": "string",
             "description": "The web name of the tournament",
             "example": "nationals"
@@ -4733,6 +4969,74 @@
             "format": "date-time",
             "description": "The registration end date and time of the tournament",
             "example": "2023-06-02T06:59:00.000Z"
+          },
+          "Contacts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Contact"
+            }
+          },
+          "Categories": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Category"
+            }
+          },
+          "Events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Event"
+            }
+          },
+          "Schools": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/School"
+            }
+          },
+          "Webpages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Webpage"
+            }
+          },
+          "Files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/File"
+            }
+          },
+          "Emails": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Email"
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "readOnly": true,
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "integer",
+                "boolean"
+              ]
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "integer",
+                "boolean"
+              ]
+            }
           }
         }
       },
@@ -4799,7 +5103,7 @@
             "description": "The IANA timezone of the tournament location",
             "example": "America/Chicago"
           },
-          "webName": {
+          "webname": {
             "type": "string",
             "description": "The web name of the tournament",
             "example": "nationals"
@@ -4830,7 +5134,62 @@
           }
         }
       },
-      "WebPage": {
+      "Topic": {
+        "type": "object",
+        "required": [
+          "id",
+          "tag",
+          "source",
+          "schoolYear",
+          "topicText"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "tag": {
+            "type": "string"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "NSDA",
+              "NCFL",
+              "CEDA",
+              "NFHS",
+              "CPFL",
+              "NFA",
+              "AFA"
+            ]
+          },
+          "schoolYear": {
+            "type": "integer"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "pattern": {
+            "type": "string"
+          },
+          "topicText": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "Events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Event"
+            }
+          }
+        }
+      },
+      "Webpage": {
         "type": "object",
         "description": "A webpage",
         "properties": {
@@ -5118,10 +5477,6 @@
             "type": "integer",
             "description": "District ID"
           },
-          "settings": {
-            "type": "object",
-            "description": "School settings object"
-          },
           "updatedAt": {
             "type": "string",
             "readOnly": true,
@@ -5133,6 +5488,41 @@
             "readOnly": true,
             "format": "date-time",
             "description": "Creation timestamp"
+          },
+          "Chapter": {
+            "$ref": "#/components/schemas/Chapter"
+          },
+          "Entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            }
+          },
+          "Judges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Judge"
+            }
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "integer",
+                "boolean"
+              ]
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "integer",
+                "boolean"
+              ]
+            }
           }
         },
         "additionalProperties": false,

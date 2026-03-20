@@ -3,6 +3,7 @@ import { withSettingsInclude, saveSettings } from './utils/settings.js';
 import { FIELD_MAP, toDomain, toPersistence } from './mappers/eventMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { roundInclude } from './roundRepo.js';
+import snakeToCamel from '../helpers/text.js';
 
 function buildEventQuery(opts = {}) {
 	const query = {
@@ -39,10 +40,11 @@ export function eventInclude(opts = {}) {
 /**
  *  One of palmers creations to get event invite data for a tournament
  * @param {*} tournId the tournament id to get event invites for
- * @returns You're just gonna have to look at the query
+ * @returns an array of Event objects populated with settings appropriate for public consumption.
  */
-export async function getEventInvites(tournId) {
-	return await db.sequelize.query(`
+export async function getEventsForInvite(tournId) {
+
+	const events = await db.sequelize.query(`
             select
                 event.id, event.abbr, event.name, event.fee, event.type,
                 event.nsda_category nsdaCategory,
@@ -51,6 +53,7 @@ export async function getEventInvites(tournId) {
                 judge_field_report.value judgeFieldReport,
                 cap.value cap,
                 school_cap.value schoolCap,
+				topic.id topicId,
                 topic.source topicSource, topic.event_type topicEventType, topic.tag topicTag,
                 topic.topic_text topicText,
                 field_report.value fieldReport,
@@ -114,6 +117,49 @@ export async function getEventInvites(tournId) {
 		replacements : { tournId },
 		type         : db.sequelize.QueryTypes.SELECT,
 	});
+
+	return events.map( (event) => {
+		return {
+			id   : event.id,
+			abbr : event.abbr,
+			name : event.name,
+			fee  : event.fee,
+			type : snakeToCamel(event.type),
+
+			NSDACategory : {
+				id       : event.nsdaCategory,
+				name     : event.nsdaCategoryName,
+				code     : event.nsdaCategory,
+			},
+			Category: {
+				id   : event.categoryId,
+				abbr : event.categoryAbbr,
+				name : event.categoryName,
+				settings:  {
+					judgeFieldReport : event.judgeFieldReport,
+				},
+			},
+			Topic: {
+				id        : event.topicId,
+				source    : event.topicSource,
+				eventType : event.topicEventType,
+				tag       : event.topicTag,
+				text      : event.topicText,
+			},
+			settings : {
+				cap             : event.cap,
+				schoolCap       : event.schoolCap,
+				fieldReport     : event.fieldReport,
+				anonymousPublic : event.anonymousPublic,
+				live_updates    : event.liveUpdates,
+				description     : event.description,
+				currency        : event.currency,
+			},
+			metadata: {
+				entryCount : event.entryCount,
+			},
+		};
+	});
 }
 
 export function getEvent(eventId, opts = {}) {
@@ -150,6 +196,6 @@ async function createEvent(event) {
 export default {
 	getEvent,
 	getEvents,
-	getEventInvites,
+	getEventsForInvite,
 	createEvent,
 };

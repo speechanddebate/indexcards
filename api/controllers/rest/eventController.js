@@ -9,9 +9,18 @@ export async function getEntryFieldByEvent(req,res) {
 
 	const events = await db.sequelize.query(`
 		select
-			event.id, event.name,
-			event.abbr, event.type
+			event.*,
+            field_waitlist.value fieldWaitlist,
+            field_report.value fieldReport
 		from event
+
+            left join event_setting field_report
+                on field_report.event = event.id
+                and field_report.tag = 'field_report'
+
+            left join event_setting field_waitlist
+                on field_waitlist.event = event.id
+                and field_waitlist.tag = 'field_waitlist'
 		where 1=1
             and event.tourn = :tournId
             and event.abbr  = :eventAbbr
@@ -24,28 +33,44 @@ export async function getEntryFieldByEvent(req,res) {
 		type: req.db.Sequelize.QueryTypes.SELECT,
 	});
 
-	let event = {};
-
-	if (events.length > 0) {
-		event = events[0];
+	if (!events || events.length < 1) {
+		return NotFound(req, res, `No valid event abbreviation sent`);
 	}
+
+	if (!events[0].fieldReport) {
+		return NotFound(req, res, `Tournament has not posted that event field report`);
+	}
+
+	const event = {
+		name       : events[0].name,
+		id         : events[0].id,
+		abbr       : events[0].name,
+		type       : events[0].type,
+		categoryId : events[0].category,
+		tournId    : events[0].tourn,
+		settings   : {
+			fieldWaitlist: events[0].fieldWaitlist,
+			fieldReport: events[0].fieldReport,
+		},
+		Entries    : [],
+	};
 
 	const entries = await db.sequelize.query(`
         SELECT
             entry.id, entry.code, entry.name,
             entry.active, entry.waitlist,
-            school.name schoolName, school.code schoolCode,
-            GROUP_CONCAT(student.id) as studentIds,
-            GROUP_CONCAT(CONCAT(student.first, ' ', student.last)) as studentNames,
-            field_waitlist.value fieldWaitlist
-
+			school.id schoolId,
+				school.name schoolName,
+				school.code schoolCode,
+			student.id studentId,
+				student.first studentFirst,
+				student.middle studentMiddle,
+				student.last studentLast,
+				student.chapter chapterId
         from (entry, event)
             left join school on school.id = entry.school
             left join entry_student es on es.entry = entry.id
             left join student on student.id = es.student
-            left join event_setting field_waitlist
-                on field_waitlist.event = event.id
-                and field_waitlist.tag = 'field_waitlist'
         where 1=1
             and event.id = :eventId
 			and event.id = entry.event
@@ -66,17 +91,40 @@ export async function getEntryFieldByEvent(req,res) {
 		type: req.db.Sequelize.QueryTypes.SELECT,
 	});
 
-	if (entries && entries.length > 0 && !entries[0].fieldWaitlist) {
-		const noWaitlist = entries.filter( (entry) => !entry.waitlist ).map( (entry) => {
-			delete entry.fieldWaitlist;
-			delete entry.waitlist;
-			return entry;
+	const entryById = {};
+
+	entries.forEach( (entry) => {
+		if (!event.fieldWaitlist && entry.waitlist) return;
+		if (!entryById[entry.id]) {
+			entryById[entry.id] = {
+				id       : entry.id,
+				name     : entry.name,
+				code     : entry.code,
+				active   : entry.active,
+				waitlist : entry.waitlist,
+				School   : {
+					id   : entry.schoolId,
+					name : entry.schoolName,
+					code : entry.schoolCode,
+				},
+				Students : [],
+			};
+		}
+
+		entryById[entry.id].Students.push({
+			id         : entry.studentId,
+			firstName  : entry.studentFirst,
+			middleName : entry.studentMiddle,
+			lastName   : entry.studentLast,
+			chapterId  : entry.chapterId,
 		});
+	});
 
-		return res.status(200).json({ entries: noWaitlist, showWaitlist: false, ...event});
-	}
+	event.Entries = Object.keys(entryById).map( (entryId) => {
+		return entryById[entryId];
+	});
 
-	return res.status(200).json({entries, showWaitlist: true, ...event});
+	return res.status(200).json(event);
 };
 
 export async function getScheduleByEvent(req,res) {

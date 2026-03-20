@@ -18,7 +18,6 @@ export async function circuitQualifiers(req, res) {
 			return;
 		}
 		const eventSave = await saveEventResult(event.id);
-		console.log(`Event Save is ${JSON.stringify(eventSave, null, 2)}` );
 		if (typeof eventSave === 'string') {
 			msg += eventSave;
 		}
@@ -172,8 +171,6 @@ export const saveEventResult = async (eventId) => {
 			generated : new Date(),
 		});
 
-		console.log(`I am here 5!`);
-
 		// Get final results set for the rankings
 
 		const finalResultQuery = `
@@ -200,8 +197,6 @@ export const saveEventResult = async (eventId) => {
 			type: db.sequelize.QueryTypes.SELECT,
 		});
 
-		console.log(`I am here 6! Final results length is ${finalResults.length}`);
-
 		if (finalResults.length < 1) {
 			return;
 		}
@@ -216,8 +211,6 @@ export const saveEventResult = async (eventId) => {
 
 		// Get last round participated data
 		//
-		console.log(`I am here 7!`);
-
 		const lastRoundQuery = `
 			select entry.id entry, max(round.name) roundname
 				from entry, ballot, panel, round
@@ -244,8 +237,6 @@ export const saveEventResult = async (eventId) => {
 		if (lastRound.length < 1) {
 			return;
 		}
-
-		console.log(`I am here 8!`);
 
 		const entriesByLastRound = {};
 
@@ -303,8 +294,6 @@ export const saveEventResult = async (eventId) => {
 				}
 			}
 		}
-
-		console.log(`I am here 9!`);
 
 		if (eventRules.individuals) {
 

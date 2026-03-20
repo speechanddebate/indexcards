@@ -55,8 +55,9 @@ export async function getTournInvite(req, res) {
 		return NotFound(req, res, 'No such tournament found');
 	}
 
-	invite.webpages = (invite.webpages ?? []).map(ToPublicPage);
-	invite.files = (invite.files ?? []).map(file => {
+	invite.Webpages = (invite.webpages ?? []).map(ToPublicPage);
+	delete invite.webpages;
+	invite.Files = (invite.files ?? []).map(file => {
 		return {
 			id        : file.id,
 			tag       : file.tag,
@@ -69,8 +70,9 @@ export async function getTournInvite(req, res) {
 			updatedAt : file.updatedAt,
 		};
 	});
-	invite.events = await eventRepo.getEventInvites(invite.id);
-	invite.contacts = await tournRepo.getContacts(invite.id);
+	delete invite.files;
+	invite.Events = await eventRepo.getEventsForInvite(invite.id);
+	invite.Contacts = await tournRepo.getContacts(invite.id);
 
 	return res.status(200).json(invite);
 };

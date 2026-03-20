@@ -17,7 +17,7 @@ router.route('/').get(controller.getPublicPages).openapi = {
 						schema: {
 							type: 'array',
 							items: {
-								$ref: '#/components/schemas/WebPage',
+								$ref: '#/components/schemas/Webpage',
 							},
 						},
 					},
@@ -42,7 +42,7 @@ router.route('/:slug').get(controller.getPublicPages).openapi = {
 				content: {
 					'application/json': {
 						schema: {
-							$ref: '#/components/schemas/WebPage',
+							$ref: '#/components/schemas/Webpage',
 						},
 					},
 				},
