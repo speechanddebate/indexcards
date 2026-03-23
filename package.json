@@ -21,7 +21,8 @@
 		"format": "prettier --write .",
 		"format-check": "prettier --check .",
 		"prepare": "husky",
-		"models": "NODE_ENV='development' node api/data/auto.js"
+		"models": "NODE_ENV='development' node api/data/auto.js",
+		"updateTestFile": "NODE_ENV=test node scripts/updateTestFile.js"
 	},
 	"extensionless": {
 		"lookFor": [
