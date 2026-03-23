@@ -3,6 +3,7 @@ import config from '../../config/config.js';
 import authService from '../services/AuthService.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import personRepo from '../repos/personRepo.js';
+import { createActor } from './authorization/authorization.js';
 import { BadRequest, Unauthorized } from '../helpers/problem.js';
 
 export async function Authenticate(req, res, next) {
@@ -83,7 +84,7 @@ export async function Authenticate(req, res, next) {
 				return BadRequest(req, res, 'The Authorization header uses an unrecognized authentication scheme.');
 			}
 		}
-
+		req.actor = createActor(req);
 		next();
 
 	} catch (err) {

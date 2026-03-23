@@ -4,6 +4,7 @@ import factories from '../../../../tests/factories/index.js';
 import { hashPassword } from '../../../services/AuthService.js';
 
 describe('Auth Router', () => {
+
 	describe('/register' , () => {
 		it('Registers a new user', async () => {
 			const personData = await factories.person.createPersonData({

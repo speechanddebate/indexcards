@@ -1,10 +1,8 @@
 import permissionRepo from '../../repos/permissionRepo.js';
 import eventRepo from '../../repos/eventRepo.js';
-import  { createActor } from './authorization.js';
+import db from '../../data/db.js';
 
 export async function loadTournAuthContext(req, res, next, tournId){
-
-	req.actor = createActor(req);
 
 	//attach all relevant perms to the req.auth.perms object
 	req.auth = req.auth || {};
@@ -71,5 +69,51 @@ export async function loadTournAuthContext(req, res, next, tournId){
 			}
 		}
 	}
+	return next();
+}
+export async function loadExtAuthContext(req, res, next) {
+
+	if (!req.actor?.person?.id) return next();
+
+	// Fetch permissions where person matches req.actor.person and tag is like 'api_auth_%'
+	const perms = await db.personSetting.findAll({
+		where: {
+			person: req.actor.person.id,
+			tag: { [db.Sequelize.Op.like]: 'api_auth_%' },
+		},
+	});
+
+	// Attach to req.auth.perms if needed, or handle as required
+	req.auth = req.auth || {};
+	req.auth.perms = perms.map(p => ({
+		scope: p.tag,
+		id: req.actor.person.id,
+		role: 'authorized',
+	}));
+
+	return next();
+}
+/** load all the chapter perms for the actor */
+export async function loadChapterAuthContext(req, res, next,chapterId) {
+	//attach all relevant perms to the req.auth.perms object
+	req.auth = req.auth || {};
+	req.auth.perms = req.auth.perms || [];
+
+	//cannot load perms when there is no person
+	if(!req.actor?.person?.id) return next();
+
+	const perms = await permissionRepo.getPermissions({
+		personId: req.actor.person.id,
+		chapterId,
+	});
+
+	for (const perm of perms) {
+		req.auth.perms.push({
+			scope: 'chapter',
+			id: perm.chapterId,
+			role: req.tag === 'chapter' ? 'chapterAdmin' : 'prefs',
+		});
+	}
+
 	return next();
 }

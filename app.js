@@ -13,7 +13,6 @@ import v1Router from './api/routes/routers/v1/indexRouter.js';
 import { rateLimiterMiddleware } from './api/middleware/rateLimiter.js';
 
 import {
-	coachAuth,
 	localAuth,
 } from './api/helpers/auth.js';
 
@@ -82,45 +81,18 @@ if (process.env.NODE_ENV === 'development') {
 // Parse cookies and add them to the session
 app.use(cookieParser());
 
-// Authenticate all requests and set req.person if valid
+// Authenticate all requests and set req.actor
 app.use(Authenticate);
 app.use(rateLimiterMiddleware);
 app.use(csrfMiddleware);
 app.use('/v1',v1Router);
-
-app.use('/v1/user', (req, res, next) => {
-	if (!req.person) {
-		return Unauthorized(req, res, 'User: You are not logged in.');
-	}
-	next();
-});
-
-app.use('/v1/coach', async (req, res, next) => {
-
-	// apis related to the coach or directors of a program.  Prefs only access
-	// is in the /user/prefs directory because it's such a bizarre one off
-
-	if (!req.person) {
-		return Unauthorized(req, res, 'Coach: You are not logged in.');
-	}
-
-	const chapter = await coachAuth(req, res);
-
-	if (typeof chapter === 'object' && chapter.id === parseInt(req.params.chapterId)) {
-		req.chapter = chapter;
-	} else {
-		return Forbidden(req, res, `You do not have access to that part of that institution`);
-	}
-
-	next();
-});
 
 app.use('/v1/local', async (req, res, next) => {
 
 	// APIs related to administrators of districts (the committee), or a
 	// region, or an NCFL diocese, or a circuit.
 
-	if (!req.person) {
+	if (!req.actor || req.actor.type === 'anonymous') {
 		return Unauthorized(req, res, 'Admin: You are not logged in.');
 	}
 

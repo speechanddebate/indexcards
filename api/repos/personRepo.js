@@ -166,17 +166,6 @@ async function getPersonByUsername(username, opts = {}) {
 	const dbRow = await db.person.findOne(query);
 	return toDomain(dbRow);
 }
-async function hasAreaAccess(personId, area) {
-	const authTag = `api_auth_${area}`;
-	const setting = await db.personSetting.findOne({
-		where: {
-			person: personId,
-			tag: authTag,
-		},
-	});
-
-	return setting !== null;
-}
 
 async function createPerson(personData = {}){
 	const dbRow = await db.person.create(toPersistence(personData));
@@ -193,7 +182,6 @@ async function createPerson(personData = {}){
 // export the  data functions NOT the mappers
 export default {
 	getPerson,
-	hasAreaAccess,
 	personSearch,
 	getPersonByUsername,
 	createPerson,

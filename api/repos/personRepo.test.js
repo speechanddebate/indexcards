@@ -214,34 +214,4 @@ describe('PersonRepo', () => {
 			}
 		});
 	});
-
-	describe('hasAreaAccess', () => {
-
-		it('returns true when person has access', async () => {
-
-			// Arrange
-			const { personId } = await factories.person.createTestPerson({
-				settings: {
-					api_auth_caselist: '1',
-				},
-			});
-
-			// Act
-			const result = await personRepo.hasAreaAccess(personId, 'caselist');
-
-			// Assert
-			expect(result).toBe(true);
-		});
-
-		it('returns false when person does not have access', async () => {
-			// Arrange
-			const { personId } = await factories.person.createTestPerson();
-
-			// Act
-			const result = await personRepo.hasAreaAccess(personId, 'caselist');
-
-			// Assert
-			expect(result).toBe(false);
-		});
-	});
 });

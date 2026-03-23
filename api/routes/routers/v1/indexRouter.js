@@ -15,11 +15,12 @@ import statusRouter from './admin/statusRouter.js';
 import legacyUserRouter from './legacy/userRouter.js';
 import legacyCoachRouter from './legacy/coachRouter.js';
 import legacyPublicRouter from './legacy/public/indexRouter.js';
+import { requireLogin, requireSiteAdmin } from '../../../middleware/authorization/authorization.js';
 
 const router = Router({ mergeParams: true });
 
 router.use('/auth'  , authRouter);
-router.use('/admin' , adminRouter);
+router.use('/admin' ,requireSiteAdmin, adminRouter);
 router.use('/ext'   , extRouter);
 router.use('/pages' , pagesRouter);
 router.use('/tab'   , tabRouter);
@@ -27,7 +28,7 @@ router.use('/rest'  , restRouter);
 router.use('/status' , statusRouter);
 
 router.use('/public' , legacyPublicRouter);
-router.use('/user'   , legacyUserRouter);
+router.use('/user'   ,requireLogin, legacyUserRouter);
 router.use('/coach'  , legacyCoachRouter);
 
 // Serve pre-built OpenAPI spec

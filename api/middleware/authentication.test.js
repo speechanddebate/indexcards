@@ -19,6 +19,18 @@ describe('Authentication Middleware', () => {
 			expect(next).toHaveBeenCalled();
 			expect(req.person).not.toBeDefined();
 		});
+		it('attaches actor', async () => {
+			// Arrange
+			const {req, res, next} = createContext();
+			// Act
+			await Authenticate(req, res, next);
+
+			// Assert
+			expect(req.actor).toBeDefined();
+			const actor = req.actor;
+			expect(actor.id).not.toBeDefined();
+		});
+
 	});
 
 	describe('Cookie Auth', () => {
@@ -99,6 +111,43 @@ describe('Authentication Middleware', () => {
 			//Assert
 			expect(next).toHaveBeenCalledWith(expect.any(Error));
 		});
+		it('attaches actor with correct info', async () => {
+			// Arrange
+			const { req, res, next } = createContext({
+				req: {
+					cookies: {
+						[config.COOKIE_NAME]: userData.testUserSession.userkey,
+					},
+				},
+			});
+			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
+				return {
+					id          : 1,
+					person      : {
+						id          : 69,
+						siteAdmin   : false,
+						email       : '',
+						first      : 'I',
+						middle     : 'Am',
+						last       : 'Test',
+					},
+				};});
+
+			vi.spyOn(personRepo, 'getPerson').mockImplementationOnce(async () => {
+				return {
+					id: 69,
+					email: '',
+				};
+			});
+			// Act
+			await Authenticate(req, res, next);
+
+			// Assert
+			expect(req.actor).toBeDefined();
+			const actor = req.actor;
+			expect(actor.id).toBe(69);
+		});
+
 	});
 
 	describe('Basic Auth', () => {

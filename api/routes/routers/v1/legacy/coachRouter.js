@@ -1,7 +1,12 @@
 import { Router } from 'express';
 import { updateContact, deleteContact, userProfile } from '../../../../controllers/coach/contacts.js';
+import { loadChapterAuthContext } from '../../../../middleware/authorization/authContext.js';
+import { requireAccess } from '../../../../middleware/authorization/authorization.js';
 
 const router = Router();
+
+router.param('chapterId', loadChapterAuthContext);
+router.use(requireAccess('chapter','write'));
 
 // /coach/{chapterId}/school/{schoolId}/updateContact
 router.post('/:chapterId/school/:schoolId/updateContact', updateContact).openapi = {
