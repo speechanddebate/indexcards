@@ -3,18 +3,36 @@ import request from 'supertest';
 import server from '../../../../app';
 
 import db from '../../../data/db';
-
+import factories from '../../../../tests/factories';
 import config from '../../../../config/config';
 
 import {
 	testUserChapterPerm,
 	testUserSchoolContact,
-	testUserSession,
 } from '../../../../tests/testFixtures';
 
 describe ('getMySchoolsByTourn', () => {
-
+	let userkey, personId;
 	beforeEach(async () => {
+		const session = await factories.session.createTestSession();
+		userkey = session.userkey;
+		personId = session.personId;
+		await factories.permission.createTestPermission({
+			chapterId : 130737,
+			schoolId  : 699354,
+			tournId   : 31059,
+			personId  : personId,
+			tag     : 'chapter',
+		});
+		await db.contact.create({
+			school   : 694009,
+			tourn    : 30661,
+			chapter  : 130140,
+			person   : personId,
+			official : 1,
+			onsite   : 1,
+			email    : 1,
+		});
 		await db.permission.upsert(testUserChapterPerm);
 		await db.contact.create(testUserSchoolContact);
 	});
@@ -22,11 +40,9 @@ describe ('getMySchoolsByTourn', () => {
 		await db.sequelize.query(
 			`delete from permission
 				where person = :personId
-				and chapter = :chapterId
 			`,{
 				replacements: {
-					personId: testUserChapterPerm.person,
-					chapterId: testUserChapterPerm.chapter,
+					personId: personId,
 				},
 				type: db.sequelize.QueryTypes.DELETE,
 			}
@@ -34,12 +50,10 @@ describe ('getMySchoolsByTourn', () => {
 		await db.sequelize.query(
 			`delete from contact
 				where person = :personId
-				and school = :schoolId
 			`,
 			{
 				replacements: {
-					personId: testUserSchoolContact.person,
-					schoolId: testUserSchoolContact.school,
+					personId: personId,
 				},
 				type: db.sequelize.QueryTypes.DELETE,
 			}
@@ -51,7 +65,7 @@ describe ('getMySchoolsByTourn', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapter/byTourn/29807/mySchools`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -66,7 +80,7 @@ describe ('getMySchoolsByTourn', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapter/byTourn/${testUserChapterPerm.tourn}/mySchools`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -83,7 +97,7 @@ describe ('getMySchoolsByTourn', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapter/byTourn/${ testUserSchoolContact.tourn }/mySchools`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -100,7 +114,7 @@ describe ('getMySchoolsByTourn', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapter/byTourn/30661/nonSchools`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 

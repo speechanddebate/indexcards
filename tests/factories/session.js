@@ -10,8 +10,8 @@ export function createSessionData(overrides = {}) {
 }
 
 export async function createTestSession(overrides = {}) {
-	if(!overrides.personId) {
-		const { personId } = await factories.person.createTestPerson();
+	if(!overrides.personId || overrides.Person) {
+		const { personId } = await factories.person.createTestPerson(overrides.Person);
 		overrides.personId = personId;
 	}
 

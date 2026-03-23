@@ -58,10 +58,16 @@ export function roundInclude(opts = {}) {
 	};
 }
 
+async function getRound(roundId, opts = {}) {
+	const query = buildRoundQuery(opts);
+	query.where.id = roundId;
+	const round = await db.round.findOne(query);
+	return round ? toDomain(round) : null;
+}
+
 /**
  * Fetches rounds from the database with optional filters and event information.
  */
-
 export async function getRounds(scope = {}, opts = {}) {
 	const query = buildRoundQuery(opts);
 
@@ -107,6 +113,7 @@ async function createRound(data){
 }
 
 export default {
+	getRound,
 	getRounds,
 	createRound,
 };

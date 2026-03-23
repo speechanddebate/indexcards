@@ -3,9 +3,7 @@ import { assert } from 'chai';
 import config from '../../../../config/config';
 import db from '../../../data/db';
 import server from '../../../../app';
-import userData from '../../../../tests/testFixtures';
-
-const testUserSession = await db.session.findByPk(userData.testUserSession.id);
+import factories from '../../../../tests/factories';
 
 const testTourn = {
 	id     : 27074,
@@ -18,11 +16,13 @@ const testTourn = {
 };
 
 describe('Status Board', () => {
-
+	let personId, userkey;
 	beforeAll(async () => {
-
+		const session = await factories.session.createTestSession();
+		userkey = session.userkey;
+		personId = session.personId;
 		const permission = {
-			person : testUserSession.person,
+			person : personId,
 			tourn  : testTourn.id,
 			tag    : 'tabber',
 		};
@@ -33,14 +33,14 @@ describe('Status Board', () => {
 			{ 	tag         : 'present',
 				description : 'LASA marked as present by testrunner',
 				entry       : testTourn.entry,
-				marker      : testUserSession.person || 69,
+				marker      : personId,
 				tourn       : testTourn.id,
 				panel       : testTourn.panel,
 			},
 			{ 	tag         : 'present',
 				description : 'Cayman marked as present by testrunner',
 				person      : testTourn.person,
-				marker      : testUserSession.person || 69,
+				marker      : personId,
 				tourn       : testTourn.id,
 				panel       : testTourn.panel,
 			},
@@ -55,7 +55,7 @@ describe('Status Board', () => {
 		const res = await request(server)
 			.get(`/v1/tab/tourns/${testTourn.id}/rounds/${testTourn.round}/attendance`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -75,10 +75,9 @@ describe('Status Board', () => {
 
 		assert.equal(
 			res.body.entry[testTourn.entry][testTourn.panel].markerId,
-			'69',
+			personId,
 			'LASA marked present by the correct admin'
 		);
-
 	});
 
 	it('Reflects absence & presence changes in a new status object', async() => {
@@ -87,7 +86,7 @@ describe('Status Board', () => {
 		await request(server)
 			.post(`/v1/tab/tourns/${testTourn.id}/all/attendance`)
 			.set('Accept', 'application/json')
-			.set('Authorization', `Bearer ${testUserSession.userkey}`)
+			.set('Authorization', `Bearer ${userkey}`)
 			.send({
 				targetId : testTourn.person,   	// person who was absent now present
 				panel    : testTourn.panel, 	// panel ID
@@ -100,7 +99,7 @@ describe('Status Board', () => {
 		await request(server)
 			.post(`/v1/tab/tourns/${testTourn.id}/all/attendance`)
 			.set('Accept', 'application/json')
-			.set('Authorization', `Bearer ${testUserSession.userkey}`)
+			.set('Authorization', `Bearer ${userkey}`)
 			.send({
 				targetId   : testTourn.entry,
 				panel      : testTourn.panel,
@@ -114,7 +113,7 @@ describe('Status Board', () => {
 		await request(server)
 			.post(`/v1/tab/tourns/${testTourn.id}/all/attendance`)
 			.set('Accept', 'application/json')
-			.set('Authorization', `Bearer ${testUserSession.userkey}`)
+			.set('Authorization', `Bearer ${userkey}`)
 			.send({
 				targetId      : testTourn.judge,
 				panel         : 7212078,
@@ -128,7 +127,7 @@ describe('Status Board', () => {
 		const newResponse = await request(server)
 			.get(`/v1/tab/tourns/${testTourn.id}/rounds/${testTourn.round}/attendance`)
 			.set('Accept', 'application/json')
-			.set('Authorization', `Bearer ${testUserSession.userkey}`)
+			.set('Authorization', `Bearer ${userkey}`)
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -149,26 +148,43 @@ describe('Status Board', () => {
 
 		assert.equal(
 			newBody.entry[testTourn.entry][testTourn.panel].markerId,
-			'69',
+			personId,
 			'LASA marked present by the correct admin'
 		);
 	});
 
 	afterAll(async () => {
 
-		await db.sequelize.query(`delete from campus_log where marker = 69`,
-			{ type: db.sequelize.QueryTypes.DELETE }
+		await db.sequelize.query(`delete from campus_log where marker = :personId`,
+			{
+				replacements: { personId: personId },
+				type: db.sequelize.QueryTypes.DELETE,
+			}
 		);
 	});
 
 });
 
 describe.todo('Event Dashboard', () => {
+	let personId, userkey;
+	beforeAll(async () => {
+		const session = await factories.session.createTestSession();
+		userkey = session.userkey;
+		personId = session.personId;
+		const permission = {
+			person : personId,
+			tourn  : testTourn.id,
+			tag    : 'tabber',
+		};
+
+		await db.permission.create(permission);
+	});
+
 	it('Return a correct JSON status object for the event dashboard', async () => {
 		const res = await request(server)
 			.get(`/v1/tab/tourns/${testTourn.id}/status/dashboard`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userData.testUserSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
