@@ -14,13 +14,13 @@ describe('buildTarget', () => {
 		const cached = { id: '123', resource: 'foo' };
 		targetCache.set('foo:123', cached);
 
-		const result = await buildTarget('foo', '123', {}, targetCache);
+		const result = await buildTarget('foo', '123', targetCache);
 		expect(result).toBe(cached);
 	});
 
 	it('target for tourn resource sets circuitIds', async () => {
 
-		const result = await buildTarget('tourn', '456', {}, targetCache);
+		const result = await buildTarget('tourn', '456', targetCache);
 
 		expect(result).toEqual({
 			id: '456',
@@ -31,7 +31,7 @@ describe('buildTarget', () => {
 	it('target for category resource sets tournId and circuitIds', async () => {
 		vi.spyOn(categoryRepo, 'getCategory').mockResolvedValueOnce({ tournId: 1 });
 
-		const result = await buildTarget('category', '456', {}, targetCache);
+		const result = await buildTarget('category', '456', targetCache);
 
 		expect(result).toEqual({
 			id: '456',
@@ -43,7 +43,7 @@ describe('buildTarget', () => {
 	it('target for event resource sets categoryId, tournId and circuitIds', async () => {
 		vi.spyOn(eventRepo, 'getEvent').mockResolvedValueOnce({ tournId: 1, categoryId: 10 });
 
-		const result = await buildTarget('event', '456', {}, targetCache);
+		const result = await buildTarget('event', '456', targetCache);
 
 		expect(result).toEqual({
 			id: '456',

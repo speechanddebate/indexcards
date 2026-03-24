@@ -12,7 +12,7 @@ describe('getTournByWebname Human to ID', () => {
 
 		const body = res.body;
 		assert.typeOf(body, 'object');
-		assert.equal(body.tournId, 29714);
+		assert.equal(body.id, 29714);
 	});
 });
 

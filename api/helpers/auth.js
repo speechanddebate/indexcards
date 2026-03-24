@@ -1,72 +1,6 @@
 import db from '../data/db.js';
 import { errorLogger } from './logger.js';
 
-// export async function keyAuth(req, res, next) {
-// 	let persons = [];
-// 	const personId = req.user.id;
-// 	/**
-// 	 * if area is tourn and tournId is set, check for tournament level permissions
-// 	 */
-// 	if (req.params.area === 'tourn' && req.params.tournId) {
-
-// 		persons = await db.sequelize.query(`
-// 			select
-// 				person.*,
-// 				permission.tag tournTag
-// 			from person, permission
-// 			where 1=1
-// 				and person.id        = :personId
-// 				and person.id       = permission.person
-// 				and permission.tourn = :tournId
-// 				and permission.tag IN ('owner', 'tabber')
-// 				and exists (
-// 					select ps.id
-// 						from person_setting ps
-// 					where 1=1
-// 						and ps.tag = 'api_key'
-// 						and ps.person = person.id
-// 						and ps.value = :key
-// 				)
-// 		`, {
-// 			replacements: {
-// 				personId,
-// 				key,
-// 				tournId: req.params.tournId,
-// 			},
-// 			type: db.Sequelize.QueryTypes.SELECT,
-// 		});
-
-// 	} else {
-// 		if(personRepo.hasAreaAccess(personId, req.params.area)){
-// 			person.add(await personRepo.getById(personId));
-// 		}
-// 	}
-
-// 	if (persons.length < 1) {
-// 		return 'No valid Authorization header found. Access denied.';
-// 	}
-
-// 	const person = persons.shift();
-
-// 	if (person && person.id) {
-// 		req.session = { person };
-// 		if (person.apiTag) {
-// 			req.session.settings = {
-// 				[person.apiTag]: true,
-// 			};
-// 		}
-
-// 		if (person.tournTag) {
-// 			req.session.permissions = {
-// 				[req.params.tournId] : person.tournTag,
-// 			};
-// 		}
-// 		return req.session;
-// 	}
-
-// 	return 'No valid Authorization header found. Access denied.';
-// };
-
 export const tabAuth = async (req) => {
 
 	if (!req.person || !req.person.id) {
@@ -435,41 +369,6 @@ export const tournPerms = async (tournId, personId) => {
 	}
 
 	return perms;
-};
-
-export const coachAuth = async (req) => {
-
-	const chapterId = req.params.chapterId;
-	let chapterAccess = false;
-
-	if (req.session.siteAdmin) {
-		chapterAccess = true;
-	} else {
-		const perms = await db.sequelize.query(`
-			select perm.id
-			from permission perm
-			where perm.person = :personId
-				and perm.tag = 'chapter'
-				and perm.chapter = :chapterId
-		`, {
-			replacements: {
-				chapterId,
-				personId: req.session.personId,
-			},
-			type: db.sequelize.QueryTypes.SELECT,
-		});
-
-		if (perms && perms[0].id) {
-			chapterAccess = true;
-		}
-	}
-
-	if (chapterAccess) {
-		const chapter = await db.summon(db.chapter, chapterId);
-		return chapter;
-	}
-
-	return 'You do not have access to that institution';
 };
 
 export const localAuth = async (req) => {

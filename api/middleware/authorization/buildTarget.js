@@ -4,19 +4,30 @@ import eventRepo from '../../repos/eventRepo.js';
 import sectionRepo from '../../repos/sectionRepo.js';
 import roundRepo from '../../repos/roundRepo.js';
 import timeslotRepo from '../../repos/timeslotRepo.js';
-export async function buildTarget(resource, resourceId, req, targetCache) {
+
+export async function buildTarget(resource, resourceId, targetCache) {
 	const key = `${resource}:${resourceId}`;
 	if (targetCache.has(key)) return targetCache.get(key);
 
 	let target = { id: resourceId, resource };
+	//no parents to build
+	if(resource.startsWith('api_auth_')){
+		targetCache.set(key, target);
+		return target;
+	}
+	if(resource === 'chapter'){
+		targetCache.set(key, target);
+		return target;
+	}
 
+	//build tourn target
 	switch (resource) {
 		case 'category': {
 			const category = await categoryRepo.getCategory(resourceId, { fields: ['tournId'] });
 			if (category) {
 				target.tournId = category.tournId;
 				target ={
-					...await buildTarget('tourn', target.tournId, req, targetCache),
+					...await buildTarget('tourn', target.tournId, targetCache),
 					...target,
 				};
 			}
@@ -28,7 +39,7 @@ export async function buildTarget(resource, resourceId, req, targetCache) {
 				target.tournId = event.tournId;
 				target.categoryId = event.categoryId;
 				target ={
-					...await buildTarget('tourn', target.tournId, req, targetCache),
+					...await buildTarget('tourn', target.tournId, targetCache),
 					...target,
 				};
 			}
@@ -39,7 +50,7 @@ export async function buildTarget(resource, resourceId, req, targetCache) {
 			if (round) {
 				target.eventId = round.eventId;
 				target ={
-					...await buildTarget('event', target.eventId, req, targetCache),
+					...await buildTarget('event', target.eventId, targetCache),
 					...target,
 				};
 			}
@@ -50,7 +61,7 @@ export async function buildTarget(resource, resourceId, req, targetCache) {
 			if (section) {
 				target.roundId = section.roundId;
 				target ={
-					...await buildTarget('round', target.roundId, req, targetCache),
+					...await buildTarget('round', target.roundId, targetCache),
 					...target,
 				};
 			}
@@ -61,15 +72,15 @@ export async function buildTarget(resource, resourceId, req, targetCache) {
 			if (timeslot) {
 				target.tournId = timeslot.tournId;
 				target ={
-					...await buildTarget('tourn', target.tournId, req, targetCache),
+					...await buildTarget('tourn', target.tournId, targetCache),
 					...target,
 				};
 			}
 			break;
 		}
+		// no parent scopes to load
 		case 'circuit':
 		case 'tourn': {
-			// no parent scopes to load
 			break;
 		}
 		default:

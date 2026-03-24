@@ -58,28 +58,16 @@ export function roundInclude(opts = {}) {
 	};
 }
 
-async function getRound(ref, opts = {}) {
-	if (!ref) throw new Error('getRound: id or scope is required');
-
-	const isScoped = typeof ref === 'object';
-	const roundId = isScoped ? ref.roundId : ref;
-
-	if (!roundId) throw new Error('getRound: roundId is required');
-
-	const scope = isScoped ? { ...ref } : {};
-	delete scope.roundId;
-
-	const query = buildRoundQuery(opts, scope);
+async function getRound(roundId, opts = {}) {
+	const query = buildRoundQuery(opts);
 	query.where.id = roundId;
-
 	const round = await db.round.findOne(query);
-	return toDomain(round);
+	return round ? toDomain(round) : null;
 }
 
 /**
  * Fetches rounds from the database with optional filters and event information.
  */
-
 export async function getRounds(scope = {}, opts = {}) {
 	const query = buildRoundQuery(opts);
 

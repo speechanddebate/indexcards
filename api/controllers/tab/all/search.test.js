@@ -1,16 +1,20 @@
 import { assert } from 'chai';
 import request from 'supertest';
 import server from '../../../../app';
-import db from '../../../data/db';
 import config from '../../../../config/config';
-import { testAdminSession }  from '../../../../tests/testFixtures';
+import factories from '../../../../tests/factories';
 
 describe('Attendee Search Function', () => {
 
-	let adminSession = {};
+	let userkey;
 
 	beforeAll(async () => {
-		adminSession = await db.session.findByPk(testAdminSession.id);
+		const session = await factories.session.createTestSession({
+			Person: {
+				siteAdmin: true,
+			},
+		});
+		userkey = session.userkey;
 	});
 
 	it('Searches for tournament attendees by name', async () => {
@@ -22,7 +26,7 @@ describe('Attendee Search Function', () => {
 		const manOverboard = await request(server)
 			.get(`/v1/tab/tourns/29774/all/search/${searchNavy}`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${adminSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -51,7 +55,7 @@ describe('Attendee Search Function', () => {
 		const resDVOG = await request(server)
 			.get(`/v1/tab/tourns/29774/all/search/${searchDaisy}`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${adminSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 

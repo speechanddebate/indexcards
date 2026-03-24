@@ -15,7 +15,7 @@ This section describes auth as it is relevant to a developer working on indexcar
 When a request comes in to indexcards, it first passes through the [<b>Authentication Middleware</b>](/api/middleware/authentication.js). where, if the user supplied credentials, they are validated and a couple of bits or information are attached to the request:
 - `req.person`: the person who is making the request
 - `req.session`: if this is a cookie session, attach the session
-- `req.actor`: more on this in Authorization ( not yet but probably should be attached in authentication)
+- `req.actor`: more on this in Authorization
 
 If credentials are provided and are invalid, the request will fail even if it is a public endpoint.
 
@@ -78,7 +78,7 @@ These are details about *how* the RBAC system works. they are not necessary to u
 TODO: actually write it
 
 ## Auth Context
-functions that create and attach AuthContexts are found in [`authContext.js`](/api//middleware//authorization/authContext.js). Currently there is only one, `loadTournAuthContext(req, res, next, tournId)`.
+functions that create and attach AuthContexts are found in [`authContext.js`](/api//middleware//authorization/authContext.js).
 
 an auth context loader works by attaching items to the `req.auth.perms` array in this format.
 ```js
@@ -89,8 +89,10 @@ req.auth.perms = {
 }
 ```
 
-## checkAccess(resource, action, target, person, perms)
+## checkAccess(resource, action, target, perms)
 This is the workhorse of the whole process. It takes the who, what, and where and makes and authorization decision.
+
+this is the function that answers "does any of the permissions in `perms` allow `action` on `resource` either directly, or via another resource like a parent in `target`.
 
 this is probably the most confusing part of the whole system and could benefit from some refinement. The benefit however is that this is a single interface to make a boolean determination on access meaning it can be completely rewritten without changing the caller and it is highly testable as it is a synchronous with rigid inputs.
 

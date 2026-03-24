@@ -1,18 +1,16 @@
 
-import factories from '../../../tests/factories/index.js';
-import personRepo from '../../repos/personRepo.js';
 import * as buildTargetModule from './buildTarget.js';
-import { loadTournAuthContext } from './authContext.js';
-import {requireAreaAccess, requireSiteAdmin, requireAccess, checkAccess} from './authorization.js';
+import { loadExtAuthContext, loadTournAuthContext } from './authContext.js';
+import {requireAreaAccess, requireSiteAdmin, requireAccess, checkAccess, createActor} from './authorization.js';
 import { createContext } from '../../../tests/httpMocks.js';
 
 describe('Authorization Middleware', () => {
-
 	describe('requireAreaAccess', () => {
-		it('deny access when no user', async () => {
+		it('deny access when no actor', async () => {
 			// Arrange
 			const {req, res, next} = createContext();
 			// Act
+			await loadExtAuthContext(req, res, () => {});
 			await requireAreaAccess(req, res, next);
 			// Assert
 
@@ -27,8 +25,10 @@ describe('Authorization Middleware', () => {
 					params: {area: 'caselist'},
 				},
 			});
+			req.actor = createActor(req);
+			await loadExtAuthContext(req, res, () => {});
 
-			vi.spyOn(personRepo, 'hasAreaAccess').mockResolvedValueOnce(false);
+			vi.spyOn(buildTargetModule, 'buildTarget').mockResolvedValueOnce({ id: 2, resource: 'api_auth_caselist' });
 
 			// Act
 			await requireAreaAccess(req, res, next);
@@ -45,8 +45,9 @@ describe('Authorization Middleware', () => {
 					params: {area: 'caselist'},
 				},
 			});
-
-			vi.spyOn(personRepo, 'hasAreaAccess').mockResolvedValueOnce(true);
+			req.actor = createActor(req);
+			await loadExtAuthContext(req, res, () => {});
+			vi.spyOn(buildTargetModule, 'buildTarget').mockResolvedValueOnce({ id: 1, resource: 'api_auth_caselist' });
 
 			// Act
 			await requireAreaAccess(req, res, next);
@@ -72,6 +73,7 @@ describe('Authorization Middleware', () => {
 					},
 				},
 			});
+			req.actor = createActor(req);
 
 			requireSiteAdmin(req,res,next);
 
@@ -86,7 +88,7 @@ describe('Authorization Middleware', () => {
 					},
 				},
 			});
-
+			req.actor = createActor(req);
 			requireSiteAdmin(req,res,next);
 
 			expect(next).toHaveBeenCalled();
@@ -131,6 +133,7 @@ describe('Authorization Middleware', () => {
 					auth: { perms: [] },
 				},
 			});
+			req.actor = createActor(req);
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess(resource, capability)(req, res, next);
 			expect(next).toHaveBeenCalled();
@@ -148,6 +151,7 @@ describe('Authorization Middleware', () => {
 						],
 					},
 				}});
+			req.actor = createActor(req);
 
 			await loadTournAuthContext(req, res, () => {});
 
@@ -169,6 +173,7 @@ describe('Authorization Middleware', () => {
 						],
 					},
 				}});
+			req.actor = createActor(req);
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'read')(req, res, next);
 			expect(next).toHaveBeenCalled();
@@ -186,6 +191,7 @@ describe('Authorization Middleware', () => {
 					},
 				},
 			});
+			req.actor = createActor(req);
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'read')(req, res, next);
 			expect(next).not.toHaveBeenCalled();
@@ -204,6 +210,7 @@ describe('Authorization Middleware', () => {
 					},
 				},
 			});
+			req.actor = createActor(req);
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('category', 'read')(req, res, next);
 			expect(next).toHaveBeenCalled();
@@ -220,13 +227,14 @@ describe('Authorization Middleware', () => {
 						],
 					},
 				}});
+			req.actor = createActor(req);
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'owner')(req, res, next);
 			expect(next).not.toHaveBeenCalled();
 			expect(res.json).toHaveBeenCalled();
 		});
 
-		it('allows access for child resource with parent permission', () => {
+		it('allows access for child resource with parent permission', async () => {
 			let {req, res, next} = createContext({
 				req: {
 					person: { id: 1, siteAdmin: false },
@@ -237,7 +245,12 @@ describe('Authorization Middleware', () => {
 						],
 					},
 				}});
-			requireAccess('category', 'write')(req, res, next);
+			req.actor = createActor(req);
+			vi.spyOn(buildTargetModule, 'buildTarget').mockResolvedValueOnce({ id: 42, resource: 'category', tournId: 42});
+
+			await loadTournAuthContext(req, res, () => {});
+
+			await requireAccess('category', 'write')(req, res, next);
 			expect(next).toHaveBeenCalled();
 		});
 
@@ -260,48 +273,41 @@ describe('Authorization Middleware', () => {
 	});
 	describe('checkAccess', () => {
 		it('allows tourn owner tourn access', async () => {
-			const person = factories.person.createPersonData();
 			const perm = { scope: 'tourn', id: 42, role: 'owner' };
-			const granted = checkAccess('tourn', 'read', {id: 42},person, [perm]);
+			const granted = checkAccess('tourn', 'read', {id: 42}, [perm]);
 			expect(granted).toBe(true);
 		});
 		it('allows tourn owner event access', async () => {
-			const person = factories.person.createPersonData();
 			const perm = { scope: 'tourn', id: 42, role: 'owner' };
-			const granted = checkAccess('event', 'read', {id: 12, tournId: 42},person, [perm]);
+			const granted = checkAccess('event', 'read', {id: 12, tournId: 42}, [perm]);
 			expect(granted).toBe(true);
 		});
 		it('denies event access when owner of other tourn', async () => {
-			const person = factories.person.createPersonData();
 			const perm = { scope: 'tourn', id: 42, role: 'owner' };
-			const granted = checkAccess('event', 'read', {id: 12, tournId: 43},person, [perm]);
+			const granted = checkAccess('event', 'read', {id: 12, tournId: 43}, [perm]);
 			expect(granted).toBe(false);
 		});
 		it('allows access when one perm allows access', async () => {
-			const person = factories.person.createPersonData();
 			const perms = [
 				{ scope: 'tourn', id: 42, role: 'owner' },
 				{ scope: 'event', id: 12, role: 'owner' },
 			];
-			const granted = checkAccess('event', 'write', {id: 12, tournId: 44},person, perms);
+			const granted = checkAccess('event', 'write', {id: 12, tournId: 44}, perms);
 			expect(granted).toBe(true);
 		});
 		it('denies access when perm with the same id but different scope', async () => {
-			const person = factories.person.createPersonData();
 			const perm = { scope: 'event', id: 12, role: 'owner' };
-			const granted = checkAccess('tourn', 'read', {id: 12},person, [perm]);
+			const granted = checkAccess('tourn', 'read', {id: 12}, [perm]);
 			expect(granted).toBe(false);
 		});
 		it('allows tourn owner access to category in tourn', async () => {
-			const person = factories.person.createPersonData();
 			const perm = { scope: 'tourn', id: 42, role: 'owner' };
-			const granted = checkAccess('category', 'write', {id: 7, tournId: 42},person, [perm]);
+			const granted = checkAccess('category', 'write', {id: 7, tournId: 42}, [perm]);
 			expect(granted).toBe(true);
 		});
 		it('allow event tabber access to timeslot:read', async () => {
-			const person = factories.person.createPersonData();
 			const perm = { scope: 'event', id: 12,tournId: 42, role: 'tabber' };
-			const granted = checkAccess('timeslot', 'read', {id: 5, eventId: 12, tournId: 42},person, [perm]);
+			const granted = checkAccess('timeslot', 'read', {id: 5, eventId: 12, tournId: 42}, [perm]);
 			expect(granted).toBe(true);
 		});
 	});

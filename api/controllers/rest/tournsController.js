@@ -38,7 +38,23 @@ export async function getTourns(req,res) {
 	const tourns = await tournRepo.getTourns({ circuit, startBefore, startAfter },
 		opts
 	);
-	return res.status(200).json(tourns);
+
+	return res.status(200).json(tourns.map(t => {
+		return {
+			id: t.id,
+			name: t.name,
+			city: t.city,
+			state: t.state,
+			country: t.country,
+			tz: t.tz,
+			webname: t.webname,
+			start: t.start,
+			end: t.end,
+			regStart: t.reg_start,
+			regEnd: t.reg_end,
+			Events: t.events,
+		};
+	}));
 }
 
 export async function getTournInvite(req, res) {

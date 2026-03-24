@@ -1,7 +1,8 @@
-import schemas from './schemas/index.js';
-import responses from './responses/index.js';
+import * as schemas from './schemas/index.js';
+import { createDocument } from 'zod-openapi';
+import * as responses from './responses/index.js';
 import { tags as declaredTags, declaredTagGroups } from './tags.js';
-import {parameters } from './parameters.js';
+import { parameters } from './parameters.js';
 
 import { readFile } from 'node:fs/promises';
 
@@ -36,8 +37,8 @@ export function createOpenApiSpec(apiRouter) {
 		}
 	}
 
-	return {
-		openapi: '3.1.0',
+	const doc = {
+		openapi: '3.1.1',
 		servers: [{ url: '/v1' }],
 		info: {
 			title: 'IndexCards API',
@@ -63,8 +64,10 @@ export function createOpenApiSpec(apiRouter) {
 				cookie: { type: 'apiKey', in: 'cookie', name: 'x-tabroom-cookie' },
 			},
 		},
-
 	};
+	return createDocument(doc,{
+		reused: 'inline',
+	});
 }
 
 /**

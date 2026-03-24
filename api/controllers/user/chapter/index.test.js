@@ -3,24 +3,37 @@ import { assert } from 'chai';
 import config from '../../../../config/config';
 import server from '../../../../app';
 import db from '../../../data/db';
-import {
-	testUserChapterPerm,
-	testUserSchoolContact,
-	testUserSession,
-} from '../../../../tests/testFixtures';
+import factories from '../../../../tests/factories';
 
 describe('User Chapter', () => {
-
+	let userkey, personId;
 	beforeAll(async () => {
-		await db.permission.create(testUserChapterPerm);
-		await db.contact.create(testUserSchoolContact);
+		const session = await factories.session.createTestSession();
+		userkey = session.userkey;
+		personId = session.personId;
+		await factories.permission.createTestPermission({
+			chapterId : 130737,
+			schoolId  : 699354,
+			tournId   : 31059,
+			personId  : personId,
+			tag     : 'chapter',
+		});
+		await db.contact.create({
+			school   : 694009,
+			tourn    : 30661,
+			chapter  : 130140,
+			person   : personId,
+			official : 1,
+			onsite   : 1,
+			email    : 1,
+		});
 	});
 
 	it('Returns correct JSON for user chapter permission request', async () => {
 		const res = await request(server)
 			.get(`/v1/user/chapter`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -48,7 +61,7 @@ describe('User Chapter', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapter/byTourn/30661`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -74,18 +87,17 @@ describe('User Chapter', () => {
 			`delete from permission where person = :personId and chapter = :chapterId `,
 			{
 				replacements: {
-					personId: testUserChapterPerm.person,
-					chapterId: testUserChapterPerm.chapter,
+					personId: personId,
+					chapterId: 130737,
 				},
 				type: db.sequelize.QueryTypes.DELETE,
 			}
 		);
 		await db.sequelize.query(
-			`delete from contact where person = :personId and school = :schoolId `,
+			`delete from contact where person = :personId`,
 			{
 				replacements: {
-					personId: testUserSchoolContact.person,
-					schoolId: testUserSchoolContact.school,
+					personId: personId,
 				},
 				type: db.sequelize.QueryTypes.DELETE,
 			}

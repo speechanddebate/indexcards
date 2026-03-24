@@ -237,25 +237,4 @@ export const BackupRequest = {
 		},
 	},
 	additionalProperties: false,
-
-	examples: {
-		example1: {
-			scope: {
-				type: 'tournament',
-			},
-			options: {
-				ignoreComments: true,
-			},
-		},
-		example2: {
-			tournId: 123,
-			scope: {
-				type: 'event',
-				id: 456,
-			},
-			options: {
-				ignoreBallots: true,
-			},
-		},
-	},
 };

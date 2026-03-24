@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import * as schemas from '../../openapi/schemas/index.js';
+import * as examples from '../../openapi/examples/index.js';
 import * as controller from '../../../controllers/authController.js';
 
 const router = Router();
@@ -14,8 +16,18 @@ router.route('/login').post(controller.login).openapi = {
 		required: true,
 		content: {
 			'application/json': {
-				schema: {
-					$ref: '#/components/schemas/LoginRequest',
+				schema: schemas.LoginRequest,
+				example: examples.LoginRequest,
+			},
+		},
+	},
+	responses: {
+		'200': {
+			description: 'Success',
+			content: {
+				'application/json': {
+					schema: schemas.LoginResponse,
+					example: examples.LoginResponse,
 				},
 			},
 		},
@@ -41,9 +53,7 @@ router.route('/register').post(controller.register).openapi = {
 		required: true,
 		content: {
 			'application/json': {
-				schema: {
-					$ref: '#/components/schemas/RegisterRequest',
-				},
+				schema: schemas.RegisterRequest,
 			},
 		},
 	},

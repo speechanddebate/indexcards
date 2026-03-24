@@ -3,17 +3,17 @@ import authService, { AUTH_INVALID }  from '../services/AuthService.js';
 import config from '../../config/config.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import { ValidationError } from '../helpers/errors/errors.js';
+import { LoginRequest, LoginResponse } from '../routes/openapi/schemas/index.js';
 
 export async function login(req, res) {
-	//validate request, in future should validate against the openapi schema
-	const { username, password } = req.body;
-
-	if (!username || !password) {
-		return BadRequest(req,res, 'username and password are required');
+	const validation = LoginRequest.safeParse(req.body);
+	if (!validation.success) {
+		return BadRequest(req, res, 'Invalid request payload');
 	}
+	const { username, password } = validation.data;
 	let result;
 	try {
-		result = await authService.login(username,password,{
+		result = await authService.login(username, password, {
 			ip: req.ip,
 			agentData: req.get('User-Agent'),
 		});
@@ -23,17 +23,19 @@ export async function login(req, res) {
 	}
 
 	const { person, token } = result;
-
-	var response = {
+	const validationResponse = LoginResponse.safeParse({
 		token: token,
-		person: { //should conform to personSchema
+		Person: { //should conform to personSchema
 			id: person.id,
 			email: person.email,
 		},
-	};
+	});
+	if (!validationResponse.success) {
+		return BadRequest(req, res, 'Invalid response payload');
+	}
 	res.cookie(config.COOKIE_NAME, token, authService.getAuthCookieOptions());
 	res.cookie(config.CSRF.COOKIE_NAME, authService.generateCSRFToken(token), authService.getCSRFCookieOptions());
-	return res.json(response);
+	return res.json(validationResponse.data);
 };
 
 export async function logout(req, res){

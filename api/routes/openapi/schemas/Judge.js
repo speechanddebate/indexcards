@@ -1,3 +1,9 @@
+export const Judge = {
+	type: 'object',
+	properties: {
+
+	},
+};
 /**
  *  A record of a judge's decision. used in paradigm details
  */

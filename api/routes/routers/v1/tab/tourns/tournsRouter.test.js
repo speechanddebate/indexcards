@@ -26,6 +26,7 @@ describe('tournsRouter', () => {
 				id: tournId,
 				start: data.start?.toISOString(),
 				end: data.end?.toISOString(),
+				hidden: false,
 				regStart: data.regStart?.toISOString(),
 				regEnd: data.regEnd?.toISOString(),
 			});

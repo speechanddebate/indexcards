@@ -72,18 +72,18 @@ describe('Authorization Functions', () => {
 	});
 
 	it('Finds a session for an GLP Admin user', async () => {
-		const req = {
-			person: {
-				id: userData.testAdminSession.person,
+		const { req, res } = createContext({
+			req: {
+				person: {
+					id: userData.testAdminSession.person,
+				},
+				config,
+				cookies : {
+					[config.COOKIE_NAME]: userData.testAdminSession.userkey,
+				},
 			},
-			config,
-			cookies : {
-				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
-			},
-			clearCookie: vi.fn(),
-		};
+		});
 
-		const res = {};
 		// Call the middleware to set req.session
 		await new Promise((resolve, reject) => {
 			Authenticate(req, res, (err) => {
@@ -104,18 +104,19 @@ describe('Authorization Functions', () => {
 
 		const testNotTourn = '9700';
 
-		const req = {
-			config,
-			params: {
-				tournId : testNotTourn,
+		const { req, res } = createContext({
+			req: {
+				config,
+				params: {
+					tournId : testNotTourn,
+				},
+				cookies : {
+					[config.COOKIE_NAME]: userData.testAdminSession.userkey,
+				},
+				clearCookie: vi.fn(),
 			},
-			cookies : {
-				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
-			},
-			clearCookie: vi.fn(),
-		};
+		});
 
-		const res = {};
 		// Call the middleware to set req.session
 		await new Promise((resolve, reject) => {
 			Authenticate(req, res, (err) => {

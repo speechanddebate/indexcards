@@ -21,7 +21,8 @@
 		"format": "prettier --write .",
 		"format-check": "prettier --check .",
 		"prepare": "husky",
-		"models": "NODE_ENV='development' node api/data/auto.js"
+		"models": "NODE_ENV='development' node api/data/auto.js",
+		"updateTestFile": "NODE_ENV=test node scripts/updateTestFile.js"
 	},
 	"extensionless": {
 		"lookFor": [
@@ -71,7 +72,7 @@
 		"dayjs": "^1.11.13",
 		"dotenv": "^8.2.0",
 		"express": "^5.2.1",
-		"express-rate-limit": "^3.4.1",
+		"express-rate-limit": "^8.3.1",
 		"express-winston": "^4.2.0",
 		"full-name-splitter": "^1.1.1",
 		"helmet": "^8",
@@ -91,7 +92,8 @@
 		"unixcrypt": "^3.0.4",
 		"uuid": "^7",
 		"winston": "^3.2.1",
-		"xml2js": "^0.6.2"
+		"xml2js": "^0.6.2",
+		"zod-openapi": "^5.4.6"
 	},
 	"devDependencies": {
 		"@alt3/sequelize-to-json-schemas": "^0.3.55",
@@ -119,6 +121,7 @@
 		"tsx": "^4.19.2",
 		"typescript": "^5.2.0",
 		"typescript-eslint": "^8.20.0",
-		"vitest": "^4.0.17"
+		"vitest": "^4.0.17",
+		"zod": "^4.3.6"
 	}
 }

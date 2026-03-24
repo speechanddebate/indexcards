@@ -1,5 +1,5 @@
 {
-  "openapi": "3.1.0",
+  "openapi": "3.1.1",
   "servers": [
     {
       "url": "/v1"
@@ -128,22 +128,6 @@
       "description": "Auto-discovered tag"
     },
     {
-      "name": "Rounds",
-      "description": "Auto-discovered tag"
-    },
-    {
-      "name": "schematics",
-      "description": "Auto-discovered tag"
-    },
-    {
-      "name": "rounds",
-      "description": "Auto-discovered tag"
-    },
-    {
-      "name": "pairings",
-      "description": "Auto-discovered tag"
-    },
-    {
       "name": "Events",
       "description": "Auto-discovered tag"
     },
@@ -157,6 +141,22 @@
     },
     {
       "name": "Entries",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "Rounds",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "schematics",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "rounds",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "pairings",
       "description": "Auto-discovered tag"
     },
     {
@@ -272,20 +272,38 @@
           "Orval"
         ],
         "security": [],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
+              "example": {
+                "username": "johndoe@tabroom.com",
+                "password": "password123"
+              },
               "schema": {
                 "$ref": "#/components/schemas/LoginRequest"
               }
             }
           }
         },
-        "parameters": [],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "example": {
+                  "token": "example-token",
+                  "Person": {
+                    "id": 1,
+                    "email": "johndoe@tabroom.com"
+                  }
+                },
+                "schema": {
+                  "$ref": "#/components/schemas/LoginResponse"
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -329,6 +347,7 @@
           "Orval"
         ],
         "security": [],
+        "parameters": [],
         "requestBody": {
           "required": true,
           "content": {
@@ -339,7 +358,6 @@
             }
           }
         },
-        "parameters": [],
         "responses": {
           "200": {
             "description": "Success"
@@ -359,6 +377,8 @@
         "tags": [
           "Admin : Servers"
         ],
+        "description": "GET /admin/servers/usage is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -369,9 +389,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /admin/servers/usage is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/admin/servers/show": {
@@ -380,6 +398,8 @@
         "tags": [
           "Admin : Servers"
         ],
+        "description": "GET /admin/servers/show is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -390,9 +410,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /admin/servers/show is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/admin/servers/show/{linodeId}": {
@@ -401,17 +419,6 @@
         "tags": [
           "Admin : Servers"
         ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          }
-        },
         "description": "GET /admin/servers/show/{linodeId} is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
@@ -422,7 +429,18 @@
               "type": "integer"
             }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
       }
     },
     "/admin/servers/status": {
@@ -431,6 +449,8 @@
         "tags": [
           "Admin : Servers"
         ],
+        "description": "GET /admin/servers/status is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -441,9 +461,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /admin/servers/status is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/admin/servers/count": {
@@ -452,6 +470,8 @@
         "tags": [
           "Admin : Servers"
         ],
+        "description": "GET /admin/servers/count is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -462,9 +482,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /admin/servers/count is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/admin/servers/reboot": {
@@ -473,6 +491,8 @@
         "tags": [
           "Admin : Servers"
         ],
+        "description": "POST /admin/servers/reboot is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -483,9 +503,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /admin/servers/reboot is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/admin/servers/changeCount": {
@@ -494,6 +512,8 @@
         "tags": [
           "Admin : Servers"
         ],
+        "description": "POST /admin/servers/changeCount is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -504,9 +524,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /admin/servers/changeCount is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/admin/servers/changeCount/{id}": {
@@ -515,17 +533,6 @@
         "tags": [
           "Admin : Servers"
         ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          }
-        },
         "description": "DELETE /admin/servers/changeCount/{id} is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
@@ -536,7 +543,18 @@
               "type": "string"
             }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
       }
     },
     "/admin/mailtest/error": {
@@ -550,6 +568,8 @@
             "basic": []
           }
         ],
+        "description": "GET /admin/mailtest/error is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -560,9 +580,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /admin/mailtest/error is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/admin/mailtest/slack": {
@@ -571,6 +589,8 @@
         "tags": [
           "Admin : Mail"
         ],
+        "description": "GET /admin/mailtest/slack is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "OK"
@@ -581,9 +601,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /admin/mailtest/slack is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/ext/login": {
@@ -592,6 +610,8 @@
         "tags": [
           "Ext"
         ],
+        "description": "POST /ext/login is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Login successful"
@@ -605,9 +625,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /ext/login is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/ext/caselist/chapters": {
@@ -621,6 +639,7 @@
         "tags": [
           "Ext : Caselist"
         ],
+        "description": "GET /ext/caselist/chapters is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "in": "query",
@@ -656,8 +675,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /ext/caselist/chapters is undocumented. Need to add .openapi to handler"
+        }
       }
     },
     "/ext/caselist/rounds": {
@@ -671,6 +689,7 @@
         "tags": [
           "Ext : Caselist"
         ],
+        "description": "GET /ext/caselist/rounds is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "in": "query",
@@ -723,8 +742,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /ext/caselist/rounds is undocumented. Need to add .openapi to handler"
+        }
       }
     },
     "/ext/caselist/students": {
@@ -738,6 +756,7 @@
         "tags": [
           "Ext : Caselist"
         ],
+        "description": "GET /ext/caselist/students is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "in": "query",
@@ -773,8 +792,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /ext/caselist/students is undocumented. Need to add .openapi to handler"
+        }
       }
     },
     "/ext/caselist/link": {
@@ -788,6 +806,8 @@
         "tags": [
           "Ext : Caselist"
         ],
+        "description": "POST /ext/caselist/link is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "requestBody": {
           "description": "The caselist link",
           "required": true,
@@ -822,9 +842,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /ext/caselist/link is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/ext/share/sendShareFile": {
@@ -839,6 +857,8 @@
         "tags": [
           "Ext : Share"
         ],
+        "description": "POST /ext/share/sendShareFile is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "requestBody": {
           "description": "Initialize the doc chain room and emails",
           "required": true,
@@ -870,9 +890,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /ext/share/sendShareFile is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/ext/share/makeShareRooms": {
@@ -886,6 +904,8 @@
         "tags": [
           "Ext : Share"
         ],
+        "description": "POST /ext/share/makeShareRooms is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Rooms created successfully"
@@ -899,9 +919,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /ext/share/makeShareRooms is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/ext/nsda/history": {
@@ -916,6 +934,7 @@
         "tags": [
           "Ext : NSDA"
         ],
+        "description": "GET /ext/nsda/history is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "in": "query",
@@ -948,8 +967,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /ext/nsda/history is undocumented. Need to add .openapi to handler"
+        }
       }
     },
     "/ext/nsda/payment": {
@@ -963,6 +981,8 @@
         "tags": [
           "Ext : NSDA"
         ],
+        "description": "GET /ext/nsda/payment is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Payment information"
@@ -976,9 +996,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /ext/nsda/payment is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       },
       "post": {
         "summary": "Process payment",
@@ -990,6 +1008,8 @@
         "tags": [
           "Ext : NSDA"
         ],
+        "description": "POST /ext/nsda/payment is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "201": {
             "description": "Payment processed"
@@ -1003,9 +1023,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /ext/nsda/payment is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/ext/nsda/payment/tourn/{tournId}": {
@@ -1019,6 +1037,7 @@
         "tags": [
           "Ext : NSDA"
         ],
+        "description": "GET /ext/nsda/payment/tourn/{tournId} is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "in": "path",
@@ -1045,8 +1064,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /ext/nsda/payment/tourn/{tournId} is undocumented. Need to add .openapi to handler"
+        }
       },
       "post": {
         "summary": "Process payment for tournament",
@@ -1058,6 +1076,7 @@
         "tags": [
           "Ext : NSDA"
         ],
+        "description": "POST /ext/nsda/payment/tourn/{tournId} is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "in": "path",
@@ -1084,8 +1103,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /ext/nsda/payment/tourn/{tournId} is undocumented. Need to add .openapi to handler"
+        }
       }
     },
     "/ext/nsda/nats/appearances": {
@@ -1099,6 +1117,8 @@
         "tags": [
           "Ext : NSDA"
         ],
+        "description": "GET /ext/nsda/nats/appearances is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Appearances synced"
@@ -1112,9 +1132,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /ext/nsda/nats/appearances is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/ext/nsda/nats/placements": {
@@ -1128,6 +1146,8 @@
         "tags": [
           "Ext : NSDA"
         ],
+        "description": "GET /ext/nsda/nats/placements is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Individual placements"
@@ -1141,9 +1161,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /ext/nsda/nats/placements is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/ext/mason/round/{roundId}/blast": {
@@ -1157,6 +1175,7 @@
         "tags": [
           "Ext : Mason"
         ],
+        "description": "POST /ext/mason/round/{roundId}/blast is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "in": "path",
@@ -1183,8 +1202,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /ext/mason/round/{roundId}/blast is undocumented. Need to add .openapi to handler"
+        }
       }
     },
     "/ext/mason/blast": {
@@ -1198,6 +1216,8 @@
         "tags": [
           "Ext : Mason"
         ],
+        "description": "POST /ext/mason/blast is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Message sent successfully"
@@ -1211,9 +1231,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /ext/mason/blast is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/ext/mason/section/{sectionId}/blastPairing": {
@@ -1227,6 +1245,7 @@
         "tags": [
           "Ext : Mason"
         ],
+        "description": "POST /ext/mason/section/{sectionId}/blastPairing is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "in": "path",
@@ -1258,8 +1277,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /ext/mason/section/{sectionId}/blastPairing is undocumented. Need to add .openapi to handler"
+        }
       }
     },
     "/pages/invite/nsdaCategories": {
@@ -1270,6 +1288,7 @@
           "Invite",
           "Public"
         ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "List of NSDA event categories"
@@ -1280,43 +1299,19 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "parameters": []
+        }
       }
     },
     "/pages/invite/upcoming": {
       "get": {
         "summary": "Returns the public listing of upcoming tournaments",
-        "responses": {
-          "200": {
-            "description": "List of public upcoming tournaments",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Tourn"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          }
-        },
         "tags": [
           "futureTourns",
           "invite",
           "public"
         ],
         "description": "GET /pages/invite/upcoming is undocumented. Need to add .openapi to handler",
-        "parameters": []
-      }
-    },
-    "/pages/invite/{circuit}": {
-      "get": {
-        "summary": "Returns the public listing of upcoming tournaments",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "List of public upcoming tournaments",
@@ -1334,7 +1329,12 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
+        }
+      }
+    },
+    "/pages/invite/{circuit}": {
+      "get": {
+        "summary": "Returns the public listing of upcoming tournaments",
         "tags": [
           "futureTourns",
           "invite",
@@ -1350,13 +1350,37 @@
               "type": "string"
             }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "List of public upcoming tournaments",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tourn"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
       }
     },
     "/pages/invite/nextweek": {
       "get": {
         "summary": "Returns the public listing of upcoming tournaments in this week",
         "operationId": "listWeeksTourns",
+        "tags": [
+          "invite",
+          "public"
+        ],
+        "description": "GET /pages/invite/nextweek is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "List of this week's tournaments, with some stats",
@@ -1374,13 +1398,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "tags": [
-          "invite",
-          "public"
-        ],
-        "description": "GET /pages/invite/nextweek is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/pages/invite/webname/{webname}": {
@@ -1390,6 +1408,16 @@
         "tags": [
           "Invite",
           "Public"
+        ],
+        "parameters": [
+          {
+            "name": "webname",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -1401,17 +1429,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "parameters": [
-          {
-            "name": "webname",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ]
+        }
       }
     },
     "/pages/invite/{tournId}/{eventAbbr}/{roundName}": {
@@ -1424,17 +1442,6 @@
           "Schematic",
           "Round"
         ],
-        "responses": {
-          "200": {
-            "description": "Round Information"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          }
-        },
         "parameters": [
           {
             "$ref": "#/components/parameters/tournId"
@@ -1455,7 +1462,18 @@
               "type": "string"
             }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "Round Information"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
       }
     },
     "/tab/tourns": {
@@ -1464,15 +1482,17 @@
         "tags": [
           "Tournament"
         ],
+        "description": "POST /tab/tourns is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "requestBody": {
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/TournRequest"
               }
             }
-          },
-          "required": true
+          }
         },
         "responses": {
           "201": {
@@ -1491,9 +1511,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "POST /tab/tourns is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/tab/tourns/{tournId}": {
@@ -1501,6 +1519,12 @@
         "summary": "Get tournament",
         "tags": [
           "Tournament"
+        ],
+        "description": "GET /tab/tourns/{tournId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
         ],
         "responses": {
           "200": {
@@ -1522,13 +1546,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /tab/tourns/{tournId} is undocumented. Need to add .openapi to handler",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          }
-        ]
+        }
       },
       "put": {
         "summary": "Update tournament",
@@ -1630,6 +1648,12 @@
         "tags": [
           "Category"
         ],
+        "description": "GET /tab/tourns/{tournId}/categories is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of categories",
@@ -1650,13 +1674,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /tab/tourns/{tournId}/categories is undocumented. Need to add .openapi to handler",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Create category",
@@ -1688,6 +1706,20 @@
         "tags": [
           "Category"
         ],
+        "description": "GET /tab/tourns/{tournId}/categories/{categoryId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "Category details",
@@ -1708,21 +1740,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /tab/tourns/{tournId}/categories/{categoryId} is undocumented. Need to add .openapi to handler",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          },
-          {
-            "name": "categoryId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ]
+        }
       },
       "delete": {
         "summary": "Delete category",
@@ -1794,6 +1812,11 @@
         "tags": [
           "Schools"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Schools retrieved successfully",
@@ -1817,18 +1840,18 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Create School",
         "description": "Creates a new school within the specified tournament.",
         "tags": [
           "Schools"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
         ],
         "requestBody": {
           "required": true,
@@ -1863,12 +1886,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          }
-        ]
+        }
       }
     },
     "/tab/tourns/{tournId}/schools/{schoolId}": {
@@ -1877,6 +1895,19 @@
         "description": "Retrieves a school by its ID within the specified tournament.",
         "tags": [
           "Schools"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "schoolId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -1898,7 +1929,14 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
+        }
+      },
+      "put": {
+        "summary": "Update School",
+        "description": "Updates an existing school within the specified tournament.",
+        "tags": [
+          "Schools"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/tournId"
@@ -1911,13 +1949,6 @@
               "type": "integer"
             }
           }
-        ]
-      },
-      "put": {
-        "summary": "Update School",
-        "description": "Updates an existing school within the specified tournament.",
-        "tags": [
-          "Schools"
         ],
         "requestBody": {
           "required": true,
@@ -1942,7 +1973,14 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
+        }
+      },
+      "delete": {
+        "summary": "Delete School",
+        "description": "Deletes a school within the specified tournament.",
+        "tags": [
+          "Schools"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/tournId"
@@ -1955,13 +1993,6 @@
               "type": "integer"
             }
           }
-        ]
-      },
-      "delete": {
-        "summary": "Delete School",
-        "description": "Deletes a school within the specified tournament.",
-        "tags": [
-          "Schools"
         ],
         "responses": {
           "204": {
@@ -1976,20 +2007,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          },
-          {
-            "name": "schoolId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ]
+        }
       }
     },
     "/tab/tourns/{tournId}/sites": {
@@ -1997,6 +2015,12 @@
         "summary": "Get sites",
         "tags": [
           "Sites & Rooms"
+        ],
+        "description": "GET /tab/tourns/{tournId}/sites is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
         ],
         "responses": {
           "200": {
@@ -2036,13 +2060,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /tab/tourns/{tournId}/sites is undocumented. Need to add .openapi to handler",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          }
-        ]
+        }
       },
       "post": {
         "summary": "Create site",
@@ -2073,6 +2091,20 @@
         "summary": "Get site",
         "tags": [
           "Sites & Rooms"
+        ],
+        "description": "GET /tab/tourns/{tournId}/sites/{siteId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -2107,21 +2139,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /tab/tourns/{tournId}/sites/{siteId} is undocumented. Need to add .openapi to handler",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          },
-          {
-            "name": "siteId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ]
+        }
       },
       "put": {
         "summary": "Update site",
@@ -2698,6 +2716,7 @@
           "Ads",
           "Orval"
         ],
+        "parameters": [],
         "responses": {
           "200": {
             "description": "An array of Ads to be displayed",
@@ -2732,8 +2751,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "parameters": []
+        }
       }
     },
     "/rest/circuits/active": {
@@ -2803,6 +2821,48 @@
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/rest/circuits/{circuitId}": {
+      "get": {
+        "summary": "get a circuit",
+        "description": "gets a circuit by ID",
+        "operationId": "RestCircuit",
+        "tags": [
+          "Circuits",
+          "Orval"
+        ],
+        "parameters": [
+          {
+            "name": "circuitId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Circuit details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RestCircuit"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "description": "Circuit not found"
           },
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
@@ -2901,6 +2961,11 @@
         "tags": [
           "Tournaments"
         ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Tournament information",
@@ -2921,12 +2986,41 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
+        }
+      }
+    },
+    "/rest/tourns/{tournId}/rounds/{roundId}/records": {
+      "get": {
+        "summary": "Get Published Entry Records by Round",
+        "description": "Given an Round ID, get a bunch of win loss data about the entries up to but not including that round",
+        "tags": [
+          "Events",
+          "Results",
+          "Records",
+          "Entries"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "$ref": "#/components/parameters/roundId"
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "Entries with Win Loss data attached"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
       }
     },
     "/rest/tourns/{tournId}/rounds": {
@@ -2936,6 +3030,11 @@
         "tags": [
           "Tournaments",
           "Rounds"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
         ],
         "responses": {
           "200": {
@@ -2950,18 +3049,29 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          }
-        ]
+        }
       }
     },
     "/rest/tourns/{tournId}/rounds/{roundId}": {
       "get": {
         "summary": "Returns round information given an ID if it is public",
         "operationId": "getRound",
+        "tags": [
+          "invite",
+          "public",
+          "schematics",
+          "rounds",
+          "pairings"
+        ],
+        "description": "GET /rest/tourns/{tournId}/rounds/{roundId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "$ref": "#/components/parameters/roundId"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Object of Round with public information on it",
@@ -2982,7 +3092,13 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
+        }
+      }
+    },
+    "/rest/tourns/{tournId}/rounds/{roundId}/schematic": {
+      "get": {
+        "summary": "Returns public round information necessary to create a full schematic",
+        "operationId": "getSchematic",
         "tags": [
           "invite",
           "public",
@@ -2990,7 +3106,7 @@
           "rounds",
           "pairings"
         ],
-        "description": "GET /rest/tourns/{tournId}/rounds/{roundId} is undocumented. Need to add .openapi to handler",
+        "description": "GET /rest/tourns/{tournId}/rounds/{roundId}/schematic is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "$ref": "#/components/parameters/tournId"
@@ -2998,13 +3114,7 @@
           {
             "$ref": "#/components/parameters/roundId"
           }
-        ]
-      }
-    },
-    "/rest/tourns/{tournId}/rounds/{roundId}/schematic": {
-      "get": {
-        "summary": "Returns public round information necessary to create a full schematic",
-        "operationId": "getSchematic",
+        ],
         "responses": {
           "200": {
             "description": "Object of Round with public information on it for a schematic, which includes a list of entries or sections as appropriate.",
@@ -3025,23 +3135,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "tags": [
-          "invite",
-          "public",
-          "schematics",
-          "rounds",
-          "pairings"
-        ],
-        "description": "GET /rest/tourns/{tournId}/rounds/{roundId}/schematic is undocumented. Need to add .openapi to handler",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          },
-          {
-            "$ref": "#/components/parameters/roundId"
-          }
-        ]
+        }
       }
     },
     "/rest/tourns/{tournId}/events": {
@@ -3050,6 +3144,11 @@
         "description": "Retrieve a list of events associated with a specific tournament.",
         "tags": [
           "Tournaments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
         ],
         "responses": {
           "200": {
@@ -3064,38 +3163,19 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          }
-        ]
+        }
       }
     },
-    "/rest/tourns/{tournId}/events/{eventId}/records": {
+    "/rest/tourns/{tournId}/events/{eventId}/entryWins": {
       "get": {
-        "summary": "Get Published Entry Records by Event",
-        "description": "Given an Event ID, get a bunch of win loss data about that entry",
+        "summary": "Get Published Entry Winloss Records by Event",
+        "description": "Given an Event ID, get a bunch of win loss data about each entry",
         "tags": [
           "Events",
           "Results",
           "Records",
           "Entries"
         ],
-        "responses": {
-          "200": {
-            "description": "Entries with Win Loss data attached"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          }
-        },
         "parameters": [
           {
             "$ref": "#/components/parameters/tournId"
@@ -3108,18 +3188,6 @@
               "type": "integer"
             }
           }
-        ]
-      }
-    },
-    "/rest/tourns/{tournId}/events/{eventId}/records/{roundName}": {
-      "get": {
-        "summary": "Get Published Entry Records by Event up to a Round",
-        "description": "Given an Event ID, get a bunch of win loss data about that entry, up to but not including a named round",
-        "tags": [
-          "Events",
-          "Results",
-          "Records",
-          "Entries"
         ],
         "responses": {
           "200": {
@@ -3134,7 +3202,19 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
+        }
+      }
+    },
+    "/rest/tourns/{tournId}/events/{eventId}/entryWins/{roundName}": {
+      "get": {
+        "summary": "Get Published Entry WinLoss Records by Event up to specified round",
+        "description": "Given an Event ID, get a bunch of win loss data about that entry, up to but not including a named round",
+        "tags": [
+          "Events",
+          "Results",
+          "Records",
+          "Entries"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/tournId"
@@ -3155,7 +3235,21 @@
               "type": "string"
             }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "Entries with Win Loss data attached"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
       }
     },
     "/rest/tourns/{tournId}/events/{eventAbbr}/field": {
@@ -3164,6 +3258,19 @@
         "description": "Retrieve entries in the field for a specific event.",
         "tags": [
           "Events"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "eventAbbr",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -3178,44 +3285,13 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          },
-          {
-            "name": "eventAbbr",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ]
+        }
       }
     },
     "/rest/tourns/{tournId}/events/{eventAbbr}": {
       "get": {
         "summary": "Returns some limited data about an event together with published rounds by event abbreviation",
         "operationId": "getEventByAbbr",
-        "responses": {
-          "200": {
-            "description": "Event and Round in JSON format for parsing",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
-                }
-              }
-            }
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          }
-        },
         "tags": [
           "invite",
           "public",
@@ -3236,7 +3312,25 @@
               "type": "string"
             }
           }
-        ]
+        ],
+        "responses": {
+          "200": {
+            "description": "Event and Round in JSON format for parsing",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
       }
     },
     "/rest/tourns/{tournId}/invite": {
@@ -3247,6 +3341,11 @@
         "tags": [
           "Tournaments",
           "test"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
         ],
         "responses": {
           "200": {
@@ -3271,12 +3370,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          }
-        ]
+        }
       }
     },
     "/rest/tourns/{tournId}/files": {
@@ -3285,6 +3379,11 @@
         "description": "Retrieve a list of published files associated with a specific tournament.",
         "tags": [
           "Tournaments"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
         ],
         "responses": {
           "200": {
@@ -3309,12 +3408,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          }
-        ]
+        }
       }
     },
     "/rest/tourns/{tournId}/schedule": {
@@ -3323,6 +3417,7 @@
         "tags": [
           "Tournaments"
         ],
+        "description": "GET /rest/tourns/{tournId}/schedule is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "in": "path",
@@ -3356,8 +3451,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /rest/tourns/{tournId}/schedule is undocumented. Need to add .openapi to handler"
+        }
       }
     },
     "/rest/tourns/{tournId}/results": {
@@ -3369,6 +3463,7 @@
           "public",
           "results"
         ],
+        "description": "GET /rest/tourns/{tournId}/results is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "in": "path",
@@ -3405,8 +3500,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /rest/tourns/{tournId}/results is undocumented. Need to add .openapi to handler"
+        }
       }
     },
     "/rest/paradigms": {
@@ -3417,6 +3511,7 @@
           "Paradigms",
           "Orval"
         ],
+        "description": "GET /rest/paradigms is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "name": "search",
@@ -3498,8 +3593,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /rest/paradigms is undocumented. Need to add .openapi to handler"
+        }
       }
     },
     "/rest/paradigms/{personId}": {
@@ -3509,6 +3603,17 @@
         "tags": [
           "Paradigms",
           "Orval"
+        ],
+        "description": "GET /rest/paradigms/{personId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "name": "personId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
         ],
         "responses": {
           "200": {
@@ -3533,18 +3638,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "description": "GET /rest/paradigms/{personId} is undocumented. Need to add .openapi to handler",
-        "parameters": [
-          {
-            "name": "personId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ]
+        }
       }
     },
     "/user/push/find": {
@@ -3553,6 +3647,9 @@
           "legacy",
           "Push Notifications"
         ],
+        "summary": "GET /user/push/find",
+        "description": "GET /user/push/find is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Subscription"
@@ -3566,16 +3663,16 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "summary": "GET /user/push/find",
-        "description": "GET /user/push/find is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       },
       "delete": {
         "tags": [
           "legacy",
           "Push Notifications"
         ],
+        "summary": "DELETE /user/push/find",
+        "description": "DELETE /user/push/find is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Subscription deleted"
@@ -3589,10 +3686,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "summary": "DELETE /user/push/find",
-        "description": "DELETE /user/push/find is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/user/inbox/list": {
@@ -3601,6 +3695,9 @@
           "legacy",
           "Inbox"
         ],
+        "summary": "GET /user/inbox/list",
+        "description": "GET /user/inbox/list is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Inbox list"
@@ -3614,10 +3711,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "summary": "GET /user/inbox/list",
-        "description": "GET /user/inbox/list is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/user/inbox/unread": {
@@ -3627,6 +3721,9 @@
           "Inbox",
           "Orval"
         ],
+        "summary": "GET /user/inbox/unread",
+        "description": "GET /user/inbox/unread is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Unread count",
@@ -3649,10 +3746,7 @@
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "summary": "GET /user/inbox/unread",
-        "description": "GET /user/inbox/unread is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/user/inbox/markRead": {
@@ -3661,6 +3755,9 @@
           "legacy",
           "Inbox"
         ],
+        "summary": "POST /user/inbox/markRead",
+        "description": "POST /user/inbox/markRead is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Message marked as read"
@@ -3674,10 +3771,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "summary": "POST /user/inbox/markRead",
-        "description": "POST /user/inbox/markRead is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/user/inbox/markAllRead": {
@@ -3686,6 +3780,9 @@
           "legacy",
           "Inbox"
         ],
+        "summary": "POST /user/inbox/markAllRead",
+        "description": "POST /user/inbox/markAllRead is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "All messages marked as read"
@@ -3699,10 +3796,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "summary": "POST /user/inbox/markAllRead",
-        "description": "POST /user/inbox/markAllRead is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/user/inbox/markDeleted": {
@@ -3711,6 +3805,9 @@
           "legacy",
           "Inbox"
         ],
+        "summary": "POST /user/inbox/markDeleted",
+        "description": "POST /user/inbox/markDeleted is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "Message marked as deleted"
@@ -3724,10 +3821,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "summary": "POST /user/inbox/markDeleted",
-        "description": "POST /user/inbox/markDeleted is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     },
     "/user/session": {
@@ -3738,6 +3832,9 @@
           "User Session",
           "Orval"
         ],
+        "summary": "GET /user/session",
+        "description": "GET /user/session is undocumented. Need to add .openapi to handler",
+        "parameters": [],
         "responses": {
           "200": {
             "description": "User session",
@@ -3758,10 +3855,7 @@
           "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
-        },
-        "summary": "GET /user/session",
-        "description": "GET /user/session is undocumented. Need to add .openapi to handler",
-        "parameters": []
+        }
       }
     }
   },
@@ -3841,108 +3935,72 @@
           }
         ]
       },
-      "PublicAd": {
+      "BackupRequest": {
         "type": "object",
-        "description": "A public representation of the ads displayed on the homepage",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "number",
-            "readOnly": true,
-            "description": "the Id of the Ad",
-            "example": 1
-          },
-          "filename": {
-            "type": "string",
-            "description": "The Image filename",
-            "example": "https://someurl.s2.aws.com"
-          },
-          "url": {
-            "type": "string",
-            "description": "The link to follow when the ad is clicked",
-            "example": "https://www.example.com"
-          }
-        }
-      },
-      "LoginRequest": {
-        "type": "object",
-        "description": "A request to log in a user",
-        "additionalProperties": false,
+        "description": "A request to create a backup for a tournament or part of a tournament",
         "required": [
-          "username",
-          "password"
+          "scope"
         ],
         "properties": {
-          "username": {
-            "type": "string",
-            "description": "the username of the user"
+          "scope": {
+            "type": "object",
+            "description": "Defines what part of the tournament to back up",
+            "required": [
+              "type"
+            ],
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The scope of the backup",
+                "enum": [
+                  "tournament",
+                  "category",
+                  "event",
+                  "school"
+                ]
+              },
+              "id": {
+                "type": "integer",
+                "description": "The ID of the category, event, or school being backed up (required when scope type is not \"tournament\")"
+              }
+            },
+            "additionalProperties": false
           },
-          "password": {
-            "type": "string",
-            "description": "The hashed user password"
-          }
-        }
-      },
-      "RegisterRequest": {
-        "type": "object",
-        "description": "A request to register a new user",
-        "additionalProperties": false,
-        "required": [
-          "email",
-          "password",
-          "firstName",
-          "lastName"
-        ],
-        "properties": {
-          "email": {
-            "type": "string",
-            "format": "email",
-            "description": "The email address of the new user"
-          },
-          "password": {
-            "type": "string",
-            "description": "The password for the new user"
-          },
-          "firstName": {
-            "type": "string",
-            "description": "The first name of the new user"
-          },
-          "middleName": {
-            "type": "string",
-            "description": "The middle name of the new user"
-          },
-          "lastName": {
-            "type": "string",
-            "description": "The last name of the new user"
-          },
-          "phoneNumber": {
-            "type": "string",
-            "description": "The phone number of the new user"
-          },
-          "state": {
-            "type": "string",
-            "description": "The 2 letter state code of the new user"
-          },
-          "country": {
-            "type": "string",
-            "description": "The 2 letter country code of the new user"
-          },
-          "tz": {
-            "type": "string",
-            "description": "The IANA timezone of the new user"
+          "options": {
+            "type": "object",
+            "description": "Optional flags that affect how the backup is generated",
+            "properties": {
+              "ignoreComments": {
+                "type": "boolean",
+                "description": "Exclude comments from the backup"
+              },
+              "ignoreBallots": {
+                "type": "boolean",
+                "description": "Exclude ballots from the backup"
+              }
+            },
+            "additionalProperties": false
           }
         },
-        "examples": {
-          "example1": {
-            "email": "john.doe@example.com",
-            "password": "SecurePassw0rd!",
-            "firstName": "John",
-            "middleName": "A",
-            "lastName": "Doe",
-            "phoneNumber": "555-123-4567",
-            "state": "CA",
-            "country": "US",
-            "tz": "America/Chicago"
+        "additionalProperties": false
+      },
+      "CaselistLink": {
+        "type": "object",
+        "properties": {
+          "person_id": {
+            "type": "integer"
+          },
+          "slug": {
+            "type": "string",
+            "nullable": true
+          },
+          "caselist_key": {
+            "type": "string",
+            "nullable": true
+          },
+          "eventcode": {
+            "type": "integer",
+            "nullable": true
           }
         }
       },
@@ -4000,14 +4058,17 @@
         },
         "examples": {
           "example1": {
-            "id": 1,
-            "name": "Lincoln-Douglas",
-            "abbr": "LD",
-            "tournId": 42,
-            "patternId": 7,
-            "settings": [],
-            "createdAt": "2023-01-01T00:00:00Z",
-            "updatedAt": "2023-01-02T00:00:00Z"
+            "summary": "Example category",
+            "value": {
+              "id": 1,
+              "name": "Lincoln-Douglas",
+              "abbr": "LD",
+              "tournId": 42,
+              "patternId": 7,
+              "settings": [],
+              "createdAt": "2023-01-01T00:00:00Z",
+              "updatedAt": "2023-01-02T00:00:00Z"
+            }
           }
         }
       },
@@ -4184,131 +4245,55 @@
           }
         }
       },
-      "Event": {
+      "CreateSchool": {
         "type": "object",
-        "description": "An event",
         "required": [
-          "id",
-          "name",
-          "abbr",
-          "type",
-          "categoryId",
-          "tournId"
+          "chapterId"
         ],
         "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "abbr": {
-            "type": "string"
-          },
           "name": {
-            "type": "string"
-          },
-          "fee": {
-            "type": "number"
-          },
-          "type": {
             "type": "string",
-            "enum": [
-              "debate",
-              "speech",
-              "mockTrial",
-              "congress",
-              "wsdc",
-              "wudc",
-              "attendee",
-              "academic"
-            ]
+            "description": "Name of the school"
           },
-          "categoryId": {
-            "type": "integer"
+          "code": {
+            "type": "string",
+            "description": "School code"
+          },
+          "onsite": {
+            "type": "boolean",
+            "description": "Whether the school is onsite"
+          },
+          "chapterId": {
+            "type": "integer",
+            "description": "Chapter ID"
+          },
+          "state": {
+            "type": "string",
+            "description": "State abbreviation"
+          },
+          "regionId": {
+            "type": "integer",
+            "description": "Region ID"
           },
           "settings": {
             "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "metadata": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "Tourn": {
-            "$ref": "#/components/schemas/Category"
-          },
-          "Category": {
-            "$ref": "#/components/schemas/Category"
-          },
-          "Topic": {
-            "$ref": "#/components/schemas/Topic"
-          },
-          "Entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Entry"
-            }
-          },
-          "nsdaCategoryId": {
-            "type": "integer",
-            "nullable": true
-          },
-          "NSDACategory": {
-            "$ref": "#/components/schemas/NSDACategory"
+            "description": "School settings object"
           }
-        }
-      },
-      "File": {
-        "type": "object",
-        "description": "A file",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "description": "The unique identifier for the file",
-            "readOnly": true,
-            "example": 123
-          },
-          "tag": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "label": {
-            "type": "string",
-            "nullable": true
-          },
-          "filename": {
-            "type": "string",
-            "maxLength": 255,
-            "description": "The filename of the file",
-            "example": "example.pdf"
-          },
-          "published": {
-            "type": "boolean",
-            "description": "Whether the file is published or not",
-            "example": true
-          },
-          "pageOrder": {
-            "type": "integer",
-            "format": "int16",
-            "nullable": true
-          },
-          "uploaded": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When the file was last modified",
-            "readOnly": true,
-            "example": "2023-10-26T15:51:32.000Z"
+        },
+        "additionalProperties": false,
+        "examples": {
+          "example1": {
+            "value": {
+              "name": "Shermer High School",
+              "code": "SHS",
+              "onsite": true,
+              "chapterId": 456,
+              "state": "IL",
+              "regionId": 789,
+              "settings": {
+                "allowGuests": true
+              }
+            }
           }
         }
       },
@@ -4453,41 +4438,147 @@
           }
         }
       },
-      "TournInvite": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Tourn"
+      "Event": {
+        "type": "object",
+        "description": "An event",
+        "required": [
+          "id",
+          "name",
+          "abbr",
+          "type",
+          "categoryId",
+          "tournId"
+        ],
+        "properties": {
+          "id": {
+            "type": "integer"
           },
-          {
+          "abbr": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "fee": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "debate",
+              "speech",
+              "mockTrial",
+              "congress",
+              "wsdc",
+              "wudc",
+              "attendee",
+              "academic"
+            ]
+          },
+          "categoryId": {
+            "type": "integer"
+          },
+          "settings": {
             "type": "object",
-            "properties": {
-              "Webpages": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/Webpage"
-                }
-              },
-              "Files": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/File"
-                }
-              },
-              "Events": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/EventInvite"
-                }
-              },
-              "Contacts": {
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/TournContact"
-                }
-              }
+            "additionalProperties": {
+              "type": "string"
             }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "Tourn": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "Category": {
+            "$ref": "#/components/schemas/Category"
+          },
+          "Topic": {
+            "$ref": "#/components/schemas/Topic"
+          },
+          "Entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            }
+          },
+          "nsdaCategoryId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "NSDACategory": {
+            "$ref": "#/components/schemas/NSDACategory"
           }
-        ]
+        }
+      },
+      "EventInvite": {},
+      "File": {
+        "type": "object",
+        "description": "A file",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The unique identifier for the file",
+            "readOnly": true,
+            "example": 123
+          },
+          "tag": {
+            "type": "string",
+            "nullable": true
+          },
+          "type": {
+            "type": "string",
+            "nullable": true
+          },
+          "label": {
+            "type": "string",
+            "nullable": true
+          },
+          "filename": {
+            "type": "string",
+            "maxLength": 255,
+            "description": "The filename of the file",
+            "example": "example.pdf"
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Whether the file is published or not",
+            "example": true
+          },
+          "pageOrder": {
+            "type": "integer",
+            "format": "int16",
+            "nullable": true
+          },
+          "uploaded": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "When the file was last modified",
+            "readOnly": true,
+            "example": "2023-10-26T15:51:32.000Z"
+          }
+        }
+      },
+      "Invite": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "Judge": {
+        "type": "object",
+        "properties": {}
       },
       "JudgeRecord": {
         "type": "object",
@@ -4540,33 +4631,147 @@
         },
         "additionalProperties": false
       },
-      "CaselistLink": {
+      "NSDACategory": {
         "type": "object",
+        "required": [
+          "id",
+          "name",
+          "type",
+          "code"
+        ],
         "properties": {
-          "person_id": {
+          "id": {
             "type": "integer"
           },
-          "slug": {
-            "type": "string",
-            "nullable": true
+          "name": {
+            "type": "string"
           },
-          "caselist_key": {
-            "type": "string",
-            "nullable": true
+          "type": {
+            "type": "string"
           },
-          "eventcode": {
-            "type": "integer",
-            "nullable": true
+          "code": {
+            "type": "integer"
+          },
+          "nationals": {
+            "type": "boolean"
+          }
+        },
+        "examples": {
+          "example1": {
+            "id": 202,
+            "name": "Extemporaneous",
+            "type": "s",
+            "code": 202
           }
         }
       },
-      "Invite": {
+      "ParadigmDetails": {
         "type": "object",
+        "required": [
+          "id",
+          "name",
+          "lastReviewed",
+          "paradigm",
+          "record",
+          "certifications"
+        ],
+        "additionalProperties": false,
         "properties": {
+          "id": {
+            "type": "integer"
+          },
           "name": {
             "type": "string",
-            "nullable": true
+            "description": "Full name"
+          },
+          "lastReviewed": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Last reviewed timestamp"
+          },
+          "paradigm": {
+            "type": "string",
+            "description": "Paradigm content"
+          },
+          "record": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/JudgeRecord"
+            }
+          },
+          "certifications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "title",
+                "description"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "title": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "badge": {
+                  "type": "object",
+                  "properties": {
+                    "altText": {
+                      "type": "string"
+                    },
+                    "link": {
+                      "type": "string",
+                      "format": "uri"
+                    },
+                    "imageUrl": {
+                      "type": "string",
+                      "format": "uri"
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              }
+            }
           }
+        },
+        "example": {
+          "id": 123,
+          "name": "Kilgore Trout",
+          "lastReviewed": "1979-01-01T12:34:56Z",
+          "paradigm": "I will vote for anything involving aliens.",
+          "record": [
+            {
+              "tournName": "National Speech and Debate Tournament",
+              "roundDate": "2018-06-19T22:00:00.000Z",
+              "roundLabel": "R1",
+              "eventAbbr": "PF",
+              "affTeam": "Washington PV",
+              "affLabel": "Pro",
+              "negTeam": "Denver VX",
+              "negLabel": "Con",
+              "vote": "Con",
+              "panelVote": "Con",
+              "record": "0-1"
+            }
+          ],
+          "certifications": [
+            {
+              "title": "Alien Case Certification",
+              "description": "Certified in understanding alien based cases.",
+              "updatedAt": "2023-12-01T10:00:00Z",
+              "badge": {
+                "altText": "Alien Case Badge",
+                "link": "https://example.com/badges/alien-case",
+                "imageUrl": "https://example.com/images/alien-case-badge.png"
+              }
+            }
+          ]
         }
       },
       "Person": {
@@ -4634,6 +4839,63 @@
           }
         }
       },
+      "Problem": {
+        "type": "object",
+        "additionalProperties": true,
+        "required": [
+          "type",
+          "title",
+          "status"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri",
+            "description": "A URI reference that identifies the problem type."
+          },
+          "title": {
+            "type": "string",
+            "description": "A short, human-readable summary of the problem type."
+          },
+          "status": {
+            "type": "integer",
+            "format": "int32",
+            "description": "The HTTP status code."
+          },
+          "detail": {
+            "type": "string",
+            "description": "Human-readable explanation of the error."
+          },
+          "instance": {
+            "type": "string",
+            "format": "uri",
+            "description": "A URI reference to the specific occurrence."
+          }
+        }
+      },
+      "PublicAd": {
+        "type": "object",
+        "description": "A public representation of the ads displayed on the homepage",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "number",
+            "readOnly": true,
+            "description": "the Id of the Ad",
+            "example": 1
+          },
+          "filename": {
+            "type": "string",
+            "description": "The Image filename",
+            "example": "https://someurl.s2.aws.com"
+          },
+          "url": {
+            "type": "string",
+            "description": "The link to follow when the ad is clicked",
+            "example": "https://www.example.com"
+          }
+        }
+      },
       "Round": {
         "type": "object",
         "properties": {
@@ -4651,12 +4913,149 @@
           }
         }
       },
+      "School": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true,
+            "description": "Unique identifier for the school"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the school"
+          },
+          "code": {
+            "type": "string",
+            "description": "School code"
+          },
+          "onsite": {
+            "type": "boolean",
+            "description": "Whether the school is onsite"
+          },
+          "tournId": {
+            "type": "integer",
+            "description": "Tournament ID"
+          },
+          "chapterId": {
+            "type": "integer",
+            "description": "Chapter ID"
+          },
+          "state": {
+            "type": "string",
+            "description": "State abbreviation"
+          },
+          "regionId": {
+            "type": "integer",
+            "description": "Region ID"
+          },
+          "districtId": {
+            "type": "integer",
+            "description": "District ID"
+          },
+          "updatedAt": {
+            "type": "string",
+            "readOnly": true,
+            "format": "date-time",
+            "description": "Last modified timestamp"
+          },
+          "createdAt": {
+            "type": "string",
+            "readOnly": true,
+            "format": "date-time",
+            "description": "Creation timestamp"
+          },
+          "Chapter": {
+            "$ref": "#/components/schemas/Chapter"
+          },
+          "Entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Entry"
+            }
+          },
+          "Judges": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Judge"
+            }
+          },
+          "settings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "integer",
+                "boolean"
+              ]
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {
+              "type": [
+                "string",
+                "integer",
+                "boolean"
+              ]
+            }
+          }
+        },
+        "additionalProperties": false,
+        "examples": {
+          "example1": {
+            "value": {
+              "id": 1985,
+              "name": "Shermer High School",
+              "code": "SHS",
+              "onsite": true,
+              "tournId": 123,
+              "chapterId": 456,
+              "state": "IL",
+              "regionId": 789,
+              "districtId": 987,
+              "settings": {
+                "allowGuests": true
+              },
+              "updatedAt": "2024-01-15T12:34:56Z",
+              "createdAt": "2023-09-01T08:00:00Z"
+            }
+          }
+        }
+      },
       "Search": {
         "type": "object",
         "properties": {
           "result": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "Session": {
+        "type": "object",
+        "description": "A user session",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "integer",
+            "example": 111111
+          },
+          "personId": {
+            "type": "integer",
+            "example": 42
+          },
+          "suId": {
+            "type": "integer",
+            "nullable": true,
+            "example": 7
+          },
+          "Su": {
+            "nullable": true,
+            "$ref": "#/components/schemas/Person"
+          },
+          "Person": {
+            "$ref": "#/components/schemas/Person"
           }
         }
       },
@@ -4674,6 +5073,47 @@
           "from": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "SiteResponse": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "readOnly": true
+          },
+          "name": {
+            "type": "string"
+          },
+          "online": {
+            "type": "boolean"
+          },
+          "directions": {
+            "type": "string",
+            "nullable": true
+          },
+          "dropoff": {
+            "type": "string",
+            "nullable": true
+          },
+          "hostId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "circuitId": {
+            "type": "integer",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "readOnly": true
           }
         }
       },
@@ -4766,115 +5206,6 @@
           }
         }
       },
-      "NSDACategory": {
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "type",
-          "code"
-        ],
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "name": {
-            "type": "string"
-          },
-          "type": {
-            "type": "string"
-          },
-          "code": {
-            "type": "integer"
-          },
-          "nationals": {
-            "type": "boolean"
-          }
-        },
-        "examples": {
-          "example1": {
-            "id": 202,
-            "name": "Extemporaneous",
-            "type": "s",
-            "code": 202
-          }
-        }
-      },
-      "Problem": {
-        "type": "object",
-        "additionalProperties": true,
-        "required": [
-          "type",
-          "title",
-          "status"
-        ],
-        "properties": {
-          "type": {
-            "type": "string",
-            "format": "uri",
-            "description": "A URI reference that identifies the problem type."
-          },
-          "title": {
-            "type": "string",
-            "description": "A short, human-readable summary of the problem type."
-          },
-          "status": {
-            "type": "integer",
-            "format": "int32",
-            "description": "The HTTP status code."
-          },
-          "detail": {
-            "type": "string",
-            "description": "Human-readable explanation of the error."
-          },
-          "instance": {
-            "type": "string",
-            "format": "uri",
-            "description": "A URI reference to the specific occurrence."
-          }
-        }
-      },
-      "SiteResponse": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true
-          },
-          "name": {
-            "type": "string"
-          },
-          "online": {
-            "type": "boolean"
-          },
-          "directions": {
-            "type": "string",
-            "nullable": true
-          },
-          "dropoff": {
-            "type": "string",
-            "nullable": true
-          },
-          "hostId": {
-            "type": "integer",
-            "nullable": true
-          },
-          "circuitId": {
-            "type": "integer",
-            "nullable": true
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "readOnly": true
-          }
-        }
-      },
       "TimeslotRequest": {
         "type": "object",
         "properties": {
@@ -4930,71 +5261,57 @@
           }
         }
       },
-      "BackupRequest": {
+      "Topic": {
         "type": "object",
-        "description": "A request to create a backup for a tournament or part of a tournament",
         "required": [
-          "scope"
+          "id",
+          "tag",
+          "source",
+          "schoolYear",
+          "topicText"
         ],
         "properties": {
-          "scope": {
-            "type": "object",
-            "description": "Defines what part of the tournament to back up",
-            "required": [
-              "type"
-            ],
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "The scope of the backup",
-                "enum": [
-                  "tournament",
-                  "category",
-                  "event",
-                  "school"
-                ]
-              },
-              "id": {
-                "type": "integer",
-                "description": "The ID of the category, event, or school being backed up (required when scope type is not \"tournament\")"
-              }
-            },
-            "additionalProperties": false
+          "id": {
+            "type": "integer"
           },
-          "options": {
-            "type": "object",
-            "description": "Optional flags that affect how the backup is generated",
-            "properties": {
-              "ignoreComments": {
-                "type": "boolean",
-                "description": "Exclude comments from the backup"
-              },
-              "ignoreBallots": {
-                "type": "boolean",
-                "description": "Exclude ballots from the backup"
-              }
-            },
-            "additionalProperties": false
-          }
-        },
-        "additionalProperties": false,
-        "examples": {
-          "example1": {
-            "scope": {
-              "type": "tournament"
-            },
-            "options": {
-              "ignoreComments": true
-            }
+          "tag": {
+            "type": "string"
           },
-          "example2": {
-            "tournId": 123,
-            "scope": {
-              "type": "event",
-              "id": 456
-            },
-            "options": {
-              "ignoreBallots": true
+          "source": {
+            "type": "string",
+            "enum": [
+              "NSDA",
+              "NCFL",
+              "CEDA",
+              "NFHS",
+              "CPFL",
+              "NFA",
+              "AFA"
+            ]
+          },
+          "schoolYear": {
+            "type": "integer"
+          },
+          "eventType": {
+            "type": "string"
+          },
+          "pattern": {
+            "type": "string"
+          },
+          "topicText": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "$ref": "#/components/schemas/Person"
+          },
+          "Events": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Event"
             }
           }
         }
@@ -5175,6 +5492,42 @@
           }
         }
       },
+      "TournInvite": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Tourn"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "Webpages": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/Webpage"
+                }
+              },
+              "Files": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/File"
+                }
+              },
+              "Events": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/EventInvite"
+                }
+              },
+              "Contacts": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/TournContact"
+                }
+              }
+            }
+          }
+        ]
+      },
       "TournRequest": {
         "type": "object",
         "description": "A request to create or update a Tournament",
@@ -5235,57 +5588,46 @@
           }
         }
       },
-      "Topic": {
+      "UpdateSchool": {
         "type": "object",
-        "required": [
-          "id",
-          "tag",
-          "source",
-          "schoolYear",
-          "topicText"
-        ],
         "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "tag": {
-            "type": "string"
-          },
-          "source": {
+          "name": {
             "type": "string",
-            "enum": [
-              "NSDA",
-              "NCFL",
-              "CEDA",
-              "NFHS",
-              "CPFL",
-              "NFA",
-              "AFA"
-            ]
+            "description": "Name of the school"
           },
-          "schoolYear": {
-            "type": "integer"
-          },
-          "eventType": {
-            "type": "string"
-          },
-          "pattern": {
-            "type": "string"
-          },
-          "topicText": {
-            "type": "string"
-          },
-          "createdAt": {
+          "code": {
             "type": "string",
-            "format": "date-time"
+            "description": "School code"
           },
-          "createdBy": {
-            "$ref": "#/components/schemas/Person"
+          "onsite": {
+            "type": "boolean",
+            "description": "Whether the school is onsite"
           },
-          "Events": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Event"
+          "state": {
+            "type": "string",
+            "description": "State abbreviation"
+          },
+          "regionId": {
+            "type": "integer",
+            "description": "Region ID"
+          },
+          "settings": {
+            "type": "object",
+            "description": "School settings object"
+          }
+        },
+        "additionalProperties": false,
+        "examples": {
+          "example1": {
+            "value": {
+              "name": "Shermer High School",
+              "code": "SHS",
+              "onsite": true,
+              "state": "IL",
+              "regionId": 789,
+              "settings": {
+                "allowGuests": true
+              }
             }
           }
         }
@@ -5352,341 +5694,240 @@
           }
         }
       },
-      "ParadigmDetails": {
+      "LoginRequest": {
         "type": "object",
-        "required": [
-          "id",
-          "name",
-          "lastReviewed",
-          "paradigm",
-          "record",
-          "certifications"
-        ],
-        "additionalProperties": false,
         "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "name": {
+          "username": {
             "type": "string",
-            "description": "Full name"
+            "description": "The username of the user"
           },
-          "lastReviewed": {
+          "password": {
             "type": "string",
-            "format": "date-time",
-            "description": "Last reviewed timestamp"
-          },
-          "paradigm": {
-            "type": "string",
-            "description": "Paradigm content"
-          },
-          "record": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/JudgeRecord"
-            }
-          },
-          "certifications": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "title",
-                "description"
-              ],
-              "additionalProperties": false,
-              "properties": {
-                "title": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "badge": {
-                  "type": "object",
-                  "properties": {
-                    "altText": {
-                      "type": "string"
-                    },
-                    "link": {
-                      "type": "string",
-                      "format": "uri"
-                    },
-                    "imageUrl": {
-                      "type": "string",
-                      "format": "uri"
-                    }
-                  },
-                  "additionalProperties": false
-                }
-              }
-            }
+            "description": "The password of the user"
           }
         },
-        "example": {
-          "id": 123,
-          "name": "Kilgore Trout",
-          "lastReviewed": "1979-01-01T12:34:56Z",
-          "paradigm": "I will vote for anything involving aliens.",
-          "record": [
-            {
-              "tournName": "National Speech and Debate Tournament",
-              "roundDate": "2018-06-19T22:00:00.000Z",
-              "roundLabel": "R1",
-              "eventAbbr": "PF",
-              "affTeam": "Washington PV",
-              "affLabel": "Pro",
-              "negTeam": "Denver VX",
-              "negLabel": "Con",
-              "vote": "Con",
-              "panelVote": "Con",
-              "record": "0-1"
-            }
-          ],
-          "certifications": [
-            {
-              "title": "Alien Case Certification",
-              "description": "Certified in understanding alien based cases.",
-              "updatedAt": "2023-12-01T10:00:00Z",
-              "badge": {
-                "altText": "Alien Case Badge",
-                "link": "https://example.com/badges/alien-case",
-                "imageUrl": "https://example.com/images/alien-case-badge.png"
-              }
-            }
-          ]
-        }
+        "required": [
+          "username",
+          "password"
+        ],
+        "description": "A request to log in a user"
       },
-      "Session": {
+      "RegisterRequest": {
         "type": "object",
-        "description": "A user session",
-        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$",
+            "description": "The email address of the new user"
+          },
+          "password": {
+            "type": "string",
+            "description": "The password for the new user"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "The first name of the new user"
+          },
+          "middleName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The middle name of the new user"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "The last name of the new user"
+          },
+          "phoneNumber": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The phone number of the new user"
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The 2 letter state code of the new user",
+            "example": "IA"
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The 2 letter country code of the new user",
+            "example": "US"
+          },
+          "tz": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The IANA timezone of the new user"
+          }
+        },
+        "required": [
+          "email",
+          "password",
+          "firstName",
+          "middleName",
+          "lastName",
+          "phoneNumber",
+          "state",
+          "country",
+          "tz"
+        ],
+        "description": "A request to register a new user"
+      },
+      "RestCircuit": {
+        "type": "object",
         "properties": {
           "id": {
-            "type": "integer",
-            "example": 111111
+            "readOnly": true,
+            "type": "number",
+            "exclusiveMinimum": 0
           },
-          "personId": {
-            "type": "integer",
-            "example": 42
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 63
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
-          "suId": {
-            "type": "integer",
-            "nullable": true,
-            "example": 7
+          "abbr": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 15
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
-          "Su": {
-            "nullable": true,
-            "$ref": "#/components/schemas/Person"
+          "tz": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 63,
+                "description": "Time zone of the circuit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "example": "MN",
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "country": {
+            "example": "US",
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "webname": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 31
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
           },
           "Person": {
-            "$ref": "#/components/schemas/Person"
-          }
-        }
-      },
-      "CreateSchool": {
-        "type": "object",
-        "required": [
-          "chapterId"
-        ],
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the school"
-          },
-          "code": {
-            "type": "string",
-            "description": "School code"
-          },
-          "onsite": {
-            "type": "boolean",
-            "description": "Whether the school is onsite"
-          },
-          "chapterId": {
-            "type": "integer",
-            "description": "Chapter ID"
-          },
-          "state": {
-            "type": "string",
-            "description": "State abbreviation"
-          },
-          "regionId": {
-            "type": "integer",
-            "description": "Region ID"
-          },
-          "settings": {
             "type": "object",
-            "description": "School settings object"
-          }
-        },
-        "additionalProperties": false,
-        "examples": {
-          "example1": {
-            "name": "Shermer High School",
-            "code": "SHS",
-            "onsite": true,
-            "chapterId": 456,
-            "state": "IL",
-            "regionId": 789,
-            "settings": {
-              "allowGuests": true
-            }
-          }
-        }
-      },
-      "School": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "readOnly": true,
-            "description": "Unique identifier for the school"
-          },
-          "name": {
-            "type": "string",
-            "description": "Name of the school"
-          },
-          "code": {
-            "type": "string",
-            "description": "School code"
-          },
-          "onsite": {
-            "type": "boolean",
-            "description": "Whether the school is onsite"
-          },
-          "tournId": {
-            "type": "integer",
-            "description": "Tournament ID"
-          },
-          "chapterId": {
-            "type": "integer",
-            "description": "Chapter ID"
-          },
-          "state": {
-            "type": "string",
-            "description": "State abbreviation"
-          },
-          "regionId": {
-            "type": "integer",
-            "description": "Region ID"
-          },
-          "districtId": {
-            "type": "integer",
-            "description": "District ID"
-          },
-          "updatedAt": {
-            "type": "string",
-            "readOnly": true,
-            "format": "date-time",
-            "description": "Last modified timestamp"
-          },
-          "createdAt": {
-            "type": "string",
-            "readOnly": true,
-            "format": "date-time",
-            "description": "Creation timestamp"
-          },
-          "Chapter": {
-            "$ref": "#/components/schemas/Chapter"
-          },
-          "Entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Entry"
-            }
-          },
-          "Judges": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Judge"
-            }
-          },
-          "settings": {
-            "type": "object",
-            "additionalProperties": {
-              "type": [
-                "string",
-                "integer",
-                "boolean"
-              ]
-            }
-          },
-          "metadata": {
-            "type": "object",
-            "additionalProperties": {
-              "type": [
-                "string",
-                "integer",
-                "boolean"
-              ]
-            }
-          }
-        },
-        "additionalProperties": false,
-        "examples": {
-          "example1": {
-            "id": 1985,
-            "name": "Shermer High School",
-            "code": "SHS",
-            "onsite": true,
-            "tournId": 123,
-            "chapterId": 456,
-            "state": "IL",
-            "regionId": 789,
-            "districtId": 987,
-            "settings": {
-              "allowGuests": true
+            "properties": {
+              "id": {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              "email": {
+                "type": "string"
+              }
             },
-            "updatedAt": "2024-01-15T12:34:56Z",
-            "createdAt": "2023-09-01T08:00:00Z"
-          }
-        }
-      },
-      "UpdateSchool": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "description": "Name of the school"
-          },
-          "code": {
-            "type": "string",
-            "description": "School code"
-          },
-          "onsite": {
-            "type": "boolean",
-            "description": "Whether the school is onsite"
-          },
-          "state": {
-            "type": "string",
-            "description": "State abbreviation"
-          },
-          "regionId": {
-            "type": "integer",
-            "description": "Region ID"
-          },
-          "settings": {
-            "type": "object",
-            "description": "School settings object"
+            "required": [
+              "id",
+              "email"
+            ],
+            "additionalProperties": false
           }
         },
+        "required": [
+          "token",
+          "Person"
+        ],
         "additionalProperties": false,
-        "examples": {
-          "example1": {
-            "name": "Shermer High School",
-            "code": "SHS",
-            "onsite": true,
-            "state": "IL",
-            "regionId": 789,
-            "settings": {
-              "allowGuests": true
-            }
-          }
-        }
+        "description": "A response for a login request"
       }
     },
     "responses": {

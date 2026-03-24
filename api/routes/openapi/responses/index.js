@@ -1,5 +1,2 @@
-import * as ProblemResponses from './ProblemResponses.js';
+export * from './ProblemResponses.js';
 
-export default {
-	...ProblemResponses,
-};

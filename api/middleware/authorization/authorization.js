@@ -1,35 +1,32 @@
-import personRepo from '../../repos/personRepo.js';
 import { buildTarget } from './buildTarget.js';
-import { Unauthorized, Forbidden } from '../../helpers/problem.js';
+import { Unauthorized, Forbidden, NotImplemented } from '../../helpers/problem.js';
 //requires login - use before any route that needs authentication
 export function requireLogin(req, res, next) {
-	if (!req.person) {
+	if (!req.actor || req.actor.type === 'anonymous') {
 		return Unauthorized(req, res,'User not Authenticated');
 	}
 	next();
 }
 // used for ext routes
 export async function requireAreaAccess(req, res, next) {
-	if (!req.person) {
+	if (!req.actor) {
 		return Unauthorized(req, res,'User not Authenticated');
 	}
 
-	const personId = req.person.id;
-	const area = req.params.area;
-	const hasAccess = await personRepo.hasAreaAccess(personId, area);
-
-	if (!hasAccess) {
-		return Forbidden(req, res,`Access to ${area} is forbidden for your API credentials`);
+	if(!req.actor.person){
+		return NotImplemented(req,res,'Area access not implemented for non-person actors');
 	}
-
+	if(!(await req.actor.can(`api_auth_${req.params.area}`, 'authorized', req.actor.person.id))) {
+		return Forbidden(req, res,`You do not have permission to access area: ${req.params.area}`);
+	}
 	next();
 }
 // should be rolled into the RBAC scheme at some point
 export function requireSiteAdmin(req,res,next) {
-	if (!req.person) {
+	if (!req.actor) {
 		return Unauthorized(req, res,'User not Authenticated');
 	}
-	if (!req.person.siteAdmin){
+	if (!req.actor.person?.siteAdmin){
 		return Forbidden(req, res,'This Resource is Restricted to Site Administrators');
 	}
 	next();
@@ -37,7 +34,7 @@ export function requireSiteAdmin(req,res,next) {
 
 export function requireAccess(resource, action) {
 	return async (req, res, next) => {
-		if (!req.person) {
+		if (!req.actor) {
 			return Unauthorized(req, res,'User not Authenticated');
 		}
 		const resourceId = Number(req.params[resource + 'Id']);
@@ -53,21 +50,36 @@ export function requireAccess(resource, action) {
 		}
 	};
 }
+/** create and attach the actor to the request */
 export function createActor(req) {
-
-	const auth = createAuthContext(req);
+	//if the request is scoped to a specific person
+	if(req.person){
+		const auth = createAuthContext(req);
+		return {
+			id: req.person?.id,
+			person: req.person,
+			type: 'person',
+			can: auth.can,
+			assert: auth.assert,
+			allowedIds: auth.allowedIds,
+		};
+	}
+	// unauthenticated
 	return {
-		id: req.person?.id,
-		user: req.person,
-		type: 'user',
-		can: auth.can,
-		assert: auth.assert,
-		allowedIds: auth.allowedIds,
+		type: 'anonymous',
+		can: async () => false,
+		assert: async () => {
+			const err = new Error('Forbidden');
+			err.status = 403;
+			err.code = 'AUTH_FORBIDDEN';
+			throw err;
+		},
+		allowedIds: () => ({ all: false, ids: [] }),
+
 	};
 }
 // this is a misnomer, I should rename it RT
 function createAuthContext(req) {
-
 	// Per-request cache
 	const targetCache = new Map();
 	const permCache = new Map();
@@ -77,13 +89,17 @@ function createAuthContext(req) {
 			throw new Error('Invalid auth call');
 		}
 
+		if(req.person && req.person.siteAdmin){
+			return true;
+		}
+
 		const key = `${resource}:${resourceId}`;
 
 		// Build target once per request
 		let target = targetCache.get(key);
 
 		if (!target) {
-			target = await buildTarget(resource, resourceId, req, targetCache);
+			target = await buildTarget(resource, resourceId, targetCache);
 			targetCache.set(key, target);
 		}
 		const permKey = `${resource}:${action}:${resourceId}`;
@@ -96,7 +112,6 @@ function createAuthContext(req) {
 			resource,
 			action,
 			target,
-			req.person,
 			req.auth?.perms
 		);
 
@@ -178,6 +193,34 @@ const ROLES = {
 			},
 		],
 	},
+	//used for things like ext auth where the role is a boolean check
+	authorized: {
+		description: 'External API authorization - scoped to specific API actions',
+		permissions: [
+			{
+				actions: ['*/*'],
+			},
+		],
+	},
+	//admin of the resource, used for chapters
+	chapterAdmin: {
+		description: 'resource administrator - manage a chapter and its resources',
+		permissions: [
+			{
+				actions: ['chapter/*'],// allow any action on any scoped resource
+				notActions: ['chapter/owner'], //disallow anything only owner can do.
+			},
+		],
+	},
+	//indicates an actor can do prefs for a given chapter
+	prefs: {
+		description: 'prefs - can manage prefs for a chapter',
+		permissions: [
+			{
+				actions: ['chapter/prefs'],
+			},
+		],
+	},
 };
 /**
  * Roles scoped to the parent resource can grant access to child resources. ex: action
@@ -222,13 +265,8 @@ function getActionChain(action) {
 	return chain;
 }
 
-export function checkAccess(resource, action, target, person, perms){
+export function checkAccess(resource, action, target, perms){
 
-	if(!person){
-		return false;
-	}
-	//Site admins bypass all checks
-	if (person.siteAdmin) return true;
 	if (!perms || !Array.isArray(perms)) return false;
 
 	return perms.some(perm => hasPermissionForResource(resource, action, target, perm));
@@ -245,7 +283,7 @@ function hasPermissionForResource(resource, action, target, perm, visited = new 
 		for (const p of roleDef.permissions) {
 			// Denied takes precedence - check if any action in the chain is denied
 			const actionChain = getActionChain(action);
-			if (actionChain.some(act => p.notActions.some(pattern => actionMatches(pattern, targetResource, act)))) {
+			if (actionChain.some(act => p.notActions?.some(pattern => actionMatches(pattern, targetResource, act)))) {
 				continue;
 			}
 			// Allowed patterns
@@ -271,7 +309,7 @@ function hasPermissionForResource(resource, action, target, perm, visited = new 
 			if (perm.scope === parent && perm.id === id) {
 				for (const p of roleDef.permissions) {
 					const actionChain = getActionChain(action);
-					if (actionChain.some(act => p.notActions.some(pattern => actionMatches(pattern, targetResource, act)))) continue;
+					if (actionChain.some(act => p.notActions?.some(pattern => actionMatches(pattern, targetResource, act)))) continue;
 					if (p.actions.some(pattern => actionMatches(pattern, targetResource, action))) return true;
 				}
 			}

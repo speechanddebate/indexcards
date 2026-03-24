@@ -8,6 +8,7 @@ import mason from './masonRouter.js';
 
 import { login } from '../../../../controllers/ext/loginController.js';
 import {ipLocation} from '../../../../controllers/rest/personsController.js';
+import { loadExtAuthContext } from '../../../../middleware/authorization/authContext.js';
 
 const router = Router();
 
@@ -20,7 +21,7 @@ router.route('/login').post(login).openapi = {
 		default: { $ref: '#/components/responses/ErrorResponse' },
 	},
 };
-
+router.use(loadExtAuthContext);
 router.use('/:area',requireAreaAccess);
 router.use('/caselist', caselist);
 router.use('/share', share);
