@@ -1,5 +1,6 @@
 import { NotFound } from '../../helpers/problem.js';
 import roundRepo from '../../repos/roundRepo.js';
+import { entryRecords } from '../../services/results/entryWins.js';
 
 export async function getRound(req,res) {
 
@@ -28,6 +29,14 @@ export async function getRound(req,res) {
 
 	return res.status(200).json(round);
 }
+
+export async function getEntryRecordsByRound(req, res) {
+	// This is public only for now but at some point needs to be auth informed
+	// so that coaches, entries, and admins get the full shebang as outlined in
+	// the service function.
+	const records = entryRecords({ ...req.params });
+	return res.status(200).json(records);
+};
 
 export async function getPublishedRounds(req, res){
 	const rounds = await roundRepo.getRounds({

@@ -148,6 +148,18 @@
       "description": "Auto-discovered tag"
     },
     {
+      "name": "Results",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "Records",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "Entries",
+      "description": "Auto-discovered tag"
+    },
+    {
       "name": "event",
       "description": "Auto-discovered tag"
     },
@@ -219,6 +231,7 @@
         "Ads",
         "Auth",
         "Circuits",
+        "Entries",
         "Events",
         "Inbox",
         "Invite",
@@ -226,6 +239,8 @@
         "Paradigms",
         "Public",
         "Push Notifications",
+        "Records",
+        "Results",
         "Round",
         "Rounds",
         "Schematic",
@@ -3053,6 +3068,92 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/tournId"
+          }
+        ]
+      }
+    },
+    "/rest/tourns/{tournId}/events/{eventId}/records": {
+      "get": {
+        "summary": "Get Published Entry Records by Event",
+        "description": "Given an Event ID, get a bunch of win loss data about that entry",
+        "tags": [
+          "Events",
+          "Results",
+          "Records",
+          "Entries"
+        ],
+        "responses": {
+          "200": {
+            "description": "Entries with Win Loss data attached"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ]
+      }
+    },
+    "/rest/tourns/{tournId}/events/{eventId}/records/{roundName}": {
+      "get": {
+        "summary": "Get Published Entry Records by Event up to a Round",
+        "description": "Given an Event ID, get a bunch of win loss data about that entry, up to but not including a named round",
+        "tags": [
+          "Events",
+          "Results",
+          "Records",
+          "Entries"
+        ],
+        "responses": {
+          "200": {
+            "description": "Entries with Win Loss data attached"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "roundName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ]
       }

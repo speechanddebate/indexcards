@@ -19,6 +19,37 @@ router.route('/').get(controller.getTournEvents).openapi = {
 	},
 };
 
+router.route('/:eventId/entryWins').get(controller.getEntryRecordsByEvent).openapi = {
+	path        : '/rest/tourns/{tournId}/events/{eventId}/entryWins',
+	summary     : 'Get Published Entry Winloss Records by Event',
+	description : 'Given an Event ID, get a bunch of win loss data about each entry',
+	tags        : ['Events', 'Results', 'Records', 'Entries'],
+	responses :{
+		200             : {
+			description : 'Entries with Win Loss data attached',
+		},
+		404: {
+			$ref: '#/components/responses/NotFound',
+		},
+	},
+};
+
+// input is a round.name, must be numeric
+router.route('/:eventId/entryWins/:roundName').get(controller.getEntryRecordsByEvent).openapi = {
+	path        : '/rest/tourns/{tournId}/events/{eventId}/entryWins/{roundName}',
+	summary     : 'Get Published Entry WinLoss Records by Event up to specified round',
+	description : 'Given an Event ID, get a bunch of win loss data about that entry, up to but not including a named round',
+	tags        : ['Events', 'Results', 'Records', 'Entries'],
+	responses :{
+		200             : {
+			description : 'Entries with Win Loss data attached',
+		},
+		404: {
+			$ref: '#/components/responses/NotFound',
+		},
+	},
+};
+
 router.route('/:eventAbbr/field').get(controller.getEntryFieldByEvent).openapi = {
 	path: '/rest/tourns/{tournId}/events/{eventAbbr}/field',
 	summary: 'Get Entry Field by Event',
@@ -33,6 +64,7 @@ router.route('/:eventAbbr/field').get(controller.getEntryFieldByEvent).openapi =
 		},
 	},
 };
+
 // router.get('/:eventId', controller.getEventById);
 // Need to distinguish this from a normal request by event ID which will be
 // needed

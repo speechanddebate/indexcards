@@ -5,6 +5,21 @@ const router = Router({ mergeParams: true });
 
 // Bolted onto /tourns/:tournId/rounds
 
+router.route('/:roundId/records').get(controller.getEntryRecordsByRound).openapi = {
+	path        : '/rest/tourns/{tournId}/rounds/{roundId}/records',
+	summary     : 'Get Published Entry Records by Round',
+	description : 'Given an Round ID, get a bunch of win loss data about the entries up to but not including that round',
+	tags        : ['Events', 'Results', 'Records', 'Entries'],
+	responses :{
+		200             : {
+			description : 'Entries with Win Loss data attached',
+		},
+		404: {
+			$ref: '#/components/responses/NotFound',
+		},
+	},
+};
+
 router.route('/').get(controller.getPublishedRounds).openapi = {
 	path: '/rest/tourns/{tournId}/rounds',
 	summary: 'Get Published Rounds',
