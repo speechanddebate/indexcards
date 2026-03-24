@@ -1,4 +1,4 @@
-# Indexcards Openapi
+# Indexcards OpenAPI Standards
 
 Indexcards uses an [OpenAPI 3.1](https://swagger.io/specification/) document to define its endpoints. This document is used to:
 - communicate the structure of the API to our community
@@ -9,23 +9,28 @@ The 10,000ft view is that we take the `.openapi = {...}` from each route, and, t
 
 Below are some standards to follow when defining your route.
 
-## OpenAPI Version
-
-Use [OpenAPI 3.1](https://swagger.io/specification/) conventions in endpoint definitions and shared schemas.
-
 # Defining the Endpoint
 There are a couple of things the should be defined on each endpoint:
-- **`path:`** The full path after the version identifier with path parameters replaced. If the endpoint can be called at `/v1/foo/:barId` the path should be `path: 'foo/{barId}`
-	> [!NOTE]
-	> This is not actually put in the openapi document but it is how the generator function builds the document
-- **`OperationId:`** The programmatic name of the operation, used to generate code on the frontend. The operationId should match the path in the following form. If the path is `/tab/foo/{fooId}/bars` then the operationId should be `tabFooBars`.
-- **`summary:`** A human readable name for the operation. Likely a non-camelCase version of the operationId.
+
+#### `path`
+The full path after the version identifier with path parameters replaced. If the endpoint can be called at `/v1/foo/:barId` the path should be `path: 'foo/{barId}`
+
+	> [!WARN]
+	> This is not actually put in the openapi document but it is how the generator function builds the document. If this is not present, the generator will skip this endpoint
+#### `OperationId` 
+The programmatic name of the operation, used to generate code on the frontend. The operationId should match the path in the following form. If the path is `/tab/foo/{fooId}/bars` then the operationId should be `tabFooBars`.
+#### `summary` 
+A human readable name for the operation. Likely a non-camelCase version of the operationId.
 - **`description:`** This can be a longer form explanation of the endpoint.
-- **`tags:`** Tags are how endpoints are organized in scalar
-- **`parameters:`** THe parameters the endpoint accepts.
+#### `tags`
+Tags are how endpoints are organized in scalar
+#### `parameters`
+The parameters the endpoint accepts.
+
 	>[!NOTE]
 	> The path parameters for each route are automatically added and do not need to be specified.
-- **`responses`** The various response types for an endpoint
+#### `responses`
+The various response types for an endpoint
 
 A good example of what a openapi definition can look like are:
 ```js
@@ -62,11 +67,56 @@ router.route('/:personId').get(controller.getParadigmByPersonId).openapi = {
 - Shared schemas and response objects live in this `openapi` area.
 - Build the generated OpenAPI document with:
 
+
 ```bash
 npm run build:openapi
 ```
-> [!NOTE]
-> this also runs on `npm run build` && `npm run dev`
+
+## Schemas
+Schemas can be defined in two ways, they can either be defined directly in the json following the OpenAPI standard, or using a Zod schema. 
+To define a route with a zod schema, the response definition would look like this:
+```js
+	responses: {
+		200: {
+			description: 'Foo details',
+			content: {
+				'application/json': {
+					schema: fooSchema,
+				},
+			},
+		},
+		...
+```
+with fooSchema being the imported Zod schema. This schema then gets converted to the openapi def at buildtime via [zod-openapi](https://www.npmjs.com/package/zod-openapi). If using a zod schema, the response should be parse in the controller to ensure adherence. The are some unsupported Zod methods that should be avoided, see [the docs](https://zod.dev/json-schema#ztojsonschema) for more info.
+
+### Zod notes
+
+adding `.meta({...})` to a schema/fields allows adding openapi metadata. For example, to add a description to a fields do 
+```js 
+	foo: z.string().meta({
+		description: 'this is a description of the foo field',
+	}),
+```
+zod schemas will default to being converted to inline definitions, if you would like it to be created as a model (it is a reusable schema), ad an Id to the metadata of the schema.
+```js
+export const fooSchema = z.object({
+	...
+}).meta({
+	//the id will be the name of the model
+	id: 'Foo',
+});
+```
+
+#### nullability 
+
+Zod and OpenAPI make a distinction between `null` and `undefined`. consult the table below to determine which one to use.
+
+| Zod method   | in `required: []`?         | `type: null`?         | Can be `undefined`? | Can be `null`? |
+|--------------|----------------------------|:---------------------:|:------------------:|:-------------:|
+| .optional()  | ❌ (not required)           | ❌ (unless also nullable) | ✅                | ❌ (unless also nullable) |
+| .nullable()  | ✅ (required)               | ✅                    | ❌                 | ✅            |
+| .nullish()   | ❌ (not required)           | ✅                    | ✅                 | ✅            |
+| none         | ✅ (required)               | ❌                    | ❌                 | ❌            |
 
 ## Orval-Focused Rules
 
@@ -80,7 +130,7 @@ These are the most important rules for frontend generation and mocks:
 - Non-required fields are treated as optional and can become `undefined` in mocks.
 
 3. **Model nullability intentionally.**
-- If a field can be null, declare it (`nullable: true` or OpenAPI 3.1 equivalent such as `type: ['string', 'null']`).
+- If a field can be null, declare it (`type: ['string', 'null']`).
 - Do not rely on consumers guessing from examples.
 
 4. **Use `readOnly`/`writeOnly` when schemas are reused.**

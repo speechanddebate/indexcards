@@ -1,4 +1,5 @@
 import schemas from './schemas/index.js';
+import { createDocument } from 'zod-openapi';
 import responses from './responses/index.js';
 import { tags as declaredTags, declaredTagGroups } from './tags.js';
 import {parameters } from './parameters.js';
@@ -36,7 +37,7 @@ export function createOpenApiSpec(apiRouter) {
 		}
 	}
 
-	return {
+	const doc = {
 		openapi: '3.1.0',
 		servers: [{ url: '/v1' }],
 		info: {
@@ -63,8 +64,10 @@ export function createOpenApiSpec(apiRouter) {
 				cookie: { type: 'apiKey', in: 'cookie', name: 'x-tabroom-cookie' },
 			},
 		},
-
 	};
+	return createDocument(doc,{
+		reused: 'inline',
+	});
 }
 
 /**
