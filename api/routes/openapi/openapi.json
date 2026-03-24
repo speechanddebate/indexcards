@@ -5694,6 +5694,7 @@
             ]
           },
           "country": {
+            "example": "US",
             "anyOf": [
               {
                 "type": "string",
@@ -5719,12 +5720,7 @@
         "required": [
           "id"
         ],
-        "additionalProperties": false,
-        "examples": {
-          "circuit": {
-            "id": 12
-          }
-        }
+        "additionalProperties": false
       }
     },
     "responses": {
