@@ -24,3 +24,6 @@ export const TournInvite = {
 		},
 	],
 };
+export const EventInvite = {
+
+};

@@ -4411,6 +4411,7 @@
           }
         }
       },
+      "EventInvite": {},
       "TournInvite": {
         "allOf": [
           {
@@ -4446,6 +4447,10 @@
             }
           }
         ]
+      },
+      "Judge": {
+        "type": "object",
+        "properties": {}
       },
       "JudgeRecord": {
         "type": "object",
