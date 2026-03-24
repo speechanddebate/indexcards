@@ -89,8 +89,8 @@ describe('authController',() => {
 			// Response body
 			const json = res.json.mock.calls[0][0];
 			assert.equal(json.token, 'jwt123');
-			assert.equal(json.person.id, 42);
-			assert.equal(json.person.email, 'test@test.com');
+			assert.equal(json.Person.id, 42);
+			assert.equal(json.Person.email, 'test@test.com');
 		});
 
 	});

@@ -7,7 +7,7 @@ describe('Auth Router', () => {
 
 	describe('/register' , () => {
 		it('Registers a new user', async () => {
-			const personData = await factories.person.createPersonData({
+			const personData = factories.person.createPersonData({
 				password: 'securepassword',
 			});
 			const res = await request(server)
@@ -42,7 +42,7 @@ describe('Auth Router', () => {
 				.expect('Content-Type', /json/)
 				.expect(200);
 			assert.isObject(res.body, 'Response is an object');
-			assert.containsAllKeys(res.body, ['person', 'token'], 'Response has person object and session token');
+			assert.containsAllKeys(res.body, ['Person', 'token'], 'Response has person object and session token');
 		});
 		it('Fails to log in with incorrect password', async () => {
 			const person = await (await factories.person.createTestPerson({
@@ -60,6 +60,14 @@ describe('Auth Router', () => {
 
 			expect(res).toBeProblemResponse(401);
 		});
+		it('returns 400 for missing credentials', async () => {
+			const res = await request(server)
+				.post('/v1/auth/login')
+				.send({})
+				.set('Accept', 'application/json')
+				.expect('Content-Type', /json/);
 
+			expect(res).toBeProblemResponse(400);
+		});
 	});
 });

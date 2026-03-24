@@ -67,18 +67,20 @@ export const School = {
 	additionalProperties: false,
 	examples: {
 		example1: {
-			id: 1985,
-			name: 'Shermer High School',
-			code: 'SHS',
-			onsite: true,
-			tournId: 123,
-			chapterId: 456,
-			state: 'IL',
-			regionId: 789,
-			districtId: 987,
-			settings: { allowGuests: true },
-			updatedAt: '2024-01-15T12:34:56Z',
-			createdAt: '2023-09-01T08:00:00Z',
+			value: {
+				id: 1985,
+				name: 'Shermer High School',
+				code: 'SHS',
+				onsite: true,
+				tournId: 123,
+				chapterId: 456,
+				state: 'IL',
+				regionId: 789,
+				districtId: 987,
+				settings: { allowGuests: true },
+				updatedAt: '2024-01-15T12:34:56Z',
+				createdAt: '2023-09-01T08:00:00Z',
+			},
 		},
 	},
 };
@@ -97,13 +99,15 @@ export const CreateSchool = {
 	additionalProperties: false,
 	examples: {
 		example1: {
-			name: 'Shermer High School',
-			code: 'SHS',
-			onsite: true,
-			chapterId: 456,
-			state: 'IL',
-			regionId: 789,
-			settings: { allowGuests: true },
+			value: {
+				name: 'Shermer High School',
+				code: 'SHS',
+				onsite: true,
+				chapterId: 456,
+				state: 'IL',
+				regionId: 789,
+				settings: { allowGuests: true },
+			},
 		},
 	},
 };
@@ -120,12 +124,14 @@ export const UpdateSchool = {
 	additionalProperties: false,
 	examples: {
 		example1: {
-			name: 'Shermer High School',
-			code: 'SHS',
-			onsite: true,
-			state: 'IL',
-			regionId: 789,
-			settings: { allowGuests: true },
+			value: {
+				name: 'Shermer High School',
+				code: 'SHS',
+				onsite: true,
+				state: 'IL',
+				regionId: 789,
+				settings: { allowGuests: true },
+			},
 		},
 	},
 };

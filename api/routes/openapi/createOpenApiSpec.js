@@ -1,8 +1,8 @@
-import schemas from './schemas/index.js';
+import * as schemas from './schemas/index.js';
 import { createDocument } from 'zod-openapi';
-import responses from './responses/index.js';
+import * as responses from './responses/index.js';
 import { tags as declaredTags, declaredTagGroups } from './tags.js';
-import {parameters } from './parameters.js';
+import { parameters } from './parameters.js';
 
 import { readFile } from 'node:fs/promises';
 
@@ -38,7 +38,7 @@ export function createOpenApiSpec(apiRouter) {
 	}
 
 	const doc = {
-		openapi: '3.1.0',
+		openapi: '3.1.1',
 		servers: [{ url: '/v1' }],
 		info: {
 			title: 'IndexCards API',

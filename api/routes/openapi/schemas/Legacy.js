@@ -29,31 +29,6 @@ export const Share = {
 		from        : { type : 'string' , nullable  : true },
 	},
 };
-
-export const Student = {
-	type               : 'object',
-	properties         : {
-		id             : { type    : 'integer' },
-		first          : { type    : 'string'  , nullable  : true },
-		middle         : { type    : 'string'  , nullable  : true },
-		last           : { type    : 'string'  , nullable  : true },
-		phonetic       : { type    : 'string'  , nullable  : true },
-		grad_year      : { type    : 'integer'  , nullable : true },
-		novice         : { type    : 'boolean' },
-		retired        : { type    : 'boolean' },
-		gender         : { type    : 'string'  , nullable  : true },
-		diet           : { type    : 'string'  , nullable  : true },
-		birthdate      : { type    : 'string'  , nullable  : true , pattern : mysqlDate },
-		school_sid     : { type    : 'string'  , nullable  : true },
-		race           : { type    : 'string'  , nullable  : true },
-		nsda           : { type    : 'integer', nullable   : true },
-		chapter        : { type    : 'integer', nullable   : true },
-		person         : { type    : 'integer', nullable   : true },
-		person_request : { type    : 'integer', nullable   : true },
-		timestamp      : { type    : 'string'  , nullable  : true , pattern : mysqlDate },
-	},
-};
-
 export const Invite = {
 	type : 'object',
 	properties : {
@@ -65,30 +40,5 @@ export const Search = {
 	type : 'object',
 	properties : {
 		result : { type : 'string', nullable  : true },
-	},
-};
-
-export const Person = {
-	type              : 'object',
-	properties        : {
-		id            : { type    : 'integer' },
-		email         : { type    : 'string'  , nullable : true },
-		first         : { type    : 'string'  , nullable : true },
-		middle        : { type    : 'string'  , nullable : true },
-		last          : { type    : 'string'  , nullable : true },
-		state         : { type    : 'string'  , nullable : true },
-		country       : { type    : 'string'  , nullable : true },
-		tz            : { type    : 'string'  , nullable : true },
-		nsda          : { type    : 'integer' , nullable : true },
-		phone         : { type    : 'integer' , nullable : true },
-		gender        : { type    : 'string'  , nullable : true },
-		pronoun       : { type    : 'string'  , nullable : true },
-		password      : { type    : 'string'  , nullable : false },
-		no_email      : { type    : 'boolean' },
-		site_admin    : { type    : 'boolean' , nullable : true },
-		accesses      : { type    : 'integer' , nullable : true },
-		last_access   : { type    : 'string'  , nullable : true , pattern : mysqlDate },
-		pass_timestamp: { type    : 'string'  , nullable : true , pattern : mysqlDate },
-		timestamp     : { type    : 'string'  , nullable : true , pattern : mysqlDate },
 	},
 };
