@@ -21,7 +21,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     services:
       mariadb-test:
         image: mariadb:10.11.2
@@ -33,39 +32,33 @@ jobs:
           MARIADB_DATABASE: tabroom
           MARIADB_ROOT_PASSWORD: tabroom
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
-
-
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+      - run: cp ./config/config.sample.js ./config/config.js
 
-    - name: Shutdown Ubuntu MySQL
-      run: sudo service mysql stop
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
 
-    - name: Load local database
-      run: mysql -h 127.0.0.1 -P 3306 -u root -ptabroom tabroom < ./tests/test.sql
+      - name: Install packages
+        run: npm ci
 
-    - name: Get node
-      uses: actions/setup-node@v1
-      with:
-        node-version: 24
+      - name: Lint
+        run: npm run lint
 
-    - name: Install packages
-      run: npm install
+      - name: Shutdown Ubuntu MySQL
+        run: sudo service mysql stop
+      - name: Load local database
+        run: mysql -h 127.0.0.1 -P 3306 -u root -ptabroom tabroom < ./tests/test.sql
 
-    - name: Copy config file
-      run: cp ./config/config.js.sample ./config/config.js
+      - name: Run Tests
+        run: npm run test-ci
 
-    - name: Lint
-      run: npm run lint
-
-    - name: Tests
-      run: npm run test-ci
-
-    - name: If tests passed change icon
-      if: success()
-      run: echo "SLACK_ICON=:white_check_mark:" >> $GITHUB_ENV
-
-    - name: Send slack notification
-      if: always()
-      uses: speechanddebate/action-slack-notify@master
+      - name: If tests passed change icon
+        if: success()
+        run: echo "SLACK_ICON=:white_check_mark:" >> $GITHUB_ENV
+      - name: Send slack notification
+        if: always()
+        uses: speechanddebate/action-slack-notify@master
 
