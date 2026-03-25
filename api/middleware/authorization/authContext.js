@@ -73,12 +73,12 @@ export async function loadTournAuthContext(req, res, next, tournId){
 }
 export async function loadExtAuthContext(req, res, next) {
 
-	if (!req.actor?.person?.id) return next();
+	if (!req.actor?.Person?.id) return next();
 
-	// Fetch permissions where person matches req.actor.person and tag is like 'api_auth_%'
+	// Fetch permissions where person matches req.actor.Person and tag is like 'api_auth_%'
 	const perms = await db.personSetting.findAll({
 		where: {
-			person: req.actor.person.id,
+			person: req.actor.Person.id,
 			tag: { [db.Sequelize.Op.like]: 'api_auth_%' },
 		},
 	});
@@ -87,7 +87,7 @@ export async function loadExtAuthContext(req, res, next) {
 	req.auth = req.auth || {};
 	req.auth.perms = perms.map(p => ({
 		scope: p.tag,
-		id: req.actor.person.id,
+		id: req.actor.Person.id,
 		role: 'authorized',
 	}));
 
@@ -100,10 +100,10 @@ export async function loadChapterAuthContext(req, res, next,chapterId) {
 	req.auth.perms = req.auth.perms || [];
 
 	//cannot load perms when there is no person
-	if(!req.actor?.person?.id) return next();
+	if(!req.actor?.Person?.id) return next();
 
 	const perms = await permissionRepo.getPermissions({
-		personId: req.actor.person.id,
+		personId: req.actor.Person.id,
 		chapterId,
 	});
 

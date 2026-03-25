@@ -57,9 +57,7 @@ describe('csrfMiddleware', () => {
 				authType: 'cookie',
 				method: 'POST',
 				path: '/rest/anything',
-				session: {
-					csrfToken: token,
-				},
+				csrfToken: token,
 				get: (name) =>
           name === config.CSRF.HEADER_NAME ? token : undefined,
 			},
@@ -78,9 +76,7 @@ describe('csrfMiddleware', () => {
 				authType: 'cookie',
 				method: 'POST',
 				path: '/rest/anything',
-				session: {
-					csrfToken: 'abc',
-				},
+				csrfToken: 'abc',
 				get: () => undefined,
 			},
 		});

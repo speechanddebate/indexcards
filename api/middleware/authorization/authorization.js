@@ -13,10 +13,10 @@ export async function requireAreaAccess(req, res, next) {
 		return Unauthorized(req, res,'User not Authenticated');
 	}
 
-	if(!req.actor.person){
+	if(!req.actor.Person){
 		return NotImplemented(req,res,'Area access not implemented for non-person actors');
 	}
-	if(!(await req.actor.can(`api_auth_${req.params.area}`, 'authorized', req.actor.person.id))) {
+	if(!(await req.actor.can(`api_auth_${req.params.area}`, 'authorized', req.actor.Person.id))) {
 		return Forbidden(req, res,`You do not have permission to access area: ${req.params.area}`);
 	}
 	next();
@@ -26,7 +26,7 @@ export function requireSiteAdmin(req,res,next) {
 	if (!req.actor) {
 		return Unauthorized(req, res,'User not Authenticated');
 	}
-	if (!req.actor.person?.siteAdmin){
+	if (!req.actor.Person?.siteAdmin){
 		return Forbidden(req, res,'This Resource is Restricted to Site Administrators');
 	}
 	next();
@@ -57,7 +57,7 @@ export function createActor(req) {
 		const auth = createAuthContext(req);
 		return {
 			id: req.person?.id,
-			person: req.person,
+			Person: req.person,
 			type: 'person',
 			can: auth.can,
 			assert: auth.assert,

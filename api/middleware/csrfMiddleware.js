@@ -17,7 +17,7 @@ export default async function csrfMiddleware(req,res,next){
 
 	//validate csrf
 	const csrfToken = req.get(config.CSRF.HEADER_NAME);
-	if(csrfToken === req.session.csrfToken){
+	if(csrfToken === req.csrfToken){
 		return next();
 	}
 	Unauthorized(req,res,'request failed CSRF validation');

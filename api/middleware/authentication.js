@@ -8,6 +8,8 @@ import { BadRequest, Unauthorized } from '../helpers/problem.js';
 
 export async function Authenticate(req, res, next) {
 
+	let session = null;
+
 	try {
 
 		// COOKIE AUTHENTICATION
@@ -21,28 +23,9 @@ export async function Authenticate(req, res, next) {
 			if (!cookieSession) {
 				res.clearCookie(cookieName);  //invalid cookie, clear it
 			} else {
-
-				/** The req.session should only be used for storing info
-				 * related to the users browser session any authorization
-				 * decision should use req.person set below Rationale: the
-				 * session is only created and attached to browser sessions and
-				 * we support more than that should almost be removed as the
-				 * only current server use is auth which should user persons
-				 * and policies
-				 */
-
-				req.session = {
-					id       : cookieSession.id,
-					personId : cookieSession.personId,
-					suId     : cookieSession.suId || null,
-					Su       : cookieSession.Su || null,
-					Person   : cookieSession.Person || null,
-				};
-
-				//req.person is what should be checked for every authorization decision
-				req.person = await personRepo.getPerson(req.session.suId ?? req.session.personId);
+				session = cookieSession;
 				req.authType = 'cookie';
-				req.session.csrfToken = authService.generateCSRFToken(cookie);
+				req.csrfToken = authService.generateCSRFToken(cookie);
 			}
 		}
 
@@ -73,17 +56,30 @@ export async function Authenticate(req, res, next) {
 				if (!token) {
 					return BadRequest(req, res, 'The Authorization header is malformed. Expected format: Bearer token.');
 				}
-				const session = await sessionRepo.findByUserKey(token, { include: { person: true } });
-				if (!session) {
-					return Unauthorized(req, res,'Invalid Bearer token');
-				}
-				req.person = await personRepo.getPerson(session.personId);
+				const bearerSession = await sessionRepo.findByUserKey(token, {include: {su: true, person: true}});
+				if (!bearerSession) return Unauthorized(req, res,'Invalid Bearer token');
+				session = bearerSession;
 				req.authType = 'bearer';
 
 			} else {
 				return BadRequest(req, res, 'The Authorization header uses an unrecognized authentication scheme.');
 			}
 		}
+
+		if(session){
+
+			req.session = {
+				id       : session.id,
+				personId : session.personId,
+				suId     : session.suId || null,
+				Su       : session.Su || null,
+				Person   : session.Person || null,
+			};
+
+			//deprecated, use req.actor for auth and req.session.Person for anything that MUST be done by a person
+			req.person = await personRepo.getPerson(req.session.suId ?? req.session.personId);
+		}
+		//req.actor is what should be checked for every authorization decision
 		req.actor = createActor(req);
 		next();
 
