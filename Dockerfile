@@ -1,4 +1,4 @@
-FROM node:24.13.1  AS base
+FROM node:24 AS base
 WORKDIR /indexcards
 
 COPY package*.json .
@@ -13,7 +13,7 @@ ENV PORT=3000
 CMD ["npm" , "run" , "dev"]
 
 
-FROM node:24.13.1-slim AS prod
+FROM node:24-slim AS prod
 WORKDIR /indexcards
 
 ARG NODE_ENV=production
