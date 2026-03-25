@@ -70,14 +70,14 @@ export async function Authenticate(req, res, next) {
 
 			req.session = {
 				id       : session.id,
-				personId : session.personId,
-				suId     : session.suId || null,
+				person  : session.person,
+				su       : session.su || null,
 				Su       : session.Su || null,
 				Person   : session.Person || null,
 			};
 
 			//deprecated, use req.actor for auth and req.session.Person for anything that MUST be done by a person
-			req.person = await personRepo.getPerson(req.session.suId ?? req.session.personId);
+			req.person = await personRepo.getPerson(req.session.su ?? req.session.person);
 		}
 		//req.actor is what should be checked for every authorization decision
 		req.actor = createActor(req);

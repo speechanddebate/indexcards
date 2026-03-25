@@ -325,6 +325,52 @@
         ],
         "parameters": [],
         "responses": {
+          "204": {
+            "description": "No Content. Successfully logged out."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/auth/su": {
+      "post": {
+        "summary": "Start Su session",
+        "operationId": "authSu",
+        "tags": [
+          "Auth",
+          "Orval"
+        ],
+        "description": "POST /auth/su is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/auth/suend": {
+      "post": {
+        "summary": "End Su session",
+        "operationId": "authSuEnd",
+        "tags": [
+          "Auth",
+          "Orval"
+        ],
+        "description": "POST /auth/suend is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
           "200": {
             "description": "Success"
           },
@@ -5041,11 +5087,11 @@
             "type": "integer",
             "example": 111111
           },
-          "personId": {
+          "person": {
             "type": "integer",
             "example": 42
           },
-          "suId": {
+          "su": {
             "type": "integer",
             "nullable": true,
             "example": 7

@@ -20,9 +20,9 @@ export async function login(username, password, context = {}) {
 	}
 
 	const { userkey: userkey } = await sessionRepo.createSession({
-		personId  : person.id,
+		person  : person.id,
 		ip        : ip,
-		agentData : agentData,
+		agent_data : agentData,
 	});
 	//TODO enforce limits
 
@@ -54,9 +54,9 @@ export async function register(userData, context = {}) {
 	}
 
 	const { userkey } = await sessionRepo.createSession({
-		personId,
+		person: personId,
 		ip,
-		agentData,
+		agent_data: agentData,
 	});
 	return {personId, token: userkey};
 }

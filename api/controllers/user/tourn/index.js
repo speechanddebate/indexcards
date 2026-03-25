@@ -30,9 +30,9 @@ export async function getPersonTournPresence(req, res) {
 		},
 	};
 
-	const edata = await getPersonTournEntries(req.session.personId, req.params.tournId);
-	const jdata = await getPersonTournJudges(req.session.personId, req.params.tournId);
-	const sdata = await getPersonTournSchools(req.session.personId, req.params.tournId);
+	const edata = await getPersonTournEntries(req.session.person, req.params.tournId);
+	const jdata = await getPersonTournJudges(req.session.person, req.params.tournId);
+	const sdata = await getPersonTournSchools(req.session.person, req.params.tournId);
 
 	// Unique lists of stuff that is me as an individual
 	Object.keys(tournPresence.me).forEach( (key) => {

@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { requireLogin, requireSiteAdmin } from '../../../middleware/authorization/authorization.js';
 import * as schemas from '../../openapi/schemas/index.js';
 import * as examples from '../../openapi/examples/index.js';
 import * as controller from '../../../controllers/authController.js';
@@ -39,6 +40,24 @@ router.route('/logout').post(controller.logout).openapi = {
 	summary: 'Logout',
 	operationId: 'authLogout',
 	description: 'Logs out the current user and invalidates the session.',
+	tags: ['Auth', 'Orval'],
+	responses: {
+		'204': {
+			description: 'No Content. Successfully logged out.',
+		},
+	},
+};
+
+router.route('/su').post(requireSiteAdmin, controller.su).openapi = {
+	path: '/auth/su',
+	summary: 'Start Su session',
+	operationId: 'authSu',
+	tags: ['Auth', 'Orval'],
+};
+router.route('/suend').post(requireLogin, controller.suEnd).openapi = {
+	path: '/auth/suend',
+	summary: 'End Su session',
+	operationId: 'authSuEnd',
 	tags: ['Auth', 'Orval'],
 };
 

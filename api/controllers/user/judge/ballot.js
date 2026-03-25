@@ -17,7 +17,7 @@ export async function checkActive(req, res) {
 		type : db.Sequelize.QueryTypes.SELECT,
 	});
 
-	if (judges && judges[0].person === req.session.personId) {
+	if (judges && judges[0].person === req.session.person) {
 		return (judges[0].active);
 	}
 };
@@ -49,7 +49,7 @@ export async function checkBallotAccess (req, res) {
 		for (const ballot of access) {
 			if (stop < 1) {
 				if (!req.session?.person
-					|| (ballot.personId !== req.session.personId && !req.person.siteAdmin)
+					|| (ballot.personId !== req.session.person && !req.person.siteAdmin)
 				) {
 					stop++;
 					return res.status(200).json({

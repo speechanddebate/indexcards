@@ -107,7 +107,7 @@ export async function blastJudges(req, res) {
 		promises.push(db.changeLog.create({
 			tag         : 'blast',
 			description : `${req.body.message} sent to ${jpoolJudgeIds.length} judges in ${jpool.name}`,
-			person      : req.session.personId,
+			person      : req.session.person,
 			round       : round.id,
 		}));
 	});

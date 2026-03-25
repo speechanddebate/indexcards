@@ -1,14 +1,14 @@
-import { toDomain as genericToDomain, toPersistence as genericToPersistence } from './mapperUtils.js';
+import { toDomain as genericToDomain} from './mapperUtils.js';
 import * as personMapper from './personMapper.js';
 
 export const FIELD_MAP = {
 	id        : 'id',
 	ip        : 'ip',
 	defaults  : 'defaults',
-	agentData : 'agent_data',
-	geoIP     : 'geo_ip',
-	personId  : 'person',
-	suId      : 'su',
+	agent_data : 'agent_data',
+	geo_ip     : 'geo_ip',
+	person  : 'person',
+	su      : 'su',
 };
 
 export const toDomain = dbRow => {
@@ -28,10 +28,7 @@ export const toDomain = dbRow => {
 	return domain;
 };
 
-export const toPersistence = domainObj => genericToPersistence(domainObj, FIELD_MAP);
-
 export default {
 	toDomain,
-	toPersistence,
 	FIELD_MAP,
 };

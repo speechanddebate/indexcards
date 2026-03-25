@@ -1,9 +1,11 @@
-import { BadRequest, Unauthorized } from '../helpers/problem.js';
+import { BadRequest, NotFound, Unauthorized } from '../helpers/problem.js';
 import authService, { AUTH_INVALID }  from '../services/AuthService.js';
 import config from '../../config/config.js';
+import personRepo from '../repos/personRepo.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import { ValidationError } from '../helpers/errors/errors.js';
 import { LoginRequest, LoginResponse } from '../routes/openapi/schemas/index.js';
+import z from 'zod';
 
 export async function login(req, res) {
 	const validation = LoginRequest.safeParse(req.body);
@@ -23,19 +25,16 @@ export async function login(req, res) {
 	}
 
 	const { person, token } = result;
-	const validationResponse = LoginResponse.safeParse({
+	const validatedResponse = LoginResponse.parse({
 		token: token,
 		Person: { //should conform to personSchema
 			id: person.id,
 			email: person.email,
 		},
 	});
-	if (!validationResponse.success) {
-		return BadRequest(req, res, 'Invalid response payload');
-	}
 	res.cookie(config.COOKIE_NAME, token, authService.getAuthCookieOptions());
 	res.cookie(config.CSRF.COOKIE_NAME, authService.generateCSRFToken(token), authService.getCSRFCookieOptions());
-	return res.json(validationResponse.data);
+	return res.json(validatedResponse);
 };
 
 export async function logout(req, res){
@@ -50,6 +49,33 @@ export async function logout(req, res){
 
 	// Always return success
 	res.status(204).send();
+}
+/** start an su session */
+export async function su(req, res){
+	if(!req.session?.Person){
+		return BadRequest(req, res, 'You cannot start an su session without a valid session.');
+	}
+	if(!z.int().positive().safeParse(req.body.suId).success) return BadRequest(req, res, 'Invalid suId');
+	const suTarget = await personRepo.getPerson(req.body.suId);
+	if(!suTarget) return BadRequest(req, res, 'no such person found');
+
+	await sessionRepo.updateSession(req.session.id,{
+		person: suTarget.id,
+		su: req.session.Person.id,
+	});
+	return res.status(204).send();
+}
+/** end an su session */
+export async function suEnd(req, res){
+	if(!req.session?.Su){
+		return NotFound(req, res, 'You do not have an active su session.');
+	}
+	await sessionRepo.updateSession(req.session.id,{
+		person: req.session.Su.id,
+		su: null,
+	});
+	return res.status(204).send();
+
 }
 
 export async function register(req,res){

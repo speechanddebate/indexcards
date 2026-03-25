@@ -83,7 +83,7 @@ export async function updateAccess(req, res) {
 
 		if (description) {
 			await db.changeLog.create({
-				person     : req.session.personId,
+				person     : req.session.person,
 				tourn      : req.params.tournId,
 				tag        : 'access',
 				created_at : Date(),
@@ -104,7 +104,7 @@ export async function updateAccess(req, res) {
 
 		if (
 			req.session.perms.tourn[req.params.tournId] !== 'owner'
-			&& (targetPerson.id !== req.session.personId
+			&& (targetPerson.id !== req.session.person
 				|| req.body.property_value
 			)
 		) {
@@ -130,13 +130,13 @@ export async function updateAccess(req, res) {
 				person     : targetPerson.id,
 				tourn      : req.params.tournId,
 				tag,
-				created_by : req.session.personId,
+				created_by : req.session.person,
 			});
 
 			const description = `${targetPerson.email} has been made a tournament contact`;
 
 			await db.changeLog.create({
-				person     : req.session.personId,
+				person     : req.session.person,
 				tourn      : req.params.tournId,
 				tag        : 'access',
 				created_at : Date(),
@@ -163,7 +163,7 @@ export async function updateAccess(req, res) {
 		const description = `${targetPerson.email} is no longer a tournament contact`;
 
 		await db.changeLog.create({
-			person     : req.session.personId,
+			person     : req.session.person,
 			tourn      : req.params.tournId,
 			tag        : 'access',
 			created_at : Date(),
@@ -228,7 +228,7 @@ export async function updateAccess(req, res) {
 
 	if (currentPerm?.id) {
 		currentPerm.tag = tag;
-		currentPerm.created_by = req.session.personId;
+		currentPerm.created_by = req.session.person;
 		await currentPerm.save();
 	} else {
 
@@ -240,14 +240,14 @@ export async function updateAccess(req, res) {
 		await db.permission.create({
 			person     : targetPerson.id,
 			tourn      : req.params.tournId,
-			created_by : req.session.personId,
+			created_by : req.session.person,
 			tag,
 		});
 	}
 
 	const description = `${targetPerson.email} granted tournament wide ${tag} permissions`;
 	await db.changeLog.create({
-		person     : req.session.personId,
+		person     : req.session.person,
 		tourn      : req.params.tournId,
 		tag        : 'access',
 		created_at : Date(),
@@ -311,7 +311,7 @@ export async function deleteAccess(req, res) {
 		try {
 			const logCreate = {
 				tourn       : req.params.tournId,
-				person      : req.session.personId,
+				person      : req.session.person,
 				tag         : 'access',
 				created_at  : Date(),
 				description,

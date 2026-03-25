@@ -80,7 +80,7 @@ export async function cleanRoundEmpties(req, res) {
 
 	if (description) {
 		await db.ChangeLog.create({
-			person      : req.session.personId,
+			person      : req.session.person,
 			round       : req.params.roundId,
 			description,
 		});
