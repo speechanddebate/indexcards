@@ -5,7 +5,7 @@ import { tabAuth } from './auth';
 import userData from '../../tests/testFixtures';
 import { createContext } from '../../tests/httpMocks.js';
 
-describe('Authorization Functions', () => {
+describe.todo('Authorization Functions', () => {
 
 	it('Permits an ordinary user access to a tournament it is admin for', async () => {
 

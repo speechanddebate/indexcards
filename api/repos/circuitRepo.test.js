@@ -78,7 +78,10 @@ describe('circuitRepo', () => {
 
 		});
 		it('should apply state and country filters', async () => {
-			const { circuitId: noLocale } = await factories.circuit.createTestCircuit();
+			const { circuitId: noLocale } = await factories.circuit.createTestCircuit({
+				country: null,
+				state: null,
+			});
 			await factories.tourn.createTestTourn({ circuit: noLocale, start: new Date() });
 			const { circuitId: rightState } = await factories.circuit.createTestCircuit({ state: 'MN', country: 'US'});
 			await factories.tourn.createTestTourn({ circuit: rightState, start: new Date() });
