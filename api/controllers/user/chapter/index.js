@@ -33,7 +33,7 @@ export async function userChaptersByTourn(req, res)  {
 			group by chapter.id
 		`, {
 		replacements : {
-			personId : req.session.personId,
+			personId : req.session.person,
 			tournId  : req.params.tournId,
 		},
 		type: req.db.Sequelize.QueryTypes.SELECT,
@@ -63,7 +63,7 @@ export async function userChaptersByTourn(req, res)  {
 				group by chapter.id
 		`, {
 		replacements: {
-			personId   : req.session.personId,
+			personId   : req.session.person,
 			tournId    : req.params.tournId,
 			chapterIds,
 		},

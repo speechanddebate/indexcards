@@ -22,6 +22,17 @@ export default [
 		],
 	},
 	{
+		rules: {
+			//the linter is having a really hard time with this one but it DOES resolve
+			'import/no-unresolved': [
+			  'error',
+			  {
+				ignore: ['uuid'],
+			  },
+			],
+		}
+	},
+	{
 
 		files : ['**/*.js', '*.js'],
 		rules : {

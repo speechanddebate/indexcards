@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import * as c from '../../../../controllers/rest/circuitsController.js';
 import { restCircuit } from '../../../openapi/schemas/Circuit.js';
+import { ValidateRequest } from '../../../../middleware/validation.js';
+import z from 'zod';
 
 const router = Router();
 router.route('/active').get(c.activeCircuits).openapi = {
@@ -49,12 +51,15 @@ router.route('/active').get(c.activeCircuits).openapi = {
 		},
 	},
 };
-router.route('/:circuitId').get(c.getCircuit).openapi = {
+router.route('/:circuitId').get(ValidateRequest, c.getCircuit).openapi = {
 	path: '/rest/circuits/{circuitId}',
 	summary: 'get a circuit',
 	description: 'gets a circuit by ID',
 	operationId: 'RestCircuit',
 	tags: ['Circuits', 'Orval'],
+	requestParams: {
+		path: z.object({ circuitId: z.coerce.number().positive() }),
+	},
 	responses: {
 		200: {
 			description: 'Circuit details',

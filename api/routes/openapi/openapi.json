@@ -325,8 +325,80 @@
         ],
         "parameters": [],
         "responses": {
-          "200": {
-            "description": "Success"
+          "204": {
+            "description": "No Content. Successfully logged out."
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/auth/su": {
+      "post": {
+        "summary": "Start Su session",
+        "operationId": "authSu",
+        "tags": [
+          "Auth",
+          "Orval"
+        ],
+        "description": "POST /auth/su is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "suId": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "suId"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "No Content. Successfully logged out."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/auth/suend": {
+      "post": {
+        "summary": "End Su session",
+        "operationId": "authSuEnd",
+        "tags": [
+          "Auth",
+          "Orval"
+        ],
+        "description": "POST /auth/suend is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "204": {
+            "description": "No Content. Successfully ended Su session."
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2839,6 +2911,15 @@
         ],
         "parameters": [
           {
+            "in": "path",
+            "name": "circuitId",
+            "schema": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "required": true
+          },
+          {
             "name": "circuitId",
             "in": "path",
             "required": true,
@@ -5097,11 +5178,11 @@
             "type": "integer",
             "example": 111111
           },
-          "personId": {
+          "person": {
             "type": "integer",
             "example": 42
           },
-          "suId": {
+          "su": {
             "type": "integer",
             "nullable": true,
             "example": 7
@@ -5987,6 +6068,28 @@
       }
     },
     "responses": {
+      "BadRequest": {
+        "description": "BadRequest - the request was invalid or cannot be otherwise served.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "examples": {
+              "badrequest": {
+                "summary": "400 Bad Request",
+                "value": {
+                  "type": "about:blank",
+                  "title": "Bad Request",
+                  "status": 400,
+                  "detail": "The request was invalid or cannot be otherwise served.",
+                  "instance": "/api/v1/example"
+                }
+              }
+            }
+          }
+        }
+      },
       "ErrorResponse": {
         "description": "Unexpected Error",
         "content": {

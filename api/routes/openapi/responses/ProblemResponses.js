@@ -61,4 +61,24 @@ export const NotFound = {
 		},
 	},
 };
+export const BadRequest = {
+	description: 'BadRequest - the request was invalid or cannot be otherwise served.',
+	content: {
+		'application/problem+json': {
+			schema: { $ref: '#/components/schemas/Problem' },
+			examples:{
+				badrequest: {
+					summary: '400 Bad Request',
+					value: {
+						type: 'about:blank',
+						title: 'Bad Request',
+						status: 400,
+						detail: 'The request was invalid or cannot be otherwise served.',
+						instance: '/api/v1/example',
+					},
+				},
+			},
+		},
+	},
+};
 

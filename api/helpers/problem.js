@@ -36,12 +36,12 @@ export function handleDomainError(err, req, res, next) {
 	}
 }
 
-export function BadRequest(req, res, detail, extras = {}){
+export function BadRequest(req, res, detail, issues = {}){
 	return sendProblem(req, res, {
 		title: 'Request Validation Failed',
 		status: 400,
 		detail,
-		...extras,
+		issues,
 	});
 }
 //I hate that the 401 Unauthorized is technically for unauthenticated issues but we live in a society after all

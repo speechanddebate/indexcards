@@ -8,7 +8,7 @@ describe('Inbox Router', () => {
 		it('Returns the number of unread messages', async () => {
 			const { personId } = await factories.person.createTestPerson();
 			await factories.message.createTestMessage({ person: personId });
-			const { userkey } = await factories.session.createTestSession({ personId });
+			const { userkey } = await factories.session.createTestSession({ person: personId });
 
 			const res = await request(server)
 				.get('/v1/user/inbox/unread')

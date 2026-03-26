@@ -11,7 +11,7 @@ describe('sessionRepo', () => {
 
 		it('includes a person record always', async () => {
 			//Arrange
-			const { sessionId } = await factories.session.createTestSession({ personId });
+			const { sessionId } = await factories.session.createTestSession({ person: personId });
 			//Act
 			const session = await sessionRepo.getSession(sessionId, { include: { person: true} });
 			//Assert
@@ -21,8 +21,8 @@ describe('sessionRepo', () => {
 
 		it('includes su when requested', async () => {
 			//Arrange
-			const { personId: suId } = await factories.person.createTestPerson();
-			const { sessionId } = await factories.session.createTestSession({ suId, personId });
+			const { personId: su } = await factories.person.createTestPerson();
+			const { sessionId } = await factories.session.createTestSession({ su, person: personId });
 
 			//Act
 			const session = await sessionRepo.getSession(sessionId, { include: { su: true } });
@@ -38,7 +38,7 @@ describe('sessionRepo', () => {
 			expect(session).toBeNull();
 		});
 		it('returns the session when it exists', async () => {
-			const { sessionId } = await factories.session.createTestSession({personId});
+			const { sessionId } = await factories.session.createTestSession({person: personId});
 			const session = await sessionRepo.getSession(sessionId);
 			expect(session).not.toBeNull();
 			expect(session.id).toBe(sessionId);
@@ -56,7 +56,7 @@ describe('sessionRepo', () => {
 		});
 
 		it('returns the session when it exists', async () => {
-			const { sessionId, userkey } = await factories.session.createTestSession({personId});
+			const { sessionId, userkey } = await factories.session.createTestSession({person: personId});
 			const session = await sessionRepo.findByUserKey(userkey);
 			expect(session).not.toBeNull();
 			expect(session.id).toBe(sessionId);
@@ -65,7 +65,7 @@ describe('sessionRepo', () => {
 
 	describe('deleteSession', () => {
 		it('deletes the session when given a valid session id', async () => {
-			const { sessionId } = await factories.session.createTestSession({personId});
+			const { sessionId } = await factories.session.createTestSession({person: personId});
 
 			await sessionRepo.deleteSession(sessionId);
 
@@ -74,7 +74,7 @@ describe('sessionRepo', () => {
 		});
 
 		it('does not call destroy when session id is null', async () => {
-			const { sessionId } = await factories.session.createTestSession({personId});
+			const { sessionId } = await factories.session.createTestSession({person: personId});
 			const destroySpy = vi.spyOn(db.session, 'destroy');
 
 			await sessionRepo.deleteSession(null);
@@ -86,7 +86,7 @@ describe('sessionRepo', () => {
 		});
 
 		it('does not call destroy when session id is undefined', async () => {
-			const { sessionId } = await factories.session.createTestSession({personId});
+			const { sessionId } = await factories.session.createTestSession({person: personId});
 			const destroySpy = vi.spyOn(db.session, 'destroy');
 
 			await sessionRepo.deleteSession(undefined);
@@ -98,7 +98,7 @@ describe('sessionRepo', () => {
 		});
 
 		it('throws when session id is not a number', async () => {
-			const { sessionId } = await factories.session.createTestSession({personId});
+			const { sessionId } = await factories.session.createTestSession({person: personId});
 			await expect(
 				sessionRepo.deleteSession('not-a-number'),
 			).rejects.toThrow();
@@ -110,19 +110,19 @@ describe('sessionRepo', () => {
 
 	describe('createSession', () => {
 		it('creates a session and returns mapped session with userkey', async () => {
-			const { id, userkey } = await sessionRepo.createSession({ personId });
+			const { id, userkey } = await sessionRepo.createSession({ person: personId });
 
 			expect(id).toBeDefined();
 			expect(userkey).toBeDefined();
 			expect(typeof userkey).toBe('string');
 			const sessionInDb = await sessionRepo.getSession(id);
 			expect(sessionInDb).not.toBeNull();
-			expect(sessionInDb.personId).toBe(personId);
+			expect(sessionInDb.person).toBe(personId);
 		});
 
 		it('generates a unique userkey for each session', async () => {
-			const session1 = await sessionRepo.createSession({ personId });
-			const session2 = await sessionRepo.createSession({ personId });
+			const session1 = await sessionRepo.createSession({ person: personId });
+			const session2 = await sessionRepo.createSession({ person: personId });
 			expect(session1.userkey).not.toBe(session2.userkey);
 		});
 	});

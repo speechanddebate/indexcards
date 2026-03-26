@@ -2,7 +2,7 @@ import db from '../data/db.js';
 import crypto from 'crypto';
 // eslint-disable-next-line import/no-unresolved
 import { encrypt, verify} from 'unixcrypt';
-import { FIELD_MAP,toDomain, toPersistence } from './mappers/sessionMapper.js';
+import { FIELD_MAP,toDomain } from './mappers/sessionMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { personInclude } from './personRepo.js';
 import { config } from '../../config/config.js';
@@ -51,11 +51,18 @@ async function getSession(id, opts = {}) {
 	return toDomain(dbRow);
 }
 
+async function updateSession(id,updates) {
+	const ogSession = await db.session.findByPk(id);
+	if (!ogSession) throw new Error(`Session ${id} not found`);
+	delete updates.id;
+	ogSession.set(updates);
+	await ogSession.save();
+	return ogSession;
+}
+
 async function createSession(session){
 	const userSalt = crypto.randomBytes(8).toString('hex');
-	const created = await db.session.create({
-		...toPersistence(session),
-	});
+	const created = await db.session.create(session);
 
 	// I don't defend this but it preserves backwards compat -- CLP
 	created.set({
@@ -83,6 +90,7 @@ async function deleteSession(sessionId) {
 export default {
 	findByUserKey,
 	getSession,
+	updateSession,
 	createSession,
 	deleteSession,
 };

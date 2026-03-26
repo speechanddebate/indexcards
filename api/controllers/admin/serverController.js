@@ -87,7 +87,7 @@ export async function getTabroomInstanceCounts(req, res) {
 export async function changeInstanceCount(req, res) {
 	const user = {
 		su    : req.session.su,
-		id    : req.session.personId,
+		id    : req.session.person,
 		name  : `${req.person.name}`,
 		email : req.person.email,
 	};
@@ -150,7 +150,7 @@ export async function rebootInstance(req, res) {
 	}
 
 	await req.db.changeLog.create({
-		person     : req.session.su || req.session.personId,
+		person     : req.session.su || req.session.person,
 		tag        : 'sitewide',
 		created_at : new Date(),
 		description: resultMessages.join('\n'),
@@ -180,7 +180,7 @@ const notifyCloudAdmins = async (req, log, subject) => {
 	if (req.session.su) {
 		sender = await req.db.summon(req.db.person, req.session.su);
 	} else {
-		sender = await req.db.summon(req.db.person, req.session.personId);
+		sender = await req.db.summon(req.db.person, req.session.person);
 	}
 
 	const adminIds = cloudAdmins.map( item => item.id );

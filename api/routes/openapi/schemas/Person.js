@@ -58,11 +58,11 @@ export const Session = {
 			type: 'integer',
 			example: 111111,
 		},
-		personId: {
+		person: {
 			type: 'integer',
 			example: 42,
 		},
-		suId: {
+		su: {
 			type: 'integer',
 			nullable: true,
 			example: 7,
