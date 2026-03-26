@@ -5,6 +5,7 @@ import * as controller from './authController.js';
 import authService,{ AUTH_INVALID} from '../services/AuthService.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import { ValidationError } from '../helpers/errors/errors.js';
+import personRepo from '../repos/personRepo.js';
 
 afterEach(() => {
 	vi.restoreAllMocks();
@@ -140,6 +141,88 @@ describe('authController',() => {
 			expect(res.send).toHaveBeenCalled();
 
 			expect(next).not.toHaveBeenCalled();
+		});
+	});
+	describe('su', () => {
+		it('returns 400 when no session', async () => {
+			const { req, res } = createContext({
+				req: {
+					body: { suId: '1' },
+				},
+			});
+			await controller.su(req, res);
+			expect(res.status).toHaveBeenCalledWith(400);
+		});
+		it('returns 400 when malformed suId', async () => {
+			const { req, res } = createContext({
+				req: {
+					session: {
+						Person: {
+							id: 2,
+						},
+					},
+					body: { suId: 'not an id' },
+				},
+			});
+			vi.spyOn(personRepo, 'getPerson').mockResolvedValue(null);
+			await controller.su(req, res);
+			expect(res.status).toHaveBeenCalledWith(400);
+		});
+		it('returns 400 when target not found', async () => {
+			const { req, res } = createContext({
+				req: {
+					session: {
+						Person: {
+							id: 2,
+						},
+					},
+					body: { suId: 1 },
+				},
+			});
+			vi.spyOn(personRepo, 'getPerson').mockResolvedValue(null);
+			await controller.su(req, res);
+			expect(res.status).toHaveBeenCalledWith(400);
+		});
+		it('returns 204 when successful', async () => {
+			const { req, res } = createContext({
+				req: {
+					session: {
+						Person: {
+							id: 2,
+						},
+					},
+					body: { suId: 1 },
+				},
+			});
+			vi.spyOn(personRepo, 'getPerson').mockResolvedValue({ id: 1 });
+			const spy = vi.spyOn(sessionRepo, 'updateSession');
+			spy.mockResolvedValue();
+			await controller.su(req, res);
+			expect(spy).toHaveBeenCalled();
+			expect(res.status).toHaveBeenCalledWith(204);
+		});
+
+	});
+	describe('suEnd', () => {
+		it('returns 204 when successful', async () => {
+			const { req, res } = createContext({
+				req: {
+					session: {
+						Su: { id: 2},
+					},
+				},
+			});
+			vi.spyOn(personRepo, 'getPerson').mockResolvedValue({ id: 1 });
+			const spy = vi.spyOn(sessionRepo, 'updateSession');
+			spy.mockResolvedValue();
+			await controller.suEnd(req, res);
+			expect(spy).toHaveBeenCalled();
+			expect(res.status).toHaveBeenCalledWith(204);
+		});
+		it('returns 404 when no Su session', async () => {
+			const { req, res } = createContext();
+			await controller.suEnd(req, res);
+			expect(res.status).toHaveBeenCalledWith(404);
 		});
 	});
 

@@ -53,12 +53,24 @@ router.route('/su').post(requireSiteAdmin, controller.su).openapi = {
 	summary: 'Start Su session',
 	operationId: 'authSu',
 	tags: ['Auth', 'Orval'],
+	responses: {
+		'204': {
+			description: 'No Content. Successfully logged out.',
+		},
+		'400': { '$ref': '#/components/responses/BadRequest' },
+	},
 };
 router.route('/suend').post(requireLogin, controller.suEnd).openapi = {
 	path: '/auth/suend',
 	summary: 'End Su session',
 	operationId: 'authSuEnd',
 	tags: ['Auth', 'Orval'],
+	responses: {
+		'204': {
+			description: 'No Content. Successfully ended Su session.',
+		},
+		'400': { '$ref': '#/components/responses/BadRequest' },
+	},
 };
 
 router.route('/register').post(controller.register).openapi = {
