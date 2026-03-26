@@ -73,7 +73,26 @@ npm run build:openapi
 ```
 
 ## Schemas
-Schemas can be defined in two ways, they can either be defined directly in the json following the OpenAPI standard, or using a Zod schema. 
+Schemas are defined by attaching a Zod object to various locations in the `.openapi = {...}` block. the request schemas can additionally be validated on each request by callid the `ValidateRequest`middleware on the endpoint like so:
+```js
+router.route('/foo').post(ValidateRequest, postFoo).openapi = {...};
+```
+this will parse against the schemas defined for the params and body, returning 400 if they fails.
+
+### defining param schemas
+to validate request params, attach a zod schema to `requestParams`in the openapi block and call ValidateRequest like so 
+```js
+router.route('/:fooId').get(ValidateRequest, c.getFoo).openapi = {
+	path: '/rest/foos/{fooId}',
+	//...
+	requestParams: {
+		path: z.object({ circuitId: z.coerce.number().positive() }),
+	},
+	//...
+};
+```
+Note: The path and query params are seperate objects under the schema. This must be adhered to to work properly.
+
 To define a route with a zod schema, the response definition would look like this:
 ```js
 	responses: {
@@ -87,7 +106,7 @@ To define a route with a zod schema, the response definition would look like thi
 		},
 		...
 ```
-with fooSchema being the imported Zod schema. This schema then gets converted to the openapi def at buildtime via [zod-openapi](https://www.npmjs.com/package/zod-openapi). If using a zod schema, the response should be parse in the controller to ensure adherence. The are some unsupported Zod methods that should be avoided, see [the docs](https://zod.dev/json-schema#ztojsonschema) for more info.
+with fooSchema being the imported Zod schema. This schema then gets converted to the openapi def at buildtime via [zod-openapi](https://www.npmjs.com/package/zod-openapi). If using a zod schema, the response should be parsed in the controller to ensure adherence. The are some unsupported Zod methods that should be avoided, see [the docs](https://zod.dev/json-schema#ztojsonschema) for more info.
 
 ### Zod notes
 

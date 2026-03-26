@@ -5,6 +5,7 @@
 - [Auth](./auth.md)
 - [OpenAPI](/api/routes/openapi/README.md)
 
+
 # Adding a new Path
 
 ## defining the route
@@ -30,7 +31,10 @@ router.route('/:fooId').get(controller.getBarByFooId).openapi = {
 - `.openapi = {...}` this defines the openapi definition for the endpoint. see the [OpenApi](/api/routes/openapi/README.md) README for more details.
 
 > [!IMPORTANT]
-> The OpenApi doc is how the frontend gets type information when calling endpoints. Make sure the type information is accurate. We may use libraries like [Zod](Zod.dev) to automate and validate this relationship, but for now these definitions must be made manually.
+> The OpenApi doc is how the frontend gets type information when calling endpoints. Make sure the type information is accurate.
+
+## validating requests
+Request params and bodies can be validated against a Zod schema by defining it in the `.openapi` section and calling the `ValidateRequest` middleware. if the request fails validation, it will return a 400 error with details on why. For more info see the [section on Zod schemas](../api/routes/openapi/README.md#schemas).
 
 ## Creating the controller
 

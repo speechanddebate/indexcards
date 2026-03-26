@@ -13,18 +13,6 @@ afterEach(() => {
 
 describe('authController',() => {
 	describe('login', () => {
-
-		it('returns 400 when username or password missing', async () => {
-			const { req, res } = createContext({
-				req: { body: { username: 'bob' } },
-			});
-
-			await controller.login(req, res);
-
-			assert.equal(res.status.mock.calls[0][0], 400);
-			assert.ok(res.json.mock.calls.length === 1);
-		});
-
 		it('returns 401 when credentials are invalid', async () => {
 			vi.spyOn(authService, 'login').mockRejectedValue(AUTH_INVALID);
 

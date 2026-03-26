@@ -140,6 +140,33 @@ describe('Auth Router', () => {
 
 			expect(res).not.toBeProblemResponse();
 		});
+		it('fails to start an su session with invalid suId', async () => {
+			const person = await (await factories.person.createTestPerson({
+				siteAdmin: true,
+				password: hashPassword('securepassword'),
+			})).getPerson();
+
+			const loginRes = await request(server)
+				.post('/v1/auth/login')
+				.send({
+					username: person.email,
+					password: 'securepassword',
+				})
+				.set('Accept', 'application/json')
+				.expect('Content-Type', /json/)
+				.expect(200);
+
+			const token = loginRes.body.token;
+
+			const res = await request(server)
+				.post('/v1/auth/su')
+				.set('Authorization', `Bearer ${token}`)
+				.send({ suId: 'string' })
+				.expect(400);
+
+			expect(res).toBeProblemResponse(400);
+		});
+
 	});
 	describe('/suEnd',async () => {
 		it('ends an su session', async () => {

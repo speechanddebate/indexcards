@@ -1,21 +1,24 @@
 import circuitRepo from '../../repos/circuitRepo.js';
-import * as z from 'zod';
 import { schoolYearDateRange } from '../../helpers/dateTime.js';
-import { NotFound } from '../../helpers/problem.js';
+import { NotFound, UnexpectedError } from '../../helpers/problem.js';
 import { toPublicCircuit } from '../mappers/circuitMapper.js';
 import { restCircuit } from '../../routes/openapi/schemas/Circuit.js';
 
 export async function getCircuit(req, res) {
-	//can parse params, could have a global handler for zod error that return bad requests on failure
-	const circuitId = z.coerce.number().positive().parse(req.params.circuitId);
-	const circuit = await circuitRepo.getCircuit(circuitId, {
+	const circuit = await circuitRepo.getCircuit(req.params.circuitId, {
 		active: true,
 	});
 	if (!circuit) return NotFound(req, res, 'No such circuit found');
-	return res.json(
-		//will ignore extra fields not in schema and validate the ones present
-		restCircuit.parse(circuit)
-	);
+	try {
+		return res.json(
+			restCircuit.parse({
+				...circuit,
+				state: circuit.state ? circuit.state : null,
+			})
+		);
+	} catch (error) {
+		return UnexpectedError(req, res, error.message);
+	}
 }
 
 export async function activeCircuits(req, res) {

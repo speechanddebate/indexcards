@@ -347,6 +347,26 @@
         ],
         "description": "POST /auth/su is undocumented. Need to add .openapi to handler",
         "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "suId": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991
+                  }
+                },
+                "required": [
+                  "suId"
+                ]
+              }
+            }
+          }
+        },
         "responses": {
           "204": {
             "description": "No Content. Successfully logged out."
@@ -2890,6 +2910,15 @@
           "Orval"
         ],
         "parameters": [
+          {
+            "in": "path",
+            "name": "circuitId",
+            "schema": {
+              "type": "number",
+              "exclusiveMinimum": 0
+            },
+            "required": true
+          },
           {
             "name": "circuitId",
             "in": "path",

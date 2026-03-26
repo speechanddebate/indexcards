@@ -4,15 +4,10 @@ import config from '../../config/config.js';
 import personRepo from '../repos/personRepo.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import { ValidationError } from '../helpers/errors/errors.js';
-import { LoginRequest, LoginResponse } from '../routes/openapi/schemas/index.js';
-import z from 'zod';
+import { LoginResponse } from '../routes/openapi/schemas/index.js';
 
 export async function login(req, res) {
-	const validation = LoginRequest.safeParse(req.body);
-	if (!validation.success) {
-		return BadRequest(req, res, 'Invalid request payload');
-	}
-	const { username, password } = validation.data;
+	const { username, password } = req.body;
 	let result;
 	try {
 		result = await authService.login(username, password, {
@@ -55,7 +50,6 @@ export async function su(req, res){
 	if(!req.session?.Person){
 		return BadRequest(req, res, 'You cannot start an su session without a valid session.');
 	}
-	if(!z.int().positive().safeParse(req.body.suId).success) return BadRequest(req, res, 'Invalid suId');
 	const suTarget = await personRepo.getPerson(req.body.suId);
 	if(!suTarget) return BadRequest(req, res, 'no such person found');
 

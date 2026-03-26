@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import z from 'zod';
+import { ValidateRequest } from '../../../middleware/validation.js';
 import { requireLogin, requireSiteAdmin } from '../../../middleware/authorization/authorization.js';
 import * as schemas from '../../openapi/schemas/index.js';
 import * as examples from '../../openapi/examples/index.js';
@@ -6,7 +8,7 @@ import * as controller from '../../../controllers/authController.js';
 
 const router = Router();
 
-router.route('/login').post(controller.login).openapi = {
+router.route('/login').post(ValidateRequest, controller.login).openapi = {
 	path: '/auth/login',
 	summary: 'Login',
 	operationId: 'authLogin',
@@ -48,11 +50,21 @@ router.route('/logout').post(controller.logout).openapi = {
 	},
 };
 
-router.route('/su').post(requireSiteAdmin, controller.su).openapi = {
+router.route('/su').post(requireSiteAdmin, ValidateRequest, controller.su).openapi = {
 	path: '/auth/su',
 	summary: 'Start Su session',
 	operationId: 'authSu',
 	tags: ['Auth', 'Orval'],
+	requestBody: {
+		required: true,
+		content: {
+			'application/json': {
+				schema: z.object({
+					suId: z.int().positive(),
+				}),
+			},
+		},
+	},
 	responses: {
 		'204': {
 			description: 'No Content. Successfully logged out.',

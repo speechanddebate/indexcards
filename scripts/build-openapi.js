@@ -24,6 +24,6 @@ try {
 	await writeFile(fileURLToPath(outputPath), JSON.stringify(spec, null, 2));
 	console.log(`Generated OpenAPI spec with ${routeCount} routes -> ${fileURLToPath(outputPath)}`);
 } catch (err) {
-	console.error('Failed to generate OpenAPI spec:', err.message);
+	console.error('Failed to generate OpenAPI spec:', err);
 	process.exit(1);
 }
