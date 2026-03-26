@@ -19,7 +19,7 @@ router.route('/').get(controller.getTournEvents).openapi = {
 	},
 };
 
-router.route('/:eventId/entryWins').get(controller.getEntryRecordsByEvent).openapi = {
+router.route('/:eventId/entryWins').get(controller.getEntryWinsByEvent).openapi = {
 	path        : '/rest/tourns/{tournId}/events/{eventId}/entryWins',
 	summary     : 'Get Published Entry Winloss Records by Event',
 	description : 'Given an Event ID, get a bunch of win loss data about each entry',
@@ -35,7 +35,7 @@ router.route('/:eventId/entryWins').get(controller.getEntryRecordsByEvent).opena
 };
 
 // input is a round.name, must be numeric
-router.route('/:eventId/entryWins/:roundName').get(controller.getEntryRecordsByEvent).openapi = {
+router.route('/:eventId/entryWins/:roundName').get(controller.getEntryWinsByEvent).openapi = {
 	path        : '/rest/tourns/{tournId}/events/{eventId}/entryWins/{roundName}',
 	summary     : 'Get Published Entry WinLoss Records by Event up to specified round',
 	description : 'Given an Event ID, get a bunch of win loss data about that entry, up to but not including a named round',

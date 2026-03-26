@@ -5,9 +5,10 @@ import config from '../../config/config.js';
 // Helper for RFC 7807 problem details
 function rateLimitResponse(req, res, detail) {
 	return sendProblem(req,res, {
-		title: 'Rate limit exceeded',
-		status: 429,
-		detail: detail,
+		title    : 'Rate limit exceeded',
+		status   : 429,
+		detail   : detail,
+		validate : {trustProxy: false},
 	});
 }
 

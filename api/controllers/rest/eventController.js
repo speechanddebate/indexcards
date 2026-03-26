@@ -1,16 +1,16 @@
 import db from '../../data/db.js';
 import { NotImplemented, NotFound } from '../../helpers/problem.js';
-import { entryRecords } from '../../services/results/entryWins.js';
+import { entryWins } from '../../services/results/entryWins.js';
 
 export async function getTournEvents(req, res) {
 	return NotImplemented(req,res,'Not implemented');
 };
 
-export async function getEntryRecordsByEvent(req, res) {
+export async function getEntryWinsByEvent(req, res) {
 	// This is public only for now but at some point needs to be auth informed
 	// so that coaches, entries, and admins get the full shebang as outlined in
 	// the service function.
-	const records = await entryRecords({ ...req.params });
+	const records = await entryWins({ ...req.params });
 	return res.status(200).json(records);
 };
 

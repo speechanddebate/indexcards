@@ -17,7 +17,6 @@ import {
 } from './api/helpers/auth.js';
 
 import db from './api/data/db.js';
-
 import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger.js';
 import { Forbidden, Unauthorized } from './api/helpers/problem.js';
 
@@ -49,6 +48,7 @@ app.use((req, res, next) => {
 const proxyNumber = config.PROXY_NUMBER;
 
 if (proxyNumber !== 0) {
+	console.log(`Proxy Number is ${proxyNumber}`);
 	app.enable('trust proxy', proxyNumber);
 }
 

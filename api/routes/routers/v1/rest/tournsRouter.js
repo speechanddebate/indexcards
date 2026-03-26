@@ -3,6 +3,7 @@ import * as controller from '../../../../controllers/rest/tournsController.js';
 import { requirePublicTourn } from '../../../../policy/tournPolicy.js';
 import roundRouter from './roundRouter.js';
 import eventRouter from './eventRouter.js';
+import entryRouter from './entryRouter.js';
 
 const router = Router({ mergeParams: true });
 
@@ -93,8 +94,9 @@ router.route('/:tournId').get(controller.getTourn).openapi = {
 	},
 };
 
-router.use('/:tournId/rounds',roundRouter);
-router.use('/:tournId/events',eventRouter);
+router.use('/:tournId/rounds'  , roundRouter);
+router.use('/:tournId/events'  , eventRouter);
+router.use('/:tournId/entries' , entryRouter);
 
 router.route('/:tournId/invite').get(controller.getTournInvite).openapi = {
 	path: '/rest/tourns/{tournId}/invite',

@@ -4,7 +4,7 @@
 import db from '../../data/db.js';
 import roundRepo from '../../repos/roundRepo.js';
 
-export const entryRecords = async ({eventId, roundName, roundId, ...options}) => {
+export const entryWins = async ({eventId, roundName, roundId, ...options}) => {
 
 	// This has to be filled in by whatever convoluted bullshit RT did to auth :)
 	let postLevel = '3';
@@ -12,9 +12,7 @@ export const entryRecords = async ({eventId, roundName, roundId, ...options}) =>
 	if (options.isCoach) postLevel = 1;
 	if (options.isEntry) postLevel = 2;
 
-	if (!options.admin) {
-		publicLimiter = 'and round.post_primary = :postLevel';
-	}
+	if (!options.admin) publicLimiter = 'and round.post_primary = :postLevel';
 
 	if (roundId && !eventId) {
 		const round = await roundRepo.getRound(roundId);
@@ -23,6 +21,7 @@ export const entryRecords = async ({eventId, roundName, roundId, ...options}) =>
 	}
 
 	let roundNameLimiter = '';
+
 	if (roundName) {
 		// Always check as of the round before because the default expression
 		// here is the "record going into this round" for schematics or
@@ -73,6 +72,7 @@ export const entryRecords = async ({eventId, roundName, roundId, ...options}) =>
 	const recordByRound = {};
 
 	resultsData.forEach( (entry) => {
+
 		if (!recordByRound[entry.id]) {
 			recordByRound[entry.id] = {
 				code: entry.code,
@@ -142,22 +142,7 @@ export const entryRecords = async ({eventId, roundName, roundId, ...options}) =>
 				ballotWins   : 0,
 				ballotLosses : 0,
 				record       : '',  // 3-0, 4-2, etc
-				prelim : {
-					wins         : 0,
-					losses       : 0,
-					splits       : 0,
-					ballotWins   : 0,
-					ballotLosses : 0,
-					record       : '',  // 3-0, 4-2, etc
-				},
-				elim : {
-					wins         : 0,
-					losses       : 0,
-					splits       : 0,
-					ballotWins   : 0,
-					ballotLosses : 0,
-					record       : '',  // 3-0, 4-2, etc
-				},
+				rounds       : records.rounds,
 			};
 		}
 
@@ -167,12 +152,24 @@ export const entryRecords = async ({eventId, roundName, roundId, ...options}) =>
 			let roundType = 'prelim';
 			if (['final', 'elim', 'runoff'].includes(round.type)) roundType = 'elim';
 
+			if (!entry[roundType] || !entry[roundType].wins) {
+				entry[roundType] = {
+					wins         : 0,
+					losses       : 0,
+					splits       : 0,
+					ballotWins   : 0,
+					ballotLosses : 0,
+					record       : '',  // 3-0, 4-2, etc
+				};
+			};
+
 			if (resultsData.byBallots) {
 
 				entry.wins += round.ballotWins;
 				entry.losses += round.ballotLosses;
 				entry.ballotWins += round.ballotWins;
 				entry.ballotLosses += round.ballotLosses;
+
 				entry[roundType].wins += round.ballotWins;
 				entry[roundType].losses += round.ballotLosses;
 				entry[roundType].ballotWins += round.ballotWins;
@@ -183,6 +180,7 @@ export const entryRecords = async ({eventId, roundName, roundId, ...options}) =>
 				if (round.ballotWins > round.ballotLosses) {
 					entry[roundType].wins++;
 					entry.wins++;
+					round.record = `${round.ballotWins}-${round.ballotLosses}`;
 				} else if (round.ballotWins === round.ballotLosses) {
 					entry[roundType].splits++;
 					entry.splits++;
@@ -216,13 +214,17 @@ export const entryRecords = async ({eventId, roundName, roundId, ...options}) =>
 		entry.record += `${entry.losses}`;
 		if (splits) entry.record += `${entry.splits}`;
 
-		entry.prelim.record = `${entry.prelim.wins}-`;
-		entry.prelim.record += `${entry.prelim.losses}`;
-		if (splits) entry.prelim.record += `${entry.prelim.splits}`;
+		if (entry.prelim) {
+			entry.prelim.record = `${entry.prelim.wins}-`;
+			entry.prelim.record += `${entry.prelim.losses}`;
+			if (splits) entry.prelim.record += `${entry.prelim.splits}`;
+		}
 
-		entry.elim.record = `${entry.elim.wins}-`;
-		entry.elim.record += `${entry.elim.losses}`;
-		if (splits) entry.elim.record += `${entry.elim.splits}`;
+		if (entry.elim) {
+			entry.elim.record = `${entry.elim.wins}-`;
+			entry.elim.record += `${entry.elim.losses}`;
+			if (splits) entry.elim.record += `${entry.elim.splits}`;
+		}
 
 		// not necessary but makes it clearer this was intended
 		entries[entryId] = entry;
@@ -232,5 +234,5 @@ export const entryRecords = async ({eventId, roundName, roundId, ...options}) =>
 };
 
 export default {
-	entryRecords,
+	entryWins,
 };
