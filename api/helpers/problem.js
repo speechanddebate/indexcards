@@ -3,7 +3,7 @@ export function sendProblem(req, res, {
 	title,
 	status,
 	detail,
-	instance = req.originalUrl,
+	instance = req.originalUrl ?? '',
 	...extras
 }) {
 	return res

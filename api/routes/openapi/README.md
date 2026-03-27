@@ -73,11 +73,11 @@ npm run build:openapi
 ```
 
 ## Schemas
-Schemas are defined by attaching a Zod object to various locations in the `.openapi = {...}` block. the request schemas can additionally be validated on each request by callid the `ValidateRequest`middleware on the endpoint like so:
+Schemas are defined by attaching a Zod object to various locations in the `.openapi = {...}` block. the request schemas can additionally be validated on each request by callid the `ValidateRequest` middleware on the endpoint like so:
 ```js
 router.route('/foo').post(ValidateRequest, postFoo).openapi = {...};
 ```
-this will parse against the schemas defined for the params and body, returning 400 if they fails.
+this will parse against the schemas defined for the params and body, returning 400 if they fails. the validated values is attached to `req.valid` as `req.valid.params`,`req.valid.query`, and `req.valid.body` respectively. 
 
 ### defining param schemas
 to validate request params, attach a zod schema to `requestParams`in the openapi block and call ValidateRequest like so 

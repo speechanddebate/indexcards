@@ -1,4 +1,6 @@
 import { Router } from 'express';
+import z from 'zod';
+import { ValidateRequest } from '../../../../middleware/validation.js';
 import * as controller from '../../../../controllers/rest/tournsController.js';
 import { requirePublicTourn } from '../../../../policy/tournPolicy.js';
 import roundRouter from './roundRouter.js';
@@ -7,49 +9,24 @@ import entryRouter from './entryRouter.js';
 
 const router = Router({ mergeParams: true });
 
-router.route('/').get(controller.getTourns).openapi = {
+router.route('/').get(ValidateRequest,controller.getTourns).openapi = {
 	path: '/rest/tourns',
 	summary: 'Get Public Tournaments',
 	operationId: 'RestTourns',
 	description: 'Retrieve public information about tournaments.',
 	tags: ['Tournaments','Orval'],
-	parameters: [
-		{
-			name: 'circuit',
-			in: 'query',
-			required: false,
-			schema: { type: 'integer' },
-			description: 'Filter tournaments to those approved in this circuit.',
-		},
-		{
-			name: 'startAfter',
-			in: 'query',
-			required: false,
-			schema: { type: 'string', format: 'date-time' },
-			description: 'Return tournaments with start date after this UTC timestamp.',
-		},
-		{
-			name: 'startBefore',
-			in: 'query',
-			required: false,
-			schema: { type: 'string', format: 'date-time' },
-			description: 'Return tournaments with start date before this UTC timestamp.',
-		},
-		{
-			name: 'fields',
-			in: 'query',
-			required: false,
-			schema: { type: 'string' },
-			description: 'Comma-separated tournament fields. Example: id,name,start',
-		},
-		{
-			name: 'fields[events]',
-			in: 'query',
-			required: false,
-			schema: { type: 'string' },
-			description: 'Comma-separated event fields to include when requesting events.',
-		},
-	],
+	requestParams: {
+		query: z.object({
+			limit: z.coerce.number().max(250).min(0).default(50).meta({ description: 'Maximum number of tournaments to return. Default: 50, Max: 250.' }),
+			offset: z.coerce.number().min(0).optional().meta({ description: 'Number of tournaments to skip. Must be a non-negative number.' }),
+			circuit: z.coerce.number().optional().meta({ description: 'Filter tournaments to those approved in this circuit.' }),
+			startAfter: z.iso.datetime().optional().meta({ description: 'Return tournaments with start date after this UTC timestamp.' }),
+			startBefore: z.iso.datetime().optional().meta({ description: 'Return tournaments with start date before this UTC timestamp.' }),
+			fields: z.string().optional().meta({ description: 'Comma-separated tournament fields. Example: id,name,start' }),
+			'fields[events]': z.string().optional().meta({ description: 'Comma-separated event fields to include when requesting events.' }),
+			publishedResults: z.coerce.boolean().optional().meta({ description: 'Filter tournaments to those with published results.' }),
+		}),
+	},
 	responses: {
 		200: {
 			description: 'List of tournaments',

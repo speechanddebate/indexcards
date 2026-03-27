@@ -15,16 +15,19 @@ export async function getTourn(req, res) {
 export async function getTourns(req,res) {
 	const fields = {};
 	//These should probably be handled by a distinct function in the future RCT
-	if(req.query.fields){
-		fields.root = req.query.fields.split(',').map(f => f.trim());
+	if(req.valid.query.fields){
+		fields.root = req.valid.query.fields.split(',').map(f => f.trim());
 	}
-	if(req.query['fields[events]']){
-		fields.events = req.query['fields[events]'].split(',').map(f => f.trim())
+	if(req.valid.query['fields[events]']){
+		fields.events = req.valid.query['fields[events]'].split(',').map(f => f.trim())
 		.filter(field => ['id','name','type','abbr','level'].includes(field)); //list of allowed fields
 	}
-	const { circuit, startBefore, startAfter } = req.query;
+	const query = req.valid.query;
 	const opts = {
 		fields: fields.root,
+		hasPublishedResults: query.publishedResults,
+		limit: query.limit,
+		offset: query.offset,
 	};
 
 	if (fields.events?.length) {
@@ -34,10 +37,11 @@ export async function getTourns(req,res) {
 			},
 		};
 	}
-
-	const tourns = await tournRepo.getTourns({ circuit, startBefore, startAfter },
-		opts
-	);
+	const tourns = await tournRepo.getTourns({
+		circuit: query.circuit,
+		startBefore: query.startBefore,
+		startAfter: query.startAfter,
+	}, opts);
 
 	return res.status(200).json(tourns.map(t => {
 		return {

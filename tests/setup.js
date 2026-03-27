@@ -48,8 +48,7 @@ expect.extend({
             typeof body.title === 'string' &&
             typeof body.status === 'number' &&
             typeof body.detail === 'string' &&
-            typeof body.instance === 'string' &&
-			body.instance.length > 0;
+            typeof body.instance === 'string';
 
 		let matchesExpectedCode = true;
 		switch (code) {

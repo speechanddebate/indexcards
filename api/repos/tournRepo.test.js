@@ -54,6 +54,26 @@ describe('tournRepo', () => {
 			expect(tourn.settings).toBeDefined();
 			expect(tourn.settings.testSetting).toBe(settings.testSetting);
 		});
+		it('applies limit and offset when specified', async () => {
+			await factories.tourn.createTestTourn();
+			await factories.tourn.createTestTourn();
+
+			const tourn = await tournRepo.getTourns({},{ limit: 1, offset: 0 });
+			expect(tourn).toBeDefined();
+			expect(tourn.length).toBe(1);
+			const tourn2 = await tournRepo.getTourns({},{ limit: 1, offset: 1 });
+			expect(tourn2).toBeDefined();
+			expect(tourn2.length).toBe(1);
+			expect(tourn2[0].id).not.toBe(tourn[0].id);
+		});
+		it.todo('applies hasPublishedResults when specified', async () => {
+			const tournData = factories.tourn.createTournData();
+			const tournId = await tournRepo.createTourn(tournData);
+			const tourn = await tournRepo.getTourn(tournId, { hasPublishedResults: true });
+			expect(tourn).toBeNull();
+
+		});
+
 	});
 	describe('TournInclude', () => {
 		it('returns base tourn include config', () => {

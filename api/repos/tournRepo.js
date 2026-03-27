@@ -5,6 +5,7 @@ import { FIELD_MAP, toDomain, toPersistence } from './mappers/tournMapper.js';
 import { saveSettings, withSettingsInclude } from './utils/settings.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { eventInclude } from './eventRepo.js';
+import { literal, Op } from 'sequelize';
 
 function buildTournQuery(opts = {}) {
 	const query = {
@@ -13,8 +14,34 @@ function buildTournQuery(opts = {}) {
 		include: [],
 		order: [['start', 'desc']],
 	};
+	if(opts.limit) {
+		query.limit = opts.limit;
+	}
+	if(opts.offset) {
+		query.offset = opts.offset;
+	}
 	if (!opts.unpublished){
 		query.where.hidden = 0;
+	}
+	if (opts.hasPublishedResults) {
+		query.where = {
+			...query.where,
+			[Op.or]: [
+				literal(`EXISTS (
+					SELECT event.id
+					FROM event, round
+					WHERE event.tourn = tourn.id
+					  AND event.id = round.event
+					  AND round.post_primary > 2
+				)`),
+				literal(`EXISTS (
+					SELECT result_set.id
+					FROM result_set
+					WHERE result_set.tourn = tourn.id
+					  AND result_set.published = 1
+				)`),
+			],
+		};
 	}
 	if(opts.include?.webpages) {
 		query.include.push({

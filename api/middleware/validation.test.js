@@ -3,11 +3,48 @@ import express from 'express';
 import z from 'zod';
 import request from 'supertest';
 import bodyParser from 'body-parser';
+import { ValidateRequest } from './validation.js';
+import { createContext } from '../../tests/httpMocks.js';
 
+function createValidationContext(){
+	return createContext({
+		req: {
+			params: {
+				value: 'test',
+			},
+			query:{
+				value: 'test',
+			},
+			body: {
+				value: 'test',
+			},
+			route:{
+				openapi: {
+					requestParams: {
+						query: z.object({
+							value: z.string(),
+						}),
+						path: z.object({
+							value: z.string(),
+						}),
+					},
+					requestBody: {
+						required: true,
+						content: {
+							'application/json': {
+								schema: z.object({
+									value: z.string(),
+								}),
+							},
+						},
+					},
+				},
+			},
+		},
+	});
+}
 async function makeApp() {
 	vi.resetModules();
-
-	const { ValidateRequest } = await import('./validation.js');
 
 	const app = express();
 	app.use(bodyParser.json());
@@ -38,34 +75,42 @@ async function makeApp() {
 	return app;
 }
 
-describe('validateBodies', () => {
-
-	it('validates request bodies', async () => {
+describe('ValidateRequest', () => {
+	it('validates the request and attaches valid data to req.valid', async () => {
+		const { req, res } = createValidationContext();
+		await ValidateRequest(req, res, () => {});
+		expect(req.valid).toEqual({
+			params: {
+				value: 'test',
+			},
+			query: {
+				value: 'test',
+			},
+			body: {
+				value: 'test',
+			},
+		});
+	});
+	it('returns a 400 error when validation fails', async () => {
+		let { req, res } = createValidationContext();
+		req.body.value = 123; // Invalid value
+		await ValidateRequest(req, res, () => {});
+		expect(res).toBeProblemResponse(400);
+		({ req, res } = createValidationContext());
+		req.params.value = 123; // Invalid value
+		await ValidateRequest(req, res, () => {});
+		expect(res).toBeProblemResponse(400);
+		({ req, res } = createValidationContext());
+		req.query.value = 123; // Invalid value
+		await ValidateRequest(req, res, () => {});
+		expect(res).toBeProblemResponse(400);
+	});
+	it('validates correct requests', async () => {
 		const app = await makeApp();
 
 		const res = await request(app)
 		.get('/v1/test/123?queryValue=string')
 		.send({value: 'testValue'});
-
 		expect(res).not.toBeProblemResponse();
-	});
-	it('fails when request body is invalid', async () => {
-		const app = await makeApp();
-
-		const res = await request(app).
-		get('/v1/test/123?queryValue=string')
-		.send().expect(400);
-
-		expect(res).toBeProblemResponse();
-	});
-	it('fails when request params are invalid', async () => {
-		const app = await makeApp();
-
-		const res = await request(app)
-		.get('/v1/test/0?queryValue=string')
-		.send({value: 'testValue'})
-		.expect(400);
-
-		expect(res).toBeProblemResponse();
 	});
 });

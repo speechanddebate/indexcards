@@ -2962,51 +2962,84 @@
         ],
         "parameters": [
           {
-            "name": "circuit",
             "in": "query",
-            "required": false,
+            "name": "limit",
             "schema": {
-              "type": "integer"
+              "default": 50,
+              "description": "Maximum number of tournaments to return. Default: 50, Max: 250.",
+              "type": "number",
+              "minimum": 0,
+              "maximum": 250
+            },
+            "description": "Maximum number of tournaments to return. Default: 50, Max: 250."
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "description": "Number of tournaments to skip. Must be a non-negative number.",
+              "type": "number",
+              "minimum": 0
+            },
+            "description": "Number of tournaments to skip. Must be a non-negative number."
+          },
+          {
+            "in": "query",
+            "name": "circuit",
+            "schema": {
+              "description": "Filter tournaments to those approved in this circuit.",
+              "type": "number"
             },
             "description": "Filter tournaments to those approved in this circuit."
           },
           {
-            "name": "startAfter",
             "in": "query",
-            "required": false,
+            "name": "startAfter",
             "schema": {
+              "description": "Return tournaments with start date after this UTC timestamp.",
               "type": "string",
-              "format": "date-time"
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
             },
             "description": "Return tournaments with start date after this UTC timestamp."
           },
           {
-            "name": "startBefore",
             "in": "query",
-            "required": false,
+            "name": "startBefore",
             "schema": {
+              "description": "Return tournaments with start date before this UTC timestamp.",
               "type": "string",
-              "format": "date-time"
+              "format": "date-time",
+              "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
             },
             "description": "Return tournaments with start date before this UTC timestamp."
           },
           {
-            "name": "fields",
             "in": "query",
-            "required": false,
+            "name": "fields",
             "schema": {
+              "description": "Comma-separated tournament fields. Example: id,name,start",
               "type": "string"
             },
             "description": "Comma-separated tournament fields. Example: id,name,start"
           },
           {
-            "name": "fields[events]",
             "in": "query",
-            "required": false,
+            "name": "fields[events]",
             "schema": {
+              "description": "Comma-separated event fields to include when requesting events.",
               "type": "string"
             },
             "description": "Comma-separated event fields to include when requesting events."
+          },
+          {
+            "in": "query",
+            "name": "publishedResults",
+            "schema": {
+              "description": "Filter tournaments to those with published results.",
+              "type": "boolean"
+            },
+            "description": "Filter tournaments to those with published results."
           }
         ],
         "responses": {
