@@ -11,7 +11,7 @@ export async function getEntryRecords(req, res) {
 	// so that coaches, entries, and admins get the full shebang as outlined in
 	// the service function.
 
-	const records = await entryRecords({ ...req.params });
+	const records = await entryRecords(req.params.entryId, req.params.tournId);
 
 	if (records === 401) {
 		return NotFound( req, res, 'No published data on that entry was found' );

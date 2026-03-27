@@ -1,63 +1,65 @@
 /* This delivers the published record for a given entry */
 import db from '../../data/db.js';
 
-export const entryRecords = async (entryId, options) => {
+export const entryRecords = async (entryId, tournId, options) => {
 
 	// This has to be filled in by whatever convoluted bullshit RT did to auth :)
 	let postLevel = '3';
-	if (options.isCoach) postLevel = 1;
-	if (options.isEntry) postLevel = 2;
+	if (options?.isCoach) postLevel = 1;
+	if (options?.isEntry) postLevel = 2;
 
 	const resultsData = await db.sequelize.query(`
 		select
 			entry.id, entry.code, entry.name,
 			event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
-			round.id roundId, round.type roundType, round.name roundName,
+			round.id roundId, round.type roundType, round.name roundName, round.label roundLabel,
 			room.id roomId, room.name roomName,
 			round.published roundPublished,
 			round.post_primary postPrimary,
 			round.post_secondary postSecondary,
 			judge.id judgeId, judge.first judgeFirst, judge.middle judgeMiddle, judge.last judgeLast,
 			student.id studentId, student.first studentFirst, student.middle studentMiddle, student.last studentLast,
-			section.id sectionId, section.sectionPublish, section.bye sectionBye,
+			section.id sectionId, section.publish sectionPublish, section.bye sectionBye,
 			ballot.bye, ballot.forfeit, ballot.chair, ballot.side, ballot.speakerorder,
-			winloss.id winlossExists,
-			winloss.value winloss,
-			(select anon.value from event_setting anon on anon.event = event.id and anon.tag = 'anonymous_public') as anonymousPublic,
-			(select al.value from event_setting al on al.event = event.id and al.tag = 'aff_label') as affLabel,
-			(select nl.value from event_setting nl on nl.event = event.id and nl.tag = 'neg_label') as negLabel
+			score.id scoreId, score.tag scoreTag, score.value scoreValue,
+			(select anon.value from event_setting anon where anon.event = event.id and anon.tag = 'anonymous_public') as anonymousPublic,
+			(select al.value from event_setting al where al.event = event.id and al.tag = 'aff_label') as affLabel,
+			(select nl.value from event_setting nl where nl.event = event.id and nl.tag = 'neg_label') as negLabel
 
 		from (event, entry, round, panel section, ballot)
 
 			left join score on score.ballot = ballot.id
 			left join student on score.student = student.id
 			left join judge on ballot.judge = judge.id
-			left join room on panel.room = room.id
+			left join room on section.room = room.id
 
 		where 1=1
 
 			and entry.id     = :entryId
 			and entry.event  = event.id
+			and event.tourn  = :tournId
 			and event.id     = round.event
 			and round.id     = section.round
 			and section.id   = ballot.panel
 			and ballot.entry = entry.id
-			and ballot.audit = 1
+			and (ballot.audit = 1 OR section.bye = 1)
 
 			and NOT EXISTS (
 				select rs.id from round_setting rs
 				where rs.tag = 'ignore_results'
 				and rs.round = round.id
 			)
+
+		order by round.name, ballot.chair DESC, ballot.id
 	`, {
 		type: db.Sequelize.QueryTypes.SELECT,
-		replacements: { entryId },
+		replacements: { entryId, tournId },
 	});
 
 	if (resultsData
 		&& resultsData[0]
 		&& resultsData[0].anonymousPublic
-		&! options.inTournament // from auth
+		&! options?.inTournament // from auth
 	) {
 		return 401;
 	}
@@ -89,21 +91,31 @@ export const entryRecords = async (entryId, options) => {
 				type : row.eventType,
 			};
 
-			records.rounds = {};
+			records.Rounds = {};
 		}
 
 		if (!records.Rounds[row.roundName]) {
 			records.Rounds[row.roundName] = {
 				id      : row.roundId,
 				type    : row.roundType,
-				results : {},
+				Results : {},
 			};
+
+			if (row.roundLabel) records.Rounds[row.roundName].label = row.roundLabel;
+
+			if (row.roomId) {
+				records.Rounds[row.roundName].Room = {
+					id   : row.roomId,
+					name : row.roomName,
+				};
+			}
 		}
 
-		let results = records.Rounds[row.roundName].results;
+		let results = records.Rounds[row.roundName].Results;
 
 		if (row.postPrimary >= postLevel || row.sectionPublish) {
 
+			if (!results.default)  results.default = {};
 			if (row.sectionBye || row.bye) results.default.primary = 'BYE';
 			if (row.forfeit) results.default.primary = 'FORFEIT';
 
@@ -113,10 +125,8 @@ export const entryRecords = async (entryId, options) => {
 					results[row.judgeId] = {
 						chair      : row.chair ? true : false,
 						id         : row.judgeId,
-						name       : `${row.rowLast}, ${row.rowFirst} ${row.rowMiddle}`,
+						name       : `${row.judgeLast}, ${row.judgeFirst}${row.judgeMiddle ? ` ${row.judgeMiddle}` : '' }`,
 						primary    : '',
-						teamPoints : 0,
-						teamRanks  : 0,
 					};
 				}
 
@@ -153,35 +163,32 @@ export const entryRecords = async (entryId, options) => {
 
 						if (!results[row.judgeId].studentScores[row.studentId]) {
 							results[row.judgeId].studentScores[row.studentId] = {
-								name   : `${row.studentLast}, ${row.studentFirst} ${row.studentMiddle}`,
+								name   : `${row.studentLast}, ${row.studentFirst}${row.studentMiddle ? ` ${row.studentMiddle}` : '' }`,
 								id     : row.studentId,
-								point  : 0,
-								refute : 0,
-								rank   : 0,
 							};
 						}
 
-						results[row.judgeId].studentScores[row.studentId][row.scoreTag] =+ parseFloat(row.scoreValue);
+						results[row.judgeId].studentScores[row.studentId][row.scoreTag] = parseFloat(row.scoreValue);
 
 					} else {
 
 						if (row.scoreTag === 'point') {
-							results[row.judgeId].teamPoints += parseFloat(row.scoreValue);
+							results[row.judgeId].teamPoints = parseFloat(row.scoreValue);
 						}
 					}
 				}
 			} else {
 
 				if (row.scoreTag === 'point') {
-					results[row.judgeId].teamPoints += parseFloat(row.scoreValue);
+					results[row.judgeId].teamPoints = parseFloat(row.scoreValue);
 				}
 				if (row.scoreTag === 'rank') {
-					results[row.judgeId].teamRanks += parseFloat(row.scoreValue);
+					results[row.judgeId].teamRanks = parseFloat(row.scoreValue);
 				}
 			}
 		}
 
-		records.Rounds[row.roundName].results = results;
+		records.Rounds[row.roundName].Results = results;
 	});
 
 	return records;

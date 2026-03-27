@@ -48,7 +48,6 @@ app.use((req, res, next) => {
 const proxyNumber = config.PROXY_NUMBER;
 
 if (proxyNumber !== 0) {
-	console.log(`Proxy Number is ${proxyNumber}`);
 	app.enable('trust proxy', proxyNumber);
 }
 
