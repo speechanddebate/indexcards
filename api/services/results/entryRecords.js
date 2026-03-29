@@ -1,5 +1,6 @@
 /* This delivers the published record for a given entry */
 import db from '../../data/db.js';
+import { snakeToCamel } from '../../helpers/text.js';
 
 export const entryRecords = async (entryId, tournId, options) => {
 
@@ -11,7 +12,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 	const resultsData = await db.sequelize.query(`
 		select
 			entry.id, entry.code, entry.name,
-			event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
+			event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType, event.nsda_category nsdaCategory,
 			round.id roundId, round.type roundType, round.name roundName, round.label roundLabel,
 			room.id roomId, room.name roomName,
 			round.published roundPublished,
@@ -66,7 +67,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 
 	if (!resultsData || resultsData.length < 1) return 401;
 
-	const records = {};
+	let records = {};
 
 	resultsData.forEach( (row) => {
 
@@ -74,34 +75,41 @@ export const entryRecords = async (entryId, tournId, options) => {
 			&& (row.postPrimary || 0 < postLevel)
 			&& !row.sectionPublish) return;
 
-		if (!records.Entry) {
+		if (!records?.id) {
 
-			records.Entry = {
-				id           : row.id,
-				code         : row.code,
-				name         : row.name,
-				side         : (row.side ? row.side == 1 ? row.affLabel || 'Aff' : row.negLabel || 'Neg' : ''),
-				speakerorder : row.speakeroder,
+			records = {
+				id   : row.id,
+				code : row.code,
+				name : row.name,
 			};
 
 			records.Event = {
 				id   : row.eventId,
 				abbr : row.eventAbbr,
 				name : row.eventName,
-				type : row.eventType,
+				nsda : row.nsdaCategory,
+				type : snakeToCamel(row.eventType),
 			};
+
+			if (records.Event.type == 'mockTrial') {
+				if (row.side === 1) records.sideLabel = row.affLabel || 'Pros';
+				if (row.side === 2) records.sideLabel = row.negLabel || 'Def';
+			}
 
 			records.Rounds = {};
 		}
 
 		if (!records.Rounds[row.roundName]) {
 			records.Rounds[row.roundName] = {
-				id      : row.roundId,
-				type    : row.roundType,
-				Results : {},
+				id           : row.roundId,
+				type         : row.roundType,
+				side         : row.side,
+				sideLabel    : (row.side ? row.side == 1 ? row.affLabel || 'Aff' : row.negLabel || 'Neg' : ''),
+				speakerorder : row.speakeroder,
+				Results      : {},
 			};
 
-			if (row.roundLabel) records.Rounds[row.roundName].label = row.roundLabel;
+			records.Rounds[row.roundName].label = row.roundLabel || `Round ${row.roundName}`;
 
 			if (row.roomId) {
 				records.Rounds[row.roundName].Room = {
@@ -130,7 +138,13 @@ export const entryRecords = async (entryId, tournId, options) => {
 					};
 				}
 
-				if (row.scoreTag === 'winloss')  results[row.judgeId].primary = 'W';
+				if (row.scoreTag === 'winloss') {
+					if (row.scoreValue == 1) {
+						results[row.judgeId].primary = 'W';
+					} else {
+						results[row.judgeId].primary = 'L';
+					}
+				}
 
 				// Speech or Congress Ranks
 				if (row.scoreTag === 'rank'

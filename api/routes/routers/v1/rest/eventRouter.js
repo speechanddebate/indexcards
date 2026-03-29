@@ -55,6 +55,19 @@ router.route('/:eventAbbr/field').get(controller.getEntryFieldByEvent).openapi =
 	summary: 'Get Entry Field by Event',
 	description: 'Retrieve entries in the field for a specific event.',
 	tags: ['Events'],
+	parameters: [
+		{
+			in       : 'path',
+			name     : 'tournId',
+			required : true,
+			schema   : { type: 'integer' },
+		},{
+			in       : 'path',
+			name     : 'eventAbbr',
+			required : true,
+			schema   : { type: 'string' },
+		},
+	],
 	responses: {
 		200: {
 			description: 'List of entries',

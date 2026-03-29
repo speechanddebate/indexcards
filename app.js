@@ -44,13 +44,6 @@ app.use((req, res, next) => {
 	return next();
 });
 
-// Enable getting forwarded client IP from proxy
-const proxyNumber = config.PROXY_NUMBER;
-
-if (proxyNumber !== 0) {
-	app.enable('trust proxy', proxyNumber);
-}
-
 app.get('/v1/ip', (request, response) => response.send(request.ip));
 
 // Enable CORS Access, hopefully in a way that means I don't
@@ -82,7 +75,16 @@ app.use(cookieParser());
 
 // Authenticate all requests and set req.actor
 app.use(Authenticate);
-app.use(rateLimiterMiddleware);
+
+if (process.env.NODE_ENV !== 'test'
+	&& process.env.NODE_ENV !== 'development'
+) {
+	// Enable getting forwarded client IP from proxy
+	const proxyNumber = config.PROXY_NUMBER;
+	if (proxyNumber !== 0) app.enable('trust proxy', proxyNumber);
+	app.use(rateLimiterMiddleware);
+}
+
 app.use(csrfMiddleware);
 app.use('/v1',v1Router);
 
