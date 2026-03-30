@@ -17,7 +17,7 @@ import {
 } from './api/helpers/auth.js';
 
 import db from './api/data/db.js';
-import { debugLogger, requestLogger, errorLogger } from './api/helpers/logger.js';
+import { debugLogger, setupRequestLogging, errorLogger } from './api/helpers/logger.js';
 import { Forbidden, Unauthorized } from './api/helpers/problem.js';
 
 const app = express();
@@ -86,6 +86,9 @@ if (process.env.NODE_ENV !== 'test'
 }
 
 app.use(csrfMiddleware);
+
+// Log all requests
+app.use(setupRequestLogging);
 app.use('/v1',v1Router);
 
 app.use('/v1/local', async (req, res, next) => {
@@ -112,18 +115,6 @@ app.use('/v1/local', async (req, res, next) => {
 app.use(expressWinston.errorLogger({
 	winstonInstance : errorLogger,
 	meta            : true,
-	dynamicMeta: (req) => {
-		return {
-			logCorrelationId: req.uuid,
-		};
-	},
-}));
-
-// Log all requests
-app.use(expressWinston.logger({
-	winstonInstance : requestLogger,
-	meta            : true,
-	env             : process.env.NODE_ENV,
 	dynamicMeta: (req) => {
 		return {
 			logCorrelationId: req.uuid,

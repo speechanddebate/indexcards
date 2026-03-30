@@ -28,14 +28,16 @@ export const debugLogger = winston.createLogger({
 });
 
 export const requestLogger = winston.createLogger({
-	level: 'info',
+	level: config.LOG_LEVEL,
+	meta: false,
 	format: winston.format.combine(
 		addHostname(),
 		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
 		winston.format.json(),
 	),
+	msg: 'HTTP {{req.method}} {{req.url}}',
 	exitOnError: false,
-	silent: process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'production',
+	silent: process.env.NODE_ENV === 'test',
 	transports: [
 		new winston.transports.Console(config.winstonConsoleOptions),
 		new winston.transports.File({
@@ -58,24 +60,6 @@ export const errorLogger = winston.createLogger({
 		new winston.transports.Console(config.winstonConsoleOptions),
 		new winston.transports.File({
 			filename: `${logPath}/error.log`,
-			...config.winstonFileOptions,
-		}),
-	],
-});
-
-export const clientLogger = winston.createLogger({
-	level: 'info',
-	format: winston.format.combine(
-		addHostname(),
-		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-		winston.format.json(),
-	),
-	exitOnError: false,
-	silent: process.env.NODE_ENV === 'test' || process.env.NODE_ENV === 'production',
-	transports: [
-		new winston.transports.Console(config.winstonConsoleOptions),
-		new winston.transports.File({
-			filename: `${logPath}/client.log`,
 			...config.winstonFileOptions,
 		}),
 	],
@@ -111,3 +95,22 @@ export const autoemailLogger = winston.createLogger({
 		}),
 	],
 });
+
+export const setupRequestLogging = (req, res, next) => {
+	const { method, url, uuid } = req;
+	const start = Date.now();
+
+	res.on('finish', () => {
+		const duration = Date.now() - start;
+
+		requestLogger.info({
+			message: 'Request handled',
+			method,
+			url,
+			statusCode: res.statusCode,
+			responseTime: `${duration}ms`,
+			requestId: uuid,
+		});
+	});
+	next();
+};

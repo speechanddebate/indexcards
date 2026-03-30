@@ -2,6 +2,7 @@ import dotenv from 'dotenv'
 dotenv.config({ quiet: true });
 
 export const config = {
+	LOG_LEVEL             : 'info',
 	PORT                  : 8001,
 	RATE_WINDOW           : 15 * 60 * 1000,
 	RATE_MAX              : 100000,
