@@ -35,7 +35,6 @@ describe('GET /rest/tourns', () => {
 		const tournDate = faker.date.between({from: startAfter, to: startBefore});
 		const { tournId } = await factories.tourn.createTestTourn({ start: tournDate });
 		await factories.resultSet.createTestResultSet({ tourn: tournId, published: 1 });
-		await factories.event.createTestEvent({ tournId, abbr: 'ABBR' });
 		const res = await request(server)
             .get(`/v1/rest/tourns?startAfter=${startAfter.toISOString()}
 				&startBefore=${startBefore.toISOString()}

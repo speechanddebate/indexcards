@@ -33,24 +33,24 @@ export const RegisterRequest = z.object({
 	firstName: z.string().meta({
 		description: 'The first name of the new user',
 	}),
-	middleName: z.string().nullable().meta({
+	middleName: z.string().nullish().meta({
 		description: 'The middle name of the new user',
 	}),
 	lastName: z.string().meta({
 		description: 'The last name of the new user',
 	}),
-	phoneNumber: z.string().nullable().meta({
+	phoneNumber: z.string().nullish().meta({
 		description: 'The phone number of the new user',
 	}),
-	state: z.string().nullable().meta({
+	state: z.string().nullish().meta({
 		description: 'The 2 letter state code of the new user',
 		example: 'IA',
 	}),
-	country: z.string().nullable().meta({
+	country: z.string().nullish().meta({
 		description: 'The 2 letter country code of the new user',
 		example: 'US',
 	}),
-	tz: z.string().nullable().meta({
+	tz: z.string().nullish().meta({
 		description: 'The IANA timezone of the new user',
 	}),
 

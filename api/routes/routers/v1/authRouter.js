@@ -85,7 +85,7 @@ router.route('/suend').post(requireLogin, controller.suEnd).openapi = {
 	},
 };
 
-router.route('/register').post(controller.register).openapi = {
+router.route('/register').post(ValidateRequest, controller.register).openapi = {
 	path: '/auth/register',
 	summary: 'Register',
 	operationId: 'authRegister',

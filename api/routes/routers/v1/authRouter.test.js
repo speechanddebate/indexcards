@@ -2,7 +2,9 @@ import request from 'supertest';
 import server from '../../../../app.js';
 import factories from '../../../../tests/factories/index.js';
 import sessionRepo from '../../../repos/sessionRepo.js';
+import personRepo from '../../../repos/personRepo.js';
 import { hashPassword } from '../../../services/AuthService.js';
+import { expect } from 'chai';
 
 let adminId, userId;
 describe('Auth Router', () => {
@@ -103,10 +105,13 @@ describe('Auth Router', () => {
 					lastName: personData.lastName,
 				})
 				.set('Accept', 'application/json')
-				.expect('Content-Type', /json/)
-				.expect(200);
+				.expect('Content-Type', /json/);
+
+			expect(res).not.toBeProblemResponse();
 			assert.isObject(res.body, 'Response is an object');
 			assert.containsAllKeys(res.body, ['personId', 'token'], 'Response has personId and session token');
+			const person = await personRepo.getPerson(res.body.personId);
+			expect(person).toBeDefined();
 		});
 	});
 	describe('/su', () => {

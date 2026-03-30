@@ -7,7 +7,7 @@ import { ValidationError } from '../helpers/errors/errors.js';
 import { LoginResponse } from '../routes/openapi/schemas/index.js';
 
 export async function login(req, res) {
-	const { username, password } = req.body;
+	const { username, password } = req.valid.body;
 	let result;
 	try {
 		result = await authService.login(username, password, {
@@ -50,7 +50,7 @@ export async function su(req, res){
 	if(!req.session?.Person){
 		return BadRequest(req, res, 'You cannot start an su session without a valid session.');
 	}
-	const suTarget = await personRepo.getPerson(req.body.suId);
+	const suTarget = await personRepo.getPerson(req.valid.body.suId);
 	if(!suTarget) return BadRequest(req, res, 'no such person found');
 
 	await sessionRepo.updateSession(req.session.id,{
@@ -75,7 +75,7 @@ export async function suEnd(req, res){
 export async function register(req,res){
 	let result = null;
 	try {
-		result = await authService.register(req.body,{
+		result = await authService.register(req.valid.body,{
 			ip: req.ip,
 			agentData: req.get('User-Agent'),
 		});

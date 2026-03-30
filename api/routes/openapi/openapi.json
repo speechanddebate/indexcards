@@ -3375,6 +3375,22 @@
         ],
         "parameters": [
           {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "eventAbbr",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "$ref": "#/components/parameters/tournId"
           },
           {
@@ -5900,6 +5916,7 @@
             "description": "The first name of the new user"
           },
           "middleName": {
+            "description": "The middle name of the new user",
             "anyOf": [
               {
                 "type": "string"
@@ -5907,14 +5924,14 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The middle name of the new user"
+            ]
           },
           "lastName": {
             "type": "string",
             "description": "The last name of the new user"
           },
           "phoneNumber": {
+            "description": "The phone number of the new user",
             "anyOf": [
               {
                 "type": "string"
@@ -5922,10 +5939,11 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The phone number of the new user"
+            ]
           },
           "state": {
+            "description": "The 2 letter state code of the new user",
+            "example": "IA",
             "anyOf": [
               {
                 "type": "string"
@@ -5933,11 +5951,11 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The 2 letter state code of the new user",
-            "example": "IA"
+            ]
           },
           "country": {
+            "description": "The 2 letter country code of the new user",
+            "example": "US",
             "anyOf": [
               {
                 "type": "string"
@@ -5945,11 +5963,10 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The 2 letter country code of the new user",
-            "example": "US"
+            ]
           },
           "tz": {
+            "description": "The IANA timezone of the new user",
             "anyOf": [
               {
                 "type": "string"
@@ -5957,20 +5974,14 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The IANA timezone of the new user"
+            ]
           }
         },
         "required": [
           "email",
           "password",
           "firstName",
-          "middleName",
-          "lastName",
-          "phoneNumber",
-          "state",
-          "country",
-          "tz"
+          "lastName"
         ],
         "description": "A request to register a new user"
       },
