@@ -54,11 +54,3 @@ jobs:
 
       - name: Run Tests
         run: npm run test-ci
-
-      - name: If tests passed change icon
-        if: success()
-        run: echo "SLACK_ICON=:white_check_mark:" >> $GITHUB_ENV
-      - name: Send slack notification
-        if: always()
-        uses: speechanddebate/action-slack-notify@master
-
