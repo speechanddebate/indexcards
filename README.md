@@ -31,6 +31,19 @@ At minimum, make sure your local values for `development` and `test` DB settings
 
 ### 3) Create and load the test database
 
+If you haven't already configured a mysql user, configure one using commands such as:
+```bash
+mysql -u root
+```
+
+and then at the mysql prompt:
+```sql
+CREATE USER 'tabroom'@'localhost' IDENTIFIED BY 'lolz'; -- lolz here being the very secure password
+GRANT ALL PRIVILEGES ON tabtest.* TO 'tabroom'@'localhost'; -- assuming tabtest is your DB name
+SET GLOBAL log_bin_trust_function_creators = 1; -- not necessarily recommended for production! But works around ERROR 1419
+FLUSH PRIVILEGES;
+```
+
 Create a MariaDB/MySQL database (for example `tabtest`) and import `tests/test.sql`:
 
 ```bash
