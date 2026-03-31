@@ -88,6 +88,9 @@ export const config = {
 		maxFiles : 8,
 		tailable : true,
 	},
+	loki: {
+		host: '',
+	}
 };
 
 const env = process.env.NODE_ENV || 'development';

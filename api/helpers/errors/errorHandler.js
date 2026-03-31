@@ -1,39 +1,10 @@
-import { errorLogger } from '../logger.js';
+import logger from '../logger.js';
 import { adminBlast } from '../admin.js';
 import config from '../../../config/config.js';
 
 export const errorHandler = (err, req, res, next) => {
 
-	// Delegate to default express error handler if headers are already sent
-	if (res.headersSent) {
-		return next(err);
-	}
-
-	err.host = config.DOCKERHOST;
-
-	// Validation error object from OpenAPI
-	if (err.status || err.errors) {
-		if (err.status === 400) {
-			return res.status(err.status).json({
-				message          : `OpenAPI Validation error : ${err.message}`,
-				errors           : err.errors,
-				request          : req.originalUrl,
-				stack            : err.stack,
-				host             : config.DOCKERHOST,
-				logCorrelationId : req.uuid,
-				env              : process.env,
-			});
-		}
-		if (err.status === 401) {
-			return res.status(err.status).json({
-				message: err.message,
-			});
-		}
-	}
-
-	// Default to a 500 error and give me a stack trace PLEASE ALWAYS GIVE ME A
-	// FRIGGIN STACK TRACE WHY IS THIS NOT THE DEFAULT DEV BEHAVIOR OMFG.
-	errorLogger.error(err, err.stack);
+	logger.error(err.message, err);
 
 	// Production bugs should find their way to Palmer
 	if (
@@ -75,7 +46,7 @@ ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
 			adminBlast(messageData);
 			err.message += ` Also, this stack was emailed to the admins to ${config.ERROR_DESTINATION}`;
 		} catch (error) {
-			errorLogger.info(error);
+			logger.error(error);
 			err.message += ` Also, error response on sending email: ${err}`;
 		}
 	}
@@ -95,8 +66,6 @@ ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
 
 export const inlineError = (err, location = 'Unknown') => {
 
-	err.host = config.DOCKERHOST;
-
 	// Validation error object from OpenAPI
 	if (err.status || err.errors) {
 		if (err.status === 400) {
@@ -115,8 +84,7 @@ export const inlineError = (err, location = 'Unknown') => {
 
 	// Default to a 500 error and give me a stack trace PLEASE ALWAYS GIVE ME A
 	// FRIGGIN STACK TRACE WHY IS THIS NOT THE DEFAULT DEV BEHAVIOR OMFG.
-
-	errorLogger.error(err, err.stack);
+	logger.error(err.message, err);
 
 	// Production bugs should find their way to Palmer
 	if (process.env.NODE_ENV === 'production') {
@@ -144,7 +112,7 @@ ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
 			adminBlast(messageData);
 			err.message += ` Also, this stack was emailed to the admins to ${config.ERROR_DESTINATION}`;
 		} catch (error) {
-			errorLogger.info(error);
+			logger.error(error);
 			err.message += ` Also, error response on sending email: ${err}`;
 		}
 	}

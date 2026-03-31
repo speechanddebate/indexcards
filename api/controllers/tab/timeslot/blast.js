@@ -1,5 +1,5 @@
 import { getFollowers } from '../../../helpers/followers.js';
-import { errorLogger } from '../../../helpers/logger.js';
+import logger from '../../../helpers/logger.js';
 import { notify } from '../../../helpers/blast.js';
 import { blastRoundPairing } from '../round/blast.js';
 import { BadRequest, Forbidden } from '../../../helpers/problem.js';
@@ -46,7 +46,7 @@ export async function blastTimeslotMessage(req, res) {
 	});
 
 	if (notifyResponse.error) {
-		errorLogger.error(notifyResponse.message);
+		logger.error(notifyResponse.message);
 		return res.status(200).json(notifyResponse);
 	}
 

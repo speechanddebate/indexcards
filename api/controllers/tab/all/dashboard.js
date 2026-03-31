@@ -1,6 +1,6 @@
 import { showDateTime } from '@speechanddebate/nsda-js-utils';
 import { flightTimes } from '../../../helpers/round.js';
-import { errorLogger } from '../../../helpers/logger.js';
+import logger from '../../../helpers/logger.js';
 import { BadRequest, Unauthorized } from '../../../helpers/problem.js';
 import db from '../../../data/db.js';
 
@@ -595,8 +595,7 @@ export async function postTournAttendance(req, res) {
 		});
 
 	} catch (err) {
-		errorLogger.info(`Error caught in tournAttendance of the dashboard`);
-		errorLogger.info(err);
+		logger.error(`Error caught in tournAttendance of the dashboard`, err);
 	}
 }
 

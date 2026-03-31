@@ -1,116 +1,126 @@
 import os from 'os';
 import winston from 'winston';
+import LokiTransport from 'winston-loki';
 import config from '../../config/config.js';
 
 const logPath = config.LOG_PATH || '/tmp';
 
-const addHostname = winston.format(info => {
-	info.hostname = os.hostname();
-	return info;
-});
+function Labels(props = {}) {
+	return {
+		app: 'indexcards',
+		host: os.hostname(),
+		container: config.DOCKERHOST ?? 'unknown',
+		...props,
+	};
+}
 
-export const debugLogger = winston.createLogger({
-	level: 'debug',
-	format: winston.format.combine(
-		addHostname(),
-		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-		winston.format.json(),
-	),
-	exitOnError: false,
-	silent: process.env.NODE_ENV === 'test',
-	transports: [
-		new winston.transports.Console(config.winstonConsoleOptions),
-		new winston.transports.File({
-			filename: `${logPath}/debug.log`,
-			...config.winstonFileOptions,
-		}),
-	],
-});
+const prettyConsoleFormat = winston.format.combine(
+	winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
+	// Uppercase the level first so colorize operates on the final text
+	winston.format((info) => { info.level = (info.level || '').toUpperCase(); return info; })(),
+	winston.format.colorize({ all: false, level: true }),
+	winston.format.printf((info) => {
 
-export const requestLogger = winston.createLogger({
+		let { timestamp, level, message, ...rest } = info;
+		//special format for console request logger
+		if( message === 'Request handled') {
+			const {method, statusCode, url, responseTime} = rest;
+			return `${timestamp} ${level} ${method} ${statusCode} ${url} ${responseTime}`;
+		}
+		const msg = typeof message === 'string' ? message : JSON.stringify(message);
+		// include other metadata after the message
+		const filtered = { ...rest };
+		const restKeys = Object.keys(filtered);
+		const restStr = restKeys.length ? ' ' + JSON.stringify(filtered,null,2) : '';
+		return `${timestamp} ${level} ${msg}${restStr}`;
+	})
+);
+
+const createLokiTransport = (extraLabels = {}) => {
+	const t = new LokiTransport({
+		host: config.loki.host,
+		json: true,
+		labels: {
+			...Labels(extraLabels),
+		},
+		format: winston.format.json(),
+		onConnectionError: (err) => logger.error(err),
+	});
+
+	t.on('error', (err) => console.error('[Loki error]', err));
+	t.on('warn', (msg) => console.warn('[Loki warn]', msg));
+	return t;
+};
+
+const createFileTransport =() => {
+	return new winston.transports.File({
+		filename: `${logPath}/${config.LOG_LEVEL}.log`,
+		format: winston.format.combine(
+			winston.format((info) => { info.labels = Labels(); return info; })(),
+			winston.format.json(),
+		),
+		...config.winstonFileOptions,
+	});
+};
+
+const createConsoleTransport = () => {
+	return new winston.transports.Console({
+		format: prettyConsoleFormat,
+		...config.winstonConsoleOptions,
+	});
+};
+
+const logger = winston.createLogger({
 	level: config.LOG_LEVEL,
-	meta: false,
-	format: winston.format.combine(
-		addHostname(),
-		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-		winston.format.json(),
-	),
-	msg: 'HTTP {{req.method}} {{req.url}}',
+	format: winston.format.json(),
 	exitOnError: false,
 	silent: process.env.NODE_ENV === 'test',
 	transports: [
-		new winston.transports.Console(config.winstonConsoleOptions),
-		new winston.transports.File({
-			filename: `${logPath}/request.log`,
-			...config.winstonFileOptions,
-		}),
+		createConsoleTransport(),
+		createFileTransport(),
 	],
 });
 
-export const errorLogger = winston.createLogger({
-	level: 'error',
-	format: winston.format.combine(
-		winston.format.label({ hostname: process.env.HOSTNAME }),
-		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-		winston.format.prettyPrint(),
-	),
+export function setupLoggers(){
+	if(config.loki && config.loki.host){
+		try{
+			const reqTrans = createLokiTransport({type: 'request'});
+			const appTrans = createLokiTransport({type: 'app'});
+			requestLogger.add(reqTrans);
+			logger.add(appTrans);
+		} catch (err) {
+			logger.error('Error setting up Loki transport', err);
+		}
+	} else {
+		logger.warn(`Loki host is not configured. logging to ${logPath} only`);
+	}
+}
+
+const requestLogger = winston.createLogger({
+	level: config.LOG_LEVEL,
+	format: winston.format.json(),
 	exitOnError: false,
 	silent: process.env.NODE_ENV === 'test',
 	transports: [
-		new winston.transports.Console(config.winstonConsoleOptions),
-		new winston.transports.File({
-			filename: `${logPath}/error.log`,
-			...config.winstonFileOptions,
-		}),
-	],
-});
-
-export const queryLogger = winston.createLogger({
-	level: 'info',
-	format: winston.format.combine(
-		addHostname(),
-		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-		winston.format.json(),
-	),
-	exitOnError: false,
-	silent: process.env.NODE_ENV === 'test',
-	transports: [
-		new winston.transports.Console(config.winstonConsoleOptions),
-	],
-});
-
-export const autoemailLogger = winston.createLogger({
-	level: 'error',
-	format: winston.format.combine(
-		addHostname(),
-		winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
-		winston.format.json(),
-	),
-	exitOnError: false,
-	transports: [
-		new winston.transports.Console(config.winstonConsoleOptions),
-		new winston.transports.File({
-			filename: `${logPath}/autoemail.log`,
-			...config.winstonFileOptions,
-		}),
+		createConsoleTransport(),
+		createFileTransport(),
 	],
 });
 
 export const setupRequestLogging = (req, res, next) => {
-	const { method, url, uuid } = req;
-	const start = Date.now();
-
+	req.recieved = Date.now();
 	res.on('finish', () => {
-		const duration = Date.now() - start;
+		const duration = Date.now() - req.recieved;
 
-		requestLogger.info({
-			message: 'Request handled',
-			method,
-			url,
-			statusCode: res.statusCode,
+		requestLogger.info('Request handled', {
+			method: req.method,
+			url: req.originalUrl ?? '',
+			statusCode: `${res.statusCode ?? ''}`,
 			responseTime: `${duration}ms`,
-			requestId: uuid,
+			requestId: req.uuid,
 		});
 	});
 	next();
 };
+
+export default logger;

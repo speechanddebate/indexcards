@@ -1,5 +1,5 @@
 import db from '../data/db.js';
-import { errorLogger } from './logger.js';
+import logger from './logger.js';
 
 export const tabAuth = async (req) => {
 
@@ -597,7 +597,7 @@ export const checkPerms = async (req, res, query, replacements) => {
 		}
 	}
 
-	errorLogger.info({
+	logger.error({
 		error     : true,
 		message   : `You do not have permission to access that part of that tournament`,
 	});

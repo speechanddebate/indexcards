@@ -1,7 +1,7 @@
 /* eslint-disable camelcase */
 import axios from 'axios';
 import { Op } from 'sequelize';
-import { errorLogger } from '../../../helpers/logger.js';
+import logger from '../../../helpers/logger.js';
 import config from '../../../../config/config.js';
 
 const headers = {
@@ -39,7 +39,7 @@ export async function getSubscribe(req, res) {
 export async function pushSubscribe(req,res) {
 
 	if (!req.params.subscriptionId) {
-		errorLogger.error(`No subscriptionID sent to the updater`);
+		logger.error(`No subscriptionID sent to the updater`);
 		return res.status(200).json('Session subscription disabled');
 	}
 

@@ -2,7 +2,7 @@
 import fs from 'fs';
 import { randomPhrase } from '@speechanddebate/nsda-js-utils';
 import { emailBlast } from '../../../helpers/mail.js';
-import { debugLogger } from '../../../helpers/logger';
+import logger from '../../../helpers/logger';
 
 const generateTestEmails = async (numberOfEmails = parseInt(process.argv[1]) || 10) => {
 	const buffer = fs.readFileSync('./api/controllers/ext/share/test.docx');
@@ -27,7 +27,7 @@ const generateTestEmails = async (numberOfEmails = parseInt(process.argv[1]) || 
 			promises.push(info.result);
 		}
 	} catch (err) {
-		debugLogger.error(err);
+		logger.error(err);
 	}
 
 	await Promise.all(promises);

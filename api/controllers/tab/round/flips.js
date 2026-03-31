@@ -1,6 +1,6 @@
 // Functions to handle the online coinflip
 import { db } from '../../../helpers/litedb.js';
-import { errorLogger } from '../../../helpers/logger.js';
+import logger from '../../../helpers/logger.js';
 
 export async function scheduleRoundFlips(req,res) {
 	const counter = await scheduleFlips(req.params.roundId);
@@ -70,13 +70,12 @@ export const scheduleFlips = async (roundId) => {
 		});
 
 	} catch (err) {
-		errorLogger.info(`Flip schedule failed for round ${roundId} with error`);
-		errorLogger.info(err);
+		logger.error(`Flip schedule failed for round ${roundId} with error`,err);
 		return;
 	}
 
 	if (!flips || flips.length < 1) {
-		errorLogger.info(`No flips registered`);
+		logger.error(`No flips registered`);
 		return;
 	}
 

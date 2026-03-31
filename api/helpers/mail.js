@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import { convert } from 'html-to-text';
 import config from '../../config/config.js';
-import { debugLogger } from './logger.js';
+import logger from './logger.js';
 import { inlineError } from './errors/errorHandler.js';
 
 export const emailBlast = async (inputData) => {
@@ -129,13 +129,13 @@ export const emailBlast = async (inputData) => {
 		}
 
 	} else {
-		debugLogger.info(`Local: email not sending from ${messageData.from} to ${messageData.to} bcc ${messageData.bcc} `);
-		debugLogger.info(`Env: ${process.env.NODE_ENV}`);
-		debugLogger.info(`Subject ${messageData.subject}`);
-		debugLogger.info(`Text ${messageData.text}`);
-		debugLogger.info(`HTML ${messageData.html}`);
-		debugLogger.info(`From ${messageData.from}`);
-		debugLogger.info(`ReplyTo ${messageData.replyTo}`);
+		logger.info(`Local: email not sending from ${messageData.from} to ${messageData.to} bcc ${messageData.bcc} `);
+		logger.info(`Env: ${process.env.NODE_ENV}`);
+		logger.info(`Subject ${messageData.subject}`);
+		logger.info(`Text ${messageData.text}`);
+		logger.info(`HTML ${messageData.html}`);
+		logger.info(`From ${messageData.from}`);
+		logger.info(`ReplyTo ${messageData.replyTo}`);
 	}
 
 	const promise = new Promise( (resolve) => {

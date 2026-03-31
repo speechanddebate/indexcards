@@ -1,5 +1,5 @@
 import { notify } from '../../helpers/blast.js';
-import { debugLogger, errorLogger } from '../../helpers/logger.js';
+import logger from '../../helpers/logger.js';
 import { sendPairingBlast, formatPairingBlast } from '../../helpers/pairing.js';
 import { getPairingFollowers } from '../../helpers/followers.js';
 import { UnexpectedError } from '../../helpers/problem.js';
@@ -10,8 +10,8 @@ export async function blastMessage(req, res) {
 		if (req.body.body) {
 			req.body.text = req.body.body;
 		} else if (!req.body.html) {
-			debugLogger.info('No message to blast sent');
-			debugLogger.info(req.body);
+			logger.info('No message to blast sent');
+			logger.info(req.body);
 			return res.status(200).json({ error: true, message: 'No message to blast sent' });
 		}
 	}
@@ -19,7 +19,7 @@ export async function blastMessage(req, res) {
 	const notifyResponse = await notify({ ...req.body });
 
 	if (notifyResponse.error) {
-		errorLogger.error(notifyResponse.message);
+		logger.error(notifyResponse.message);
 		return UnexpectedError(req, res, notifyResponse);
 	}
 

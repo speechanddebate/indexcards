@@ -1,5 +1,5 @@
 import db from './litedb.js';
-import { errorLogger } from './logger.js';
+import logger from './logger.js';
 
 export const getFollowers = async (replacements, options = { recipients: 'all' }) => {
 
@@ -161,7 +161,7 @@ export const getFollowers = async (replacements, options = { recipients: 'all' }
 			try {
 				followerIds = JSON.parse(sectionFollowerIds[0].followers).join(',');
 			} catch (err) {
-				errorLogger.info(err);
+				logger.error(err);
 			}
 		}
 

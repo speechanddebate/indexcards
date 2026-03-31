@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import { errorLogger, debugLogger } from '../helpers/logger.js';
+import logger from '../helpers/logger.js';
 import config from '../../config/config.js';
 import initModels from './models/init-models.js';
 
@@ -55,7 +55,7 @@ db.tourn.hasMany(db.event, { as: 'events', foreignKey: 'tourn' });
 const errorsPlease = ['findAll', 'findOne', 'save', 'create', 'findByPk'];
 
 const dbError = (err) => {
-	debugLogger.error(err);
+	logger.error(err);
 	return `Database query error`;
 };
 
@@ -97,12 +97,12 @@ db.summon = async (dbTable, objectId) => {
 			options
 		);
 	} catch (err) {
-		errorLogger.info(`SUMMON QUERY RETURNED ERROR: ${err} for model ${dbTable} PK ${objectId}`);
+		logger.error(`SUMMON QUERY RETURNED ERROR: ${err} for model ${dbTable} PK ${objectId}`);
 		return;
 	}
 
 	if (!dbObject) {
-		errorLogger.info(`NOTHING FOUND: No ${dbTable} record found with key ${objectId}`);
+		logger.error(`NOTHING FOUND: No ${dbTable} record found with key ${objectId}`);
 		return;
 	}
 
@@ -129,8 +129,8 @@ db.summon = async (dbTable, objectId) => {
 						try {
 							jsonOutput = JSON.parse(item.value_text);
 						} catch (err) {
-							errorLogger.info(item.tag);
-							errorLogger.info(err);
+							logger.error(item.tag);
+							logger.error(err);
 						}
 						if (jsonOutput) {
 							dbData.settings[item.tag] = jsonOutput;
