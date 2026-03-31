@@ -3700,36 +3700,36 @@
         "description": "GET /rest/paradigms is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
+            "in": "query",
             "name": "search",
-            "in": "query",
-            "description": "Search query for paradigms",
-            "required": true,
             "schema": {
+              "description": "Search query for paradigms",
               "type": "string"
-            }
+            },
+            "description": "Search query for paradigms"
           },
           {
+            "in": "query",
             "name": "limit",
-            "in": "query",
-            "description": "Maximum number of paradigms to return",
-            "required": false,
             "schema": {
-              "type": "integer",
-              "minimum": 1,
               "default": 50,
+              "description": "Maximum number of paradigms to return",
+              "type": "number",
+              "minimum": 1,
               "maximum": 100
-            }
+            },
+            "description": "Maximum number of paradigms to return"
           },
           {
-            "name": "offset",
             "in": "query",
-            "description": "Number of paradigms to skip before starting to return results",
-            "required": false,
+            "name": "offset",
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0
-            }
+              "default": 0,
+              "description": "Number of paradigms to skip before starting to return results",
+              "type": "number",
+              "minimum": 0
+            },
+            "description": "Number of paradigms to skip before starting to return results"
           }
         ],
         "responses": {
@@ -3792,6 +3792,17 @@
         ],
         "description": "GET /rest/paradigms/{personId} is undocumented. Need to add .openapi to handler",
         "parameters": [
+          {
+            "in": "path",
+            "name": "personId",
+            "schema": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "ID of the person to get paradigm details for"
+            },
+            "required": true,
+            "description": "ID of the person to get paradigm details for"
+          },
           {
             "name": "personId",
             "in": "path",

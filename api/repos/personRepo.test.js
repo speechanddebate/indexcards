@@ -181,6 +181,18 @@ describe('PersonRepo', () => {
 			expect(Array.isArray(results)).toBe(true);
 			expect(results.length).toBe(0);
 		});
+		it('returns results when search query is empty', async () => {
+			// Arrange
+			const personData = factories.person.createPersonData();
+			await factories.person.createTestPerson(personData);
+
+			// Act
+			const results = await personRepo.personSearch();
+
+			// Assert
+			expect(Array.isArray(results)).toBe(true);
+			expect(results.length).toBeGreaterThan(0);
+		});
 	});
 
 	describe('getPersonByUsername', () => {

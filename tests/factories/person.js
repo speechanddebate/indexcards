@@ -1,5 +1,6 @@
 import personRepo from '../../api/repos/personRepo.js';
 import { faker } from '@faker-js/faker';
+import factories from './index.js';
 
 export function createPersonData(overrides = {}) {
 	// Ensure email is always unique by adding a random string
@@ -30,7 +31,22 @@ export async function createTestPerson(overrides = {}) {
 	};
 }
 
+export async function createJudge(overrides = {}) {
+	const data = createPersonData({
+		...overrides,
+	});
+
+	const personId = await personRepo.createPerson(data);
+	await factories.judge.createTestJudge({ personId });
+
+	return {
+		personId,
+		getPerson: () => personRepo.getPerson(personId),
+	};
+}
+
 export default {
 	createTestPerson,
 	createPersonData,
+	createJudge,
 };

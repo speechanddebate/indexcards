@@ -20,6 +20,7 @@ export function createReq(overrides = {}) {
 		session: undefined,
 		params: {},
 		query: {},
+		valid: {},
 		get: () => {},
 		...overrides,
 	};
