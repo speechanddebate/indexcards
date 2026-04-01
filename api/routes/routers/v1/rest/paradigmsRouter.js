@@ -19,10 +19,10 @@ router.route('/').get(ValidateRequest, controller.getParadigms).openapi = {
 			search: z.string().optional().meta({
 				description: 'Search query for paradigms',
 			}),
-			limit: z.number().min(1).max(100).default(50).meta({
+			limit: z.coerce.number().min(1).max(100).default(50).meta({
 				description: 'Maximum number of paradigms to return',
 			}),
-			offset: z.number().min(0).default(0).meta({
+			offset: z.coerce.number().min(0).default(0).meta({
 				description: 'Number of paradigms to skip before starting to return results',
 			}),
 		}),
@@ -32,27 +32,19 @@ router.route('/').get(ValidateRequest, controller.getParadigms).openapi = {
 			description: 'List of paradigms matching the search query',
 			content: {
 				'application/json': {
-					schema: {
-						type: 'array',
-						items: {
-							type: 'object',
-							properties: {
-								id: { type: 'integer' },
-								name: { type: 'string', description: 'Full name' },
-								tournJudged: { type: 'integer', description: 'Number of tournaments judged' },
-								schools: {
-									type: 'array',
-									items: {
-										type: 'object',
-										properties: {
-											id: { type: 'integer' },
-											name: { type: 'string' },
-										},
-									},
-								},
-							},
-						},
-					},
+					schema: z.array(
+						z.object({
+							id: z.coerce.number().int().positive(),
+							name: z.string().meta({ description: 'Full name' }),
+							tournJudged: z.coerce.number().int().positive().meta({ description: 'Number of tournaments judged' }),
+							schools: z.array(
+								z.object({
+									id: z.coerce.number().int().positive(),
+									name: z.string(),
+								})
+							),
+						})
+					),
 				},
 			},
 		},

@@ -15,7 +15,7 @@ async function getParadigms(req, res) {
 		offset: offset ?? 0,
 		include: {
 			Judges: {
-				fields: ['id'],
+				fields: ['id','createdAt'],
 				include: {
 					School: {
 						fields: ['id','name'],
@@ -29,7 +29,12 @@ async function getParadigms(req, res) {
 		// Get all schools from Judges
 		const schools = p.Judges
 			? p.Judges
-				.filter(j => j && j.School)
+				.filter(j => {
+					if (!j || !j.School || !j.createdAt) return false;
+					const fiveYearsAgo = new Date();
+					fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+					return new Date(j.createdAt) >= fiveYearsAgo;
+				})
 				.map(j => ({
 					id: j.School.id,
 					name: j.School.name,

@@ -88,6 +88,7 @@ export function setupLoggers(){
 			const appTrans = createLokiTransport({type: 'app'});
 			requestLogger.add(reqTrans);
 			logger.add(appTrans);
+			logger.info('Loki transport setup complete');
 		} catch (err) {
 			logger.error('Error setting up Loki transport', err);
 		}

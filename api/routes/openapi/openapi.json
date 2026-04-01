@@ -3743,7 +3743,9 @@
                     "type": "object",
                     "properties": {
                       "id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
                       },
                       "name": {
                         "type": "string",
@@ -3751,6 +3753,8 @@
                       },
                       "tournJudged": {
                         "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991,
                         "description": "Number of tournaments judged"
                       },
                       "schools": {
@@ -3759,15 +3763,29 @@
                           "type": "object",
                           "properties": {
                             "id": {
-                              "type": "integer"
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
                             },
                             "name": {
                               "type": "string"
                             }
-                          }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "additionalProperties": false
                         }
                       }
-                    }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "tournJudged",
+                      "schools"
+                    ],
+                    "additionalProperties": false
                   }
                 }
               }

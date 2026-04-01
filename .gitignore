@@ -10,4 +10,4 @@ config/config.js
 .vscode
 npm*
 *.nvimlog
-.devcontainer.json
+.devcontainer/
