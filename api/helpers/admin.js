@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer';
 import { convert } from 'html-to-text';
 import config from '../../config/config.js';
-import { debugLogger } from './logger.js';
+import logger from './logger.js';
 
 export const adminBlast = async (inputData) => {
 
@@ -65,11 +65,14 @@ export const adminBlast = async (inputData) => {
 			const result = transporter.sendMail(messageData);
 			promises.push(result);
 		} else {
-			debugLogger.info(`Local: Admin email not sending from ${messageData.from} to ${messageData.email}`);
-			debugLogger.info(`Subject ${messageData.subject}`);
-			debugLogger.info(`Text ${messageData.text}`);
-			debugLogger.info(`HTML ${messageData.html}`);
-			debugLogger.info(`From ${messageData.from}`);
+			logger.warn('Local: Admin email not sent', {
+				action: 'admin_blast_local',
+				from: messageData.from,
+				to: messageData.email,
+				subject: messageData.subject,
+				text: messageData.text,
+				html: messageData.html,
+			});
 		}
 	}
 

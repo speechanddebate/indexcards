@@ -1,5 +1,5 @@
 import { BadRequest, UnexpectedError } from '../helpers/problem.js';
-import { debugLogger as logger } from '../helpers/logger.js';
+import logger from '../helpers/logger.js';
 export async function ValidateRequest(req, res, next) {
 	const openapi = req.route?.openapi;
 	const bodySchema = openapi?.requestBody?.content?.['application/json']?.schema;

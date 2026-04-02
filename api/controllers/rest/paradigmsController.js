@@ -1,27 +1,21 @@
 import personRepo from '../../repos/personRepo.js';
-import { BadRequest, NotFound } from '../../helpers/problem.js';
+import { NotFound } from '../../helpers/problem.js';
 import config from '../../../config/config.js';
 
 async function getParadigms(req, res) {
 	//get the search query from the query params
-	const { search, limit = 50, offset = 0 } = req.query;
-	if (!search) {
-		throw new BadRequest(req, res, 'Search query is required');
-	}
-	if (limit > 100) {
-		throw new BadRequest(req, res, 'Limit cannot exceed 100');
-	}
+	const { search, limit = 50, offset = 0 } = req.valid.query;
 
-	const paradigms = await personRepo.personSearch(search, {
+	const paradigms = await personRepo.personSearch(search ?? '', {
 		excludeBanned: true,
 		excludeUnconfirmedEmail: true,
 		hasValidParadigm: true,
 		hasJudged: true,
-		limit,
-		offset,
+		limit: limit ?? 50,
+		offset: offset ?? 0,
 		include: {
 			Judges: {
-				fields: ['id'],
+				fields: ['id','createdAt'],
 				include: {
 					School: {
 						fields: ['id','name'],
@@ -35,7 +29,12 @@ async function getParadigms(req, res) {
 		// Get all schools from Judges
 		const schools = p.Judges
 			? p.Judges
-				.filter(j => j && j.School)
+				.filter(j => {
+					if (!j || !j.School || !j.createdAt) return false;
+					const fiveYearsAgo = new Date();
+					fiveYearsAgo.setFullYear(fiveYearsAgo.getFullYear() - 5);
+					return new Date(j.createdAt) >= fiveYearsAgo;
+				})
 				.map(j => ({
 					id: j.School.id,
 					name: j.School.name,
@@ -59,10 +58,7 @@ async function getParadigms(req, res) {
 
 //NOTE, I also hate this and will fix it, I was just seeing if it would work well. it didn't. RCT
 async function getParadigmByPersonId(req, res) {
-	const { personId } = req.params;
-	if (!personId) {
-		throw new BadRequest(req, res, 'Person ID is required');
-	}
+	const { personId } = req.valid.params;
 
 	const certInclude = {
 		PersonQuizzes: {

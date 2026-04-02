@@ -4,7 +4,7 @@ WORKDIR /indexcards
 COPY package*.json .
 
 FROM base AS dev
-ARG NODE_ENV=development
+ENV NODE_ENV=development
 RUN npm ci --include=dev
 
 COPY . .
@@ -16,8 +16,7 @@ CMD ["npm" , "run" , "dev"]
 FROM node:24-slim AS prod
 WORKDIR /indexcards
 
-ARG NODE_ENV=production
-ENV NODE_ENV=${NODE_ENV}
+ENV NODE_ENV=production
 
 COPY package*.json ./
 RUN npm ci --omit=dev --ignore-scripts

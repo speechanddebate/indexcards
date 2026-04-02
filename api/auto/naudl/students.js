@@ -1,5 +1,5 @@
 import { getAllSalesforceStudents, getOneSalesforceStudent, getSalesforceStudents, postSalesforceStudents } from '../../helpers/naudl.js';
-import { errorLogger, autoemailLogger } from '../../helpers/logger.js';
+import logger from '../../helpers/logger.js';
 import { notify } from '../../helpers/blast.js';
 import db from '../../helpers/litedb.js';
 import studentSetting from '../../data/models/student_setting.js';
@@ -142,7 +142,7 @@ export const syncNAUDLStudents = async () => {
 						value   : naudlStudent.Id,
 					});
 				} catch (err) {
-					errorLogger.info(err);
+					logger.error(err.message, err);
 				}
 
 			} else {
@@ -192,11 +192,11 @@ export const syncNAUDLStudents = async () => {
 			noWeb   : true,
 		});
 
-		autoemailLogger.info(`NAUDL student and chapter report sent`);
-		autoemailLogger.info(emailResponse);
+		logger.info(`NAUDL student and chapter report sent`);
+		logger.info(emailResponse);
 
 	} else {
-		errorLogger.info(`No NAUDL email addresses found, message not sent`);
+		logger.error(`No NAUDL email addresses found, message not sent`);
 	}
 
 	return response.data;
@@ -311,7 +311,7 @@ export const syncExistingNAUDLStudents = async () => {
 	try {
 		await db.studentSetting.bulkCreate(settings.create);
 	} catch (err) {
-		errorLogger.info(err);
+		logger.error(err.message, err);
 	}
 
 	await db.sequelize.query(`

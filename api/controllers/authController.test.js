@@ -18,9 +18,10 @@ describe('authController',() => {
 
 			const { req, res } = createContext({
 				req: {
-					body: { username: 'bob', password: 'wrong' },
-					ip: '127.0.0.1',
-					get: () => 'Mozilla',
+					valid: {
+						body: { username: 'bob', password: 'wrong' },
+						ip: '127.0.0.1',
+					},
 				},
 			});
 
@@ -33,9 +34,10 @@ describe('authController',() => {
 			vi.spyOn(authService, 'login').mockRejectedValue(new Error('Some other error'));
 			const { req, res } = createContext({
 				req: {
-					body: { username: 'alice', password: 'badpassword' },
-					ip: '127.0.0.1',
-					get: () => 'Mozilla',
+					valid: {
+						body: { username: 'alice', password: 'badpassword' },
+						ip: '127.0.0.1',
+					},
 				},
 			});
 			await expect(controller.login(req, res)).rejects.toThrow('Some other error');
@@ -53,9 +55,10 @@ describe('authController',() => {
 
 			const { req, res } = createContext({
 				req: {
-					body: { username: 'bob', password: 'pw' },
-					ip: '127.0.0.1',
-					get: () => 'Mozilla',
+					valid: {
+						body: { username: 'bob', password: 'pw' },
+						ip: '127.0.0.1',
+					},
 				},
 			});
 
@@ -135,7 +138,9 @@ describe('authController',() => {
 		it('returns 400 when no session', async () => {
 			const { req, res } = createContext({
 				req: {
-					body: { suId: '1' },
+					valid: {
+						body: { suId: '1' },
+					},
 				},
 			});
 			await controller.su(req, res);
@@ -149,7 +154,9 @@ describe('authController',() => {
 							id: 2,
 						},
 					},
-					body: { suId: 'not an id' },
+					valid: {
+						body: { suId: 'not an id' },
+					},
 				},
 			});
 			vi.spyOn(personRepo, 'getPerson').mockResolvedValue(null);
@@ -164,7 +171,9 @@ describe('authController',() => {
 							id: 2,
 						},
 					},
-					body: { suId: 1 },
+					valid: {
+						body: { suId: 1 },
+					},
 				},
 			});
 			vi.spyOn(personRepo, 'getPerson').mockResolvedValue(null);
@@ -179,7 +188,9 @@ describe('authController',() => {
 							id: 2,
 						},
 					},
-					body: { suId: 1 },
+					valid: {
+						body: { suId: 1 },
+					},
 				},
 			});
 			vi.spyOn(personRepo, 'getPerson').mockResolvedValue({ id: 1 });
@@ -225,7 +236,9 @@ describe('authController',() => {
 
 			const { req, res } = createContext({
 				req: {
-					body: { username: 'newuser', password: 'pw' },
+					valid: {
+						body: { username: 'newuser', password: 'pw' },
+					},
 					ip: '127.0.0.1',
 					get: () => 'Mozilla',
 				},
@@ -234,7 +247,7 @@ describe('authController',() => {
 			await controller.register(req, res);
 
 			expect(authService.register).toHaveBeenCalledWith(
-				req.body,
+				req.valid.body,
 				{ ip: req.ip, agentData: 'Mozilla' }
 			);
 			expect(res.json).toHaveBeenCalledWith(fakeResult);
@@ -247,9 +260,10 @@ describe('authController',() => {
 
 			const { req, res } = createContext({
 				req: {
-					body: { username: '', password: '' },
-					ip: '127.0.0.1',
-					get: () => 'Mozilla',
+					valid: {
+						body: { username: '', password: '' },
+						ip: '127.0.0.1',
+					},
 				},
 			});
 
@@ -263,9 +277,10 @@ describe('authController',() => {
 
 			const { req, res } = createContext({
 				req: {
-					body: { username: 'fail', password: 'fail' },
-					ip: '127.0.0.1',
-					get: () => 'Mozilla',
+					valid: {
+						body: { username: 'fail', password: 'fail' },
+						ip: '127.0.0.1',
+					},
 				},
 			});
 

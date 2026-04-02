@@ -1,5 +1,5 @@
 import { emailBlast } from '../../../helpers/mail.js';
-import { debugLogger } from '../../../helpers/logger.js';
+import logger from '../../../helpers/logger.js';
 
 export const acceptPayPalPayment = {
 
@@ -48,9 +48,9 @@ export const acceptPayPalPayment = {
 				subject : `Tabroom.com payment receipt for ${orderData.tourn_name}`,
 			};
 			await emailBlast(messageData);
-			debugLogger.info(`Email receipt sent to ${payerEmail}`);
+			logger.info(`Email receipt sent to ${payerEmail}`);
 		} catch (err) {
-			debugLogger.info(`Failed to send email receipt to ${payerEmail}: ${err}`);
+			logger.info(`Failed to send email receipt to ${payerEmail}: ${err}`);
 		}
 
 		res.status(200);

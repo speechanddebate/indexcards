@@ -1,6 +1,6 @@
 // Common helper functions that attach to rounds & schematics
 import fetch from 'node-fetch';
-import { errorLogger } from './logger.js';
+import logger from './logger.js';
 import objectify from './objectify.js';
 import litedb from './litedb.js';
 
@@ -301,7 +301,7 @@ export const invalidateCache = async (tournId, roundId) => {
 			);
 			promises.push(promise);
 		} catch (err) {
-			errorLogger.info(err);
+			logger.error(err);
 		}
 	}
 

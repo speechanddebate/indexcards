@@ -1,6 +1,6 @@
 import axios from 'axios';
 import config from '../../../config/config.js';
-import { errorLogger } from '../../helpers/logger.js';
+import logger from '../../helpers/logger.js';
 //import notify from '../../helpers/blast.js';
 
 /*
@@ -44,8 +44,8 @@ export async function getSubscription(req, res) {
 
 		} catch (err) {
 
-			errorLogger.info(`Error returned on the axios get for a OneSignal push`);
-			errorLogger.info(err);
+			logger.error(`Error returned on the axios get for a OneSignal push`);
+			logger.error(err);
 
 			return res.status(400).json(err);
 

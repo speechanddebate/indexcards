@@ -1,5 +1,5 @@
 import { checkJudgePerson } from '../../../helpers/auth.js';
-import { errorLogger } from '../../../helpers/logger.js';
+import logger from '../../../helpers/logger.js';
 import db from '../../../data/db.js';
 
 export async function checkActive(req, res) {
@@ -163,7 +163,7 @@ export async function saveRubric(req, res) {
 			score.content = JSON.stringify(autoSave);
 			await score.save();
 		} catch (err) {
-			errorLogger.info(`Error encountered in savings scores ${err} ballot ${ballot.id} score ${score.id}`);
+			logger.error(`Error encountered in savings scores ${err} ballot ${ballot.id} score ${score.id}`);
 		}
 
 	} else {
@@ -176,8 +176,8 @@ export async function saveRubric(req, res) {
 				content : JSON.stringify(autoSave),
 			});
 		} catch (err) {
-			errorLogger.info(`Error encountered in savings scores ${err} ballot ${ballot?.id} score ${score?.id}`);
-			errorLogger.info(req.params);
+			logger.error(`Error encountered in savings scores ${err} ballot ${ballot?.id} score ${score?.id}`);
+			logger.error(req.params);
 		}
 	}
 

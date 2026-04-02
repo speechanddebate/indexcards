@@ -1,5 +1,7 @@
+import z from 'zod';
 import controller from '../../../../controllers/rest/paradigmsController.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
+import { ValidateRequest } from '../../../../middleware/validation.js';
 import { Router } from 'express';
 
 const router = Router();
@@ -7,81 +9,59 @@ const router = Router();
 //searching paradigms requires a user to be logged in
 router.use(requireLogin);
 
-router.route('/').get(controller.getParadigms).openapi = {
+router.route('/').get(ValidateRequest, controller.getParadigms).openapi = {
 	path: '/rest/paradigms',
 	summary: 'Search paradigms',
 	operationId: 'restParadigms',
 	tags: ['Paradigms', 'Orval'],
-	parameters: [
-		{
-			name: 'search',
-			in: 'query',
-			description: 'Search query for paradigms',
-			required: true,
-			schema: {
-				type: 'string',
-			},
-		},
-		{
-			name: 'limit',
-			in: 'query',
-			description: 'Maximum number of paradigms to return',
-			required: false,
-			schema: {
-				type: 'integer',
-				minimum: 1,
-				default: 50,
-				maximum: 100,
-			},
-		},
-		{
-			name: 'offset',
-			in: 'query',
-			description: 'Number of paradigms to skip before starting to return results',
-			required: false,
-			schema: {
-				type: 'integer',
-				minimum: 0,
-				default: 0,
-			},
-		},
-	],
+	requestParams: {
+		query: z.object({
+			search: z.string().optional().meta({
+				description: 'Search query for paradigms',
+			}),
+			limit: z.coerce.number().min(1).max(100).default(50).meta({
+				description: 'Maximum number of paradigms to return',
+			}),
+			offset: z.coerce.number().min(0).default(0).meta({
+				description: 'Number of paradigms to skip before starting to return results',
+			}),
+		}),
+	},
 	responses: {
 		200: {
 			description: 'List of paradigms matching the search query',
 			content: {
 				'application/json': {
-					schema: {
-						type: 'array',
-						items: {
-							type: 'object',
-							properties: {
-								id: { type: 'integer' },
-								name: { type: 'string', description: 'Full name' },
-								tournJudged: { type: 'integer', description: 'Number of tournaments judged' },
-								schools: {
-									type: 'array',
-									items: {
-										type: 'object',
-										properties: {
-											id: { type: 'integer' },
-											name: { type: 'string' },
-										},
-									},
-								},
-							},
-						},
-					},
+					schema: z.array(
+						z.object({
+							id: z.coerce.number().int().positive(),
+							name: z.string().meta({ description: 'Full name' }),
+							tournJudged: z.coerce.number().int().positive().meta({ description: 'Number of tournaments judged' }),
+							schools: z.array(
+								z.object({
+									id: z.coerce.number().int().positive(),
+									name: z.string(),
+								})
+							),
+						})
+					),
 				},
 			},
 		},
 	},
 };
-router.route('/:personId').get(controller.getParadigmByPersonId).openapi = {
+router.route('/:personId').get(ValidateRequest, controller.getParadigmByPersonId).openapi = {
 	path: '/rest/paradigms/{personId}',
 	summary: 'Get paradigm details by person ID',
 	operationId: 'restParadigm',
 	tags: ['Paradigms', 'Orval'],
+	requestParams: {
+		path: z.object({
+			personId: z.coerce.number().positive().meta({
+				description: 'ID of the person to get paradigm details for',
+			}),
+		}),
+	},
 	responses: {
 		200: {
 			description: 'Paradigm details for the specified person ID',

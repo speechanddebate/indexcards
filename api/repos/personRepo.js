@@ -134,10 +134,6 @@ async function personSearch(searchTerm = '', opts = {}) {
 	const cleanTerm = sanitize(searchTerm);
 	const words = cleanTerm.split(/\s+/).filter(w => w.length > 0);
 
-	if (words.length === 0) {
-		return [];
-	}
-
 	// Use buildPersonQuery for all filters and includes
 	const query = await buildPersonQuery(opts);
 

@@ -1,4 +1,4 @@
-import { errorLogger } from '../../../helpers/logger.js';
+import logger from '../../../helpers/logger.js';
 import { BadRequest, Forbidden, NotFound, NotImplemented } from '../../../helpers/problem.js';
 import db from '../../../data/db.js';
 
@@ -27,8 +27,8 @@ export async function updateAccess(req, res) {
 	}
 
 	if (!tag) {
-		errorLogger.info(req.body);
-		errorLogger.info(tag);
+		logger.error(req.body);
+		logger.error(tag);
 		res.status(200).json('No request body sent with a proper access type specified');
 		return;
 	}
@@ -290,7 +290,7 @@ export async function deleteAccess(req, res) {
 			});
 
 		} catch (err) {
-			errorLogger.error(err);
+			logger.error(err.message, err);
 			return;
 		}
 
@@ -300,7 +300,7 @@ export async function deleteAccess(req, res) {
 			const targetPerson = await db.summon(db.person, req.params.personId);
 			description = `All tournament access removed from ${targetPerson.email}`;
 		} catch (err) {
-			errorLogger.error(err);
+			logger.error(err);
 			return;
 		}
 
@@ -319,7 +319,7 @@ export async function deleteAccess(req, res) {
 
 			await db.changeLog.create(logCreate);
 		} catch (err) {
-			errorLogger.error(err);
+			logger.error(err);
 			return;
 		}
 

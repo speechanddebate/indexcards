@@ -1,5 +1,5 @@
 import authorizenet from 'authorizenet';
-import { debugLogger } from '../../../helpers/logger.js';
+import logger from '../../../helpers/logger.js';
 import { emailBlast } from '../../../helpers/mail.js';
 import { UnexpectedError } from '../../../helpers/problem.js';
 
@@ -148,7 +148,7 @@ export const processAuthorizeNet = {
 		createRequest.setMerchantAuthentication(merchantAuthenticationType);
 		createRequest.setTransactionRequest(transactionRequestType);
 
-		// debugLogger.info(JSON.stringify(createRequest.getJSON(), null, 2));
+		// logger.info(JSON.stringify(createRequest.getJSON(), null, 2));
 
 		const ctrl = new APIControllers.CreateTransactionController(createRequest.getJSON());
 
@@ -163,7 +163,7 @@ export const processAuthorizeNet = {
 					const apiResponse = ctrl.getResponse();
 					const response = new APIContracts.CreateTransactionResponse(apiResponse);
 
-					// debugLogger.info(JSON.stringify(response, null, 2));
+					// logger.info(JSON.stringify(response, null, 2));
 
 					if (response != null) {
 						if (response.getMessages().getResultCode() === APIContracts.MessageTypeEnum.OK) {
@@ -176,7 +176,7 @@ export const processAuthorizeNet = {
 									.getMessages().getMessage()[0].getCode();
 								const description = response.getTransactionResponse()
 									.getMessages().getMessage()[0].getDescription();
-								debugLogger.info(`Successful Authorize.net transaction. ID: ${transactionId}, Response Code: ${responseCode}, Message Code: ${messageCode}, Description: ${description}`);
+								logger.info(`Successful Authorize.net transaction. ID: ${transactionId}, Response Code: ${responseCode}, Message Code: ${messageCode}, Description: ${description}`);
 
 								const paymentObject = {
 									reason    : `Authorize.net Payment #${transactionId} from ${payerName} (${orderData.person_email})`,
@@ -218,20 +218,20 @@ export const processAuthorizeNet = {
 										subject : `Tabroom.com payment receipt for ${orderData.tourn_name}`,
 									};
 									await emailBlast(messageData);
-									debugLogger.info(`Email receipt sent to ${orderData.person_email}`);
+									logger.info(`Email receipt sent to ${orderData.person_email}`);
 								} catch (err) {
-									debugLogger.info(`Failed to send email receipt to ${orderData.person_email}: ${err}`);
+									logger.info(`Failed to send email receipt to ${orderData.person_email}: ${err}`);
 								}
 
 								resolve(response);
 							} else {
-								debugLogger.info('Failed Transaction.');
+								logger.info('Failed Transaction.');
 								if (response.getTransactionResponse().getErrors() != null) {
 									const errorCode = response.getTransactionResponse()
 										.getErrors().getError()[0].getErrorCode();
 									const errorText = response.getTransactionResponse()
 										.getErrors().getError()[0].getErrorText();
-									debugLogger.info(`Failed Authorize.net transaction. Error ${errorCode}: ${errorText}`);
+									logger.info(`Failed Authorize.net transaction. Error ${errorCode}: ${errorText}`);
 								}
 								reject(response);
 							}
@@ -242,16 +242,16 @@ export const processAuthorizeNet = {
 									.getErrors().getError()[0].getErrorCode();
 								const errorText = response.getTransactionResponse()
 									.getErrors().getError()[0].getErrorText();
-								debugLogger.info(`Failed Authorize.net transaction. Error ${errorCode}: ${errorText}`);
+								logger.info(`Failed Authorize.net transaction. Error ${errorCode}: ${errorText}`);
 							} else {
 								const errorCode = response.getMessages().getMessage()[0].getCode();
 								const errorText = response.getMessages().getMessage()[0].getText();
-								debugLogger.info(`Failed Authorize.net transaction. Error ${errorCode}: ${errorText}`);
+								logger.info(`Failed Authorize.net transaction. Error ${errorCode}: ${errorText}`);
 							}
 							reject(response);
 						}
 					} else {
-						debugLogger.info('Failed Authorize.net transaction. Null response.');
+						logger.info('Failed Authorize.net transaction. Null response.');
 						reject(response);
 					}
 				});

@@ -5,7 +5,7 @@ import {
 	CopyObjectCommand,
 	S3Client } from '@aws-sdk/client-s3';
 import config from '../../config/config';
-import { errorLogger } from './logger';
+import logger from './logger';
 
 const client = new S3Client(config.AWS);
 
@@ -24,8 +24,8 @@ const s3Client = {
 		try {
 			response = await client.send(rmCommand);
 		} catch (err) {
-			errorLogger.error(`Error on deleting AWS ${filepath}`);
-			errorLogger.error(err);
+			logger.error(`Error on deleting AWS ${filepath}`);
+			logger.error(err);
 			return err;
 		}
 
@@ -44,8 +44,8 @@ const s3Client = {
 		try {
 			response = await client.send(cpCommand);
 		} catch (err) {
-			errorLogger.error(`Error on copying AWS ${filepath} to ${dest}`);
-			errorLogger.error(err);
+			logger.error(`Error on copying AWS ${filepath} to ${dest}`);
+			logger.error(err);
 			return err;
 		}
 		return response;
@@ -67,8 +67,8 @@ const s3Client = {
 		try {
 			await client.send(cpCommand);
 		} catch (err) {
-			errorLogger.error(`Error on moving AWS ${filepath} to ${dest} on the copy`);
-			errorLogger.error(err);
+			logger.error(`Error on moving AWS ${filepath} to ${dest} on the copy`);
+			logger.error(err);
 			return err;
 		}
 
@@ -77,8 +77,8 @@ const s3Client = {
 		try {
 			response = await client.send(rmCommand);
 		} catch (err) {
-			errorLogger.error(`Error on moving AWS ${filepath} to ${dest} on the deletion`);
-			errorLogger.error(err);
+			logger.error(`Error on moving AWS ${filepath} to ${dest} on the deletion`);
+			logger.error(err);
 			return err;
 		}
 

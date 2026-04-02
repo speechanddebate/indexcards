@@ -24,7 +24,7 @@ npm install
 Copy the sample config and then update database + environment values for your machine:
 
 ```bash
-cp config/config.js.sample config/config.js
+cp config/config.sample.js config/config.js
 ```
   
 At minimum, make sure your local values for `development` and `test` DB settings are correct in `config/config.js`.

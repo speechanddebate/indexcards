@@ -27,3 +27,4 @@ try {
 	console.error('Failed to generate OpenAPI spec:', err);
 	process.exit(1);
 }
+process.exit(0);

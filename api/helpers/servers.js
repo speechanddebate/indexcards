@@ -2,7 +2,7 @@ import axios from 'axios';
 import db from '../data/db.js';
 import config from '../../config/config.js';
 import notify from './blast.js';
-import { errorLogger } from './logger.js';
+import logger from './logger.js';
 
 export const showTabroomUsage = async () => {
 
@@ -180,8 +180,8 @@ export const getLinodeInstances = async ( limit ) => {
 			},
 		);
 	} catch (err) {
-		errorLogger.error(`Error from Linode when polling new instances`);
-		errorLogger.error(err.message);
+		logger.error(`Error from Linode when polling new instances`);
+		logger.error(err.message);
 		return {};
 	}
 
@@ -387,7 +387,7 @@ export const increaseLinodeCount = async (whodunnit, countNumber, silent) => {
 
 		} catch (err) {
 
-			errorLogger.error(`Error returned by creation request: ${JSON.stringify(err)} `);
+			logger.error(`Error returned by creation request: ${JSON.stringify(err)} `);
 
 			return {
 				message: `Machine creation ${hostname} failed with response code ${err.response?.status} ${err.response?.statusText} and errors`,

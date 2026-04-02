@@ -3794,36 +3794,36 @@
         "description": "GET /rest/paradigms is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
+            "in": "query",
             "name": "search",
-            "in": "query",
-            "description": "Search query for paradigms",
-            "required": true,
             "schema": {
+              "description": "Search query for paradigms",
               "type": "string"
-            }
+            },
+            "description": "Search query for paradigms"
           },
           {
+            "in": "query",
             "name": "limit",
-            "in": "query",
-            "description": "Maximum number of paradigms to return",
-            "required": false,
             "schema": {
-              "type": "integer",
-              "minimum": 1,
               "default": 50,
+              "description": "Maximum number of paradigms to return",
+              "type": "number",
+              "minimum": 1,
               "maximum": 100
-            }
+            },
+            "description": "Maximum number of paradigms to return"
           },
           {
-            "name": "offset",
             "in": "query",
-            "description": "Number of paradigms to skip before starting to return results",
-            "required": false,
+            "name": "offset",
             "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "default": 0
-            }
+              "default": 0,
+              "description": "Number of paradigms to skip before starting to return results",
+              "type": "number",
+              "minimum": 0
+            },
+            "description": "Number of paradigms to skip before starting to return results"
           }
         ],
         "responses": {
@@ -3837,7 +3837,9 @@
                     "type": "object",
                     "properties": {
                       "id": {
-                        "type": "integer"
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991
                       },
                       "name": {
                         "type": "string",
@@ -3845,6 +3847,8 @@
                       },
                       "tournJudged": {
                         "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991,
                         "description": "Number of tournaments judged"
                       },
                       "schools": {
@@ -3853,15 +3857,29 @@
                           "type": "object",
                           "properties": {
                             "id": {
-                              "type": "integer"
+                              "type": "integer",
+                              "exclusiveMinimum": 0,
+                              "maximum": 9007199254740991
                             },
                             "name": {
                               "type": "string"
                             }
-                          }
+                          },
+                          "required": [
+                            "id",
+                            "name"
+                          ],
+                          "additionalProperties": false
                         }
                       }
-                    }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "tournJudged",
+                      "schools"
+                    ],
+                    "additionalProperties": false
                   }
                 }
               }
@@ -3886,6 +3904,17 @@
         ],
         "description": "GET /rest/paradigms/{personId} is undocumented. Need to add .openapi to handler",
         "parameters": [
+          {
+            "in": "path",
+            "name": "personId",
+            "schema": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "ID of the person to get paradigm details for"
+            },
+            "required": true,
+            "description": "ID of the person to get paradigm details for"
+          },
           {
             "name": "personId",
             "in": "path",
@@ -6010,6 +6039,7 @@
             "description": "The first name of the new user"
           },
           "middleName": {
+            "description": "The middle name of the new user",
             "anyOf": [
               {
                 "type": "string"
@@ -6017,14 +6047,14 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The middle name of the new user"
+            ]
           },
           "lastName": {
             "type": "string",
             "description": "The last name of the new user"
           },
           "phoneNumber": {
+            "description": "The phone number of the new user",
             "anyOf": [
               {
                 "type": "string"
@@ -6032,10 +6062,11 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The phone number of the new user"
+            ]
           },
           "state": {
+            "description": "The 2 letter state code of the new user",
+            "example": "IA",
             "anyOf": [
               {
                 "type": "string"
@@ -6043,11 +6074,11 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The 2 letter state code of the new user",
-            "example": "IA"
+            ]
           },
           "country": {
+            "description": "The 2 letter country code of the new user",
+            "example": "US",
             "anyOf": [
               {
                 "type": "string"
@@ -6055,11 +6086,10 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The 2 letter country code of the new user",
-            "example": "US"
+            ]
           },
           "tz": {
+            "description": "The IANA timezone of the new user",
             "anyOf": [
               {
                 "type": "string"
@@ -6067,20 +6097,14 @@
               {
                 "type": "null"
               }
-            ],
-            "description": "The IANA timezone of the new user"
+            ]
           }
         },
         "required": [
           "email",
           "password",
           "firstName",
-          "middleName",
-          "lastName",
-          "phoneNumber",
-          "state",
-          "country",
-          "tz"
+          "lastName"
         ],
         "description": "A request to register a new user"
       },

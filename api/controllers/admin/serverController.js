@@ -1,7 +1,7 @@
 import axios from 'axios';
 import notify from '../../helpers/blast.js';
 import config from '../../../config/config.js';
-import { errorLogger } from '../../helpers/logger.js';
+import logger from '../../helpers/logger.js';
 import {
 	getLinodeInstances,
 	getProxyStatus,
@@ -142,7 +142,7 @@ export async function rebootInstance(req, res) {
 
 	} catch (err) {
 
-		errorLogger.error(err.response.data);
+		logger.error(err.response.data);
 
 		return res.status(200).json({
 			message: `Deleting ${machine.label} failed with response code ${err.response.status} ${err.response.statusText} and errors ${err.response?.data?.errors}`,

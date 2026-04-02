@@ -1,5 +1,5 @@
 import { getFollowers, getPairingFollowers } from '../../../helpers/followers.js';
-import { errorLogger } from '../../../helpers/logger.js';
+import logger from '../../../helpers/logger.js';
 import { notify } from '../../../helpers/blast.js';
 import { sendPairingBlast, formatPairingBlast } from '../../../helpers/pairing.js';
 import db from '../../../data/db.js';
@@ -34,7 +34,7 @@ export async function blastSectionMessage(req, res) {
 	});
 
 	if (notifyResponse.error) {
-		errorLogger.error(notifyResponse.message);
+		logger.error(notifyResponse.message);
 		return res.status(200).json(notifyResponse);
 	}
 

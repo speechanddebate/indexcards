@@ -1,6 +1,6 @@
 import { UAParser } from 'ua-parser-js';
 import { findLocation, findISP } from '../../helpers/clientInfo.js';
-import { queryLogger } from '../../helpers/logger.js';
+import logger from '../../helpers/logger.js';
 
 export async function ipLocation(req, res) {
 	const requestIP = req.params.ipAddress || req.get('x-forwarded-for');
@@ -18,7 +18,7 @@ export async function ipLocation(req, res) {
 		locationData.isp = ispData?.isp;
 		locationData.ispData = ispData;
 	} catch (err) {
-		queryLogger.info({ message: `IP ${requestIP} was not found in the ISP database`, err });
+		logger.info({ message: `IP ${requestIP} was not found in the ISP database`, err });
 	}
 
 	if (locationData === undefined) {

@@ -2,7 +2,7 @@ import axios from 'axios';
 import db from '../data/db.js';
 import emailBlast from './mail.js';
 import config from '../../config/config.js';
-import { errorLogger } from './logger.js';
+import logger from './logger.js';
 
 //*
 //	Notification data structure for inputData wants to be.  I'll stick this in
@@ -299,7 +299,7 @@ export const inboxMessage = async (inputData) => {
 
 	if (errors.length > 1) {
 
-		errorLogger.error(errors);
+		logger.error(errors);
 
 		return {
 			error   : true,
