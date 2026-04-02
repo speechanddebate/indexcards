@@ -4,6 +4,7 @@ import { ValidateRequest } from '../../../../middleware/validation.js';
 import * as controller from '../../../../controllers/rest/tournsController.js';
 import { requirePublicTourn } from '../../../../policy/tournPolicy.js';
 import roundRouter from './roundRouter.js';
+import resultRouter from './resultRouter.js';
 import eventRouter from './eventRouter.js';
 import entryRouter from './entryRouter.js';
 
@@ -72,6 +73,7 @@ router.route('/:tournId').get(controller.getTourn).openapi = {
 };
 
 router.use('/:tournId/rounds'  , roundRouter);
+router.use('/:tournId/results' , resultRouter);
 router.use('/:tournId/events'  , eventRouter);
 router.use('/:tournId/entries' , entryRouter);
 

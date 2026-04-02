@@ -160,6 +160,10 @@
       "description": "Auto-discovered tag"
     },
     {
+      "name": "results",
+      "description": "Auto-discovered tag"
+    },
+    {
       "name": "event",
       "description": "Auto-discovered tag"
     },
@@ -169,10 +173,6 @@
     },
     {
       "name": "test",
-      "description": "Auto-discovered tag"
-    },
-    {
-      "name": "results",
       "description": "Auto-discovered tag"
     },
     {
@@ -3252,6 +3252,100 @@
         }
       }
     },
+    "/rest/tourns/{tournId}/results/{resultSetId}": {
+      "get": {
+        "summary": "Returns result information given a result set ID if it is public",
+        "operationId": "getResultSet",
+        "tags": [
+          "invite",
+          "public",
+          "results",
+          "pairings"
+        ],
+        "description": "GET /rest/tourns/{tournId}/results/{resultSetId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "resultSetId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result Set with published aggregated result data attached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/rest/tourns/{tournId}/results/event/{eventId}": {
+      "get": {
+        "summary": "Returns public result information for a given event",
+        "operationId": "getSchematic",
+        "tags": [
+          "invite",
+          "public",
+          "results",
+          "pairings"
+        ],
+        "description": "GET /rest/tourns/{tournId}/results/event/{eventId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "eventId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Result Sets connected to a given event, with published aggregated result data attached",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
     "/rest/tourns/{tournId}/events": {
       "get": {
         "summary": "Get Tournament Events",
@@ -3374,6 +3468,22 @@
           "Events"
         ],
         "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "eventAbbr",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
           {
             "$ref": "#/components/parameters/tournId"
           },

@@ -10,6 +10,12 @@ export default class resultSet extends Model {
 						allowNull: false,
 						primaryKey: true
 				},
+				tag: {
+						type: DataTypes.ENUM('final', 'bracket', 'seed', 'speaker', 'qualifier',
+							'sweep', 'toc', 'nsda', 'table', 'chamber', 'other'),
+						allowNull: false,
+						defaultValue: "entry"
+				},
 				label: {
 						type: DataTypes.STRING(255),
 						allowNull: true
@@ -33,8 +39,8 @@ export default class resultSet extends Model {
 						allowNull: true
 				},
 				cache: {
-						type: DataTypes.TEXT,
-						allowNull: true
+						type      : DataTypes.TEXT,
+						allowNull : true
 				},
 				tourn: {
 						type: DataTypes.INTEGER,
@@ -69,18 +75,17 @@ export default class resultSet extends Model {
 						allowNull: false,
 						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
 				},
-				tag: {
-						type: DataTypes.ENUM('entry','student','chapter'),
-						allowNull: false,
-						defaultValue: "entry"
-				},
 				code: {
 						type: DataTypes.STRING(15),
 						allowNull: true
 				},
-				qualifier: {
-						type: DataTypes.INTEGER,
-						allowNull: true
+				nsda_category: {
+					type: DataTypes.INTEGER,
+					allowNull: true,
+					references: {
+							model: 'nsda_category',
+							key: 'id'
+					}
 				}
 		}, {
 				tableName: 'result_set',
