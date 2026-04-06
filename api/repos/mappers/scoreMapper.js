@@ -7,12 +7,12 @@ export const FIELD_MAP = {
 	tag: 'tag',
 	value: 'value',
 	content: 'onsite',
-	topic: 'tourn',
-	speech: 'chapter',
-	position: 'state',
-	ballotId: 'ballot',
-	studentId: 'student',
-	categoryId: 'cat_id',
+	topic: 'topic',
+	speech: 'speech',
+	position: 'position',
+	ballot: 'ballot',
+	student: 'student',
+	category: 'cat_id',
 	tiebreak: 'tiebreak',
 	settings: 'score_settings',
 	updatedAt: { db: 'timestamp', toDb: () => undefined },
@@ -22,7 +22,7 @@ export const FIELD_MAP = {
 export const toDomain = dbRow => {
 	if(!dbRow) return null;
 	const domain = genericToDomain(dbRow, FIELD_MAP);
-	if(dbRow.ballot_ballot) domain.ballot = ballotToDomain(dbRow.ballot_ballot);
+	if(dbRow.ballot_ballot) domain.Ballot = ballotToDomain(dbRow.ballot_ballot);
 	return domain;
 };
 export const toPersistence = domainObj => genericToPersistence(domainObj, FIELD_MAP);

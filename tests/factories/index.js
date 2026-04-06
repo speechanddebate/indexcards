@@ -10,6 +10,7 @@ import permission from './permission.js';
 import resultSet from './result_set.js';
 import room from './room.js';
 import round from './round.js';
+import score from './score.js';
 import section from './section.js';
 import session from './session.js';
 import site from './site.js';
@@ -32,6 +33,7 @@ const factories = {
 	resultSet,
 	room,
 	round,
+	score,
 	section,
 	session,
 	site,

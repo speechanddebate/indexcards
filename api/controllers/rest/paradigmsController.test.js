@@ -1,7 +1,8 @@
 import personRepo from '../../repos/personRepo.js';
 import { createContext } from '../../../tests/httpMocks.js';
 import paradigmsController from './paradigmsController';
-
+import * as judgeRecordsService from '../../services/results/judgeRecords.js';
+import { JudgeRecord } from '../../routes/openapi/schemas/Judge.js';
 afterEach(() => {
 	vi.restoreAllMocks();
 });
@@ -41,6 +42,43 @@ describe('paradigmsController', () => {
 			expect(paradigm.schools).toHaveLength(1);
 			expect(paradigm.schools[0].name).toBe('lt5Years');
 
+		});
+	});
+
+	describe('getJudgingRecord', () => {
+		it('maps results to JudgeRecord schema fields', async () => {
+			vi.spyOn(judgeRecordsService, 'judgeRecord').mockResolvedValue([
+				{
+					tournName: 'Tournament A',
+					roundDate: '2026-04-01T00:00:00.000Z',
+					roundLabel: 'R1',
+					eventAbbr: 'PF',
+					affTeam: 'AFF1',
+					affLabel: 'Aff',
+					negTeam: 'NEG1',
+					negLabel: 'Neg',
+					vote: 'Aff',
+					panelVote: 'Aff',
+					record: '1-0',
+					extraField: 'ignored',
+				},
+			]);
+
+			const { req, res } = createContext({
+				req: {
+					valid: {
+						params: { personId: 1 },
+					},
+				},
+			});
+
+			await paradigmsController.getJudgingRecord(req, res);
+
+			// Validate each element in the response array
+			for (const item of res.body) {
+				const parsed = JudgeRecord.safeParse(item);
+				expect(parsed.success).toBe(true);
+			}
 		});
 	});
 });

@@ -1,6 +1,7 @@
 import personRepo from '../../repos/personRepo.js';
 import { NotFound } from '../../helpers/problem.js';
 import config from '../../../config/config.js';
+import { judgeRecord } from '../../services/results/judgeRecords.js';
 
 async function getParadigms(req, res) {
 	//get the search query from the query params
@@ -56,7 +57,6 @@ async function getParadigms(req, res) {
 	res.json(results);
 };
 
-//NOTE, I also hate this and will fix it, I was just seeing if it would work well. it didn't. RCT
 async function getParadigmByPersonId(req, res) {
 	const { personId } = req.valid.params;
 
@@ -71,37 +71,6 @@ async function getParadigmByPersonId(req, res) {
 			},
 		},
 	};
-	const sectionRecordInclude = {
-		Section: {
-			required: true,
-			fields: ['id'],
-			include: {
-				Round: {
-					required: true,
-					publicPrimaryResults: true,
-					fields: ['id','name','label'],
-					include: {
-						Event: {
-							fields: ['id','abbr'],
-							settings: ['aff_label','neg_label'],
-						},
-					},
-				},
-				Ballots: {
-					fields: ['id', 'judgeId', 'side'],
-					include: {
-						Scores: {
-							winloss: true,
-							fields: ['id','tag','value'],
-						},
-						Entry: {
-							fields: ['id','code'],
-						},
-					},
-				},
-			},
-		},
-	};
 
 	const person = await personRepo.getPerson(personId, {
 		excludeBanned: true,
@@ -110,118 +79,17 @@ async function getParadigmByPersonId(req, res) {
 		settings: ['paradigm'],
 		include: {
 			...certInclude,
-			Judges: {
-				fields: ['id'],
-				include: {
-					Category: {
-						required: true,
-						fields: ['id'],
-						include: {
-							Tourn: {
-								required: true,
-								fields: ['id','name','start', 'hidden'],
-							},
-						},
-					},
-					Ballots : {
-						fields: ['id','side'],
-						winnerBallot: true,
-						include: {
-							...sectionRecordInclude,
-							Scores: {
-								winloss: true,
-								fields: ['id','tag','value'],
-							},
-						},
-					},
-				},
-			},
 		},
 	});
 	if (!person) {
 		return NotFound(req, res, 'Person not found or does not have a valid paradigm');
 	}
-	// Build record array: one element per ballot on each judge
-	const record = [];
 
-	for (const judge of person.Judges || []) {
-		for (const judgeBallot of judge.Ballots || []) {
-			// Skip non winner ballots
-
-			const section = judgeBallot.Section;
-			if (!section) continue;
-			let affLabel = section.Round?.Event?.settings?.aff_label || 'Aff';
-			let negLabel = section.Round?.Event?.settings?.neg_label || 'Neg';
-
-			let affTeam = null;
-			let negTeam = null;
-
-			let affWins = 0;
-			let negWins = 0;
-
-			let judgeVote = null;
-
-			for (const ballot of section.Ballots || []) {
-				const entryName = ballot.Entry?.code;
-				// Identify entries (will repeat, but safe)
-				if (ballot.side == 1 && !affTeam) {
-					affTeam = entryName;
-				}
-
-				if (ballot.side == 2 && !negTeam) {
-					negTeam = entryName;
-				}
-				const winScore = ballot.Scores?.find(
-					s => s.tag === 'winloss'
-				);
-
-				// Count panel votes
-				if (winScore?.value === 1) {
-					if (ballot.side == 1) affWins++;
-					if (ballot.side == 2) negWins++;
-				}
-
-				// Detect THIS judge's vote
-				if (
-					ballot.judgeId === judge.id &&
-					winScore?.value === 1
-				) {
-					judgeVote = ballot.side == 1 ? affLabel : negLabel;
-				}
-			}
-
-			// Determine panel majority winner
-			let panelVote = null;
-
-			if (affWins > negWins) panelVote = affLabel;
-			else if (negWins > affWins) panelVote = negLabel;
-			else panelVote = 'Tie'; // optional handling
-
-			let roundLabel = section?.Round?.label;
-			if (!roundLabel && section?.Round?.name) {
-				roundLabel = `R${section.Round.name}`;
-			}
-			record.push({
-				tournName: judge.Category?.Tourn?.name || 'Unknown Tournament',
-				roundDate: judge.Category?.Tourn?.start || null,
-				roundLabel,
-				eventAbbr: section?.Round?.Event?.abbr || null,
-				affTeam,
-				affLabel,
-				negTeam,
-				negLabel,
-				vote: judgeVote,   // this judge's vote
-				panelVote,         // overall result
-				record: `${affWins}-${negWins}`, // optional
-			});
-		}
-	}
 	res.json({
 		id: person.id,
 		name: [person.firstName, person.middleName, person.lastName].filter(Boolean).join(' '),
 		lastReviewed: person.settingsTimestamps['paradigm']?.updatedAt || null,
 		paradigm: person.settings['paradigm'] || null,
-		record,
 		certifications: person.PersonQuizzes?.map(pq => ({
 			title: pq.Quiz?.label,
 			description: pq.Quiz?.description,
@@ -235,8 +103,33 @@ async function getParadigmByPersonId(req, res) {
 		})),
 	});
 };
+/**
+ *  Get a judges public debate judging record to display on the paradigm details page
+ */
+async function getJudgingRecord(req, res) {
+	const { personId } = req.valid.params;
+
+	const record = await judgeRecord(personId);
+
+	const response = record.map(r => ({
+		tournName: r.tournName ?? '',
+		roundDate: r.roundDate ?? '',
+		roundLabel: r.roundLabel ?? '',
+		eventAbbr: r.eventAbbr ?? '',
+		affTeam: r.affTeam,
+		affLabel: r.affLabel ?? '',
+		negTeam: r.negTeam,
+		negLabel: r.negLabel ?? '',
+		vote: r.vote ?? '',
+		panelVote: r.panelVote ?? '',
+		record: r.record ?? '',
+	}));
+
+	res.json(response);
+}
 
 export default {
 	getParadigms,
 	getParadigmByPersonId,
+	getJudgingRecord,
 };

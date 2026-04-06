@@ -37,19 +37,15 @@ const prettyConsoleFormat = winston.format.combine(
 );
 
 const createLokiTransport = (extraLabels = {}) => {
-	const t = new LokiTransport({
+	return new LokiTransport({
 		host: config.loki.host,
 		json: true,
 		labels: {
 			...Labels(extraLabels),
 		},
 		format: winston.format.json(),
-		onConnectionError: (err) => logger.error(err),
+		onConnectionError: (err) => logger.error('Loki connection error', err),
 	});
-
-	t.on('error', (err) => console.error('[Loki error]', err));
-	t.on('warn', (msg) => console.warn('[Loki warn]', msg));
-	return t;
 };
 
 const createFileTransport =() => {

@@ -3950,6 +3950,59 @@
         }
       }
     },
+    "/rest/paradigms/{personId}/record": {
+      "get": {
+        "summary": "Get judging record by person ID",
+        "operationId": "restJudgingRecord",
+        "tags": [
+          "Paradigms",
+          "Orval"
+        ],
+        "description": "GET /rest/paradigms/{personId}/record is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "personId",
+            "schema": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "ID of the person to get paradigm details for"
+            },
+            "required": true,
+            "description": "ID of the person to get paradigm details for"
+          },
+          {
+            "name": "personId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Judging record for the specified person ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JudgeRecord"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
     "/user/push/find": {
       "get": {
         "tags": [
@@ -4889,57 +4942,6 @@
         "type": "object",
         "properties": {}
       },
-      "JudgeRecord": {
-        "type": "object",
-        "properties": {
-          "tournName": {
-            "type": "string",
-            "description": "Tournament name"
-          },
-          "roundDate": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Date of the round"
-          },
-          "roundLabel": {
-            "type": "string",
-            "description": "Label for the round (e.g., R2)"
-          },
-          "eventAbbr": {
-            "type": "string",
-            "description": "Event abbreviation (e.g., PF)"
-          },
-          "affTeam": {
-            "type": "string",
-            "description": "Affirmative team name"
-          },
-          "affLabel": {
-            "type": "string",
-            "description": "Affirmative label (e.g., Pro)"
-          },
-          "negTeam": {
-            "type": "string",
-            "description": "Negative team name"
-          },
-          "negLabel": {
-            "type": "string",
-            "description": "Negative label (e.g., Con)"
-          },
-          "vote": {
-            "type": "string",
-            "description": "This judge's vote (e.g., Con)"
-          },
-          "panelVote": {
-            "type": "string",
-            "description": "Panel majority vote (e.g., Con)"
-          },
-          "record": {
-            "type": "string",
-            "description": "Win-loss record for the round (e.g., 0-1)"
-          }
-        },
-        "additionalProperties": false
-      },
       "NSDACategory": {
         "type": "object",
         "required": [
@@ -4981,7 +4983,6 @@
           "name",
           "lastReviewed",
           "paradigm",
-          "record",
           "certifications"
         ],
         "additionalProperties": false,
@@ -5001,12 +5002,6 @@
           "paradigm": {
             "type": "string",
             "description": "Paradigm content"
-          },
-          "record": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/JudgeRecord"
-            }
           },
           "certifications": {
             "type": "array",
@@ -5054,21 +5049,6 @@
           "name": "Kilgore Trout",
           "lastReviewed": "1979-01-01T12:34:56Z",
           "paradigm": "I will vote for anything involving aliens.",
-          "record": [
-            {
-              "tournName": "National Speech and Debate Tournament",
-              "roundDate": "2018-06-19T22:00:00.000Z",
-              "roundLabel": "R1",
-              "eventAbbr": "PF",
-              "affTeam": "Washington PV",
-              "affLabel": "Pro",
-              "negTeam": "Denver VX",
-              "negLabel": "Con",
-              "vote": "Con",
-              "panelVote": "Con",
-              "record": "0-1"
-            }
-          ],
           "certifications": [
             {
               "title": "Alien Case Certification",
@@ -6200,6 +6180,71 @@
           "id"
         ],
         "additionalProperties": false
+      },
+      "JudgeRecord": {
+        "type": "object",
+        "properties": {
+          "tournName": {
+            "type": "string",
+            "description": "Tournament name"
+          },
+          "roundDate": {
+            "type": "string",
+            "description": "Date of the round",
+            "format": "date-time"
+          },
+          "roundLabel": {
+            "type": "string",
+            "description": "Label for the round (e.g., R2)"
+          },
+          "eventAbbr": {
+            "type": "string",
+            "description": "Event abbreviation (e.g., PF)"
+          },
+          "affTeam": {
+            "type": "string",
+            "description": "Affirmative team name"
+          },
+          "affLabel": {
+            "type": "string",
+            "description": "Affirmative label (e.g., Pro)"
+          },
+          "negTeam": {
+            "type": "string",
+            "description": "Negative team name"
+          },
+          "negLabel": {
+            "type": "string",
+            "description": "Negative label (e.g., Con)"
+          },
+          "vote": {
+            "type": "string",
+            "description": "This judge's vote (e.g., Con)"
+          },
+          "panelVote": {
+            "type": "string",
+            "description": "Panel majority vote (e.g., Con)"
+          },
+          "record": {
+            "type": "string",
+            "description": "Win-loss record for the round (e.g., 0-1)"
+          }
+        },
+        "required": [
+          "tournName",
+          "roundDate",
+          "roundLabel",
+          "eventAbbr",
+          "affTeam",
+          "affLabel",
+          "negTeam",
+          "negLabel",
+          "vote",
+          "panelVote",
+          "record"
+        ],
+        "additionalProperties": false,
+        "description": "A record of a judge's decision. used in paradigm details"
       },
       "LoginResponse": {
         "type": "object",

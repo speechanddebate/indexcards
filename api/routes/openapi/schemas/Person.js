@@ -79,19 +79,13 @@ export const Session = {
 
 export const ParadigmDetails = {
 	type: 'object',
-	required: ['id', 'name', 'lastReviewed', 'paradigm', 'record', 'certifications'],
+	required: ['id', 'name', 'lastReviewed', 'paradigm', 'certifications'],
 	additionalProperties: false,
 	properties: {
 		id: { type: 'integer' },
 		name: { type: 'string', description: 'Full name' },
 		lastReviewed: { type: 'string', format: 'date-time', description: 'Last reviewed timestamp' },
 		paradigm: { type: 'string', description: 'Paradigm content' },
-		record: {
-			type: 'array',
-			items: {
-				$ref: '#/components/schemas/JudgeRecord',
-			},
-		},
 		certifications: {
 			type: 'array',
 			items: {
@@ -120,21 +114,6 @@ export const ParadigmDetails = {
 		name: 'Kilgore Trout',
 		lastReviewed: '1979-01-01T12:34:56Z',
 		paradigm: 'I will vote for anything involving aliens.',
-		record: [
-			{
-				tournName: 'National Speech and Debate Tournament',
-				roundDate: '2018-06-19T22:00:00.000Z',
-				roundLabel: 'R1',
-				eventAbbr: 'PF',
-				affTeam: 'Washington PV',
-				affLabel: 'Pro',
-				negTeam: 'Denver VX',
-				negLabel: 'Con',
-				vote: 'Con',
-				panelVote: 'Con',
-				record: '0-1',
-			},
-		],
 		certifications: [
 			{
 				title: 'Alien Case Certification',
