@@ -79,7 +79,7 @@ router.route('/:personId').get(ValidateRequest, controller.getParadigmByPersonId
 router.route('/:personId/record').get(ValidateRequest, controller.getJudgingRecord).openapi = {
 	path: '/rest/paradigms/{personId}/record',
 	summary: 'Get judging record by person ID',
-	operationId: 'restJudgingRecord',
+	operationId: 'restParadigmsRecord',
 	tags: ['Paradigms', 'Orval'],
 	requestParams: {
 		path: z.object({

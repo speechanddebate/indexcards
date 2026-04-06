@@ -22,9 +22,16 @@ export async function getCircuit(req, res) {
 }
 
 export async function activeCircuits(req, res) {
-	const { state, country } = req.query;
+	const { state, country, limit, offset } = req.valid.query;
 	const { start, end } = schoolYearDateRange();
-	const circuits = await circuitRepo.getActiveCircuits({ startDate: start, endDate: end, state, country });
+	const circuits = await circuitRepo.getActiveCircuits({
+		startDate: start,
+		endDate: end,
+		state,
+		country,
+		limit,
+		offset,
+	});
 
 	return res.json(circuits.map(toPublicCircuit));
 }

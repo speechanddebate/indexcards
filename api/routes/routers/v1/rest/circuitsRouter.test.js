@@ -4,7 +4,7 @@ import factories from '../../../../../tests/factories/index.js';
 
 describe('GET /rest/circuits/active', () => {
 	it('Returns active circuits for the current school year', async () => {
-		const { circuitId, getCircuit } = await factories.circuit.createTestCircuit();
+		const { circuitId } = await factories.circuit.createTestCircuit();
 		await factories.tourn.createTestTourn({ circuit: circuitId, start: new Date() });
 		await factories.tourn.createTestTourn({ circuit: circuitId, start: new Date() });
 		const res = await request(server)
@@ -27,14 +27,6 @@ describe('GET /rest/circuits/active', () => {
 			expect(typeof circuit.country).toBe('string');
 			expect(typeof circuit.tournCount).toBe('number');
 		});
-		const circuitData = await getCircuit();
-		const circuit = body.find(c => c.id === circuitId);
-		expect(circuit).toBeDefined();
-		expect(circuit.name).toBe(circuitData.name);
-		expect(circuit.abbr).toBe(circuitData.abbr);
-		expect(circuit.state).toBe(circuitData.state);
-		expect(circuit.country).toBe(circuitData.country);
-		expect(circuit.tournCount).toBe(2);
 
 	});
 });

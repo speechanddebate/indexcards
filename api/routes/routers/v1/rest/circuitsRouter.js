@@ -5,28 +5,24 @@ import { ValidateRequest } from '../../../../middleware/validation.js';
 import z from 'zod';
 
 const router = Router();
-router.route('/active').get(c.activeCircuits).openapi = {
+router.route('/active').get(ValidateRequest,c.activeCircuits).openapi = {
 	path: '/rest/circuits/active',
 	summary: 'get active circuits',
 	description: 'gets the active circuits for the current school year',
 	operationId: 'restCircuitsActive',
 	tags: ['Circuits', 'Orval'],
-	parameters: [
-		{
-			name: 'state',
-			in: 'query',
-			required: false,
-			schema: { type: 'string', maxLength: 2 },
-			description: '2-character state code to filter circuits',
-		},
-		{
-			name: 'country',
-			in: 'query',
-			required: false,
-			schema: { type: 'string', maxLength: 2 },
-			description: '2-character country code to filter circuits',
-		},
-	],
+	requestParams: {
+		query: z.object({
+			state: z.string().max(2).optional().meta({ description: '2-character state code to filter circuits' }),
+			country: z.string().max(2).optional().meta({ description: '2-character country code to filter circuits' }),
+			limit: z.coerce.number().min(1).max(100).default(50).meta({
+				description: 'Maximum number of circuits to return',
+			}),
+			offset: z.coerce.number().min(0).default(0).meta({
+				description: 'Number of circuits to skip before starting to return results',
+			}),
+		}),
+	},
 	responses: {
 		200: {
 			description: 'Active circuits',
