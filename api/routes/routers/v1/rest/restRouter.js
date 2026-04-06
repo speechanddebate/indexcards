@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import adsRouter from './adsRouter.js';
+import adsRouter from './adsRouter.ts';
 import circuitsRouter from './circuitsRouter.js';
 import pageRouter from './pageRouter.js';
 import tournsRouter from './tournsRouter.js';
