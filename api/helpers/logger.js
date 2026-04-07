@@ -1,9 +1,50 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import os from 'os';
 import winston from 'winston';
 import LokiTransport from 'winston-loki';
 import config from '../../config/config.js';
 
 const logPath = config.LOG_PATH || '/tmp';
+const requestContext = new AsyncLocalStorage();
+
+function getRequestId() {
+	return requestContext.getStore()?.requestId ?? null;
+}
+
+function attachRequestContext(info) {
+	const requestId = getRequestId();
+
+	if (requestId && info.requestId == null) {
+		info.requestId = requestId;
+	}
+
+	return info;
+}
+
+export function getCallerFrame(options = {}) {
+	const {
+		skipContains = [],
+		preferContains = '/api/',
+	} = options;
+
+	const stackHolder = {};
+	Error.captureStackTrace(stackHolder, getCallerFrame);
+
+	const frames = String(stackHolder.stack || '')
+		.split('\n')
+		.slice(1)
+		.map((line) => line.trim())
+		.filter(Boolean)
+		.filter((line) => !line.includes('node:internal'))
+		.filter((line) => !line.includes('/node_modules/'))
+		.filter((line) => !line.includes('/api/helpers/logger.js'))
+		.filter((line) => skipContains.every((token) => !line.includes(token)));
+
+	const preferred = frames.find((line) => line.includes(preferContains));
+	return preferred ?? frames[0] ?? 'unknown';
+}
+
+const requestContextFormat = winston.format((info) => attachRequestContext(info));
 
 function Labels(props = {}) {
 	return {
@@ -24,8 +65,9 @@ const prettyConsoleFormat = winston.format.combine(
 		let { timestamp, level, message, ...rest } = info;
 		//special format for console request logger
 		if( message === 'Request handled') {
-			const {method, statusCode, url, responseTime} = rest;
-			return `${timestamp} ${level} ${method} ${statusCode} ${url} ${responseTime}`;
+			const {method, statusCode, url, responseTime, requestId} = rest;
+			const requestIdSection = requestId ? ` ${requestId}` : '';
+			return `${timestamp} ${level}${requestIdSection} ${method} ${statusCode} ${url} ${responseTime}`;
 		}
 		const msg = typeof message === 'string' ? message : JSON.stringify(message);
 		// include other metadata after the message
@@ -68,7 +110,10 @@ const createConsoleTransport = () => {
 
 const logger = winston.createLogger({
 	level: config.LOG_LEVEL,
-	format: winston.format.json(),
+	format: winston.format.combine(
+		requestContextFormat(),
+		winston.format.json(),
+	),
 	exitOnError: false,
 	silent: process.env.NODE_ENV === 'test',
 	transports: [
@@ -95,7 +140,10 @@ export function setupLoggers(){
 
 const requestLogger = winston.createLogger({
 	level: config.LOG_LEVEL,
-	format: winston.format.json(),
+	format: winston.format.combine(
+		requestContextFormat(),
+		winston.format.json(),
+	),
 	exitOnError: false,
 	silent: process.env.NODE_ENV === 'test',
 	transports: [
@@ -104,8 +152,9 @@ const requestLogger = winston.createLogger({
 	],
 });
 
-export const setupRequestLogging = (req, res, next) => {
+export const setupRequest = (req, res, next) => {
 	req.recieved = Date.now();
+
 	res.on('finish', () => {
 		const duration = Date.now() - req.recieved;
 
@@ -114,10 +163,10 @@ export const setupRequestLogging = (req, res, next) => {
 			url: req.originalUrl ?? '',
 			statusCode: `${res.statusCode ?? ''}`,
 			responseTime: `${duration}ms`,
-			requestId: req.uuid,
 		});
 	});
-	next();
+
+	return requestContext.run({ requestId: req.uuid ?? null }, next);
 };
 
 export default logger;

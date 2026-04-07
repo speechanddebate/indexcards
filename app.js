@@ -16,7 +16,7 @@ import {
 } from './api/helpers/auth.js';
 
 import db from './api/data/db.js';
-import logger, { setupLoggers, setupRequestLogging } from './api/helpers/logger.js';
+import logger, { setupRequest, setupLoggers } from './api/helpers/logger.js';
 import { Forbidden, Unauthorized } from './api/helpers/problem.js';
 
 setupLoggers();
@@ -44,6 +44,8 @@ app.use((req, res, next) => {
 	req.db     = db;
 	return next();
 });
+
+app.use(setupRequest);
 
 app.get('/v1/ip', (request, response) => response.send(request.ip));
 
@@ -86,8 +88,6 @@ if (process.env.NODE_ENV !== 'test'
 
 app.use(csrfMiddleware);
 
-// Log all requests
-app.use(setupRequestLogging);
 app.use('/v1',v1Router);
 
 app.use('/v1/local', async (req, res, next) => {

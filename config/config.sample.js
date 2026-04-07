@@ -35,6 +35,7 @@ export const config = {
 	},
 	DB_PORT               : '3306',
 	DB_DATABASE           : 'tabroom',
+	SLOW_QUERY_MS         : 1000,
 	NSDA 				  : {
 		USER_ID  : '12345678',
 		KEY      : 'IAmNotAPassword',
