@@ -12,8 +12,8 @@ async function getParadigms(req, res) {
 		excludeUnconfirmedEmail: true,
 		hasValidParadigm: true,
 		hasJudged: true,
-		limit: limit ?? 50,
-		offset: offset ?? 0,
+		limit: limit,
+		offset: offset,
 		include: {
 			Judges: {
 				fields: ['id','createdAt'],
@@ -93,14 +93,14 @@ async function getParadigmByPersonId(req, res) {
 		certifications: person.PersonQuizzes?.map(pq => ({
 			title: pq.Quiz?.label,
 			description: pq.Quiz?.description,
-			updatedAt: pq.updatedAt,
+			updatedAt: pq.updatedAt?.toISOString() || null,
 			badge: {
 				altText: pq.Quiz?.badgeDescription || null,
 				imageUrl: (pq.Quiz?.id && pq.Quiz?.badge) ? `${config.S3_URL}/badges/${pq.Quiz.id}/${pq.Quiz.badge}`
 					: null,
 				link: pq.Quiz?.badgeLink || null,
 			},
-		})),
+		})) ?? [],
 	});
 };
 /**
@@ -111,19 +111,9 @@ async function getJudgingRecord(req, res) {
 
 	const record = await judgeRecord(personId);
 
-	const response = record.map(r => ({
-		tournName: r.tournName ?? '',
-		roundDate: r.roundDate ?? '',
-		roundLabel: r.roundLabel ?? '',
-		eventAbbr: r.eventAbbr ?? '',
-		affTeam: r.affTeam,
-		affLabel: r.affLabel ?? '',
-		negTeam: r.negTeam,
-		negLabel: r.negLabel ?? '',
-		vote: r.vote ?? '',
-		panelVote: r.panelVote ?? '',
-		record: r.record ?? '',
-	}));
+	const response = record.map(r =>
+		Object.fromEntries(Object.entries(r).map(([k, v]) => [k, v ?? '']))
+	);
 
 	res.json(response);
 }

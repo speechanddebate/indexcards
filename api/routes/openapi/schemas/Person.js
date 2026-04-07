@@ -1,3 +1,6 @@
+import z from 'zod';
+import * as utils from './utils.js';
+
 export const Person = {
 	type : 'object',
 	description: 'A person (user) in tabroom',
@@ -77,54 +80,27 @@ export const Session = {
 	},
 };
 
-export const ParadigmDetails = {
-	type: 'object',
-	required: ['id', 'name', 'lastReviewed', 'paradigm', 'certifications'],
-	additionalProperties: false,
-	properties: {
-		id: { type: 'integer' },
-		name: { type: 'string', description: 'Full name' },
-		lastReviewed: { type: 'string', format: 'date-time', description: 'Last reviewed timestamp' },
-		paradigm: { type: 'string', description: 'Paradigm content' },
-		certifications: {
-			type: 'array',
-			items: {
-				type: 'object',
-				required: ['title', 'description'],
-				additionalProperties: false,
-				properties: {
-					title: { type: 'string' },
-					description: { type: 'string'},
-					updatedAt: { type: 'string', format: 'date-time' },
-					badge: {
-						type: 'object',
-						properties: {
-							altText: { type: 'string' },
-							link: { type: 'string', format: 'uri' },
-							imageUrl: { type: 'string', format: 'uri' },
-						},
-						additionalProperties: false,
-					},
-				},
-			},
-		},
-	},
-	example: {
-		id: 123,
-		name: 'Kilgore Trout',
-		lastReviewed: '1979-01-01T12:34:56Z',
-		paradigm: 'I will vote for anything involving aliens.',
-		certifications: [
-			{
-				title: 'Alien Case Certification',
-				description: 'Certified in understanding alien based cases.',
-				updatedAt: '2023-12-01T10:00:00Z',
-				badge: {
-					altText: 'Alien Case Badge',
-					link: 'https://example.com/badges/alien-case',
-					imageUrl: 'https://example.com/images/alien-case-badge.png',
-				},
-			},
-		],
-	},
-};
+export const ParadigmDetails = z.object({
+	id: utils.id.meta({
+		description: 'The id of the person associated with the paradigm',
+	}),
+	name: z.string().nullable().meta({
+		description: 'The name of the person associated with the paradigm',
+	}),
+	lastReviewed: z.iso.datetime().nullable().meta({
+		description: 'The last reviewed timestamp of the paradigm',
+	}),
+	paradigm: z.string().nullable().meta({
+		description: 'The content of the paradigm',
+	}),
+	certifications: z.array(z.object({
+		title: z.string().meta({ description: 'The title of the certification' }),
+		description: z.string().meta({ description: 'The description of the certification' }),
+		updatedAt: z.iso.datetime().meta({ description: 'The last updated timestamp of the certification' }),
+		badge: z.object({
+			altText: z.string().nullable().meta({ description: 'The alt text for the badge image' }),
+			link: z.url().nullable().meta({ description: 'The link to the badge' }),
+			imageUrl: z.url().nullable().meta({ description: 'The URL of the badge image' }),
+		}).optional().meta({ description: 'The badge associated with the certification' }),
+	})).meta({ description: 'The list of certifications associated with the paradigm' }),
+});

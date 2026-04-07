@@ -4999,93 +4999,6 @@
           }
         }
       },
-      "ParadigmDetails": {
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "lastReviewed",
-          "paradigm",
-          "certifications"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "name": {
-            "type": "string",
-            "description": "Full name"
-          },
-          "lastReviewed": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Last reviewed timestamp"
-          },
-          "paradigm": {
-            "type": "string",
-            "description": "Paradigm content"
-          },
-          "certifications": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "title",
-                "description"
-              ],
-              "additionalProperties": false,
-              "properties": {
-                "title": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "badge": {
-                  "type": "object",
-                  "properties": {
-                    "altText": {
-                      "type": "string"
-                    },
-                    "link": {
-                      "type": "string",
-                      "format": "uri"
-                    },
-                    "imageUrl": {
-                      "type": "string",
-                      "format": "uri"
-                    }
-                  },
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        },
-        "example": {
-          "id": 123,
-          "name": "Kilgore Trout",
-          "lastReviewed": "1979-01-01T12:34:56Z",
-          "paradigm": "I will vote for anything involving aliens.",
-          "certifications": [
-            {
-              "title": "Alien Case Certification",
-              "description": "Certified in understanding alien based cases.",
-              "updatedAt": "2023-12-01T10:00:00Z",
-              "badge": {
-                "altText": "Alien Case Badge",
-                "link": "https://example.com/badges/alien-case",
-                "imageUrl": "https://example.com/images/alien-case-badge.png"
-              }
-            }
-          ]
-        }
-      },
       "Person": {
         "type": "object",
         "description": "A person (user) in tabroom",
@@ -6300,6 +6213,136 @@
         ],
         "additionalProperties": false,
         "description": "A response for a login request"
+      },
+      "ParadigmDetails": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The id of the person associated with the paradigm"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the person associated with the paradigm"
+          },
+          "lastReviewed": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The last reviewed timestamp of the paradigm"
+          },
+          "paradigm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The content of the paradigm"
+          },
+          "certifications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "The title of the certification"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "The description of the certification"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                  "description": "The last updated timestamp of the certification"
+                },
+                "badge": {
+                  "description": "The badge associated with the certification",
+                  "type": "object",
+                  "properties": {
+                    "altText": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The alt text for the badge image"
+                    },
+                    "link": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The link to the badge"
+                    },
+                    "imageUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The URL of the badge image"
+                    }
+                  },
+                  "required": [
+                    "altText",
+                    "link",
+                    "imageUrl"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "title",
+                "description",
+                "updatedAt"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The list of certifications associated with the paradigm"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "lastReviewed",
+          "paradigm",
+          "certifications"
+        ],
+        "additionalProperties": false
       }
     },
     "responses": {

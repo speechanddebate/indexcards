@@ -1,6 +1,7 @@
 import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories/index.js';
+import { activeCircuitsResponse, restCircuit } from '../../../openapi/schemas/Circuit.js';
 
 describe('GET /rest/circuits/active', () => {
 	it('Returns active circuits for the current school year', async () => {
@@ -14,19 +15,20 @@ describe('GET /rest/circuits/active', () => {
             .expect(200);
 
 		const body = res.body;
-
-		expect(Array.isArray(body)).toBe(true);
-		expect(typeof body[0]).toBe('object');
-
-		// Property test: every circuit must have required properties
-		body.forEach((circuit) => {
-			expect(typeof circuit.id).toBe('number');
-			expect(typeof circuit.abbr).toBe('string');
-			expect(typeof circuit.name).toBe('string');
-			expect(typeof circuit.state).toBe('string');
-			expect(typeof circuit.country).toBe('string');
-			expect(typeof circuit.tournCount).toBe('number');
-		});
-
+		expect(body).toMatchSchema(activeCircuitsResponse);
 	});
 });
+describe('GET /rest/circuits/:circuitId', () => {
+	it('Returns a specific circuit by ID', async () => {
+		const { circuitId } = await factories.circuit.createTestCircuit();
+		const res = await request(server)
+            .get(`/v1/rest/circuits/${circuitId}`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200);
+
+		const body = res.body;
+		expect(body).toMatchSchema(restCircuit);
+	});
+});
+

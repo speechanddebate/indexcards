@@ -92,3 +92,22 @@ expect.extend({
 		};
 	},
 });
+/**
+ * validate an object against a provided zod schema and if fails, report the issues
+ */
+expect.extend({
+	toMatchSchema(received, schema) {
+		const parsed = schema.safeParse(received);
+		const pass = parsed.success;
+		return {
+			pass,
+			message: () => {
+				if (pass) {
+					return 'expected object not to match schema';
+				}
+				return `expected object to match schema, but validation failed:\n${JSON.stringify(parsed.error.format(), null, 2)}`;
+
+			},
+		};
+	},
+});

@@ -4,6 +4,7 @@ import { requireLogin } from '../../../../middleware/authorization/authorization
 import { ValidateRequest } from '../../../../middleware/validation.js';
 import { JudgeRecord } from '../../../openapi/schemas/Judge.js';
 import { Router } from 'express';
+import { ParadigmDetails } from '../../../openapi/schemas/Person.js';
 
 const router = Router();
 
@@ -68,7 +69,7 @@ router.route('/:personId').get(ValidateRequest, controller.getParadigmByPersonId
 			description: 'Paradigm details for the specified person ID',
 			content: {
 				'application/json': {
-					schema: {'$ref': '#/components/schemas/ParadigmDetails'},
+					schema: ParadigmDetails,
 				},
 			},
 		},

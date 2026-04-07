@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as c from '../../../../controllers/rest/circuitsController.js';
-import { restCircuit } from '../../../openapi/schemas/Circuit.js';
+import { restCircuit, activeCircuitsResponse } from '../../../openapi/schemas/Circuit.js';
 import { ValidateRequest } from '../../../../middleware/validation.js';
 import z from 'zod';
 
@@ -28,20 +28,7 @@ router.route('/active').get(ValidateRequest,c.activeCircuits).openapi = {
 			description: 'Active circuits',
 			content: {
 				'application/json': {
-					schema: {
-						type: 'array',
-						items: {
-							type: 'object',
-							properties: {
-								id: { type: 'integer' },
-								abbr: { type: 'string' },
-								name: { type: 'string' },
-								state: { type: 'string' },
-								country: { type: 'string' },
-								tournCount: { type: 'integer' },
-							},
-						},
-					},
+					schema: activeCircuitsResponse,
 				},
 			},
 		},

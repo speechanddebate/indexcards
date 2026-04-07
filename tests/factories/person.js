@@ -31,6 +31,20 @@ export async function createTestPerson(overrides = {}) {
 	};
 }
 
+async function createPersonQuiz(overrides = {}) {
+	return {
+		Quiz: {
+			label: faker.lorem.words(3),
+			description: faker.lorem.sentence(),
+			badgeDescription: faker.lorem.sentence(),
+			badge: faker.lorem.word(),
+			badgeLink: faker.internet.url(),
+		},
+		updatedAt: faker.date.past(),
+		...overrides,
+	};
+};
+
 export async function createJudge(overrides = {}) {
 	const data = createPersonData({
 		...overrides,
@@ -48,5 +62,6 @@ export async function createJudge(overrides = {}) {
 export default {
 	createTestPerson,
 	createPersonData,
+	createPersonQuiz,
 	createJudge,
 };
