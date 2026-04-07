@@ -3722,6 +3722,16 @@
         ],
         "parameters": [
           {
+            "in": "path",
+            "name": "tournId",
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "required": true
+          },
+          {
             "$ref": "#/components/parameters/tournId"
           }
         ],
@@ -4937,58 +4947,6 @@
         }
       },
       "EventInvite": {},
-      "File": {
-        "type": "object",
-        "description": "A file",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "description": "The unique identifier for the file",
-            "readOnly": true,
-            "example": 123
-          },
-          "tag": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "label": {
-            "type": "string",
-            "nullable": true
-          },
-          "filename": {
-            "type": "string",
-            "maxLength": 255,
-            "description": "The filename of the file",
-            "example": "example.pdf"
-          },
-          "published": {
-            "type": "boolean",
-            "description": "Whether the file is published or not",
-            "example": true
-          },
-          "pageOrder": {
-            "type": "integer",
-            "format": "int16",
-            "nullable": true
-          },
-          "uploaded": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When the file was last modified",
-            "readOnly": true,
-            "example": "2023-10-26T15:51:32.000Z"
-          }
-        }
-      },
       "Invite": {
         "type": "object",
         "properties": {
@@ -6151,6 +6109,102 @@
         },
         "required": [
           "id"
+        ],
+        "additionalProperties": false
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The unique identifier for the file"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "pageOrder": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uploaded": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "tag",
+          "type",
+          "label",
+          "filename",
+          "published",
+          "pageOrder",
+          "uploaded",
+          "updatedAt"
         ],
         "additionalProperties": false
       },

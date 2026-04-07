@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import z from 'zod';
+
 import { ValidateRequest } from '../../../../middleware/validation.js';
 import * as controller from '../../../../controllers/rest/tournsController.js';
 import { requirePublicTourn } from '../../../../policy/tournPolicy.js';
@@ -8,6 +9,8 @@ import resultRouter from './resultRouter.js';
 import eventRouter from './eventRouter.js';
 import entryRouter from './entryRouter.js';
 
+import { File } from '../../../openapi/schemas/index.js';
+import * as utils from '../../../openapi/schemas/utils.js';
 const router = Router({ mergeParams: true });
 
 router.route('/').get(ValidateRequest,controller.getTourns).openapi = {
@@ -106,22 +109,20 @@ router.route('/:tournId/invite').get(controller.getTournInvite).openapi = {
 	},
 };
 
-router.route('/:tournId/files').get(controller.getPublishedFiles).openapi = {
+router.route('/:tournId/files').get(ValidateRequest, controller.getPublishedFiles).openapi = {
 	path: '/rest/tourns/{tournId}/files',
 	summary: 'Get Tournament Files',
 	description: 'Retrieve a list of published files associated with a specific tournament.',
 	tags: ['Tournaments'],
+	requestParams: {
+		path: z.object({tournId: utils.id }),
+	},
 	responses: {
 		200: {
 			description: 'List of tournament files',
 			content: {
 				'application/json': {
-					schema: {
-						type: 'array',
-						items: {
-							$ref: '#/components/schemas/File',
-						},
-					},
+					schema: z.array(File),
 				},
 			},
 		},

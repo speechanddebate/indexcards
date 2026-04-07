@@ -1,6 +1,8 @@
 import db from '../data/db.js';
 import logger from './logger.js';
-
+/**
+ * Dead code
+ */
 export const tabAuth = async (req) => {
 
 	if (!req.person || !req.person.id) {
