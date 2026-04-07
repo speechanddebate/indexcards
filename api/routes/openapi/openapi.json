@@ -2891,24 +2891,61 @@
                     "type": "object",
                     "properties": {
                       "id": {
-                        "type": "integer"
-                      },
-                      "abbr": {
-                        "type": "string"
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991,
+                        "description": "The unique identifier of the circuit"
                       },
                       "name": {
-                        "type": "string"
+                        "type": "string",
+                        "maxLength": 63,
+                        "description": "The name of the circuit"
+                      },
+                      "abbr": {
+                        "type": "string",
+                        "maxLength": 15,
+                        "description": "The abbreviation of the circuit"
                       },
                       "state": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Z]{2}$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "description": "The state of the circuit"
                       },
                       "country": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Z]{2}$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "description": "The country of the circuit"
                       },
                       "tournCount": {
-                        "type": "integer"
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991,
+                        "description": "The number of tournaments in the circuit"
                       }
-                    }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "abbr",
+                      "state",
+                      "country",
+                      "tournCount"
+                    ],
+                    "additionalProperties": false
                   }
                 }
               }
