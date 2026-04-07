@@ -12,13 +12,9 @@ function buildBallotQuery(opts = {}){
 		attributes: resolveAttributesFromFields(opts.fields,FIELD_MAP),
 		include: [],
 	};
-	if(opts.winnerBallot){
-
-		//only ballots with a score.tag = 'winloss' and score.value = ballot.side should be included
-	}
-	if(opts.include?.judge) {
+	if(opts.include?.Judge) {
 		query.include.push({
-			...judgeInclude(opts.include.judge),
+			...judgeInclude(opts.include.Judge),
 			as: 'judge_judge',
 			required: false,
 		});
@@ -45,7 +41,6 @@ function buildBallotQuery(opts = {}){
 		});
 	}
 	if (opts.winnerBallot) {
-
 		const existing = query.include.find(i => i.as === 'ballot_scores');
 
 		if (existing) {

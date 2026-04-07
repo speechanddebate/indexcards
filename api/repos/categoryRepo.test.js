@@ -26,14 +26,14 @@ describe('getCategory', () => {
 	it('throws an error when id is not provided', async () => {
 		await expect(categoryRepo.getCategory()).rejects.toThrow();
 	});
-	it('attaches judges when include.judges is true', async () => {
+	it('attaches Judges when include.Judges is true', async () => {
 		const categoryData = factories.category.createCategoryData();
 		const resultId = await categoryRepo.createCategory(categoryData);
 		expect(resultId).toBeDefined();
-		const result = await categoryRepo.getCategory(resultId, { include: { judges: true } });
+		const result = await categoryRepo.getCategory(resultId, { include: { Judges: true } });
 		expect(result).not.toBeNull();
-		expect(result.judges).toBeDefined();
-		expect(Array.isArray(result.judges)).toBe(true);
+		expect(result.Judges).toBeDefined();
+		expect(Array.isArray(result.Judges)).toBe(true);
 	});
 });
 describe('getCategories', () => {
@@ -63,14 +63,14 @@ describe('getCategories', () => {
 		expect(results.length).toBeGreaterThanOrEqual(2);
 		expect(results.map(c => c.name)).toEqual(expect.arrayContaining([category1Data.name, category2Data.name]));
 	});
-	it('attaches judges when include.judges is true', async () => {
+	it('attaches Judges when include.Judges is true', async () => {
 		const categoryData = factories.category.createCategoryData();
 		const resultId = await categoryRepo.createCategory(categoryData);
 		expect(resultId).toBeDefined();
-		const results = await categoryRepo.getCategories({},{ include: { judges: true } });
+		const results = await categoryRepo.getCategories({},{ include: { Judges: true } });
 		expect(results).toBeDefined();
-		expect(results[0].judges).toBeDefined();
-		expect(Array.isArray(results[0].judges)).toBe(true);
+		expect(results[0].Judges).toBeDefined();
+		expect(Array.isArray(results[0].Judges)).toBe(true);
 	});
 });
 describe('deleteCategory', () => {

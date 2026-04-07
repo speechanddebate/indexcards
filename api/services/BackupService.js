@@ -43,10 +43,10 @@ async function backupTournament(tournId, opts = {}) {
 	tourn.categories = await categoryRepo.getCategories({ tournId }, {
 		settings: true,
 		include: {
-			judges: {
+			Judges: {
 				settings: true,
 			} ,
-			jpools: {
+			Jpools: {
 				settings: true,
 			},
 		},
