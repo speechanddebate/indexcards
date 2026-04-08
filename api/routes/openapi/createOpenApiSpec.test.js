@@ -33,4 +33,31 @@ describe('collectOpenApi', () => {
 		expect(result.paths['/bar']['get']).toBeDefined();
 		expect(result.paths['/bar']['get'].summary).toBe('/bar');
 	});
+
+	it('should collect method-specific OpenAPI metadata from a shared route', () => {
+		const router = Router();
+		const shared = router.route('/item/:id');
+		shared.get((req, res) => res.send('ok'));
+		shared.delete((req, res) => res.send('ok'));
+
+		shared.openapi = {
+			path: '/item/{id}',
+			requestParams: {
+				path: {},
+			},
+			get: {
+				operationId: 'GetItem',
+				summary: 'get item',
+			},
+			delete: {
+				operationId: 'DeleteItem',
+				summary: 'delete item',
+			},
+		};
+
+		const result = collectOpenApi(router);
+
+		expect(result.paths['/item/{id}']['get'].operationId).toBe('GetItem');
+		expect(result.paths['/item/{id}']['delete'].operationId).toBe('DeleteItem');
+	});
 });

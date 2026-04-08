@@ -1,0 +1,69 @@
+
+import { createContext } from '../../../tests/httpMocks';
+import messageRepo from '../../repos/messageRepo';
+import * as inbox from './inbox.js';
+import { expect } from 'chai';
+import { Message } from '../../routes/openapi/schemas/Message';
+
+describe('markDeleted', () => {
+	it('returns 404 if message not found', async () => {
+		const messageId = 1;
+		const personId = 1;
+		vi.spyOn(messageRepo, 'getMessage').mockResolvedValue(null);
+		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		await inbox.deleteMessage(req, res);
+		expect(res.status).toHaveBeenCalledWith(404);
+	});
+});
+describe('markRead', () => {
+	it('returns 404 if message not found', async () => {
+		const messageId = 1;
+		const personId = 1;
+		vi.spyOn(messageRepo, 'getMessage').mockResolvedValue(null);
+		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		await inbox.readMessage(req, res);
+		expect(res.status).toHaveBeenCalledWith(404);
+	});
+});
+describe('getMessage', () => {
+	it('maps the result to a Message object', async () => {
+		const messageId = 1;
+		const personId = 1;
+		const visibleAt = new Date('2026-01-01T10:00:00.000Z');
+		const readAt = new Date('2026-01-02T11:30:00.000Z');
+		vi.spyOn(messageRepo, 'getMessage').mockResolvedValue({
+			id: messageId,
+			subject: 'Pairings posted',
+			body: 'Round 1 pairings are now available.',
+			url: 'https://www.tabroom.com/pairings',
+			visible_at: visibleAt,
+			read_at: readAt,
+			tourn_tourn: {
+				id: 9,
+				name: 'Spring Invitational',
+				webname: 'spring-invite',
+			},
+			sender_sender: {
+				first: 'Alex',
+				middle: null,
+				last: 'Coach',
+				email: 'alex@example.com',
+			},
+			email_email: {
+				content: 'Please report to your assigned rooms.',
+			},
+		});
+		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		await inbox.getMessage(req, res);
+		expect(res).not.toBeProblemResponse();
+		expect(res.body).toMatchSchema(Message);
+	});
+	it('returns 404 if message not found', async () => {
+		const messageId = 1;
+		const personId = 1;
+		vi.spyOn(messageRepo, 'getMessage').mockResolvedValue(null);
+		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		await inbox.getMessage(req, res);
+		expect(res.status).toHaveBeenCalledWith(404);
+	});
+});

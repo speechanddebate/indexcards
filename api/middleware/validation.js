@@ -1,7 +1,32 @@
 import { BadRequest, UnexpectedError } from '../helpers/problem.js';
 import logger from '../helpers/logger.js';
+
+function isHttpMethodKey(key) {
+	return ['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'].includes(key);
+}
+
+function getOpenApiForMethod(openapi, method) {
+	if (!openapi || typeof openapi !== 'object') {
+		return openapi;
+	}
+
+	const normalizedMethod = method?.toLowerCase();
+	if (!normalizedMethod || !openapi[normalizedMethod] || typeof openapi[normalizedMethod] !== 'object') {
+		return openapi;
+	}
+
+	const shared = Object.fromEntries(
+		Object.entries(openapi).filter(([key]) => !isHttpMethodKey(key))
+	);
+
+	return {
+		...shared,
+		...openapi[normalizedMethod],
+	};
+}
+
 export async function ValidateRequest(req, res, next) {
-	const openapi = req.route?.openapi;
+	const openapi = getOpenApiForMethod(req.route?.openapi, req.method);
 	const bodySchema = openapi?.requestBody?.content?.['application/json']?.schema;
 	const paramsSchema = openapi?.requestParams;
 	req.valid = {};

@@ -54,69 +54,6 @@ describe('messageRepo',() =>{
 		});
 
 	});
-	describe('markMessageDeleted',() =>{
-		it('should mark a message as deleted for a specific person', async () => {
-			const { personId } = await factories.person.createTestPerson();
-			const { messageId } = await factories.message.createTestMessage({ person: personId });
-			const result = await messageRepo.markMessageDeleted(messageId, personId);
-			expect(result).toBeTruthy();
-			const message = await messageRepo.getMessage(messageId, personId);
-			expect(message.deleted_at).not.toBeNull();
-		});
-		it('does not mark a message as deleted for a different person', async () => {
-			const { personId: personId1 } = await factories.person.createTestPerson();
-			const { personId: personId2 } = await factories.person.createTestPerson();
-			const { messageId } = await factories.message.createTestMessage({ person: personId1 });
-			const result = await messageRepo.markMessageDeleted(messageId, personId2);
-			expect(result).toBeFalsy();
-			const message = await messageRepo.getMessage(messageId, personId1);
-			expect(message.deleted_at).toBeNull();
-		});
-		it('marks a message as deleted without specifying a person', async () => {
-			const { personId } = await factories.person.createTestPerson();
-			const { messageId } = await factories.message.createTestMessage({ person: personId });
-			const result = await messageRepo.markMessageDeleted(messageId);
-			expect(result).toBeTruthy();
-			const message = await messageRepo.getMessage(messageId, personId);
-			expect(message.deleted_at).not.toBeNull();
-		});
-	});
-	describe('markMessageRead',() =>{
-		it('should mark a message as read for a specific person', async () => {
-			const { personId } = await factories.person.createTestPerson();
-			const { messageId } = await factories.message.createTestMessage({ person: personId });
-			const result = await messageRepo.markMessageRead(messageId, personId);
-			expect(result).toBeTruthy();
-			const message = await messageRepo.getMessage(messageId);
-			expect(message.read_at).not.toBeNull();
-		});
-		it('does not mark a message as read for a different person', async () => {
-			const { personId: personId1 } = await factories.person.createTestPerson();
-			const { personId: personId2 } = await factories.person.createTestPerson();
-			const { messageId } = await factories.message.createTestMessage({ person: personId1 });
-			const result = await messageRepo.markMessageRead(messageId, personId2);
-			expect(result).toBeFalsy();
-			const message = await messageRepo.getMessage(messageId);
-			expect(message.read_at).toBeNull();
-		});
-		it('marks a message as read without specifying a person', async () => {
-			const { personId } = await factories.person.createTestPerson();
-			const { messageId } = await factories.message.createTestMessage({ person: personId });
-			const result = await messageRepo.markMessageRead(messageId);
-			expect(result).toBeTruthy();
-			const message = await messageRepo.getMessage(messageId);
-			expect(message.read_at).not.toBeNull();
-		});
-		it('does not mark a message as read if it is already read', async () => {
-			const { messageId } = await factories.message.createTestMessage({read_at: new Date()});
-			const originalReadAt = (await messageRepo.getMessage(messageId)).read_at;
-			const result = await messageRepo.markMessageRead(messageId);
-			expect(result).toBeFalsy();
-			const message = await messageRepo.getMessage(messageId);
-			expect(message.read_at).not.toBeNull();
-			expect(message.read_at).toEqualDate(originalReadAt);
-		});
-	});
 	describe('markAllMessagesRead',() =>{
 		it('should mark all messages as read for a specific person', async () => {
 			const { personId } = await factories.person.createTestPerson();

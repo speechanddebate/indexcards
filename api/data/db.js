@@ -13,11 +13,19 @@ const sequelize = new Sequelize(
 		...config.sequelizeOptions,
 		benchmark: true,
 		logging: (sql, timingMs) => {
-			if (typeof timingMs === 'number' && timingMs >= slowQueryMs) {
-				logger.warn('Slow SQL query', {
-					durationMs: timingMs,
-					caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),
-				});
+			if (typeof timingMs === 'number') {
+				if(timingMs >= slowQueryMs){
+					logger.warn('Slow SQL query', {
+						durationMs: timingMs,
+						caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),
+					});
+				} else {
+					logger.debug('SQL query', {
+						durationMs: timingMs,
+						caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),
+					});
+				}
+
 			}
 			logger.silly(`SQL: ${sql}`);
 		},
@@ -57,6 +65,12 @@ db.ballot.hasMany(db.score, { as: 'ballot_scores', foreignKey: 'ballot' });
 //event -> tourn
 db.event.belongsTo(db.tourn, { as: 'tourn_tourn', foreignKey: 'tourn' });
 db.tourn.hasMany(db.event, { as: 'events', foreignKey: 'tourn' });
+//message <-> sender
+db.message.belongsTo(db.person, { as: 'sender_sender', foreignKey: 'sender' });
+db.person.hasMany(db.message, { as: 'sent_messages', foreignKey: 'sender' });
+//message <--> email
+db.message.belongsTo(db.email, { as: 'email_email', foreignKey: 'email' });
+db.email.hasMany(db.message, { as: 'messages', foreignKey: 'email' });
 
 // By default Sequelize wants you to try...catch every single database call
 // for Reasons?  Otherwise all your database errors just go unprinted and you
