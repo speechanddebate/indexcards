@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as c from '../../../../controllers/user/inbox.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
-import { Message } from '../../../openapi/schemas/Message.js';
+import { InboxMessage } from '../../../openapi/schemas/Message.js';
 import z from 'zod';
 import * as utils from '../../../openapi/schemas/utils.js';
 import { ValidateRequest } from '../../../../middleware/validation.js';
@@ -21,7 +21,7 @@ router.route('/').get(c.inboxList).openapi = {
 			description: 'Inbox list',
 			content: {
 				'application/json': {
-					schema:  z.array(Message),
+					schema:  z.array(InboxMessage),
 				},
 			},
 		},
@@ -76,7 +76,7 @@ router.route('/:messageId')
 					description: 'Inbox message',
 					content: {
 						'application/json': {
-							schema: Message,
+							schema: InboxMessage,
 						},
 					},
 				},

@@ -3,7 +3,7 @@ import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories/index.js';
 import z from 'zod';
-import { Message } from '../../../openapi/schemas/Message.js';
+import { InboxMessage } from '../../../openapi/schemas/Message.js';
 import messageRepo from '../../../../repos/messageRepo.js';;
 
 describe('Inbox Router', () => {
@@ -17,6 +17,7 @@ describe('Inbox Router', () => {
 
 	describe('GET /user/inbox', () => {
 		it('Returns the list of messages for the user', async () => {
+
 			const res = await request(server)
 				.get('/v1/user/inbox')
 				.set('Accept', 'application/json')
@@ -24,7 +25,7 @@ describe('Inbox Router', () => {
 				.expect('Content-Type', /json/)
 				.expect(200);
 
-			expect(res.body).toMatchSchema(z.array(Message));
+			expect(res.body).toMatchSchema(z.array(InboxMessage));
 		});
 	});
 	describe('GET /user/inbox/unread', () => {
@@ -83,7 +84,7 @@ describe('Inbox Router', () => {
 				.set('Authorization', `Bearer ${userkey}`);
 
 			expect(res).not.toBeProblemResponse();
-			expect(res.body).toMatchSchema(Message);
+			expect(res.body).toMatchSchema(InboxMessage);
 		});
 	});
 	describe('DELETE /user/inbox/{messageId}', () => {

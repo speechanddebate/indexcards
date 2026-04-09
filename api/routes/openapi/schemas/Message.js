@@ -1,7 +1,7 @@
 import z from 'zod';
 import * as utils from './utils.js';
 
-export const Message = z.object({
+export const InboxMessage = z.object({
 	id: utils.id.meta({ description: 'The unique identifier for the message' }),
 	subject: z.string().max(255).nullable().meta({ description: 'The subject of the message' }),
 	body: z.string().max(65535).nullable().meta({ description: 'The body of the message' }),
@@ -20,4 +20,6 @@ export const Message = z.object({
 	Email: z.object({
 		content: z.string().nullable().meta({ description: 'The content of the email' }),
 	}).nullable().meta({ description: 'The email associated with the message' }),
+}).meta({
+	id: 'InboxMessage',
 });

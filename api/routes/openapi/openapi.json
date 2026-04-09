@@ -4144,204 +4144,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "integer",
-                        "exclusiveMinimum": 0,
-                        "maximum": 9007199254740991,
-                        "description": "The unique identifier for the message"
-                      },
-                      "subject": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "maxLength": 255
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "The subject of the message"
-                      },
-                      "body": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "maxLength": 65535
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "The body of the message"
-                      },
-                      "url": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "maxLength": 511,
-                            "format": "uri"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "The URL associated with the message"
-                      },
-                      "visibleAt": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "The timestamp when the message became visible"
-                      },
-                      "readAt": {
-                        "anyOf": [
-                          {
-                            "type": "string"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "The timestamp when the message was read"
-                      },
-                      "Tourn": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "integer",
-                                "exclusiveMinimum": 0,
-                                "maximum": 9007199254740991,
-                                "description": "The unique identifier for the tournament"
-                              },
-                              "name": {
-                                "anyOf": [
-                                  {
-                                    "type": "string",
-                                    "maxLength": 63
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ],
-                                "description": "The name of the tournament"
-                              },
-                              "webname": {
-                                "anyOf": [
-                                  {
-                                    "type": "string",
-                                    "maxLength": 64
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ],
-                                "description": "The web name of the tournament"
-                              }
-                            },
-                            "required": [
-                              "id",
-                              "name",
-                              "webname"
-                            ],
-                            "additionalProperties": false
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "The tournament associated with the message"
-                      },
-                      "Sender": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "name": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ],
-                                "description": "The name of the sender"
-                              },
-                              "email": {
-                                "anyOf": [
-                                  {
-                                    "type": "string",
-                                    "maxLength": 127
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ],
-                                "description": "The email of the sender"
-                              }
-                            },
-                            "required": [
-                              "name",
-                              "email"
-                            ],
-                            "additionalProperties": false
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "The sender of the message"
-                      },
-                      "Email": {
-                        "anyOf": [
-                          {
-                            "type": "object",
-                            "properties": {
-                              "content": {
-                                "anyOf": [
-                                  {
-                                    "type": "string"
-                                  },
-                                  {
-                                    "type": "null"
-                                  }
-                                ],
-                                "description": "The content of the email"
-                              }
-                            },
-                            "required": [
-                              "content"
-                            ],
-                            "additionalProperties": false
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "The email associated with the message"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "subject",
-                      "body",
-                      "url",
-                      "visibleAt",
-                      "readAt",
-                      "Tourn",
-                      "Sender",
-                      "Email"
-                    ],
-                    "additionalProperties": false
+                    "$ref": "#/components/schemas/InboxMessage"
                   }
                 }
               }
@@ -4450,204 +4253,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "integer",
-                      "exclusiveMinimum": 0,
-                      "maximum": 9007199254740991,
-                      "description": "The unique identifier for the message"
-                    },
-                    "subject": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "maxLength": 255
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "The subject of the message"
-                    },
-                    "body": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "maxLength": 65535
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "The body of the message"
-                    },
-                    "url": {
-                      "anyOf": [
-                        {
-                          "type": "string",
-                          "maxLength": 511,
-                          "format": "uri"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "The URL associated with the message"
-                    },
-                    "visibleAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "The timestamp when the message became visible"
-                    },
-                    "readAt": {
-                      "anyOf": [
-                        {
-                          "type": "string"
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "The timestamp when the message was read"
-                    },
-                    "Tourn": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "type": "integer",
-                              "exclusiveMinimum": 0,
-                              "maximum": 9007199254740991,
-                              "description": "The unique identifier for the tournament"
-                            },
-                            "name": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                  "maxLength": 63
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "description": "The name of the tournament"
-                            },
-                            "webname": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                  "maxLength": 64
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "description": "The web name of the tournament"
-                            }
-                          },
-                          "required": [
-                            "id",
-                            "name",
-                            "webname"
-                          ],
-                          "additionalProperties": false
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "The tournament associated with the message"
-                    },
-                    "Sender": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "name": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "description": "The name of the sender"
-                            },
-                            "email": {
-                              "anyOf": [
-                                {
-                                  "type": "string",
-                                  "maxLength": 127
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "description": "The email of the sender"
-                            }
-                          },
-                          "required": [
-                            "name",
-                            "email"
-                          ],
-                          "additionalProperties": false
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "The sender of the message"
-                    },
-                    "Email": {
-                      "anyOf": [
-                        {
-                          "type": "object",
-                          "properties": {
-                            "content": {
-                              "anyOf": [
-                                {
-                                  "type": "string"
-                                },
-                                {
-                                  "type": "null"
-                                }
-                              ],
-                              "description": "The content of the email"
-                            }
-                          },
-                          "required": [
-                            "content"
-                          ],
-                          "additionalProperties": false
-                        },
-                        {
-                          "type": "null"
-                        }
-                      ],
-                      "description": "The email associated with the message"
-                    }
-                  },
-                  "required": [
-                    "id",
-                    "subject",
-                    "body",
-                    "url",
-                    "visibleAt",
-                    "readAt",
-                    "Tourn",
-                    "Sender",
-                    "Email"
-                  ],
-                  "additionalProperties": false
+                  "$ref": "#/components/schemas/InboxMessage"
                 }
               }
             }
@@ -6600,6 +6206,206 @@
         },
         "required": [
           "id"
+        ],
+        "additionalProperties": false
+      },
+      "InboxMessage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The unique identifier for the message"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The subject of the message"
+          },
+          "body": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 65535
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The body of the message"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 511,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The URL associated with the message"
+          },
+          "visibleAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The timestamp when the message became visible"
+          },
+          "readAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The timestamp when the message was read"
+          },
+          "Tourn": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "The unique identifier for the tournament"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 63
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The name of the tournament"
+                  },
+                  "webname": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 64
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The web name of the tournament"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "webname"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The tournament associated with the message"
+          },
+          "Sender": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The name of the sender"
+                  },
+                  "email": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 127
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The email of the sender"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The sender of the message"
+          },
+          "Email": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The content of the email"
+                  }
+                },
+                "required": [
+                  "content"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The email associated with the message"
+          }
+        },
+        "required": [
+          "id",
+          "subject",
+          "body",
+          "url",
+          "visibleAt",
+          "readAt",
+          "Tourn",
+          "Sender",
+          "Email"
         ],
         "additionalProperties": false
       },
