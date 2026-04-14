@@ -70,7 +70,11 @@ export default class chapterJudge extends Model {
 				},
 				person: {
 						type: DataTypes.INTEGER,
-						allowNull: true
+						allowNull: true,
+						references: {
+								model: 'person',
+								key: 'id'
+						}
 				},
 				person_request: {
 						type: DataTypes.INTEGER,

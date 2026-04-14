@@ -24,11 +24,16 @@ export default class session extends Model {
 				},
 				su: {
 						type: DataTypes.INTEGER,
-						allowNull: true
+						allowNull: true,
+						references: {
+								model: 'person',
+								key: 'id'
+						}
 				},
 				person: {
 						type: DataTypes.INTEGER,
-						allowNull: true,
+						allowNull: false,
+						defaultValue: 0,
 						references: {
 								model: 'person',
 								key: 'id'
@@ -88,6 +93,13 @@ export default class session extends Model {
 								using: "BTREE",
 								fields: [
 										{ name: "person" },
+								]
+						},
+						{
+								name: "fk_session_su",
+								using: "BTREE",
+								fields: [
+										{ name: "su" },
 								]
 						},
 				]

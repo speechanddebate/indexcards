@@ -64,7 +64,7 @@ export default class school extends Model {
 						type: DataTypes.DATE,
 						allowNull: true,
 						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
-				},
+				}
 		}, {
 				tableName: 'school',
 				timestamps: false,
@@ -96,6 +96,13 @@ export default class school extends Model {
 								using: "BTREE",
 								fields: [
 										{ name: "region" },
+								]
+						},
+						{
+								name: "fk_school_registered_by",
+								using: "BTREE",
+								fields: [
+										{ name: "registered_by" },
 								]
 						},
 				]

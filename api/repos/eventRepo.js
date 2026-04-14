@@ -6,6 +6,7 @@ import { roundInclude } from './roundRepo.js';
 import snakeToCamel from '../helpers/text.js';
 
 function buildEventQuery(opts = {}) {
+
 	const query = {
 		where: {},
 		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
@@ -26,6 +27,7 @@ function buildEventQuery(opts = {}) {
 			settings: opts.settings,
 		})
 	);
+
 	return query;
 }
 
@@ -185,10 +187,10 @@ async function createEvent(event) {
 	);
 
 	await saveSettings({
-		model: db.eventSetting,
-		settings: event.settings,
-		ownerKey: 'event',
-		ownerId: created.id,
+		model    : db.eventSetting,
+		settings : event.settings,
+		ownerKey : 'event',
+		ownerId  : created.id,
 	});
 	return created.id;
 }

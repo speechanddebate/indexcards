@@ -22,17 +22,13 @@ export default class result extends Model {
 						type: DataTypes.DECIMAL(6,2),
 						allowNull: true
 				},
-				honor: {
-						type: DataTypes.STRING(255),
-						allowNull: true
-				},
-				honor_site: {
-						type: DataTypes.STRING(63),
-						allowNull: true
-				},
 				result_set: {
 						type: DataTypes.INTEGER,
-						allowNull: true
+						allowNull: true,
+						references: {
+								model: 'result_set',
+								key: 'id'
+						}
 				},
 				entry: {
 						type: DataTypes.INTEGER,
@@ -66,11 +62,7 @@ export default class result extends Model {
 						type: DataTypes.INTEGER,
 						allowNull: true
 				},
-				details: {
-						type: DataTypes.TEXT,
-						allowNull: true
-				},
-				raw_scores: {
+				cache: {
 						type: DataTypes.TEXT,
 						allowNull: true
 				},

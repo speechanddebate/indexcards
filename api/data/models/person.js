@@ -73,6 +73,10 @@ export default class person extends Model {
 						type: DataTypes.BIGINT,
 						allowNull: true
 				},
+				provider: {
+						type: DataTypes.STRING(63),
+						allowNull: true
+				},
 				site_admin: {
 						type: DataTypes.BOOLEAN,
 						allowNull: true

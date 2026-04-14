@@ -156,33 +156,4 @@ router.route('/:tournId/schedule').get(controller.getSchedule).openapi = {
 	},
 };
 
-router.route('/:tournId/results').get(controller.getTournPublishedResults).openapi = {
-	path: '/rest/tourns/{tournId}/results',
-	summary: 'Returns an array of result_sets that are published in a tournament',
-	operationId: 'getTournPublishedResults',
-	tags: ['invite', 'public', 'results'],
-	parameters: [
-		{
-			in: 'path',
-			name: 'tournId',
-			required: true,
-			schema: { type: 'integer' },
-		},
-	],
-	responses: {
-		200: {
-			description: 'Array of events',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'array',
-						items: { type: 'object' },
-					},
-				},
-			},
-		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
-	},
-};
-
 export default router;

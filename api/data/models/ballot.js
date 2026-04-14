@@ -88,7 +88,11 @@ export default class ballot extends Model {
 				},
 				entry: {
 						type: DataTypes.INTEGER,
-						allowNull: true
+						allowNull: true,
+						references: {
+								model: 'entry',
+								key: 'id'
+						}
 				},
 				timestamp: {
 						type: DataTypes.DATE,

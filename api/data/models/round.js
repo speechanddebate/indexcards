@@ -11,9 +11,8 @@ export default class round extends Model {
 						primaryKey: true
 				},
 				type: {
-						type: DataTypes.ENUM('prelim','elim','final','highlow','highhigh','snaked_prelim','runoff'),
-						allowNull: false,
-						defaultValue: "prelim"
+						type: DataTypes.STRING(15),
+						allowNull: true
 				},
 				name: {
 						type: DataTypes.SMALLINT,
@@ -61,15 +60,27 @@ export default class round extends Model {
 				},
 				timeslot: {
 						type: DataTypes.INTEGER,
-						allowNull: true
+						allowNull: true,
+						references: {
+								model: 'timeslot',
+								key: 'id'
+						}
 				},
 				site: {
 						type: DataTypes.INTEGER,
-						allowNull: true
+						allowNull: true,
+						references: {
+								model: 'site',
+								key: 'id'
+						}
 				},
 				protocol: {
 						type: DataTypes.INTEGER,
-						allowNull: true
+						allowNull: true,
+						references: {
+								model: 'protocol',
+								key: 'id'
+						}
 				},
 				runoff: {
 						type: DataTypes.INTEGER,
@@ -125,6 +136,13 @@ export default class round extends Model {
 								using: "BTREE",
 								fields: [
 										{ name: "protocol" },
+								]
+						},
+						{
+								name: "fk_round_site",
+								using: "BTREE",
+								fields: [
+										{ name: "site" },
 								]
 						},
 				]

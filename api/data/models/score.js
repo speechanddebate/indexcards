@@ -54,7 +54,7 @@ export default class score extends Model {
 						type: DataTypes.DATE,
 						allowNull: false,
 						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
-				},
+				}
 		}, {
 				tableName: 'score',
 				timestamps: false,

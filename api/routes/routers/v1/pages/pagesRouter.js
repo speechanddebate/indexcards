@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import * as inviteController from '../../../../controllers/pages/invite/inviteController.js';
 import * as schematController from '../../../../controllers/pages/invite/schematController.js';
+import * as resultController from '../../../../controllers/rest/resultController.js';
 
 const router = Router();
 
@@ -83,6 +84,30 @@ router.route('/invite/:tournId/:eventAbbr/:roundName').get(schematController.get
 	path: '/pages/invite/{tournId}/{eventAbbr}/{roundName}',
 	summary: 'Get Schematic Data for a Published Round',
 	description: 'Gives everything needed for a public round display',
+	tags: ['Invite', 'Public', 'Schematic', 'Round'],
+	responses: {
+		200: {
+			description: 'Round Information',
+		},
+	},
+};
+
+router.route('/tiebreaks/:roundId').get(resultController.getTiebreaks).openapi = {
+	path: '/pages/tiebreaks/{roundId}',
+	summary: 'Get tiebreaks needed for a protocol id.  This is just for Palmer testing and will go poof.',
+	description: 'for testing and dev',
+	tags: ['Invite', 'Public', 'Schematic', 'Round'],
+	responses: {
+		200: {
+			description: 'Round Information',
+		},
+	},
+};
+
+router.route('/protocol/round/:roundId').get(resultController.getTiebreaks).openapi = {
+	path: '/pages/protocol/round/{roundId}',
+	summary: 'Get tiebreaks needed for a protocol id',
+	description: 'for testing and dev',
 	tags: ['Invite', 'Public', 'Schematic', 'Round'],
 	responses: {
 		200: {

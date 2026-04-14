@@ -13,6 +13,7 @@ export const FIELD_MAP = {
 	postFeedback  : 'post_feedback',
 	published     : 'published',
 	eventId       : 'event',
+	protocolId    : 'protocol',
 };
 
 export const toDomain = dbRow => {
@@ -20,6 +21,13 @@ export const toDomain = dbRow => {
 	const domain = genericToDomain(dbRow, FIELD_MAP);
 	if(dbRow.event_event){
 		domain.Event = eventToDomain(dbRow.event_event);
+	}
+	if(dbRow.protocol_protocol){
+		domain.Protocol = dbRow.protocol_protocol;
+		if (domain.Protocol?.tiebreaks) {
+			domain.Protocol.Tiebreaks = domain.Protocol.tiebreaks;
+			delete domain.Protocol.tiebreaks;
+		}
 	}
 	if(dbRow.panels){
 		domain.Sections = dbRow.panels.map(sectionToDomain);

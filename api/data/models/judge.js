@@ -46,8 +46,11 @@ export default class judge extends Model {
 				},
 				school: {
 						type: DataTypes.INTEGER,
-						allowNull: false,
-						defaultValue: 0
+						allowNull: true,
+						references: {
+								model: 'school',
+								key: 'id'
+						}
 				},
 				category: {
 						type: DataTypes.INTEGER,
@@ -71,8 +74,11 @@ export default class judge extends Model {
 				},
 				person: {
 						type: DataTypes.INTEGER,
-						allowNull: false,
-						defaultValue: 0
+						allowNull: true,
+						references: {
+								model: 'person',
+								key: 'id'
+						}
 				},
 				person_request: {
 						type: DataTypes.INTEGER,
@@ -85,11 +91,6 @@ export default class judge extends Model {
 								model: 'person',
 								key: 'id'
 						}
-				},
-				created_at: {
-						type: DataTypes.DATE,
-						allowNull: true,
-						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
 				},
 				timestamp: {
 						type: DataTypes.DATE,
@@ -104,6 +105,11 @@ export default class judge extends Model {
 						type: DataTypes.STRING(63),
 						allowNull: true
 				},
+				created_at: {
+						type: DataTypes.DATE,
+						allowNull: true,
+						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
+				}
 		}, {
 				tableName: 'judge',
 				timestamps: false,
@@ -156,6 +162,13 @@ export default class judge extends Model {
 								using: "BTREE",
 								fields: [
 										{ name: "alt_category" },
+								]
+						},
+						{
+								name: "fk_judge_registered_by",
+								using: "BTREE",
+								fields: [
+										{ name: "registered_by" },
 								]
 						},
 				]

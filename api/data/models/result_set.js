@@ -11,10 +11,8 @@ export default class resultSet extends Model {
 						primaryKey: true
 				},
 				tag: {
-						type: DataTypes.ENUM('final', 'bracket', 'seed', 'speaker', 'qualifier',
-							'sweep', 'toc', 'nsda', 'table', 'chamber', 'other'),
-						allowNull: false,
-						defaultValue: "entry"
+						type: DataTypes.ENUM('final','bracket','seed','speaker','qualifier','sweep','toc','nsda','table','chamber','other'),
+						allowNull: true
 				},
 				label: {
 						type: DataTypes.STRING(255),
@@ -39,8 +37,8 @@ export default class resultSet extends Model {
 						allowNull: true
 				},
 				cache: {
-						type      : DataTypes.TEXT,
-						allowNull : true
+						type: DataTypes.TEXT,
+						allowNull: true
 				},
 				tourn: {
 						type: DataTypes.INTEGER,
@@ -66,6 +64,14 @@ export default class resultSet extends Model {
 								key: 'id'
 						}
 				},
+				nsda_category: {
+						type: DataTypes.INTEGER,
+						allowNull: true,
+						references: {
+								model: 'nsda_category',
+								key: 'id'
+						}
+				},
 				circuit: {
 						type: DataTypes.INTEGER,
 						allowNull: true
@@ -78,14 +84,6 @@ export default class resultSet extends Model {
 				code: {
 						type: DataTypes.STRING(15),
 						allowNull: true
-				},
-				nsda_category: {
-					type: DataTypes.INTEGER,
-					allowNull: true,
-					references: {
-							model: 'nsda_category',
-							key: 'id'
-					}
 				}
 		}, {
 				tableName: 'result_set',
@@ -119,6 +117,13 @@ export default class resultSet extends Model {
 								fields: [
 										{ name: "label" },
 										{ name: "event" },
+								]
+						},
+						{
+								name: "fk_rs_nsda_category",
+								using: "BTREE",
+								fields: [
+										{ name: "nsda_category" },
 								]
 						},
 				]

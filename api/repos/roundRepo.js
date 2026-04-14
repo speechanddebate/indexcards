@@ -4,6 +4,7 @@ import { eventInclude } from './eventRepo.js';
 import { withSettingsInclude } from './utils/settings.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { sectionInclude } from './sectionRepo.js';
+import { protocolInclude } from './protocolRepo.js';
 
 function buildRoundQuery(opts = {}) {
 	const query = {
@@ -23,9 +24,9 @@ function buildRoundQuery(opts = {}) {
 
 	query.include.push(
 		...withSettingsInclude({
-			model: db.roundSetting,
-			as: 'round_settings',
-			settings: opts.settings,
+			model    : db.roundSetting,
+			as       : 'round_settings',
+			settings : opts.settings,
 		})
 	);
 
@@ -42,11 +43,26 @@ function buildRoundQuery(opts = {}) {
 			as: 'event_event',
 		});
 	}
+
+	if (opts.include?.Protocol) {
+		const protocolOpts = opts.include.Protocol
+			? { fields: ['id','name','tourn'], settings: [] }
+			: opts.include.Protocol;
+
+		query.include.push({
+			...protocolInclude({
+				...protocolOpts,
+			}),
+			as: 'protocol_protocol',
+		});
+	}
+
 	if(opts.include?.sections){
 		query.include.push({
 			...sectionInclude(opts.include.sections),
 		});
 	}
+
 	return query;
 }
 
@@ -58,22 +74,20 @@ export function roundInclude(opts = {}) {
 	};
 }
 
-async function getRound(roundId, opts = {}) {
+export const getRound = async (roundId, opts = {}) => {
 	const query = buildRoundQuery(opts);
 	query.where.id = roundId;
 	const round = await db.round.findOne(query);
 	return round ? toDomain(round) : null;
-}
+};
 
 /**
  * Fetches rounds from the database with optional filters and event information.
  */
 export async function getRounds(scope = {}, opts = {}) {
-	const query = buildRoundQuery(opts);
 
-	if (scope.eventId) {
-		query.where.event = scope.eventId;
-	}
+	const query = buildRoundQuery(opts);
+	if (scope.eventId)  query.where.event = scope.eventId;
 
 	if (scope.tournId) {
 		// Try to find an existing event include

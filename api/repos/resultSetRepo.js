@@ -1,4 +1,5 @@
 import db from '../data/db.js';
+import { eventInclude, getEvent } from './eventRepo.js';
 
 const buildResultSetQuery = (opts = {}) => {
 
@@ -7,6 +8,14 @@ const buildResultSetQuery = (opts = {}) => {
 		where: {},
 		include: [],
 	};
+
+	if(opts?.include?.Event){
+		query.include.push({
+			...eventInclude(opts?.include?.Event),
+			as       : 'event_event',
+			required : false,
+		});
+	}
 
 	if(opts.coach) {
 		query.where.coach = 1;
@@ -19,7 +28,9 @@ const buildResultSetQuery = (opts = {}) => {
 	return {query, limiter};
 };
 
-/* Special case of returning just one */
+/*
+ * Special case of returning just one
+*/
 
 export const getResultSet = async (resultSetId, opts = {}) => {
 	const rsen = await getResultSets({ resultSetId }, {...opts});
@@ -28,8 +39,9 @@ export const getResultSet = async (resultSetId, opts = {}) => {
 };
 
 /**
- * Fetches resultSets from the database with optional filters and event information.
- */
+ * Fetches resultSets from the database with optional filters and event
+ * information.
+ **/
 
 export const getResultSets = async (scope = {}, opts = {}) => {
 
@@ -70,8 +82,15 @@ export const getResultSets = async (scope = {}, opts = {}) => {
 	});
 
 	const promises = [];
+	const processed = [];
 
-	const processed = rsen.map( async rs => {
+	for (const rs of rsen) {
+
+		rs.Event = undefined;
+
+		if(opts?.include?.Event) {
+			rs.Event = await getEvent(rs.event, {...opts?.include?.Event} );
+		}
 
 		if (!opts.noResults) {
 
@@ -92,7 +111,8 @@ export const getResultSets = async (scope = {}, opts = {}) => {
 			});
 
 			rs.Results = {};
-			rawResults.forEach( result => {
+
+			for (const result of rawResults) {
 				if (result.entry) {
 					rs.type = 'entry';
 					delete result.student;
@@ -109,7 +129,7 @@ export const getResultSets = async (scope = {}, opts = {}) => {
 					delete result.entry;
 					rs.Results[result.school] = result;
 				}
-			});
+			};
 		}
 
 		if (rs.cache) {
@@ -119,7 +139,7 @@ export const getResultSets = async (scope = {}, opts = {}) => {
 			const { headers, results } = await createResultCache( rs.id );
 			rs.cache = headers;
 
-			await db.sequelize.query(`
+			const update = db.sequelize.query(`
 				update result_set
 				set cache = :headers
 				where 1=1
@@ -132,28 +152,31 @@ export const getResultSets = async (scope = {}, opts = {}) => {
 				},
 			});
 
-			Object.keys(results).forEach( (tagId) => {
+			promises.push(update);
 
-				rs.Results[tagId].cache = results[tagId];
+			if (!opts.noResults) {
+				for (const tagId in Object.keys(results)) {
 
-				const promise = db.sequelize.query(`
-					update result
-					set cache = :result
-					where result.id = :resultId
-				`, {
-					type: db.Sequelize.QueryTypes.UPDATE,
-					replacements : {
-						result: JSON.stringify(results[tagId]),
-						resultId: results[tagId].result,
-					},
-				});
-				promises.push(promise);
-			});
+					rs.Results[tagId].cache = results[tagId];
+					const resUpdate = db.sequelize.query(`
+						update result
+						set cache = :result
+						where result.id = :resultId
+					`, {
+						type: db.Sequelize.QueryTypes.UPDATE,
+						replacements : {
+							result: JSON.stringify(results[tagId]),
+							resultId: results[tagId].result,
+						},
+					});
+
+					promises.push(resUpdate);
+				};
+			};
 		}
-		return rs;
-	});
+		processed.push(rs);
+	};
 
-	await Promise.resolve(promises);
 	return processed;
 };
 
@@ -187,6 +210,7 @@ export const createResultCache = async (resultSetId) => {
 
 	const headers = {};
 	const results = {};
+	const protocols = {};
 
 	resultValues.forEach( (rv) => {
 
@@ -219,9 +243,36 @@ export const createResultCache = async (resultSetId) => {
 
 		if (!results[rv[rv.type]])   				results[rv[rv.type]] = {};
 		if (!results[rv[rv.type]][rv.protocol]) 	results[rv[rv.type]][rv.protocol] = {};
-
 		results[rv[rv.type]][rv.protocol][rv.keyTag] = rv.value;
+
+		if (!protocols[rv.protocol]) protocols[rv.protocol] = true;
 	});
 
+	const resultScores = await db.sequelize.query(`
+		select
+			result.entry,
+			round.id, round.name, round.protocol,
+			panel.bye sectionBye,
+			ballot.bye, ballot.forfeit,
+			score.tag, score.value
+		from (result, ballot, panel, round)
+			left join score on score.ballot = ballot.id
+				and score.tag IN ('winloss', 'point', 'rank', 'refute')
+		where 1=1
+			and result.result_set = :resultSetId
+			and result.entry = ballot.entry
+			and ballot.panel = panel.id
+			and panel.round = round.id
+		order by result.entry, round.name
+	`, {
+		type         : db.Sequelize.QueryTypes.SELECT,
+		replacements : { resultSetId },
+	});
+
+	// just doing this to shut up the linter because I want to check in what I
+	// have for safety but work on this later.
+	console.log(resultScores);
+
 	return { headers, results };
+
 };
