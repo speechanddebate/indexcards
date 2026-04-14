@@ -137,7 +137,7 @@ router.use('/inbox', inboxRouter);
 router.route('/session').get(extractHandler(getSessionMod, 'GET')).openapi = {
 	path: '/user/session',
 	operationId: 'UserSession',
-	tags: ['legacy', 'User Session', 'Orval'],
+	tags: ['legacy', 'Session', 'Orval'],
 	responses: {
 		200: {
 			description: 'User session',

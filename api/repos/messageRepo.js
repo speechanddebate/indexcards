@@ -1,42 +1,67 @@
 import db from '../data/db.js';
+import { tournInclude } from './tournRepo.js';
+import { personInclude } from './personRepo.js';
+import { emailInclude } from './emailRepo.js';
 
-async function getMessage(messageId, personId) {
-	const where = { id: messageId };
+async function buildMessageQuery(opts = {}) {
+	const query = {
+		where: {},
+		include: [],
+	};
+
+	if(opts.excludeDeleted) {
+		query.where.deleted_at = null;
+	}
+
+	if(opts.excludeInvisible) {
+		query.where.visible_at = {
+			[db.Sequelize.Op.lt]: db.Sequelize.fn('NOW'),
+		};
+	}
+	if(opts.include?.Tourn){
+		query.include.push({
+			...tournInclude(opts.include.Tourn),
+			as: 'tourn_tourn',
+			required: false,
+		});
+	}
+	if(opts.include?.Sender){
+		query.include.push({
+			...(await personInclude(opts.include.Sender)),
+			as: 'sender_sender',
+			required: false,
+		});
+	}
+	if(opts.include?.Email){
+		query.include.push({
+			...emailInclude(opts.include.Email),
+			as: 'email_email',
+			required: false,
+		});
+	}
+
+	query.order = [['created_at', 'DESC'],['subject', 'DESC']];
+
+	return query;
+}
+
+async function getMessage(messageId, personId,opts={}) {
+	const query = await buildMessageQuery(opts);
+	query.where = { id: messageId };
 
 	if (personId !== undefined && personId !== null) {
-		where.person = personId;
+		query.where.person = personId;
 	}
-	return await db.message.findOne({ where, raw: true });
+	return await db.message.findOne(query);
 };
-async function getMessages(personId) {
-	return await db.sequelize.query(`
-		select
-			message.*,
-			tourn.name tournName, tourn.id tournId, tourn.webname,
-			sender.first, sender.middle, sender.last, sender.email sender_mail,
-			email.content,
-			CONVERT_TZ(message.created_at, '+00:00', person.tz) as createdAt,
-			CONVERT_TZ(message.read_at, '+00:00', person.tz) as readAt,
-			( CASE
-				WHEN message.read_at IS NULL THEN 'N'
-				ELSE 'Y'
-				END) as readStatus
-		from (message, person)
-			left join tourn on message.tourn = tourn.id
-			left join person sender on message.sender = sender.id
-			left join email on email.id = message.email
-		where message.person = :personId
-			and message.person = person.id
-			and message.deleted_at IS NULL
-			and message.visible_at < NOW()
-		order by
-			message.created_at,
-			message.subject
-	`, {
-		replacements: { personId },
-		type: db.Sequelize.QueryTypes.SELECT,
-	});
-};
+
+async function getMessages( personId, opts={} ) {
+	const query = await buildMessageQuery(opts);
+	query.where.person = personId;
+	const messages = await db.message.findAll(query);
+	return messages;
+}
+
 /**cGets the count of unread messages for a specific person
  * @param {Int} personId - The ID of the person whose unread messages are being counted
  * @returns {Promise<Int>} - The count of unread messages for the specified person
@@ -79,47 +104,6 @@ async function markAllMessagesRead(personId) {
 	);
 	return res[0];
 };
-/** Marks a message as read
- * @param {*} messageId the Id of the message to mark read
- * @param {*} personId an optional personId to limit to a single persons messages
- * @returns true if successful
- */
-async function markMessageRead(messageId, personId) {
-	const where = {
-		id: messageId,
-		read_at: null,
-	};
-
-	if (personId !== undefined && personId !== null) {
-		where.person = personId;
-	}
-
-	const [affectedRows] = await db.message.update(
-		{ read_at: db.Sequelize.fn('NOW') },
-		{ where }
-	);
-	return affectedRows > 0;
-};
-
-/**
- *  Marks a message as deleted
- * @param {*} messageId the Id of the message to mark deleted
- * @param {*} personId an optional personId to limit to a single persons messages
- * @returns true if successful
- */
-async function markMessageDeleted (messageId, personId) {
-	const where = { id: messageId };
-
-	if (personId !== undefined && personId !== null) {
-		where.person = personId;
-	}
-
-	const [affectedRows] = await db.message.update(
-		{ deleted_at: db.Sequelize.fn('NOW') },
-		{ where }
-	);
-	return affectedRows > 0;
-};
 
 async function createMessage(data) {
 	const message = await db.message.create(data);
@@ -131,7 +115,5 @@ export default {
 	getMessages,
 	getUnreadCount,
 	markAllMessagesRead,
-	markMessageRead,
-	markMessageDeleted,
 	createMessage,
 };

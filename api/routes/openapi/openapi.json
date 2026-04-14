@@ -61,12 +61,24 @@
       "description": "Endpoints for external access to Mason data"
     },
     {
+      "name": "Inbox",
+      "description": "Endpoints for managing user inbox messages"
+    },
+    {
+      "name": "Push Notifications",
+      "description": "Endpoints for managing user push notifications"
+    },
+    {
       "name": "Tournament",
       "description": "Endpoints for managing tournaments"
     },
     {
       "name": "Category",
       "description": "Endpoints for managing categories within tournaments"
+    },
+    {
+      "name": "Session",
+      "description": "Endpoints related to a users session"
     },
     {
       "name": "Sites & Rooms",
@@ -182,18 +194,6 @@
     {
       "name": "legacy",
       "description": "Auto-discovered tag"
-    },
-    {
-      "name": "Push Notifications",
-      "description": "Auto-discovered tag"
-    },
-    {
-      "name": "Inbox",
-      "description": "Auto-discovered tag"
-    },
-    {
-      "name": "User Session",
-      "description": "Auto-discovered tag"
     }
   ],
   "x-tagGroups": [
@@ -226,6 +226,14 @@
       ]
     },
     {
+      "name": "User",
+      "tags": [
+        "Inbox",
+        "Session",
+        "Push Notifications"
+      ]
+    },
+    {
       "name": "Other",
       "tags": [
         "Ads",
@@ -233,19 +241,16 @@
         "Circuits",
         "Entries",
         "Events",
-        "Inbox",
         "Invite",
         "Orval",
         "Paradigms",
         "Public",
-        "Push Notifications",
         "Records",
         "Results",
         "Round",
         "Rounds",
         "Schematic",
         "Tournaments",
-        "User Session",
         "event",
         "eventAbbr",
         "futureTourns",
@@ -2893,24 +2898,47 @@
         ],
         "parameters": [
           {
-            "name": "state",
             "in": "query",
-            "required": false,
+            "name": "state",
             "schema": {
+              "description": "2-character state code to filter circuits",
               "type": "string",
               "maxLength": 2
             },
             "description": "2-character state code to filter circuits"
           },
           {
-            "name": "country",
             "in": "query",
-            "required": false,
+            "name": "country",
             "schema": {
+              "description": "2-character country code to filter circuits",
               "type": "string",
               "maxLength": 2
             },
             "description": "2-character country code to filter circuits"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 50,
+              "description": "Maximum number of circuits to return",
+              "type": "number",
+              "minimum": 1,
+              "maximum": 100
+            },
+            "description": "Maximum number of circuits to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "description": "Number of circuits to skip before starting to return results",
+              "type": "number",
+              "minimum": 0
+            },
+            "description": "Number of circuits to skip before starting to return results"
           }
         ],
         "responses": {
@@ -2924,24 +2952,61 @@
                     "type": "object",
                     "properties": {
                       "id": {
-                        "type": "integer"
-                      },
-                      "abbr": {
-                        "type": "string"
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991,
+                        "description": "The unique identifier of the circuit"
                       },
                       "name": {
-                        "type": "string"
+                        "type": "string",
+                        "maxLength": 63,
+                        "description": "The name of the circuit"
+                      },
+                      "abbr": {
+                        "type": "string",
+                        "maxLength": 15,
+                        "description": "The abbreviation of the circuit"
                       },
                       "state": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Z]{2}$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "description": "The state of the circuit"
                       },
                       "country": {
-                        "type": "string"
+                        "anyOf": [
+                          {
+                            "type": "string",
+                            "pattern": "^[A-Z]{2}$"
+                          },
+                          {
+                            "type": "null"
+                          }
+                        ],
+                        "description": "The country of the circuit"
                       },
                       "tournCount": {
-                        "type": "integer"
+                        "type": "integer",
+                        "exclusiveMinimum": 0,
+                        "maximum": 9007199254740991,
+                        "description": "The number of tournaments in the circuit"
                       }
-                    }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "abbr",
+                      "state",
+                      "country",
+                      "tournCount"
+                    ],
+                    "additionalProperties": false
                   }
                 }
               }
@@ -3757,6 +3822,16 @@
         ],
         "parameters": [
           {
+            "in": "path",
+            "name": "tournId",
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "required": true
+          },
+          {
             "$ref": "#/components/parameters/tournId"
           }
         ],
@@ -3996,6 +4071,59 @@
         }
       }
     },
+    "/rest/paradigms/{personId}/record": {
+      "get": {
+        "summary": "Get judging record by person ID",
+        "operationId": "restParadigmsRecord",
+        "tags": [
+          "Paradigms",
+          "Orval"
+        ],
+        "description": "GET /rest/paradigms/{personId}/record is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "personId",
+            "schema": {
+              "type": "number",
+              "exclusiveMinimum": 0,
+              "description": "ID of the person to get paradigm details for"
+            },
+            "required": true,
+            "description": "ID of the person to get paradigm details for"
+          },
+          {
+            "name": "personId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Judging record for the specified person ID",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/JudgeRecord"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
     "/user/push/find": {
       "get": {
         "tags": [
@@ -4044,26 +4172,34 @@
         }
       }
     },
-    "/user/inbox/list": {
+    "/user/inbox": {
       "get": {
+        "operationId": "UserInbox",
+        "summary": "Get messages",
+        "description": "Get the list of messages for the logged-in user",
         "tags": [
-          "legacy",
+          "Orval",
           "Inbox"
         ],
-        "summary": "GET /user/inbox/list",
-        "description": "GET /user/inbox/list is undocumented. Need to add .openapi to handler",
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Inbox list"
+            "description": "Inbox list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/InboxMessage"
+                  }
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
           "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          },
-          "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
         }
@@ -4071,13 +4207,13 @@
     },
     "/user/inbox/unread": {
       "get": {
+        "summary": "Unread count",
+        "description": "Get the count of unread messages for the logged-in user",
         "operationId": "UserInboxUnread",
         "tags": [
           "Inbox",
           "Orval"
         ],
-        "summary": "GET /user/inbox/unread",
-        "description": "GET /user/inbox/unread is undocumented. Need to add .openapi to handler",
         "parameters": [],
         "responses": {
           "200": {
@@ -4104,42 +4240,17 @@
         }
       }
     },
-    "/user/inbox/markRead": {
-      "post": {
-        "tags": [
-          "legacy",
-          "Inbox"
-        ],
-        "summary": "POST /user/inbox/markRead",
-        "description": "POST /user/inbox/markRead is undocumented. Need to add .openapi to handler",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Message marked as read"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          },
-          "default": {
-            "$ref": "#/components/responses/ErrorResponse"
-          }
-        }
-      }
-    },
     "/user/inbox/markAllRead": {
       "post": {
+        "summary": "Mark all messages as read",
+        "description": "Mark all visible messages for the logged-in user as read",
         "tags": [
-          "legacy",
+          "Orval",
           "Inbox"
         ],
-        "summary": "POST /user/inbox/markAllRead",
-        "description": "POST /user/inbox/markAllRead is undocumented. Need to add .openapi to handler",
         "parameters": [],
         "responses": {
-          "200": {
+          "204": {
             "description": "All messages marked as read"
           },
           "401": {
@@ -4147,24 +4258,92 @@
           },
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
-          },
-          "default": {
-            "$ref": "#/components/responses/ErrorResponse"
           }
         }
       }
     },
-    "/user/inbox/markDeleted": {
-      "post": {
+    "/user/inbox/{messageId}": {
+      "get": {
         "tags": [
-          "legacy",
+          "Orval",
           "Inbox"
         ],
-        "summary": "POST /user/inbox/markDeleted",
-        "description": "POST /user/inbox/markDeleted is undocumented. Need to add .openapi to handler",
-        "parameters": [],
+        "operationId": "UserInboxGetMessage",
+        "summary": "Get message",
+        "description": "Get a specific message from the users inbox",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "messageId",
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "description": "The ID of the message"
+            },
+            "required": true,
+            "description": "The ID of the message"
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
         "responses": {
           "200": {
+            "description": "Inbox message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InboxMessage"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Orval",
+          "Inbox"
+        ],
+        "operationId": "UserInboxMarkDeleted",
+        "summary": "Delete message",
+        "description": "Delete a specific message from the users inbox",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "messageId",
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "description": "The ID of the message"
+            },
+            "required": true,
+            "description": "The ID of the message"
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
             "description": "Message marked as deleted"
           },
           "401": {
@@ -4172,8 +4351,49 @@
           },
           "500": {
             "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/user/inbox/{messageId}/markRead": {
+      "post": {
+        "operationId": "UserInboxMarkRead",
+        "summary": "Mark message as read",
+        "description": "Mark a specific message as read",
+        "tags": [
+          "Orval",
+          "Inbox"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "messageId",
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "description": "The ID of the message to mark as read"
+            },
+            "required": true,
+            "description": "The ID of the message to mark as read"
           },
-          "default": {
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Message marked as read"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
         }
@@ -4184,7 +4404,7 @@
         "operationId": "UserSession",
         "tags": [
           "legacy",
-          "User Session",
+          "Session",
           "Orval"
         ],
         "summary": "GET /user/session",
@@ -4870,58 +5090,6 @@
         }
       },
       "EventInvite": {},
-      "File": {
-        "type": "object",
-        "description": "A file",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "description": "The unique identifier for the file",
-            "readOnly": true,
-            "example": 123
-          },
-          "tag": {
-            "type": "string",
-            "nullable": true
-          },
-          "type": {
-            "type": "string",
-            "nullable": true
-          },
-          "label": {
-            "type": "string",
-            "nullable": true
-          },
-          "filename": {
-            "type": "string",
-            "maxLength": 255,
-            "description": "The filename of the file",
-            "example": "example.pdf"
-          },
-          "published": {
-            "type": "boolean",
-            "description": "Whether the file is published or not",
-            "example": true
-          },
-          "pageOrder": {
-            "type": "integer",
-            "format": "int16",
-            "nullable": true
-          },
-          "uploaded": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "description": "When the file was last modified",
-            "readOnly": true,
-            "example": "2023-10-26T15:51:32.000Z"
-          }
-        }
-      },
       "Invite": {
         "type": "object",
         "properties": {
@@ -4934,57 +5102,6 @@
       "Judge": {
         "type": "object",
         "properties": {}
-      },
-      "JudgeRecord": {
-        "type": "object",
-        "properties": {
-          "tournName": {
-            "type": "string",
-            "description": "Tournament name"
-          },
-          "roundDate": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Date of the round"
-          },
-          "roundLabel": {
-            "type": "string",
-            "description": "Label for the round (e.g., R2)"
-          },
-          "eventAbbr": {
-            "type": "string",
-            "description": "Event abbreviation (e.g., PF)"
-          },
-          "affTeam": {
-            "type": "string",
-            "description": "Affirmative team name"
-          },
-          "affLabel": {
-            "type": "string",
-            "description": "Affirmative label (e.g., Pro)"
-          },
-          "negTeam": {
-            "type": "string",
-            "description": "Negative team name"
-          },
-          "negLabel": {
-            "type": "string",
-            "description": "Negative label (e.g., Con)"
-          },
-          "vote": {
-            "type": "string",
-            "description": "This judge's vote (e.g., Con)"
-          },
-          "panelVote": {
-            "type": "string",
-            "description": "Panel majority vote (e.g., Con)"
-          },
-          "record": {
-            "type": "string",
-            "description": "Win-loss record for the round (e.g., 0-1)"
-          }
-        },
-        "additionalProperties": false
       },
       "NSDACategory": {
         "type": "object",
@@ -5018,115 +5135,6 @@
             "type": "s",
             "code": 202
           }
-        }
-      },
-      "ParadigmDetails": {
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "lastReviewed",
-          "paradigm",
-          "record",
-          "certifications"
-        ],
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "name": {
-            "type": "string",
-            "description": "Full name"
-          },
-          "lastReviewed": {
-            "type": "string",
-            "format": "date-time",
-            "description": "Last reviewed timestamp"
-          },
-          "paradigm": {
-            "type": "string",
-            "description": "Paradigm content"
-          },
-          "record": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/JudgeRecord"
-            }
-          },
-          "certifications": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "required": [
-                "title",
-                "description"
-              ],
-              "additionalProperties": false,
-              "properties": {
-                "title": {
-                  "type": "string"
-                },
-                "description": {
-                  "type": "string"
-                },
-                "updatedAt": {
-                  "type": "string",
-                  "format": "date-time"
-                },
-                "badge": {
-                  "type": "object",
-                  "properties": {
-                    "altText": {
-                      "type": "string"
-                    },
-                    "link": {
-                      "type": "string",
-                      "format": "uri"
-                    },
-                    "imageUrl": {
-                      "type": "string",
-                      "format": "uri"
-                    }
-                  },
-                  "additionalProperties": false
-                }
-              }
-            }
-          }
-        },
-        "example": {
-          "id": 123,
-          "name": "Kilgore Trout",
-          "lastReviewed": "1979-01-01T12:34:56Z",
-          "paradigm": "I will vote for anything involving aliens.",
-          "record": [
-            {
-              "tournName": "National Speech and Debate Tournament",
-              "roundDate": "2018-06-19T22:00:00.000Z",
-              "roundLabel": "R1",
-              "eventAbbr": "PF",
-              "affTeam": "Washington PV",
-              "affLabel": "Pro",
-              "negTeam": "Denver VX",
-              "negLabel": "Con",
-              "vote": "Con",
-              "panelVote": "Con",
-              "record": "0-1"
-            }
-          ],
-          "certifications": [
-            {
-              "title": "Alien Case Certification",
-              "description": "Certified in understanding alien based cases.",
-              "updatedAt": "2023-12-01T10:00:00Z",
-              "badge": {
-                "altText": "Alien Case Badge",
-                "link": "https://example.com/badges/alien-case",
-                "imageUrl": "https://example.com/images/alien-case-badge.png"
-              }
-            }
-          ]
         }
       },
       "Person": {
@@ -6247,6 +6255,367 @@
         ],
         "additionalProperties": false
       },
+      "InboxMessage": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The unique identifier for the message"
+          },
+          "subject": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The subject of the message"
+          },
+          "body": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 65535
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The body of the message"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 511,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The URL associated with the message"
+          },
+          "visibleAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The timestamp when the message became visible"
+          },
+          "readAt": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The timestamp when the message was read"
+          },
+          "Tourn": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "integer",
+                    "exclusiveMinimum": 0,
+                    "maximum": 9007199254740991,
+                    "description": "The unique identifier for the tournament"
+                  },
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 63
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The name of the tournament"
+                  },
+                  "webname": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 64
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The web name of the tournament"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "webname"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The tournament associated with the message"
+          },
+          "Sender": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The name of the sender"
+                  },
+                  "email": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 127
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The email of the sender"
+                  }
+                },
+                "required": [
+                  "name",
+                  "email"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The sender of the message"
+          },
+          "Email": {
+            "anyOf": [
+              {
+                "type": "object",
+                "properties": {
+                  "content": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ],
+                    "description": "The content of the email"
+                  }
+                },
+                "required": [
+                  "content"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The email associated with the message"
+          }
+        },
+        "required": [
+          "id",
+          "subject",
+          "body",
+          "url",
+          "visibleAt",
+          "readAt",
+          "Tourn",
+          "Sender",
+          "Email"
+        ],
+        "additionalProperties": false
+      },
+      "File": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The unique identifier for the file"
+          },
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filename": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "pageOrder": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uploaded": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "tag",
+          "type",
+          "label",
+          "filename",
+          "published",
+          "pageOrder",
+          "uploaded",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "JudgeRecord": {
+        "type": "object",
+        "properties": {
+          "tournName": {
+            "type": "string",
+            "description": "Tournament name"
+          },
+          "roundDate": {
+            "type": "string",
+            "description": "Date of the round",
+            "format": "date-time"
+          },
+          "roundLabel": {
+            "type": "string",
+            "description": "Label for the round (e.g., R2)"
+          },
+          "eventAbbr": {
+            "type": "string",
+            "description": "Event abbreviation (e.g., PF)"
+          },
+          "affTeam": {
+            "type": "string",
+            "description": "Affirmative team name"
+          },
+          "affLabel": {
+            "type": "string",
+            "description": "Affirmative label (e.g., Pro)"
+          },
+          "negTeam": {
+            "type": "string",
+            "description": "Negative team name"
+          },
+          "negLabel": {
+            "type": "string",
+            "description": "Negative label (e.g., Con)"
+          },
+          "vote": {
+            "type": "string",
+            "description": "This judge's vote (e.g., Con)"
+          },
+          "panelVote": {
+            "type": "string",
+            "description": "Panel majority vote (e.g., Con)"
+          },
+          "record": {
+            "type": "string",
+            "description": "Win-loss record for the round (e.g., 0-1)"
+          }
+        },
+        "required": [
+          "tournName",
+          "roundDate",
+          "roundLabel",
+          "eventAbbr",
+          "affTeam",
+          "affLabel",
+          "negTeam",
+          "negLabel",
+          "vote",
+          "panelVote",
+          "record"
+        ],
+        "additionalProperties": false,
+        "description": "A record of a judge's decision. used in paradigm details"
+      },
       "LoginResponse": {
         "type": "object",
         "properties": {
@@ -6278,6 +6647,136 @@
         ],
         "additionalProperties": false,
         "description": "A response for a login request"
+      },
+      "ParadigmDetails": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The id of the person associated with the paradigm"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The name of the person associated with the paradigm"
+          },
+          "lastReviewed": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The last reviewed timestamp of the paradigm"
+          },
+          "paradigm": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The content of the paradigm"
+          },
+          "certifications": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "title": {
+                  "type": "string",
+                  "description": "The title of the certification"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "The description of the certification"
+                },
+                "updatedAt": {
+                  "type": "string",
+                  "format": "date-time",
+                  "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$",
+                  "description": "The last updated timestamp of the certification"
+                },
+                "badge": {
+                  "description": "The badge associated with the certification",
+                  "type": "object",
+                  "properties": {
+                    "altText": {
+                      "anyOf": [
+                        {
+                          "type": "string"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The alt text for the badge image"
+                    },
+                    "link": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The link to the badge"
+                    },
+                    "imageUrl": {
+                      "anyOf": [
+                        {
+                          "type": "string",
+                          "format": "uri"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ],
+                      "description": "The URL of the badge image"
+                    }
+                  },
+                  "required": [
+                    "altText",
+                    "link",
+                    "imageUrl"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "title",
+                "description",
+                "updatedAt"
+              ],
+              "additionalProperties": false
+            },
+            "description": "The list of certifications associated with the paradigm"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "lastReviewed",
+          "paradigm",
+          "certifications"
+        ],
+        "additionalProperties": false
       }
     },
     "responses": {

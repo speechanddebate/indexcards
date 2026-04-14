@@ -29,12 +29,14 @@ export const config = {
 	COOKIE_NAME           : 'TabroomLocal',
 	COOKIE_DOMAIN         : '.dev.tabroom.com',
 	SESSION_SHARED        : 'random_string',
+	CORS_ORIGINS		  : ['http://localhost:9000', 'https://localhost:9000'],
 	CSRF                  : {
 		COOKIE_NAME   : 'CSRF_Token',
 		HEADER_NAME   : 'x-csrf-token'
 	},
 	DB_PORT               : '3306',
 	DB_DATABASE           : 'tabroom',
+	SLOW_QUERY_MS         : 1000,
 	NSDA 				  : {
 		USER_ID  : '12345678',
 		KEY      : 'IAmNotAPassword',

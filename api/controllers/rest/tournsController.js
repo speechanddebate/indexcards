@@ -103,7 +103,7 @@ export async function getSchedule(req,res){
 };
 
 export async function getPublishedFiles(req, res) {
-	const files = await fileRepo.getFiles({ tournId: req.params.tournId });
+	const files = await fileRepo.getFiles({ tournId: req.valid.params.tournId });
 	return res.status(200).json(files);
 };
 

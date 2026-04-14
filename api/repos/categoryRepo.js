@@ -22,14 +22,14 @@ function buildCategoryQuery(opts = {}) {
 		});
 	}
 
-	if (opts?.include?.judges) {
-		const judge = judgeInclude(opts.include.judges);
+	if (opts?.include?.Judges) {
+		const judge = judgeInclude(opts.include.Judges);
 		judge.as = 'judges';
 		judge.required = false;
 		query.include.push(judge);
 	}
-	if (opts?.include?.jpools) {
-		const jpool = jPoolInclude(opts.include.jpools);
+	if (opts?.include?.Jpools) {
+		const jpool = jPoolInclude(opts.include.Jpools);
 		jpool.as = 'jpools';
 		jpool.required = false;
 		query.include.push(jpool);

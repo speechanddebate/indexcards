@@ -81,8 +81,7 @@ export function collectOpenApi(router) {
 		if (layer.route) {
 
 			for (const method of Object.keys(layer.route.methods)) {
-				// Get .openapi metadata from the route
-				const openapi = layer.route.openapi;
+				const openapi = getOpenApiForMethod(layer.route.openapi, method);
 
 				// Routes must have explicit .openapi.path set at definition time
 				if (!openapi?.path) {
@@ -115,6 +114,30 @@ export function collectOpenApi(router) {
 	}
 
 	return { paths, usedTags };
+}
+
+function getOpenApiForMethod(openapi, method) {
+	if (!openapi || typeof openapi !== 'object') {
+		return openapi;
+	}
+
+	if (!openapi[method] || typeof openapi[method] !== 'object') {
+		return openapi;
+	}
+
+	const shared = Object.fromEntries(
+		Object.entries(openapi).filter(([key]) => !isHttpMethodKey(key))
+	);
+
+	return {
+		...shared,
+		...openapi[method],
+		path: openapi[method].path ?? shared.path,
+	};
+}
+
+function isHttpMethodKey(key) {
+	return ['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'].includes(key);
 }
 
 function normalizeOperation(method, routePath, openapi) {

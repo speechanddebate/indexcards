@@ -75,6 +75,45 @@ async function makeApp() {
 	return app;
 }
 
+async function makeMethodSpecificOpenApiApp() {
+	vi.resetModules();
+
+	const app = express();
+	app.use(bodyParser.json());
+
+	const route = app.route('/v1/test-method/:paramValue');
+	route.get(ValidateRequest, (req, res) => res.json({ ok: true }));
+	route.post(ValidateRequest, (req, res) => res.json({ ok: true }));
+	route.openapi = {
+		requestParams: {
+			path: z.object({
+				paramValue: z.coerce.number().positive(),
+			}),
+		},
+		get: {
+			requestParams: {
+				query: z.object({
+					queryValue: z.string(),
+				}),
+			},
+		},
+		post: {
+			requestBody: {
+				required: true,
+				content: {
+					'application/json': {
+						schema: z.object({
+							value: z.string(),
+						}),
+					},
+				},
+			},
+		},
+	};
+
+	return app;
+}
+
 describe('ValidateRequest', () => {
 	it('validates the request and attaches valid data to req.valid', async () => {
 		const { req, res } = createValidationContext();
@@ -112,5 +151,27 @@ describe('ValidateRequest', () => {
 		.get('/v1/test/123?queryValue=string')
 		.send({value: 'testValue'});
 		expect(res).not.toBeProblemResponse();
+	});
+
+	it('validates method-specific OpenAPI schemas on shared routes', async () => {
+		const app = await makeMethodSpecificOpenApiApp();
+
+		const getRes = await request(app)
+			.get('/v1/test-method/10?queryValue=ok');
+		expect(getRes).not.toBeProblemResponse();
+
+		const badGetRes = await request(app)
+			.get('/v1/test-method/10');
+		expect(badGetRes).toBeProblemResponse(400);
+
+		const postRes = await request(app)
+			.post('/v1/test-method/10')
+			.send({ value: 'ok' });
+		expect(postRes).not.toBeProblemResponse();
+
+		const badPostRes = await request(app)
+			.post('/v1/test-method/10')
+			.send({ value: 123 });
+		expect(badPostRes).toBeProblemResponse(400);
 	});
 });

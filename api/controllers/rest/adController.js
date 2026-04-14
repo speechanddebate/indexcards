@@ -1,8 +1,5 @@
 import db from '../../data/db.js';
 import config from '../../../config/config.js';
-export async function getAds(req, res) {
-	return res.status(503);
-};
 
 export async function getPublishedAds(req,res) {
 	const currentAds = await db.sequelize.query(`

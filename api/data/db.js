@@ -1,7 +1,9 @@
 import { Sequelize } from 'sequelize';
-import logger from '../helpers/logger.js';
+import logger, { getCallerFrame } from '../helpers/logger.js';
 import config from '../../config/config.js';
 import initModels from './models/init-models.js';
+
+const slowQueryMs = Number(config.SLOW_QUERY_MS || 1000);
 
 const sequelize = new Sequelize(
 	config.DB_DATABASE,
@@ -9,6 +11,24 @@ const sequelize = new Sequelize(
 	config.DB_PASS,
 	{
 		...config.sequelizeOptions,
+		benchmark: true,
+		logging: (sql, timingMs) => {
+			if (typeof timingMs === 'number') {
+				if(timingMs >= slowQueryMs){
+					logger.warn('Slow SQL query', {
+						durationMs: timingMs,
+						caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),
+					});
+				} else {
+					logger.debug('SQL query', {
+						durationMs: timingMs,
+						caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),
+					});
+				}
+
+			}
+			logger.silly(`SQL: ${sql}`);
+		},
 	}
 );
 

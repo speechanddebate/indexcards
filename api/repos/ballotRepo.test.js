@@ -16,22 +16,22 @@ describe('ballotRepo', async () => {
 			const ballot = ballots.find(b => b.id === ballotId);
 
 			expect(ballot).toBeDefined();
-			expect(ballot.judge).toBeUndefined();
-			expect(ballot.section).toBeUndefined();
-			expect(ballot.scores).toBeUndefined();
+			expect(ballot.Judge).toBeUndefined();
+			expect(ballot.Section).toBeUndefined();
+			expect(ballot.Scores).toBeUndefined();
 		});
-		it('includes judge when requested', async () => {
+		it('includes Judge when requested', async () => {
 			const { judgeId } = await factories.judge.createTestJudge();
 			const ballotId = await ballotRepo.createBallot({sectionId, judgeId});
 
 			const ballot = await ballotRepo.getBallot(
 				ballotId,
-				{ include: { judge: true } }
+				{ include: { Judge: true } }
 			);
 
 			expect(ballot).toBeDefined();
-			expect(ballot.judge).toBeDefined();
-			expect(ballot.judge.id).toBeDefined();
+			expect(ballot.Judge).toBeDefined();
+			expect(ballot.Judge.id).toBeDefined();
 		});
 		it('includes scores when requested', async () => {
 			const ballotId = await ballotRepo.createBallot({sectionId});

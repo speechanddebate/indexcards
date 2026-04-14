@@ -1,4 +1,16 @@
 import * as z from 'zod';
+import * as utils from './utils.js';
+
+export const activeCircuitsResponse = z.array(
+	z.object({
+		id: utils.id.meta({description: 'The unique identifier of the circuit'}),
+		name: z.string().max(63).meta({description: 'The name of the circuit'}),
+		abbr: z.string().max(15).meta({description: 'The abbreviation of the circuit'}),
+		state: utils.TwoLetterCode.nullable().meta({description: 'The state of the circuit'}),
+		country: utils.TwoLetterCode.nullable().meta({description: 'The country of the circuit'}),
+		tournCount: z.number().int().positive().meta({description: 'The number of tournaments in the circuit'}),
+	})
+);
 
 export const restCircuit = z.object({
 	id: z.number().positive().readonly(),

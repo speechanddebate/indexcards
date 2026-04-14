@@ -43,7 +43,7 @@ export const toDomain = dbRow => {
 		domain.Scores = dbRow.ballot_scores.map(scoreToDomain);
 	}
 	if(dbRow.judge_judge){
-		domain.judge = judgeToDomain(dbRow.judge_judge);
+		domain.Judge = judgeToDomain(dbRow.judge_judge);
 	}
 	if(dbRow.panel_panel){
 		domain.Section = sectionToDomain(dbRow.panel_panel);

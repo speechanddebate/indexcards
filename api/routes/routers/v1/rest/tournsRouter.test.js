@@ -2,6 +2,13 @@ import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories';
 import { faker } from '@faker-js/faker';
+import { File } from '../../../openapi/schemas';
+
+let testTourn;
+beforeAll(async () => {
+	({tournId: testTourn } = await factories.tourn.createTestTourn());
+	await factories.file.createTestFile({ tournId: testTourn, published: true });
+});
 
 describe('GET /rest/tourns', () => {
 	it('Returns the correct shape for the circuit calendar request', async () => {
@@ -51,3 +58,26 @@ describe('GET /rest/tourns', () => {
 		expect(body.length).toBeGreaterThan(0);
 	});
 });
+describe('GET /rest/tourns/:id/files', () => {
+	it('should return the files for a specific tourn', async () => {
+		const res = await request(server)
+            .get(`/v1/rest/tourns/${testTourn}/files`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/)
+            .expect(200);
+
+		const body = res.body;
+		body.forEach(element => {
+			expect(element).toMatchSchema(File);
+		});
+	});
+	it('should return 404 if the tourn does not exist', async () => {
+		const res = await request(server)
+            .get(`/v1/rest/tourns/9999/files`)
+            .set('Accept', 'application/json')
+            .expect('Content-Type', /json/);
+
+		expect(res).toBeProblemResponse(404);
+	});
+});
+

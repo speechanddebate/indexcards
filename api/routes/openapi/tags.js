@@ -37,12 +37,24 @@ export const tags = [
 		description: 'Endpoints for external access to Mason data',
 	},
 	{
+		name: 'Inbox',
+		description: 'Endpoints for managing user inbox messages',
+	},
+	{
+		name: 'Push Notifications',
+		description: 'Endpoints for managing user push notifications',
+	},
+	{
 		name: 'Tournament',
 		description: 'Endpoints for managing tournaments',
 	},
 	{
 		name: 'Category',
 		description: 'Endpoints for managing categories within tournaments',
+	},
+	{
+		name: 'Session',
+		description: 'Endpoints related to a users session',
 	},
 	{
 		name: 'Sites & Rooms',
@@ -88,6 +100,14 @@ export const declaredTagGroups = [
 			'Category',
 			'Sites & Rooms',
 			'Schools',
+		],
+	},
+	{
+		name: 'User',
+		tags: [
+			'Inbox',
+			'Session',
+			'Push Notifications',
 		],
 	},
 ];

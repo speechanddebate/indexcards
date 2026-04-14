@@ -22,10 +22,10 @@ export const toDomain = dbRow => {
 		domain.Tourn = tournDomain(dbRow.tourn_tourn);
 	}
 	if(Array.isArray(dbRow.judges)) {
-		domain.judges = dbRow.judges.map(judge => judgeDomain(judge));
+		domain.Judges = dbRow.judges.map(judge => judgeDomain(judge));
 	}
 	if(Array.isArray(dbRow.jpools)) {
-		domain.jpools = dbRow.jpools.map(jpool => jPoolDomain(jpool));
+		domain.Jpools = dbRow.jpools.map(jpool => jPoolDomain(jpool));
 	}
 	return domain;
 };

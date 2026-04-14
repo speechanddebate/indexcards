@@ -265,6 +265,8 @@ export default function initModels(sequelize) {
 		concessionPurchase.hasMany(concessionPurchaseOption, { as: "concession_purchase_options", foreignKey: "concession_purchase"});
 		permission.belongsTo(district, { as: "district_district", foreignKey: "district"});
 		district.hasMany(permission, { as: "permissions", foreignKey: "district"});
+		message.belongsTo(email, { as: "email_email", foreignKey: "email"});
+		email.hasMany(message, { as: "messages", foreignKey: "email"});
 		ballot.belongsTo(entry, { as: "entry_entry", foreignKey: "entry"});
 		entry.hasMany(ballot, { as: "ballots", foreignKey: "entry"});
 		campusLog.belongsTo(entry, { as: "entry_entry", foreignKey: "entry"});
@@ -359,6 +361,8 @@ export default function initModels(sequelize) {
 		person.hasMany(judge, { as: "registered_by_judges", foreignKey: "registered_by"});
 		message.belongsTo(person, { as: "person_person", foreignKey: "person"});
 		person.hasMany(message, { as: "messages", foreignKey: "person"});
+		message.belongsTo(person, { as: "sender_person", foreignKey: "sender"});
+		person.hasMany(message, { as: "sender_messages", foreignKey: "sender"});
 		permission.belongsTo(person, { as: "person_person", foreignKey: "person"});
 		person.hasMany(permission, { as: "permissions", foreignKey: "person"});
 		personQuiz.belongsTo(person, { as: "person_person", foreignKey: "person"});

@@ -1,18 +1,36 @@
 import { Router } from 'express';
-import { inboxList, getUnreadCount, markMessageRead, markAllMessagesRead, markMessageDeleted } from '../../../../controllers/user/inbox.js';
+import * as c from '../../../../controllers/user/inbox.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
+import { InboxMessage } from '../../../openapi/schemas/Message.js';
+import z from 'zod';
+import * as utils from '../../../openapi/schemas/utils.js';
+import { ValidateRequest } from '../../../../middleware/validation.js';
 
 const router = Router();
 
 router.use(requireLogin);
 
-router.route('/list').get(inboxList).openapi = {
-	path: '/user/inbox/list',
-	tags: ['legacy', 'Inbox'],
-	responses: { 200: { description: 'Inbox list' }, default: { $ref: '#/components/responses/ErrorResponse' } },
+router.route('/').get(c.inboxList).openapi = {
+	path: '/user/inbox',
+	operationId: 'UserInbox',
+	summary: 'Get messages',
+	description: 'Get the list of messages for the logged-in user',
+	tags: ['Orval','Inbox'],
+	responses: {
+		200: {
+			description: 'Inbox list',
+			content: {
+				'application/json': {
+					schema:  z.array(InboxMessage),
+				},
+			},
+		},
+	},
 };
-router.route('/unread').get(getUnreadCount).openapi = {
+router.route('/unread').get(c.getUnreadCount).openapi = {
 	path: '/user/inbox/unread',
+	summary: 'Unread count',
+	description: 'Get the count of unread messages for the logged-in user',
 	operationId: 'UserInboxUnread',
 	tags: ['Inbox','Orval'],
 	responses: {
@@ -31,20 +49,58 @@ router.route('/unread').get(getUnreadCount).openapi = {
 		},
 	},
 };
-router.route('/markRead').post(markMessageRead).openapi = {
-	path: '/user/inbox/markRead',
-	tags: ['legacy', 'Inbox'],
-	responses: { 200: { description: 'Message marked as read' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
-router.route('/markAllRead').post(markAllMessagesRead).openapi = {
-	path: '/user/inbox/markAllRead',
-	tags: ['legacy', 'Inbox'],
-	responses: { 200: { description: 'All messages marked as read' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
-router.route('/markDeleted').post(markMessageDeleted).openapi = {
-	path: '/user/inbox/markDeleted',
-	tags: ['legacy', 'Inbox'],
-	responses: { 200: { description: 'Message marked as deleted' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
 
+router.route('/markAllRead').post(c.readAllMessages).openapi = {
+	path: '/user/inbox/markAllRead',
+	summary: 'Mark all messages as read',
+	description: 'Mark all visible messages for the logged-in user as read',
+	tags: ['Orval', 'Inbox'],
+	responses: { 204: { description: 'All messages marked as read' } },
+};
+router.route('/:messageId')
+	.get(ValidateRequest, c.getMessage)
+	.delete(ValidateRequest, c.deleteMessage).openapi = {
+		path: '/user/inbox/{messageId}',
+		tags: ['Orval', 'Inbox'],
+		requestParams: {
+			path: z.object({
+				messageId: utils.id.meta({ description: 'The ID of the message' }),
+			}),
+		},
+		get: {
+			operationId: 'UserInboxGetMessage',
+			summary: 'Get message',
+			description: 'Get a specific message from the users inbox',
+			responses: {
+				200: {
+					description: 'Inbox message',
+					content: {
+						'application/json': {
+							schema: InboxMessage,
+						},
+					},
+				},
+			},
+		},
+		delete: {
+			operationId: 'UserInboxMarkDeleted',
+			summary: 'Delete message',
+			description: 'Delete a specific message from the users inbox',
+			responses: { 204: { description: 'Message marked as deleted' } },
+		},
+	};
+
+router.route('/:messageId/markRead').post(ValidateRequest, c.readMessage).openapi = {
+	path: '/user/inbox/{messageId}/markRead',
+	operationId: 'UserInboxMarkRead',
+	summary: 'Mark message as read',
+	description: 'Mark a specific message as read',
+	tags: ['Orval', 'Inbox'],
+	requestParams: {
+		path: z.object({
+			messageId: utils.id.meta({ description: 'The ID of the message to mark as read' }),
+		}),
+	},
+	responses: { 204: { description: 'Message marked as read' } },
+};
 export default router;

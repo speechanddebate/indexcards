@@ -44,11 +44,19 @@ export default class message extends Model {
 				},
 				sender: {
 						type: DataTypes.INTEGER,
-						allowNull: true
+						allowNull: true,
+						references: {
+								model: 'person',
+								key: 'id'
+						}
 				},
 				email: {
 						type: DataTypes.INTEGER,
-						allowNull: true
+						allowNull: true,
+						references: {
+								model: 'email',
+								key: 'id'
+						}
 				},
 				created_at: {
 						type: DataTypes.DATE,
@@ -103,6 +111,13 @@ export default class message extends Model {
 								using: "BTREE",
 								fields: [
 										{ name: "tourn" },
+								]
+						},
+						{
+								name: "fk_message_email",
+								using: "BTREE",
+								fields: [
+										{ name: "email" },
 								]
 						},
 				]

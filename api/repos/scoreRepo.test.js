@@ -11,19 +11,19 @@ describe('scoreRepo', async () => {
 	describe('buildScoreQuery', () => {
 
 		it('does not include associations by default', async () => {
-			const scoreId = await scoreRepo.createScore({ballotId});
+			const scoreId = await scoreRepo.createScore({ballot: ballotId});
 
 			const scores = await scoreRepo.getScores({ ballotId });
 			const score = scores.find(b => b.id === scoreId);
 
 			expect(score).toBeDefined();
 			expect(score.judge).toBeUndefined();
-			expect(score.ballot).toBeUndefined();
+			expect(score.Ballot).toBeUndefined();
 			expect(score.scores).toBeUndefined();
 		});
 
 		it('includes ballot when requested', async () => {
-			const scoreId = await scoreRepo.createScore({ballotId});
+			const scoreId = await scoreRepo.createScore({ballot: ballotId});
 
 			const score = await scoreRepo.getScore(
 				scoreId,
@@ -31,8 +31,8 @@ describe('scoreRepo', async () => {
 			);
 
 			expect(score).toBeDefined();
-			expect(score.ballot).toBeDefined();
-			expect(score.ballot.id).toBeDefined();
+			expect(score.Ballot).toBeDefined();
+			expect(score.Ballot.id).toBeDefined();
 		});
 	});
 
@@ -54,13 +54,13 @@ describe('scoreRepo', async () => {
 		});
 
 		it('should return scores for a given ballotId', async () => {
-			const scoreId = await scoreRepo.createScore({ ballotId });
+			const scoreId = await scoreRepo.createScore({ ballot: ballotId });
 			const scores = await scoreRepo.getScores({ ballotId });
 			expect(Array.isArray(scores)).toBe(true);
 			expect(scores.length).toBeGreaterThan(0);
 			const found = scores.find(b => b.id === scoreId);
 			expect(found).toBeDefined();
-			expect(found.ballotId).toBe(ballotId);
+			expect(found.ballot).toBe(ballotId);
 		});
 
 		it('should return all scores when no scope is provided', async () => {
@@ -78,7 +78,7 @@ describe('scoreRepo', async () => {
 	describe('createScore', async () => {
 
 		it('should create a score and retrieve it', async () => {
-			const scoreId = await scoreRepo.createScore({ ballotId });
+			const scoreId = await scoreRepo.createScore({ ballot: ballotId });
 			const score = await scoreRepo.getScore(scoreId);
 
 			// Ensure that id, updatedAt and createdAt are present and not null

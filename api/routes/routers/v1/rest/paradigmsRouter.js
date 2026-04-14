@@ -2,7 +2,9 @@ import z from 'zod';
 import controller from '../../../../controllers/rest/paradigmsController.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
 import { ValidateRequest } from '../../../../middleware/validation.js';
+import { JudgeRecord } from '../../../openapi/schemas/Judge.js';
 import { Router } from 'express';
+import { ParadigmDetails } from '../../../openapi/schemas/Person.js';
 
 const router = Router();
 
@@ -67,12 +69,35 @@ router.route('/:personId').get(ValidateRequest, controller.getParadigmByPersonId
 			description: 'Paradigm details for the specified person ID',
 			content: {
 				'application/json': {
-					schema: {'$ref': '#/components/schemas/ParadigmDetails'},
+					schema: ParadigmDetails,
 				},
 			},
 		},
 		404: { $ref: '#/components/responses/NotFound' },
 		default: { $ref: '#/components/responses/ErrorResponse' },
+	},
+};
+router.route('/:personId/record').get(ValidateRequest, controller.getJudgingRecord).openapi = {
+	path: '/rest/paradigms/{personId}/record',
+	summary: 'Get judging record by person ID',
+	operationId: 'restParadigmsRecord',
+	tags: ['Paradigms', 'Orval'],
+	requestParams: {
+		path: z.object({
+			personId: z.coerce.number().positive().meta({
+				description: 'ID of the person to get paradigm details for',
+			}),
+		}),
+	},
+	responses: {
+		200: {
+			description: 'Judging record for the specified person ID',
+			content: {
+				'application/json': {
+					schema: z.array(JudgeRecord),
+				},
+			},
+		},
 	},
 };
 

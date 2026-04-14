@@ -11,7 +11,10 @@ const sequelize = new Sequelize(
 	config.DB_DATABASE,
 	config.DB_USER,
 	config.DB_PASS,
-	config.sequelizeOptions
+	{
+		...config.sequelizeOptions,
+		logging: false,
+	}
 );
 
 // Initialize the data objects.

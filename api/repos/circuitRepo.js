@@ -14,7 +14,12 @@ function buildCircuitQuery(opts = {}) {
 	if(opts.active){
 		query.where.active = 1;
 	}
-
+	if(opts.limit){
+		query.limit = opts.limit;
+	}
+	if(opts.offset){
+		query.offset = opts.offset;
+	}
 	if (opts.include?.tourns) {
 		query.include.push({
 			model: db.tournCircuit,
@@ -93,6 +98,8 @@ async function getActiveCircuits(params = {}){
 		endDate,
 		state = null,
 		country = null,
+		limit,
+		offset = 0,
 	} = params;
 
 	if (!startDate || !endDate) {
@@ -111,6 +118,7 @@ async function getActiveCircuits(params = {}){
 
 	const result = await db.circuit.findAll({
 		where,
+		subQuery: false,
 		attributes: [
 			'id',
 			'abbr',
@@ -140,6 +148,8 @@ async function getActiveCircuits(params = {}){
 		}],
 		group: ['circuit.id', 'circuit.abbr', 'circuit.name', 'circuit.state', 'circuit.country'],
 		order: [['name', 'ASC']],
+		limit: limit,
+		offset: offset,
 		raw: true,
 	});
 
