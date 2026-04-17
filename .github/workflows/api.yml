@@ -19,7 +19,31 @@ env:
     SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
 
 jobs:
-  build:
+  quality-lint:
+    name: Quality - Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: cp config/config.sample.js config/config.js
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+      - run: npm ci
+      - run: npm run lint
+
+  quality-typecheck:
+    name: Quality - Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: cp config/config.sample.js config/config.js
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: package.json
+      - run: npm ci
+      - run: npm run typecheck
+
+  test:
     runs-on: ubuntu-latest
     services:
       mariadb-test:
@@ -44,8 +68,6 @@ jobs:
       - name: Install packages
         run: npm ci
 
-      - name: Lint
-        run: npm run lint
 
       - name: Shutdown Ubuntu MySQL
         run: sudo service mysql stop
