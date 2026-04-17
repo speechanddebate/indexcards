@@ -10,6 +10,6 @@ export default defineConfig({
 			include: ['api/**/*.{js,ts,tsx}'],
 			exclude: ['**/data/models/**'],
 			cleanOnRerun: false,
-			},
+		},
 	},
 });

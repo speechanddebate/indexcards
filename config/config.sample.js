@@ -1,4 +1,4 @@
-import dotenv from 'dotenv'
+import dotenv from 'dotenv';
 dotenv.config({ quiet: true });
 
 export const config = {
@@ -8,7 +8,7 @@ export const config = {
 	RATE_MAX              : 100000,
 	RATE_DELAY            : 0,
 	MESSAGE_RATE_MAX      : 15 * 1000,
-	MESSAGE_RATE_MAX	  : 1,
+	MESSAGE_RATE_WINDOW   : 1,
 	SEARCH_RATE_WINDOW    : 30 * 1000,
 	SEARCH_RATE_MAX       : 5,
 	BASE_URL 			  : 'http://api.dev.tabroom.com',
@@ -36,7 +36,7 @@ export const config = {
 	CORS_ORIGINS		  : ['http://localhost:9000', 'https://localhost:9000'],
 	CSRF                  : {
 		COOKIE_NAME   : 'CSRF_Token',
-		HEADER_NAME   : 'x-csrf-token'
+		HEADER_NAME   : 'x-csrf-token',
 	},
 	DB_PORT               : '3306',
 	DB_DATABASE           : 'tabroom',
@@ -68,7 +68,7 @@ export const config = {
 		URL      : `https://api.onesignal.com/apps/someRandomUUID`,
 		appId    : 'YeahNO',
 		safariId : 'web.onesignal.auto.nothingmuchtoseeherefolks',
-		appKey   : 'cryHavocAndLetLooseTheDogsofWar!'
+		appKey   : 'cryHavocAndLetLooseTheDogsofWar!',
 	},
 	AWS_CREDENTIALS        : {
 		accessKeyId        : 'DefNo',
@@ -96,12 +96,11 @@ export const config = {
 	},
 	loki: {
 		host: '',
-	}
+	},
 };
 
 const env = process.env.NODE_ENV || 'development';
 
-/* eslint-disable indent */
 switch (env) {
 	case 'staging':
 		config.DB_HOST          = 'localhost';
@@ -135,7 +134,6 @@ switch (env) {
 	default:
 		break;
 }
-/* eslint-enable indent */
 
 config.sequelizeOptions.host = config.DB_HOST;
 

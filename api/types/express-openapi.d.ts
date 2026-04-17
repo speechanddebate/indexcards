@@ -1,4 +1,4 @@
-import type { ZodTypeAny } from 'zod';
+import type { ZodObject } from 'zod';
 /**
  * extends the default route type to add our openapi definition.
  */
@@ -6,9 +6,9 @@ interface RouteOpenApiConfig {
 	path: string,
 	operationId: string,
 	requestParams?: {
-		path?: ZodTypeAny;
-		query?: ZodTypeAny;
-		body?: ZodTypeAny;
+		path?: ZodObject<unknown>;
+		query?: ZodObject<unknown>;
+		body?: ZodObject<unknown>;
 	};
 	[key: string]: unknown;
 }

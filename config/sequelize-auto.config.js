@@ -24,8 +24,8 @@ const autoConfig = {
 
 		additional      : {
 			timestamps : false,
-		}
+		},
 	},
-}
+};
 
 export default autoConfig;

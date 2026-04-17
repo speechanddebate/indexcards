@@ -17,17 +17,17 @@ declare global {
 			actor?: Actor;
 		}
 	}
-	type Actor = {
-		id: number;
-		Person: unknown;
-		type: 'person';
-		can: (record: string, action: string, scope: string, id?: number) => boolean;
-		assert: (record: string, action: string, scope: string, id?: number) => void;
-		allowedIds: (resource: string, action: string, opts: Record<string, unknown>) => {
-			ids: number[];
-			all: boolean;
-		};
-	}
+}
+type Actor = {
+	id: number;
+	Person: unknown;
+	type: 'person';
+	can: (record: string, action: string, scope: string, id?: number) => boolean;
+	assert: (record: string, action: string, scope: string, id?: number) => void;
+	allowedIds: (resource: string, action: string, opts: Record<string, unknown>) => {
+		ids: number[];
+		all: boolean;
+	};
 }
 
 export {};
