@@ -11,6 +11,7 @@ import permission from './permission.js';
 import resultSet from './result_set.js';
 import room from './room.js';
 import round from './round.js';
+import school from './school.js';
 import score from './score.js';
 import section from './section.js';
 import session from './session.js';
@@ -18,6 +19,8 @@ import site from './site.js';
 import timeslot from './timeslot.js';
 import tourn from './tourn.js';
 import person from './person.js';
+import personQuiz from './personQuiz.js';
+import quiz from './quiz.js';
 import student from './student.js';
 import webpage from './webpage.js';
 
@@ -35,6 +38,7 @@ const factories = {
 	resultSet,
 	room,
 	round,
+	school,
 	score,
 	section,
 	session,
@@ -42,6 +46,8 @@ const factories = {
 	timeslot,
 	tourn,
 	person,
+	personQuiz,
+	quiz,
 	student,
 	webpage,
 };

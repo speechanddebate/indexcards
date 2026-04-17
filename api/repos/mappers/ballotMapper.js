@@ -39,8 +39,8 @@ export const toDomain = dbRow => {
 	if(dbRow.round_round){
 		domain.Round = roundToDomain(dbRow.round_round);
 	}
-	if(dbRow.ballot_scores && Array.isArray(dbRow.ballot_scores)){
-		domain.Scores = dbRow.ballot_scores.map(scoreToDomain);
+	if(dbRow.scores && Array.isArray(dbRow.scores)){
+		domain.Scores = dbRow.scores.map(scoreToDomain);
 	}
 	if(dbRow.judge_judge){
 		domain.Judge = judgeToDomain(dbRow.judge_judge);

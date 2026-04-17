@@ -1,5 +1,7 @@
+
 import factories from '../../tests/factories/index.js';
 import personRepo, { personInclude } from './personRepo.js';
+import { expect } from 'chai';
 
 describe('PersonRepo', () => {
 	describe('buildPersonQuery', () => {
@@ -116,6 +118,33 @@ describe('PersonRepo', () => {
 			expect(person.id).toBe(personId);
 			expect(person.Judges).toBeDefined();
 			expect(Array.isArray(person.Judges)).toBe(true);
+		});
+		it('attaches PersonQuizzes when include.PersonQuizzes is true', async () => {
+			// Arrange
+			const { personId } = await factories.person.createTestPerson();
+			const { quizId } = await factories.quiz.createTestQuiz({ person: personId });
+			await factories.personQuiz.createTestPersonQuiz({
+				person: personId,
+				quiz: quizId,
+				hidden: false,
+				pending: false,
+				completed: true,
+				approvedBy: null,
+			});
+			// Act
+			const person = await personRepo.getPerson(personId, {
+				include: {
+					PersonQuizzes: true,
+				},
+			});
+
+			// Assert
+			expect(person).toBeDefined();
+			expect(person.PersonQuizzes).toBeDefined();
+			expect(Array.isArray(person.PersonQuizzes)).toBe(true);
+			expect(person.PersonQuizzes.length).toBeGreaterThan(0);
+			expect(person.PersonQuizzes[0]).toBeDefined();
+
 		});
 		describe('filters by hasValidParadigm', () => {
 			it('excludes persons without a paradigm setting', async () => {

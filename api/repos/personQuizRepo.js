@@ -14,7 +14,7 @@ function buildPersonQuizQuery(opts = {}) {
 	if(opts.include?.Quiz){
 		query.include.push({
 			...quizInclude(opts.include.Quiz),
-			as: 'personQuiz_quiz',
+			as: 'quiz_quiz',
 		});
 	}
 
@@ -38,7 +38,16 @@ function buildPersonQuizQuery(opts = {}) {
 export function personQuizInclude(opts = {}) {
 	return {
 		model: db.personQuiz,
-		as: 'personQuizzes',
+		as: 'person_quizzes',
 		...buildPersonQuizQuery(opts),
 	};
 }
+
+async function createPersonQuiz(data) {
+	const newPersonQuiz = await db.personQuiz.create(data);
+	return newPersonQuiz.id;
+}
+
+export default {
+	createPersonQuiz,
+};

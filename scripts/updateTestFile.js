@@ -35,13 +35,25 @@ if (DB_PORT) dumpArgs.push(`-P${DB_PORT}`);
 
 dumpArgs.push(DB_NAME);
 // 3. Dump the DB
-const dumpResult = spawnSync('/usr/bin/mariadb-dump', dumpArgs, {
+const dumpCommand = fs.existsSync('/usr/bin/mariadb-dump')
+	? '/usr/bin/mariadb-dump'
+	: 'mariadb-dump';
+
+const dumpResult = spawnSync(dumpCommand, dumpArgs, {
 	encoding: 'utf8',
 	maxBuffer: 1024 * 1024 * 300, // 300 MB
 });
 
+if (dumpResult.error) {
+	throw dumpResult.error;
+}
+
+if (dumpResult.status !== 0) {
+	throw new Error(`mariadb-dump failed with code ${dumpResult.status}: ${dumpResult.stderr || 'no stderr output'}`);
+}
+
 // 4. Remove DEFINER tags
-const cleaned = dumpResult.stdout
+const cleaned = (dumpResult.stdout || '')
 	.replace(/\/\*![0-9]{5} DEFINER=`[^`]+`@`[^`]+`\*\//g, '')
 	.replace(/DEFINER=`[^`]+`@`[^`]+`/g, '');
 

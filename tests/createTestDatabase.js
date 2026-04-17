@@ -25,21 +25,20 @@ const pruneDatabase = async () => {
 		274619,274623,274624,274626,274628,275386,275387,275389,275933,275934,275943,
 		291000,291003,291004,282898,286196,289814,289815,289816,289819,289821,
 	];
+	await db.sequelize.query(`
+		delete from event where id NOT IN (:keeperEvents)
+	`, {
+		replacements: {
+			keeperEvents,
+		},
+		type: db.sequelize.QueryTypes.DELETE,
+	});
 
 	await db.sequelize.query(`
 		delete from tourn where id NOT IN (:keeperTourns)
 	`, {
 		replacements: {
 			keeperTourns,
-		},
-		type: db.sequelize.QueryTypes.DELETE,
-	});
-
-	await db.sequelize.query(`
-		delete from event where id NOT IN (:keeperEvents)
-	`, {
-		replacements: {
-			keeperEvents,
 		},
 		type: db.sequelize.QueryTypes.DELETE,
 	});
@@ -86,6 +85,12 @@ const pruneDatabase = async () => {
 	});
 
 	await db.sequelize.query(`
+		truncate table session
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
 		DELETE
 			FROM person
 		WHERE 1=1
@@ -121,12 +126,6 @@ const pruneDatabase = async () => {
 
 	await db.sequelize.query(`
 		delete from site where not exists (select ts.id from tourn_site ts where ts.site = site.id);
-	`, {
-		type: db.sequelize.QueryTypes.DELETE,
-	});
-
-	await db.sequelize.query(`
-		truncate table session
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
@@ -436,7 +435,13 @@ const pruneDatabase = async () => {
 	});
 
 	await db.sequelize.query(`
-		truncate table email
+		truncate table message
+	`, {
+		type: db.sequelize.QueryTypes.DELETE,
+	});
+
+	await db.sequelize.query(`
+		delete from email
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});
@@ -449,12 +454,6 @@ const pruneDatabase = async () => {
 
 	await db.sequelize.query(`
 		truncate table fine
-	`, {
-		type: db.sequelize.QueryTypes.DELETE,
-	});
-
-	await db.sequelize.query(`
-		truncate table message
 	`, {
 		type: db.sequelize.QueryTypes.DELETE,
 	});

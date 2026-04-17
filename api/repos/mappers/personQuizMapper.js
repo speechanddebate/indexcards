@@ -17,8 +17,8 @@ export const FIELD_MAP = {
 export const toDomain = dbRow => {
 	if (!dbRow) return null;
 	const personQuiz = genericToDomain(dbRow, FIELD_MAP);
-	if (dbRow.personQuiz_quiz) {
-		personQuiz.Quiz = quizToDomain(dbRow.personQuiz_quiz);
+	if (dbRow.quiz_quiz) {
+		personQuiz.Quiz = quizToDomain(dbRow.quiz_quiz);
 	}
 	return personQuiz;
 };

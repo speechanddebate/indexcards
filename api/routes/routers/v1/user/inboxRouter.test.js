@@ -4,7 +4,7 @@ import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories/index.js';
 import z from 'zod';
 import { InboxMessage } from '../../../openapi/schemas/Message.js';
-import messageRepo from '../../../../repos/messageRepo.js';;
+import messageRepo from '../../../../repos/messageRepo.js';
 
 describe('Inbox Router', () => {
 	let personId;
@@ -25,6 +25,7 @@ describe('Inbox Router', () => {
 				.expect('Content-Type', /json/)
 				.expect(200);
 
+			expect(res).not.toBeProblemResponse();
 			expect(res.body).toMatchSchema(z.array(InboxMessage));
 		});
 	});
@@ -81,7 +82,8 @@ describe('Inbox Router', () => {
 			const res = await request(server)
 				.get(`/v1/user/inbox/${messageId}`)
 				.set('Accept', 'application/json')
-				.set('Authorization', `Bearer ${userkey}`);
+				.set('Authorization', `Bearer ${userkey}`)
+				.expect(200);
 
 			expect(res).not.toBeProblemResponse();
 			expect(res.body).toMatchSchema(InboxMessage);

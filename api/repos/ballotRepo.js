@@ -36,12 +36,12 @@ function buildBallotQuery(opts = {}){
 	if(opts.include?.Scores){
 		query.include.push({
 			...scoreInclude(opts.include.Scores),
-			as: 'ballot_scores',
+			as: 'scores',
 			required: opts.include.Scores.required ?? false,
 		});
 	}
 	if (opts.winnerBallot) {
-		const existing = query.include.find(i => i.as === 'ballot_scores');
+		const existing = query.include.find(i => i.as === 'scores');
 
 		if (existing) {
 			existing.required = true;

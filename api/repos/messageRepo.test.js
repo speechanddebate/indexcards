@@ -3,6 +3,64 @@ import factories from '../../tests/factories';
 import { faker } from '@faker-js/faker';
 
 describe('messageRepo',() =>{
+	describe('buildMessageQuery', () => {
+		it('does not include associations by default', async () => {
+			const { personId: recipientId } = await factories.person.createTestPerson();
+			const { personId: senderId } = await factories.person.createTestPerson();
+			const { tournId } = await factories.tourn.createTestTourn();
+			const { messageId } = await factories.message.createTestMessage({
+				person: recipientId,
+				sender: senderId,
+				tourn: tournId,
+			});
+
+			const message = await messageRepo.getMessage(messageId, recipientId);
+
+			expect(message).toBeDefined();
+			expect(message.sender_person).toBeUndefined();
+			expect(message.tourn_tourn).toBeUndefined();
+			expect(message.email_email).toBeUndefined();
+		});
+
+		it('includes sender when requested', async () => {
+			const { personId: recipientId } = await factories.person.createTestPerson();
+			const { personId: senderId } = await factories.person.createTestPerson();
+			const { messageId } = await factories.message.createTestMessage({
+				person: recipientId,
+				sender: senderId,
+			});
+
+			const message = await messageRepo.getMessage(messageId, recipientId, {
+				include: {
+					Sender: true,
+				},
+			});
+
+			expect(message).toBeDefined();
+			expect(message.sender_person).toBeDefined();
+			expect(message.sender_person.id).toBe(senderId);
+		});
+
+		it('includes tourn when requested', async () => {
+			const { personId: recipientId } = await factories.person.createTestPerson();
+			const { tournId } = await factories.tourn.createTestTourn();
+			const { messageId } = await factories.message.createTestMessage({
+				person: recipientId,
+				tourn: tournId,
+			});
+
+			const message = await messageRepo.getMessage(messageId, recipientId, {
+				include: {
+					Tourn: true,
+				},
+			});
+
+			expect(message).toBeDefined();
+			expect(message.tourn_tourn).toBeDefined();
+			expect(message.tourn_tourn.id).toBe(tournId);
+		});
+	});
+
 	describe('getMessage',() =>{
 		it('returns a specific message for a specific person', async () => {
 			const { personId } = await factories.person.createTestPerson();
@@ -30,7 +88,6 @@ describe('messageRepo',() =>{
 			expect(message).not.toBeNull();
 			expect(message.id).toBe(messageId);
 		});
-
 	});
 	describe('getMessages',() =>{
 		it('returns all messages for a specific person', async () => {

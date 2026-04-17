@@ -28,7 +28,7 @@ async function buildMessageQuery(opts = {}) {
 	if(opts.include?.Sender){
 		query.include.push({
 			...(await personInclude(opts.include.Sender)),
-			as: 'sender_sender',
+			as: 'sender_person',
 			required: false,
 		});
 	}

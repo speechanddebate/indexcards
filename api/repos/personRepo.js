@@ -83,7 +83,7 @@ async function buildPersonQuery(opts = {}) {
 	if (opts.include?.PersonQuizzes) {
 		query.include.push({
 			...personQuizInclude(opts.include.PersonQuizzes),
-			as: 'personQuizzes',
+			as: 'person_quizzes',
 			required: false,
 		});
 	}
