@@ -2,7 +2,7 @@
 import * as buildTargetModule from './buildTarget.js';
 import { loadExtAuthContext, loadTournAuthContext } from './authContext.js';
 import {requireAreaAccess, requireSiteAdmin, requireAccess, checkAccess, createActor} from './authorization.js';
-import { createContext } from '../../../tests/httpMocks.js';
+import { createContext } from '../../../tests/httpMocks.ts';
 
 describe('Authorization Middleware', () => {
 	describe('requireAreaAccess', () => {

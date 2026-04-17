@@ -1,7 +1,8 @@
 import config from '../../config/config.js';
 import { Unauthorized } from '../helpers/problem.js';
+import type { Request, Response, NextFunction } from 'express';
 
-export default async function csrfMiddleware(req,res,next){
+export default async function csrfMiddleware(req: Request, res: Response, next: NextFunction){
 	if(req.authType !== 'cookie'){
 		return next();
 	}

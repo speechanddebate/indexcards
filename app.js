@@ -7,9 +7,9 @@ import cookieParser from 'cookie-parser';
 import config from './config/config.js';
 import errorHandler from './api/helpers/errors/errorHandler.js';
 import { Authenticate } from './api/middleware/authentication.js';
-import csrfMiddleware from './api/middleware/csrfMiddleware.js';
+import csrfMiddleware from './api/middleware/csrfMiddleware.ts';
 import v1Router from './api/routes/routers/v1/indexRouter.js';
-import { rateLimiterMiddleware } from './api/middleware/rateLimiter.js';
+import { rateLimiterMiddleware } from './api/middleware/rateLimiter.ts';
 
 import {
 	localAuth,

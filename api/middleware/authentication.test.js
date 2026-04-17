@@ -4,7 +4,7 @@ import sessionRepo from '../repos/sessionRepo.js';
 import personRepo from '../repos/personRepo.js';
 import { Authenticate } from './authentication.js';
 import userData from '../../tests/testFixtures';
-import { createContext } from '../../tests/httpMocks.js';
+import { createContext } from '../../tests/httpMocks.ts';
 
 describe('Authentication Middleware', () => {
 

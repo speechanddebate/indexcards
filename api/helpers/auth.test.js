@@ -3,7 +3,7 @@ import { Authenticate } from '../middleware/authentication.js';
 import config from '../../config/config';
 import { tabAuth } from './auth';
 import userData from '../../tests/testFixtures';
-import { createContext } from '../../tests/httpMocks.js';
+import { createContext } from '../../tests/httpMocks.ts';
 
 describe.todo('Authorization Functions', () => {
 

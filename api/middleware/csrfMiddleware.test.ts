@@ -58,8 +58,8 @@ describe('csrfMiddleware', () => {
 				method: 'POST',
 				path: '/rest/anything',
 				csrfToken: token,
-				get: (name) =>
-          name === config.CSRF.HEADER_NAME ? token : undefined,
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				get: ((name: string) => name === config.CSRF.HEADER_NAME ? token : undefined) as any,
 			},
 		});
 
@@ -98,7 +98,8 @@ describe('csrfMiddleware', () => {
 				session: {
 					csrfToken: 'expected',
 				},
-				get: () => 'wrong',
+				// eslint-disable-next-line @typescript-eslint/no-explicit-any
+				get: (() => 'wrong') as any,
 			},
 		});
 

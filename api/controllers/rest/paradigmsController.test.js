@@ -1,6 +1,6 @@
 import personRepo from '../../repos/personRepo.js';
 import factories from '../../../tests/factories/index.js';
-import { createContext } from '../../../tests/httpMocks.js';
+import { createContext } from '../../../tests/httpMocks.ts';
 import paradigmsController from './paradigmsController';
 import * as judgeRecordsService from '../../services/results/judgeRecords.js';
 import { JudgeRecord } from '../../routes/openapi/schemas/Judge.js';

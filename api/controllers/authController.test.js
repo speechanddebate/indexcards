@@ -1,6 +1,6 @@
 
 import config from '../../config/config.js';
-import { createContext } from '../../tests/httpMocks.js';
+import { createContext } from '../../tests/httpMocks.ts';
 import * as controller from './authController.js';
 import authService,{ AUTH_INVALID} from '../services/AuthService.js';
 import sessionRepo from '../repos/sessionRepo.js';
