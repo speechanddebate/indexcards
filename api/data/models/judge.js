@@ -84,14 +84,6 @@ export default class judge extends Model {
 						type: DataTypes.INTEGER,
 						allowNull: true
 				},
-				registered_by: {
-						type: DataTypes.INTEGER,
-						allowNull: true,
-						references: {
-								model: 'person',
-								key: 'id'
-						}
-				},
 				timestamp: {
 						type: DataTypes.DATE,
 						allowNull: false,
@@ -109,6 +101,14 @@ export default class judge extends Model {
 						type: DataTypes.DATE,
 						allowNull: true,
 						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
+				},
+				registered_by: {
+						type: DataTypes.INTEGER,
+						allowNull: true,
+						references: {
+								model: 'person',
+								key: 'id'
+						}
 				}
 		}, {
 				tableName: 'judge',
@@ -165,7 +165,7 @@ export default class judge extends Model {
 								]
 						},
 						{
-								name: "fk_judge_registered_by",
+								name: "fk_judge_registered_by_person",
 								using: "BTREE",
 								fields: [
 										{ name: "registered_by" },

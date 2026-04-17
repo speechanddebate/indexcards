@@ -71,13 +71,6 @@ export default class roundSetting extends Model {
 										{ name: "round" },
 								]
 						},
-						{
-								name: "tag",
-								using: "BTREE",
-								fields: [
-										{ name: "tag" },
-								]
-						},
 				]
 		});
 		}

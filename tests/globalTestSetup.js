@@ -3,68 +3,73 @@ import config from '../config/config.js';
 import testData from './testFixtures';
 
 export const setup = async () => {
-	// Ensure database connection first
-	await db.sequelize.authenticate();
+	try {
+		// Ensure database connection first
+		await db.sequelize.authenticate();
 
-	const tourncount = await db.sequelize.query(
-		`select count(id) as count from tourn`,
-		{ type: db.sequelize.QueryTypes.SELECT },
-	);
+		const tourncount = await db.sequelize.query(
+			`select count(id) as count from tourn`,
+			{ type: db.sequelize.QueryTypes.SELECT },
+		);
 
-	if (tourncount?.[0]?.count >= 10) {
-		const firstPromises = [];
+		if (tourncount?.[0]?.count >= 10) {
+			const firstPromises = [];
 
-		firstPromises.push(db.sequelize.query( `delete from session where person > 3 and person < 100 ` ));
-		firstPromises.push(db.sequelize.query( `delete from campus_log where id < 100`));
-		firstPromises.push(db.sequelize.query( `delete from campus_log where person > 3 and person < 100` ));
-		firstPromises.push(db.sequelize.query( `delete from person where id > 3 and id < 100` ));
+			firstPromises.push(db.sequelize.query( `delete from session where person > 3 and person < 100 ` ));
+			firstPromises.push(db.sequelize.query( `delete from campus_log where id < 100`));
+			firstPromises.push(db.sequelize.query( `delete from campus_log where person > 3 and person < 100` ));
+			firstPromises.push(db.sequelize.query( `delete from person where id > 3 and id < 100` ));
 
-		// Prune before the recreation because of unique keys
-		await Promise.all(firstPromises);
+			// Prune before the recreation because of unique keys
+			await Promise.all(firstPromises);
 
-		const secondPromises = [];
+			const secondPromises = [];
 
-		secondPromises.push(db.person.create(testData.testUser));
-		secondPromises.push(db.person.create(testData.testAdmin));
-		secondPromises.push(db.ad.create(testData.testAd));
-		secondPromises.push(db.sequelize.query(`update person set nsda=123456 where id=123215`));
-		secondPromises.push(db.sequelize.query(`update school set name="Navy" where id=651034`));
-		secondPromises.push(db.sequelize.query(`update judge set first="Danielle", last="O'Gorman" where id=2155790`));
-		secondPromises.push(db.sequelize.query(`update entry set code="Navy XX" where id=5388933;`));
+			secondPromises.push(db.person.create(testData.testUser));
+			secondPromises.push(db.person.create(testData.testAdmin));
+			secondPromises.push(db.ad.create(testData.testAd));
+			secondPromises.push(db.sequelize.query(`update person set nsda=123456 where id=123215`));
+			secondPromises.push(db.sequelize.query(`update school set name="Navy" where id=651034`));
+			secondPromises.push(db.sequelize.query(`update judge set first="Danielle", last="O'Gorman" where id=2155790`));
+			secondPromises.push(db.sequelize.query(`update entry set code="Navy XX" where id=5388933;`));
 
-		// Must pause here because a lot of the third batch relies on foreign
-		// keys in here.
+			// Must pause here because a lot of the third batch relies on foreign
+			// keys in here.
 
-		await Promise.all(secondPromises);
+			await Promise.all(secondPromises);
 
-		const thirdPromises = [];
+			const thirdPromises = [];
 
-		thirdPromises.push(db.session.create(testData.testUserSession));
-		thirdPromises.push(db.permission.create(testData.testUserTournPerm));
-		thirdPromises.push(db.session.create(testData.testAdminSession));
-		thirdPromises.push(db.person.bulkCreate(testData.testCampusUsers));
-		thirdPromises.push(db.personSetting.create(testData.testUserAPIKey));
-		thirdPromises.push(db.personSetting.bulkCreate(testData.testUserAPIPerms));
+			thirdPromises.push(db.session.create(testData.testUserSession));
+			thirdPromises.push(db.permission.create(testData.testUserTournPerm));
+			thirdPromises.push(db.session.create(testData.testAdminSession));
+			thirdPromises.push(db.person.bulkCreate(testData.testCampusUsers));
+			thirdPromises.push(db.personSetting.create(testData.testUserAPIKey));
+			thirdPromises.push(db.personSetting.bulkCreate(testData.testUserAPIPerms));
 
-		await Promise.all(thirdPromises);
+			await Promise.all(thirdPromises);
 
-		console.log(`Test data properly loaded and ready to run`);
-		return;
+			console.log(`Test data properly loaded and ready to run`);
+			return;
+		}
+
+		console.log(`Database ${config.DB_DATABASE} is not loaded with the proper test data `);
+		console.log(`Test data should live in a separate database connected via the ${config.MODE} env `);
+		console.log(`and loaded from /indexcards/test/test.sql.  Yes this is a lazy way to do it, but `);
+		console.log(`until Tabroom has six developers working with me, that's how it's gonna be.`);
+		console.log(``);
+
+		console.log(`I expected 10 tournaments and found ${tourncount?.[0]?.count}`);
+
+		console.log(``);
+		console.log(`Someday I might automate this but node and command line shells don't play well together.`);
+		console.log(``);
+
+		throw new Error('No test data found');
+	} catch (error) {
+		console.error('Global test setup failed:', error);
+		throw error;
 	}
-
-	console.log(`Database ${config.DB_DATABASE} is not loaded with the proper test data `);
-	console.log(`Test data should live in a separate database connected via the ${config.MODE} env `);
-	console.log(`and loaded from /indexcards/test/test.sql.  Yes this is a lazy way to do it, but `);
-	console.log(`until Tabroom has six developers working with me, that's how it's gonna be.`);
-	console.log(``);
-
-	console.log(`I expected 10 tournaments and found ${tourncount?.[0]?.count}`);
-
-	console.log(``);
-	console.log(`Someday I might automate this but node and command line shells don't play well together.`);
-	console.log(``);
-
-	throw new Error('No test data found');
 };
 
 export const teardown = async () => {

@@ -53,24 +53,6 @@ export default class category extends Model {
 								]
 						},
 						{
-								name: "category_abbr",
-								unique: true,
-								using: "BTREE",
-								fields: [
-										{ name: "abbr" },
-										{ name: "tourn" },
-								]
-						},
-						{
-								name: "category_name",
-								unique: true,
-								using: "BTREE",
-								fields: [
-										{ name: "name" },
-										{ name: "tourn" },
-								]
-						},
-						{
 								name: "tourn",
 								using: "BTREE",
 								fields: [

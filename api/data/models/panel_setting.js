@@ -90,13 +90,6 @@ export default class panelSetting extends Model {
 										{ name: "setting" },
 								]
 						},
-						{
-								name: "tag",
-								using: "BTREE",
-								fields: [
-										{ name: "tag" },
-								]
-						},
 				]
 		});
 		}

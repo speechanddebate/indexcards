@@ -16,10 +16,10 @@ function mapMessage(message) {
 				webname: message.tourn_tourn.webname,
 			}
 			: null,
-		Sender: message.sender_sender
+		Sender: message.sender_person
 			? {
-				name: [message.sender_sender.first, message.sender_sender.middle, message.sender_sender.last].filter(Boolean).join(' '),
-				email: message.sender_sender.email,
+				name: [message.sender_person.first, message.sender_person.middle, message.sender_person.last].filter(Boolean).join(' '),
+				email: message.sender_person.email,
 			}
 			: null,
 		Email: message.email_email

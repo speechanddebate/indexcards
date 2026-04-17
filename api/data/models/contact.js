@@ -42,8 +42,16 @@ export default class contact extends Model {
 						type: DataTypes.BOOLEAN,
 						allowNull: true
 				},
+				no_book: {
+						type: DataTypes.BOOLEAN,
+						allowNull: true
+				},
 				nsda: {
 						type: DataTypes.INTEGER,
+						allowNull: true
+				},
+				tag: {
+						type: DataTypes.STRING(15),
 						allowNull: true
 				},
 				created_at: {

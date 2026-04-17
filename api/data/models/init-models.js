@@ -323,8 +323,6 @@ export default function initModels(sequelize) {
 		nsdaCategory.hasMany(event, { as: "events", foreignKey: "nsda_category"});
 		resultSet.belongsTo(nsdaCategory, { as: "nsda_category_nsda_category", foreignKey: "nsda_category"});
 		nsdaCategory.hasMany(resultSet, { as: "result_sets", foreignKey: "nsda_category"});
-		sweepEvent.belongsTo(nsdaCategory, { as: "nsda_category_nsda_category", foreignKey: "nsda_category"});
-		nsdaCategory.hasMany(sweepEvent, { as: "sweep_events", foreignKey: "nsda_category"});
 		ballot.belongsTo(panel, { as: "panel_panel", foreignKey: "panel"});
 		panel.hasMany(ballot, { as: "ballots", foreignKey: "panel"});
 		campusLog.belongsTo(panel, { as: "panel_panel", foreignKey: "panel"});
@@ -353,8 +351,6 @@ export default function initModels(sequelize) {
 		person.hasMany(contact, { as: "contacts", foreignKey: "person"});
 		contact.belongsTo(person, { as: "created_by_person", foreignKey: "created_by"});
 		person.hasMany(contact, { as: "created_by_contacts", foreignKey: "created_by"});
-		entry.belongsTo(person, { as: "registered_by_person", foreignKey: "registered_by"});
-		person.hasMany(entry, { as: "entries", foreignKey: "registered_by"});
 		judge.belongsTo(person, { as: "person_person", foreignKey: "person"});
 		person.hasMany(judge, { as: "judges", foreignKey: "person"});
 		judge.belongsTo(person, { as: "registered_by_person", foreignKey: "registered_by"});
