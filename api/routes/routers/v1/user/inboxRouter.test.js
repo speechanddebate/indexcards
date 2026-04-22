@@ -75,6 +75,26 @@ describe('Inbox Router', () => {
 
 		});
 	});
+
+	describe('POST /user/inbox/{messageId}/markUnread', () => {
+		it('Marks a message as unread', async () => {
+			const { messageId } = await factories.message.createTestMessage({ person: personId });
+
+			await request(server)
+				.post(`/v1/user/inbox/${messageId}/markRead`)
+				.set('Accept', 'application/json')
+				.set('Authorization', `Bearer ${userkey}`);
+
+			const res = await request(server)
+				.post(`/v1/user/inbox/${messageId}/markUnread`)
+				.set('Accept', 'application/json')
+				.set('Authorization', `Bearer ${userkey}`);
+
+			expect(res).not.toBeProblemResponse();
+			const message = await messageRepo.getMessage(messageId);
+			expect(message.read_at).toBeNull();
+		});
+	});
 	describe('GET /user/inbox/{messageId}', () => {
 		it('Gets a message by ID', async () => {
 			const { messageId } = await factories.message.createTestMessage({ person: personId });

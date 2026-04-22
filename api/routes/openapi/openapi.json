@@ -4399,6 +4399,50 @@
         }
       }
     },
+    "/user/inbox/{messageId}/markUnread": {
+      "post": {
+        "operationId": "UserInboxMarkUnread",
+        "summary": "Mark message as unread",
+        "description": "Mark a specific message as unread",
+        "tags": [
+          "Orval",
+          "Inbox"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "messageId",
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "description": "The ID of the message to mark as unread"
+            },
+            "required": true,
+            "description": "The ID of the message to mark as unread"
+          },
+          {
+            "name": "messageId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Message marked as unread"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
     "/user/session": {
       "get": {
         "operationId": "UserSession",

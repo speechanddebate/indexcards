@@ -103,4 +103,18 @@ router.route('/:messageId/markRead').post(ValidateRequest, c.readMessage).openap
 	},
 	responses: { 204: { description: 'Message marked as read' } },
 };
+
+router.route('/:messageId/markUnread').post(ValidateRequest, c.unreadMessage).openapi = {
+	path: '/user/inbox/{messageId}/markUnread',
+	operationId: 'UserInboxMarkUnread',
+	summary: 'Mark message as unread',
+	description: 'Mark a specific message as unread',
+	tags: ['Orval', 'Inbox'],
+	requestParams: {
+		path: z.object({
+			messageId: utils.id.meta({ description: 'The ID of the message to mark as unread' }),
+		}),
+	},
+	responses: { 204: { description: 'Message marked as unread' } },
+};
 export default router;

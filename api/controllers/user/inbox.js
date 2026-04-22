@@ -54,14 +54,6 @@ export const readAllMessages = async (req, res) => {
 	return res.status(204).end();
 };
 
-export const readMessage = async (req, res) => {
-	const message = await messageRepo.getMessage(req.valid.params.messageId, req.actor.Person.id);
-	if(!message) return NotFound(req,res,'Message not found');
-	message.read_at = new Date();
-	await message.save();
-	return res.status(204).end();
-};
-
 export const getMessage = async (req, res) => {
 	const message = await messageRepo.getMessage(req.valid.params.messageId, req.actor.Person.id,{
 		excludeDeleted: true,
@@ -76,10 +68,26 @@ export const getMessage = async (req, res) => {
 	return res.status(200).json(mapMessage(message));
 };
 
+export const readMessage = async (req, res) => {
+	const message = await messageRepo.getMessage(req.valid.params.messageId, req.actor.Person.id);
+	if(!message) return NotFound(req,res,'Message not found');
+	message.read_at = message.read_at ?? new Date();
+	await message.save();
+	return res.status(204).end();
+};
+
+export const unreadMessage = async (req, res) => {
+	const message = await messageRepo.getMessage(req.valid.params.messageId, req.actor.Person.id);
+	if(!message) return NotFound(req,res,'Message not found');
+	message.read_at = null;
+	await message.save();
+	return res.status(204).end();
+};
+
 export const deleteMessage = async (req, res) => {
 	const message = await messageRepo.getMessage(req.valid.params.messageId, req.actor.Person.id);
 	if(!message) return NotFound(req,res,'Message not found');
-	message.deleted_at = new Date();
+	message.deleted_at = message.deleted_at ?? new Date();
 	await message.save();
 	return res.status(204).end();
 };
