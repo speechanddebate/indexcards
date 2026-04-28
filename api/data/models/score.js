@@ -54,14 +54,6 @@ export default class score extends Model {
 						type: DataTypes.DATE,
 						allowNull: false,
 						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
-				},
-				tiebreak: {
-						type: DataTypes.TINYINT,
-						allowNull: true
-				},
-				cat_id: {
-						type: DataTypes.INTEGER,
-						allowNull: true
 				}
 		}, {
 				tableName: 'score',

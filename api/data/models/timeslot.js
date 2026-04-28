@@ -54,6 +54,20 @@ export default class timeslot extends Model {
 										{ name: "tourn" },
 								]
 						},
+						{
+								name: "start",
+								using: "BTREE",
+								fields: [
+										{ name: "start" },
+								]
+						},
+						{
+								name: "end",
+								using: "BTREE",
+								fields: [
+										{ name: "end" },
+								]
+						},
 				]
 		});
 		}
