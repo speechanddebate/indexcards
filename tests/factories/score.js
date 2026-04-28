@@ -21,7 +21,7 @@ export async function createTestScore(overrides = {}) {
 		tag: 'winloss',
 		value: 1,
 		...overrides,
-		ballotId: ballot,
+		ballot,
 	});
 
 	const scoreId = await scoreRepo.createScore(data);

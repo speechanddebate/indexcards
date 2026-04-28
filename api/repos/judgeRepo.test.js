@@ -92,7 +92,10 @@ describe('judgeRepo', () => {
 
 	describe('createJudge', () => {
 		it('creates a judge and returns the new id', async () => {
-			const newJudgeId = await judgeRepo.createJudge({});
+			const { personId } = await factories.person.createTestPerson();
+			const newJudgeId = await judgeRepo.createJudge({
+				personId,
+			});
 
 			expect(newJudgeId).toBeDefined();
 
