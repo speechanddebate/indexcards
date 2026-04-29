@@ -52,6 +52,7 @@ router.route('/unread').get(c.getUnreadCount).openapi = {
 
 router.route('/markAllRead').post(c.readAllMessages).openapi = {
 	path: '/user/inbox/markAllRead',
+	operationId: 'UserInboxMarkAllRead',
 	summary: 'Mark all messages as read',
 	description: 'Mark all visible messages for the logged-in user as read',
 	tags: ['Orval', 'Inbox'],

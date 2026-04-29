@@ -12,14 +12,14 @@ import { getSubscribe, pushSubscribe, pushSync } from '../../../../controllers/u
 import { getSubscription, deleteSubscription } from '../../../../controllers/user/blast.js';
 import { checkBallotAccess, checkActive, getBallotSides, saveRubric } from '../../../../controllers/user/judge/ballot.js';
 import { getPersonTournPresence } from '../../../../controllers/user/tourn/index.js';
-import getSessionMod from '../../../../controllers/user/person/session.js';
 import getProfileMod from '../../../../controllers/user/person/getProfile.js';
 import acceptPayPalMod from '../../../../controllers/user/enter/acceptPayPal.js';
 import processAuthorizeNetMod from '../../../../controllers/user/enter/processAuthorizeNet.js';
 import updateLastAccess from '../../../../controllers/user/person/access.js';
 import updateLearnCoursesMod from '../../../../controllers/user/person/learnCourse.js';
 
-import inboxRouter from '../user/inboxRouter.js';
+import inboxRouter from '../user/inboxRouter.ts';
+import sessionRouter from '../user/sessionRouter.ts';
 
 const router = Router();
 
@@ -132,22 +132,10 @@ router.get('/tourn/:tournId', getPersonTournPresence).openapi = {
 
 //User inbox
 router.use('/inbox', inboxRouter);
-
+//sessions
+router.use('/session', sessionRouter);
 // User session/profile/payment/learn
-router.route('/session').get(extractHandler(getSessionMod, 'GET')).openapi = {
-	path: '/user/session',
-	operationId: 'UserSession',
-	tags: ['legacy', 'Session', 'Orval'],
-	responses: {
-		200: {
-			description: 'User session',
-			content: {
-				'application/json': {
-					schema: { $ref: '#/components/schemas/Session' },
-				},
-			},
-		}, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
+
 router.get('/profile', extractHandler(getProfileMod, 'GET')).openapi = {
 	path: '/user/profile',
 	tags: ['legacy', 'User Profile'],

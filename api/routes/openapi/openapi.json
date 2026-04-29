@@ -2098,6 +2098,7 @@
     },
     "/user/inbox/markAllRead": {
       "post": {
+        "operationId": "UserInboxMarkAllRead",
         "summary": "Mark all messages as read",
         "description": "Mark all visible messages for the logged-in user as read",
         "tags": [
@@ -2301,14 +2302,13 @@
     },
     "/user/session": {
       "get": {
+        "summary": "Get Session",
+        "description": "Get the current user session",
         "operationId": "UserSession",
         "tags": [
-          "legacy",
           "Session",
           "Orval"
         ],
-        "summary": "GET /user/session",
-        "description": "GET /user/session is undocumented. Need to add .openapi to handler",
         "parameters": [],
         "responses": {
           "200": {
@@ -2324,10 +2324,10 @@
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
+          "404": {
+            "$ref": "#/components/responses/NotFound"
           },
-          "default": {
+          "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
         }
@@ -3039,68 +3039,68 @@
       },
       "Person": {
         "type": "object",
-        "description": "A person (user) in tabroom",
-        "additionalProperties": false,
-        "required": [
-          "id",
-          "email",
-          "firstName",
-          "lastName"
-        ],
         "properties": {
           "id": {
             "type": "integer",
-            "example": 42
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
           },
           "email": {
             "type": "string",
             "format": "email",
-            "example": "johndoe@tabroom.com"
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
           },
           "firstName": {
-            "type": "string",
-            "example": "John"
+            "type": "string"
           },
           "middleName": {
-            "type": "string",
-            "nullable": true,
-            "example": "Quincy"
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "lastName": {
-            "type": "string",
-            "example": "Doe"
+            "type": "string"
           },
           "state": {
-            "type": "string",
-            "example": "CA"
+            "type": "string"
           },
           "country": {
-            "type": "string",
-            "example": "USA"
+            "type": "string"
           },
           "tz": {
-            "type": "string",
-            "example": "America/Los_Angeles"
+            "type": "string"
           },
           "createdAt": {
             "type": "string",
-            "readOnly": true,
             "format": "date-time",
-            "description": "Creation timestamp"
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
           },
           "settings": {
             "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
+            "properties": {}
           },
           "metadata": {
             "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
+            "properties": {}
           }
-        }
+        },
+        "required": [
+          "id",
+          "email",
+          "firstName",
+          "middleName",
+          "lastName",
+          "state",
+          "country",
+          "tz",
+          "createdAt"
+        ],
+        "description": "A person (user) in tabroom"
       },
       "Problem": {
         "type": "object",
@@ -3292,33 +3292,6 @@
           "result": {
             "type": "string",
             "nullable": true
-          }
-        }
-      },
-      "Session": {
-        "type": "object",
-        "description": "A user session",
-        "additionalProperties": false,
-        "properties": {
-          "id": {
-            "type": "integer",
-            "example": 111111
-          },
-          "person": {
-            "type": "integer",
-            "example": 42
-          },
-          "su": {
-            "type": "integer",
-            "nullable": true,
-            "example": 7
-          },
-          "Su": {
-            "nullable": true,
-            "$ref": "#/components/schemas/Person"
-          },
-          "Person": {
-            "$ref": "#/components/schemas/Person"
           }
         }
       },
@@ -4677,6 +4650,123 @@
           "certifications"
         ],
         "additionalProperties": false
+      },
+      "Session": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "person": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "su": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "Su": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PersonOutput"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "Person": {
+            "$ref": "#/components/schemas/PersonOutput"
+          }
+        },
+        "required": [
+          "id",
+          "person",
+          "su",
+          "Su",
+          "Person"
+        ],
+        "additionalProperties": false,
+        "description": "A user session"
+      },
+      "PersonOutput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "firstName": {
+            "type": "string"
+          },
+          "middleName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "lastName": {
+            "type": "string"
+          },
+          "state": {
+            "type": "string"
+          },
+          "country": {
+            "type": "string"
+          },
+          "tz": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "settings": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "firstName",
+          "middleName",
+          "lastName",
+          "state",
+          "country",
+          "tz",
+          "createdAt"
+        ],
+        "additionalProperties": false,
+        "description": "A person (user) in tabroom"
       }
     },
     "responses": {
