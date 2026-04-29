@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import adsRouter from './adsRouter.ts';
-import circuitsRouter from './circuitsRouter.js';
+import circuitsRouter from './circuitsRouter.ts';
 import pageRouter from './pageRouter.js';
 import tournsRouter from './tournsRouter.js';
 import paradigmsRouter from './paradigmsRouter.js';

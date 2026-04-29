@@ -1,5 +1,5 @@
 
-export * from './Ad.js';
+export * from './Ad.ts';
 export * from './Auth.js';
 export * from './Category.js';
 export * from './Chapter.js';
