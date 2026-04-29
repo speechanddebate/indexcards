@@ -4,10 +4,8 @@ import fileRepo from '../../repos/fileRepo';
 describe('getFiles', () => {
 	it('returns empty array when no files found', async () => {
 		const { res, req } = createContext({
-			req: {
-				valid: {
-					params: { tournId: 1 },
-				},
+			valid: {
+				params: { tournId: 1 },
 			},
 		});
 		vi.spyOn(fileRepo, 'getFiles').mockResolvedValue([]);

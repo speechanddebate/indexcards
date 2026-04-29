@@ -2,7 +2,7 @@ import type { NextFunction, Request, Response } from 'express';
 import { vi } from 'vitest';
 
 //Mocks for unit testing middleware
-export function createContext({ req: reqOverrides }: { req?: Partial<Request> } = {}) {
+export function createContext(reqOverrides: Partial<Request> = {}) {
 	const req = createReq(reqOverrides);
 	const res = createRes();
 
