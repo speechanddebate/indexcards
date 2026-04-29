@@ -3,6 +3,7 @@ dotenv.config({ quiet: true });
 
 export const config = {
 	LOG_LEVEL             : 'info',
+	HIDE_DEV_ENDPOINTS	  : true,
 	PORT                  : 8001,
 	RATE_WINDOW           : 15 * 60 * 1000,
 	RATE_MAX              : 100000,
