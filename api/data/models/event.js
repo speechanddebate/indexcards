@@ -19,8 +19,9 @@ export default class event extends Model {
 						allowNull: true
 				},
 				type: {
-						type: DataTypes.ENUM('speech','congress','debate','wudc','wsdc','attendee','mock_trial'),
-						allowNull: true
+						type: DataTypes.ENUM('speech','congress','debate','wudc','wsdc','attendee','mock_trial','academic'),
+						allowNull: false,
+						defaultValue: "attendee"
 				},
 				level: {
 						type: DataTypes.ENUM('open','jv','novice','champ','es-open','es-novice','middle'),
@@ -30,6 +31,11 @@ export default class event extends Model {
 				fee: {
 						type: DataTypes.DECIMAL(8,2),
 						allowNull: true
+				},
+				code_style: {
+						type: DataTypes.ENUM('code_name','full_initials','initials','last_names','names','names_lastfirst','numbers','prepend_school','register','schoolname_code','school_first_names','school_last_names','school_names','school_name_only','school_number'),
+						allowNull: false,
+						defaultValue: "numbers"
 				},
 				tourn: {
 						type: DataTypes.INTEGER,
@@ -55,6 +61,14 @@ export default class event extends Model {
 						type: DataTypes.INTEGER,
 						allowNull: true
 				},
+				nsda_category: {
+						type: DataTypes.INTEGER,
+						allowNull: true,
+						references: {
+								model: 'nsda_category',
+								key: 'id'
+						}
+				},
 				timestamp: {
 						type: DataTypes.DATE,
 						allowNull: false,
@@ -64,19 +78,6 @@ export default class event extends Model {
 						type: DataTypes.DATE,
 						allowNull: true,
 						defaultValue: Sequelize.Sequelize.fn('current_timestamp')
-				},
-				code_style: {
-						type: DataTypes.ENUM('code_name','full_initials','initials','last_names','names','names_lastfirst','numbers','prepend_school','register','schoolname_code','school_first_names','school_last_names','school_names','school_name_only','school_number'),
-						allowNull: false,
-						defaultValue: "numbers"
-				},
-				nsda_category: {
-						type: DataTypes.INTEGER,
-						allowNull: true,
-						references: {
-								model: 'nsda_category',
-								key: 'id'
-						}
 				}
 		}, {
 				tableName: 'event',
@@ -91,20 +92,20 @@ export default class event extends Model {
 								]
 						},
 						{
-								name: "event_abbr",
-								unique: true,
-								using: "BTREE",
-								fields: [
-										{ name: "abbr" },
-										{ name: "tourn" },
-								]
-						},
-						{
 								name: "event_name",
 								unique: true,
 								using: "BTREE",
 								fields: [
 										{ name: "name" },
+										{ name: "tourn" },
+								]
+						},
+						{
+								name: "event_abbr",
+								unique: true,
+								using: "BTREE",
+								fields: [
+										{ name: "abbr" },
 										{ name: "tourn" },
 								]
 						},
@@ -123,7 +124,7 @@ export default class event extends Model {
 								]
 						},
 						{
-								name: "fk_event_nsda_category",
+								name: "nsda_category",
 								using: "BTREE",
 								fields: [
 										{ name: "nsda_category" },

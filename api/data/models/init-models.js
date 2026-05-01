@@ -323,6 +323,8 @@ export default function initModels(sequelize) {
 		nsdaCategory.hasMany(event, { as: "events", foreignKey: "nsda_category"});
 		resultSet.belongsTo(nsdaCategory, { as: "nsda_category_nsda_category", foreignKey: "nsda_category"});
 		nsdaCategory.hasMany(resultSet, { as: "result_sets", foreignKey: "nsda_category"});
+		sweepEvent.belongsTo(nsdaCategory, { as: "nsda_category_nsda_category", foreignKey: "nsda_category"});
+		nsdaCategory.hasMany(sweepEvent, { as: "sweep_events", foreignKey: "nsda_category"});
 		ballot.belongsTo(panel, { as: "panel_panel", foreignKey: "panel"});
 		panel.hasMany(ballot, { as: "ballots", foreignKey: "panel"});
 		campusLog.belongsTo(panel, { as: "panel_panel", foreignKey: "panel"});
@@ -351,10 +353,10 @@ export default function initModels(sequelize) {
 		person.hasMany(contact, { as: "contacts", foreignKey: "person"});
 		contact.belongsTo(person, { as: "created_by_person", foreignKey: "created_by"});
 		person.hasMany(contact, { as: "created_by_contacts", foreignKey: "created_by"});
-		judge.belongsTo(person, { as: "person_person", foreignKey: "person"});
-		person.hasMany(judge, { as: "judges", foreignKey: "person"});
+		entry.belongsTo(person, { as: "registered_by_person", foreignKey: "registered_by"});
+		person.hasMany(entry, { as: "entries", foreignKey: "registered_by"});
 		judge.belongsTo(person, { as: "registered_by_person", foreignKey: "registered_by"});
-		person.hasMany(judge, { as: "registered_by_judges", foreignKey: "registered_by"});
+		person.hasMany(judge, { as: "judges", foreignKey: "registered_by"});
 		message.belongsTo(person, { as: "person_person", foreignKey: "person"});
 		person.hasMany(message, { as: "messages", foreignKey: "person"});
 		message.belongsTo(person, { as: "sender_person", foreignKey: "sender"});
@@ -421,8 +423,6 @@ export default function initModels(sequelize) {
 		school.hasMany(follower, { as: "followers", foreignKey: "school"});
 		invoice.belongsTo(school, { as: "school_school", foreignKey: "school"});
 		school.hasMany(invoice, { as: "invoices", foreignKey: "school"});
-		judge.belongsTo(school, { as: "school_school", foreignKey: "school"});
-		school.hasMany(judge, { as: "judges", foreignKey: "school"});
 		judgeHire.belongsTo(school, { as: "school_school", foreignKey: "school"});
 		school.hasMany(judgeHire, { as: "judge_hires", foreignKey: "school"});
 		result.belongsTo(school, { as: "school_school", foreignKey: "school"});

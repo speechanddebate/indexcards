@@ -60,7 +60,11 @@ export default class entry extends Model {
 				},
 				registered_by: {
 						type: DataTypes.INTEGER,
-						allowNull: true
+						allowNull: true,
+						references: {
+								model: 'person',
+								key: 'id'
+						}
 				},
 				timestamp: {
 						type: DataTypes.DATE,

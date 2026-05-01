@@ -195,12 +195,14 @@ export const createResultCache = async (resultSetId) => {
 			rv.*,
 			rk.tag keyTag, rk.description keyLabel, rk.no_sort noSort, rk.sort_desc sortDesc,
 			protocol.name protocolName,
+			rs.event eventId,
 			result.id resultId, result.entry
-		from (result, result_value rv)
+		from (result_set rs, result, result_value rv)
 			left join result_key rk on rk.id = rv.result_key
 			left join protocol on protocol.id = rv.protocol
 		where 1=1
-			and result.result_set = :resultSetId
+			and result.result_set = rs.id
+			and rs.id = :resultSetId
 			and result.id = rv.result
 		order by result.entry, result.school, result.student, rv.priority
 	`, {
@@ -211,10 +213,12 @@ export const createResultCache = async (resultSetId) => {
 	const headers = {};
 	const results = {};
 	const protocols = {};
+	let eventId = 0;
 
 	resultValues.forEach( (rv) => {
 
 		rv.type = '';
+		eventId = rv.eventId;
 
 		if (rv.entry) {
 			rv.type = 'entry';
@@ -248,30 +252,114 @@ export const createResultCache = async (resultSetId) => {
 		if (!protocols[rv.protocol]) protocols[rv.protocol] = true;
 	});
 
-	const resultScores = await db.sequelize.query(`
+	const rawScoreSet = await db.sequelize.query(`
 		select
-			result.entry,
-			round.id, round.name, round.protocol,
-			panel.bye sectionBye,
-			ballot.bye, ballot.forfeit,
-			score.tag, score.value
-		from (result, ballot, panel, round)
-			left join score on score.ballot = ballot.id
-				and score.tag IN ('winloss', 'point', 'rank', 'refute')
+			rs.id, rs.label, rs.tag
+		from result_set rs
 		where 1=1
-			and result.result_set = :resultSetId
-			and result.entry = ballot.entry
-			and ballot.panel = panel.id
-			and panel.round = round.id
-		order by result.entry, round.name
+			and rs.tag = 'raw'
+			and rs.event = :eventId
 	`, {
 		type         : db.Sequelize.QueryTypes.SELECT,
-		replacements : { resultSetId },
+		replacements : { eventId },
 	});
 
-	// just doing this to shut up the linter because I want to check in what I
-	// have for safety but work on this later.
-	console.log(resultScores);
+	if (!rawScoreSet || !rawScoreSet[0].id) {
+
+		const resultScores = await db.sequelize.query(`
+			select
+				result.entry,
+				round.id, round.name round, round.protocol,
+				panel.bye sectionBye,
+				ballot.bye, ballot.forfeit,
+				score.tag, score.value,
+				score.student
+			from (result, ballot, panel, round)
+				left join score on score.ballot = ballot.id
+					and score.tag IN ('winloss', 'point', 'rank', 'refute')
+			where 1                   = 1
+				and result.result_set = :resultSetId
+				and result.entry      = ballot.entry
+				and ballot.panel      = panel.id
+				and panel.round       = round.id
+			order by result.entry, round.name
+		`, {
+			type         : db.Sequelize.QueryTypes.SELECT,
+			replacements : { resultSetId },
+		});
+
+		const rawScoresByEntry = {};
+		const rawScoresByStudent = {};
+
+		resultScores.forEach( (score) => {
+
+			if (score.entry && !rawScoresByEntry[score.entry]) rawScoresByEntry[score.entry] = {};
+			if (score.student && !rawScoresByStudent[score.student]) rawScoresByStudent[score.student] = {};
+
+			if (!rawScoresByEntry[score.entry][score.round]) {
+				rawScoresByEntry[score.entry][score.round] = {
+					w : '',
+					p : 0,
+					r : 0,
+				};
+			}
+
+			if (score.sectionBye || score.bye) {
+				rawScoresByEntry[score.entry][score.round].w = 'BYE';
+			} else if (score.forfeit) {
+				rawScoresByEntry[score.entry][score.round].w = 'FFT';
+			} else if (score.tag === 'winloss') {
+				if (score.value > 0) {
+					rawScoresByEntry[score.entry][score.round].w += 'W';
+				} else {
+					rawScoresByEntry[score.entry][score.round].w += 'L';
+				}
+			}
+
+			if (score.tag === 'point' || score.tag === 'refute') {
+				rawScoresByEntry[score.entry][score.round].p += score.value;
+			}
+
+			if (score.tag === 'rank') {
+				rawScoresByEntry[score.entry][score.round].r += score.value;
+			}
+
+			if (score.student) {
+				if (!rawScoresByStudent[score.student][score.round]) {
+					rawScoresByStudent[score.round] = {
+						w   : '',
+						p   : 0,
+						r   : 0,
+						ref : 0,
+					};
+				}
+
+				if (score.sectionBye || score.bye) {
+					rawScoresByEntry[score.entry][score.round].w = 'BYE';
+				} else if (score.forfeit) {
+					rawScoresByEntry[score.entry][score.round].w = 'FFT';
+				} else if (score.tag === 'winloss') {
+					if (score.value > 0) {
+						rawScoresByEntry[score.entry][score.round].w += 'W';
+					} else {
+						rawScoresByEntry[score.entry][score.round].w += 'L';
+					}
+				}
+
+				if (score.tag === 'point') {
+					rawScoresByEntry[score.entry][score.round].p += score.value;
+				}
+
+				if (score.tag === 'refute') {
+					rawScoresByEntry[score.entry][score.round].ref += score.value;
+				}
+
+				if (score.tag === 'rank') {
+					rawScoresByEntry[score.entry][score.round].r += score.value;
+				}
+			}
+		});
+	}
 
 	return { headers, results };
 

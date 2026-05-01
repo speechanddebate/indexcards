@@ -25,7 +25,22 @@ export const entryRecords = async (entryId, tournId, options) => {
 			score.id scoreId, score.tag scoreTag, score.value scoreValue,
 			(select anon.value from event_setting anon where anon.event = event.id and anon.tag = 'anonymous_public') as anonymousPublic,
 			(select al.value from event_setting al where al.event = event.id and al.tag = 'aff_label') as affLabel,
-			(select nl.value from event_setting nl where nl.event = event.id and nl.tag = 'neg_label') as negLabel
+			(select nl.value from event_setting nl where nl.event = event.id and nl.tag = 'neg_label') as negLabel,
+			(select
+				oppballot.entry
+				from ballot oppballot
+				where oppballot.panel = section.id
+				and oppballot.entry != entry.id
+				limit 1
+			) opponentId,
+			(select
+				opp.code
+				from ballot oppballot, entry opp
+				where oppballot.panel = section.id
+				and oppballot.entry != entry.id
+				and oppballot.entry = opp.id
+				limit 1
+			) opponentCode
 
 		from (event, entry, round, panel section, ballot)
 
@@ -107,7 +122,15 @@ export const entryRecords = async (entryId, tournId, options) => {
 				sideLabel    : (row.side ? row.side == 1 ? row.affLabel || 'Aff' : row.negLabel || 'Neg' : ''),
 				speakerorder : row.speakeroder,
 				Results      : {},
+				Judges       : {},
 			};
+
+			if (['debate', 'wsdc', 'mockTrial'].includes(row.eventType)) {
+				records.Rounds[row.roundName].opponent = {
+					id   : row.opponentId,
+					code : row.opponentCode,
+				};
+			}
 
 			records.Rounds[row.roundName].label = row.roundLabel || `Round ${row.roundName}`;
 
@@ -119,7 +142,18 @@ export const entryRecords = async (entryId, tournId, options) => {
 			}
 		}
 
+		let round = records.Rounds[row.roundName];
 		let results = records.Rounds[row.roundName].Results;
+
+		if (!round.Judges[row.judgeId]) {
+			round.Judges[row.judgeId] = {
+				name   : `${row.judgeLast}, ${row.judgeFirst}${row.judgeMiddle ? ` ${row.judgeMiddle}` : '' }`,
+				first  : row.judgeFirst,
+				middle : row.judgeMiddle,
+				last   : row.judgeLast,
+				chair  : row.chair,
+			};
+		}
 
 		if (row.postPrimary >= postLevel || row.sectionPublish) {
 

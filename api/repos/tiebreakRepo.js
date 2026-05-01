@@ -15,7 +15,6 @@ function buildTiebreakQuery(opts = {}){
 			required : opts.include.Protocol.required ?? false,
 		});
 	}
-
 	return query;
 }
 

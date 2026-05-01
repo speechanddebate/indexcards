@@ -1,12 +1,15 @@
-// Translation of the tb_types.mas from legacy.  When given the ID of a
-// protocol, this service delivers all of the various tiebreaker type that
-// protocol requires on a score sheet, tagged by the round type.
-import db from '../../data/db.js';
+// Translation of the tb_types.mas from legacy.  When given the ID of a round,
+// this service delivers all of the various tiebreaker type that round's
+// tiebreakers require to figure, telling us what to ask for on ballots etc.
 
+// TODO: this one is going to need some pretty extensive testing because it's a
+// big ol' logic bomb in the middle of tabroom for a bunch of functions.
+
+import db from '../../data/db.js';
 import { getRound } from '../../repos/roundRepo.js';
 import { getProtocol } from '../../repos/protocolRepo.js';
 
-export const tiebreakTypes = async ({roundId}) => {
+export const tiebreakTypes = async ({roundId, protocolId = false}) => {
 
 	const round = await getRound(
 		roundId, {
@@ -30,7 +33,13 @@ export const tiebreakTypes = async ({roundId}) => {
 				where es.event = event.id
 				and es.tag = 'wsdc_ballot'
 			) wsdc,
-			es.value protocolId
+			(
+				select rs.value
+				from round_setting rs
+				where rs.round = round.id
+				and rs.tag = 'leadership_protocol'
+			) as roundLeadership,
+			es.tag protocolType, es.value protocolId
 
 		from (event, round)
 			left join event_setting es
@@ -50,23 +59,42 @@ export const tiebreakTypes = async ({roundId}) => {
 		type: db.Sequelize.QueryTypes.SELECT,
 	});
 
-	const protocols = [round.Protocol];
+	let protocols = [];
 
-	for (const event of eventDetails) {
+	if (protocolId) {
 
-		if (!round.Event) {
-			round.Event = {
-				id       : event.id,
-				type     : event.wsdc ? 'wsdc' : event.type,
-				category : event.nsda_category,
+		const specifiedProtocol = await getProtocol(protocolId);
+		protocols = [specifiedProtocol];
+
+	} else {
+
+		protocols = [round.Protocol];
+		let roundLeadDone = false;
+
+		for (const event of eventDetails) {
+
+			if (!round.Event) {
+				round.Event = {
+					id       : event.id,
+					type     : event.wsdc ? 'wsdc' : event.type,
+					category : event.nsda_category,
+				};
 			};
-		};
 
-		if (event.protocolId) {
-			const specialProtocol = await getProtocol(event.protocolId);
-			protocols.push(specialProtocol);
-		}
-	};
+			if (round.roundLeadership &! roundLeadDone) {
+				const roundProtocol = await getProtocol(event.roundLeadership);
+				protocols.push(roundProtocol);
+			}
+
+			if (
+				event.protocolId
+				&& (event.protocolType !== 'speaker_protocol' || round.type === 'prelim')
+			) {
+				const specialProtocol = await getProtocol(event.protocolId);
+				protocols.push(specialProtocol);
+			}
+		};
+	}
 
 	const counted = {};
 
