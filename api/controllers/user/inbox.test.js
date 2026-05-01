@@ -10,7 +10,7 @@ describe('markDeleted', () => {
 		const messageId = 1;
 		const personId = 1;
 		vi.spyOn(messageRepo, 'getMessage').mockResolvedValue(null);
-		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		const { req, res } = createContext({ valid: { params: { messageId } }, actor: { Person: { id: personId } } });
 		await inbox.deleteMessage(req, res);
 		expect(res.status).toHaveBeenCalledWith(404);
 	});
@@ -24,7 +24,7 @@ describe('markDeleted', () => {
 			save: vi.fn().mockResolvedValue(undefined),
 		};
 		vi.spyOn(messageRepo, 'getMessage').mockResolvedValue(message);
-		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		const { req, res } = createContext({ valid: { params: { messageId } }, actor: { Person: { id: personId } } });
 
 		await inbox.deleteMessage(req, res);
 
@@ -37,7 +37,7 @@ describe('markRead', () => {
 		const messageId = 1;
 		const personId = 1;
 		vi.spyOn(messageRepo, 'getMessage').mockResolvedValue(null);
-		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		const { req, res } = createContext({ valid: { params: { messageId } }, actor: { Person: { id: personId } } });
 		await inbox.readMessage(req, res);
 		expect(res.status).toHaveBeenCalledWith(404);
 	});
@@ -51,7 +51,7 @@ describe('markRead', () => {
 			save: vi.fn().mockResolvedValue(undefined),
 		};
 		vi.spyOn(messageRepo, 'getMessage').mockResolvedValue(message);
-		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		const { req, res } = createContext({ valid: { params: { messageId } }, actor: { Person: { id: personId } } });
 
 		await inbox.readMessage(req, res);
 
@@ -65,7 +65,7 @@ describe('markUnread', () => {
 		const messageId = 1;
 		const personId = 1;
 		vi.spyOn(messageRepo, 'getMessage').mockResolvedValue(null);
-		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		const { req, res } = createContext({ valid: { params: { messageId } }, actor: { Person: { id: personId } } });
 		await inbox.unreadMessage(req, res);
 		expect(res.status).toHaveBeenCalledWith(404);
 	});
@@ -78,7 +78,7 @@ describe('markUnread', () => {
 			save: vi.fn().mockResolvedValue(undefined),
 		};
 		vi.spyOn(messageRepo, 'getMessage').mockResolvedValue(message);
-		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		const { req, res } = createContext({ valid: { params: { messageId } }, actor: { Person: { id: personId } } });
 
 		await inbox.unreadMessage(req, res);
 
@@ -115,7 +115,7 @@ describe('getMessage', () => {
 				content: 'Please report to your assigned rooms.',
 			},
 		});
-		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		const { req, res } = createContext({ valid: { params: { messageId } }, actor: { Person: { id: personId } } });
 		await inbox.getMessage(req, res);
 		expect(res).not.toBeProblemResponse();
 		expect(res.body).toMatchSchema(InboxMessage);
@@ -124,7 +124,7 @@ describe('getMessage', () => {
 		const messageId = 1;
 		const personId = 1;
 		vi.spyOn(messageRepo, 'getMessage').mockResolvedValue(null);
-		const { req, res } = createContext({ req: { valid: { params: { messageId } }, actor: { Person: { id: personId } } } });
+		const { req, res } = createContext({ valid: { params: { messageId } }, actor: { Person: { id: personId } } });
 		await inbox.getMessage(req, res);
 		expect(res.status).toHaveBeenCalledWith(404);
 	});

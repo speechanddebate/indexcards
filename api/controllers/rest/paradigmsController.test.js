@@ -14,9 +14,7 @@ describe('paradigmsController', () => {
 		it('should return a list of paradigms', async () => {
 			vi.spyOn(personRepo, 'personSearch').mockResolvedValue([{ id: 1, name: 'Test Paradigm' }]);
 			const { req, res } = createContext({
-				req: {
-					valid: {query: {}},
-				},
+				valid: {query: {}},
 			});
 			await paradigmsController.getParadigms(req, res);
 			expect(res).not.toBeProblemResponse();
@@ -33,9 +31,7 @@ describe('paradigmsController', () => {
 				],
 			}]);
 			const { req, res } = createContext({
-				req: {
-					valid: {query: {}},
-				},
+				valid: {query: {}},
 			});
 			await paradigmsController.getParadigms(req, res);
 			expect(res).not.toBeProblemResponse();
@@ -58,9 +54,7 @@ describe('paradigmsController', () => {
 				PersonQuizzes: [await factories.person.createPersonQuiz()],
 			});
 			const { req, res } = createContext({
-				req: {
-					valid: {params: { personId: 1 }},
-				},
+				valid: {params: { personId: 1 }},
 			});
 			await paradigmsController.getParadigmByPersonId(req, res);
 			expect(res).not.toBeProblemResponse();
@@ -69,14 +63,11 @@ describe('paradigmsController', () => {
 		it('should return a 404 if personId does not exist', async () => {
 			vi.spyOn(personRepo, 'getPerson').mockResolvedValue(null);
 			const { req, res } = createContext({
-				req: {
-					valid: {params: { personId: 999 }},
-				},
+				valid: {params: { personId: 999 }},
 			});
 			await paradigmsController.getParadigmByPersonId(req, res);
 			expect(res).toBeProblemResponse(404);
 		});
-
 	});
 
 	describe('getJudgingRecord', () => {
@@ -99,10 +90,8 @@ describe('paradigmsController', () => {
 			]);
 
 			const { req, res } = createContext({
-				req: {
-					valid: {
-						params: { personId: 1 },
-					},
+				valid: {
+					params: { personId: 1 },
 				},
 			});
 

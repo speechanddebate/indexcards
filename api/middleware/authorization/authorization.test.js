@@ -20,10 +20,8 @@ describe('Authorization Middleware', () => {
 		it('deny access when no area access', async () => {
 			// Arrange
 			const {req, res, next} = createContext({
-				req: {
-					person: {id: 1},
-					params: {area: 'caselist'},
-				},
+				person: {id: 1},
+				params: {area: 'caselist'},
 			});
 			req.actor = createActor(req);
 			await loadExtAuthContext(req, res, () => {});
@@ -40,10 +38,8 @@ describe('Authorization Middleware', () => {
 		it('allow access when has area access', async () => {
 			// Arrange
 			const {req, res, next} = createContext({
-				req: {
-					person: {id: 1},
-					params: {area: 'caselist'},
-				},
+				person: {id: 1},
+				params: {area: 'caselist'},
 			});
 			req.actor = createActor(req);
 			await loadExtAuthContext(req, res, () => {});
@@ -67,10 +63,8 @@ describe('Authorization Middleware', () => {
 		});
 		it('deny when not siteAdmin', () => {
 			const {req, res, next} = createContext({
-				req: {
-					person: {
-						siteAdmin: false,
-					},
+				person: {
+					siteAdmin: false,
 				},
 			});
 			req.actor = createActor(req);
@@ -82,10 +76,8 @@ describe('Authorization Middleware', () => {
 		});
 		it('allow when siteAdmin', () => {
 			const {req, res, next} = createContext({
-				req: {
-					person: {
-						siteAdmin: true,
-					},
+				person: {
+					siteAdmin: true,
 				},
 			});
 			req.actor = createActor(req);
@@ -112,9 +104,7 @@ describe('Authorization Middleware', () => {
 		it.each(cases)('denies access for %s:%s when not authenticated',async (resource, capability) => {
 			vi.spyOn(buildTargetModule, 'buildTarget').mockResolvedValueOnce({ id: 42, resource, circuitIds: []});
 			const { req, res, next } = createContext({
-				req: {
-					params: { [`${resource}Id`]: 42 },
-				},
+				params: { [`${resource}Id`]: 42 },
 			});
 
 			await loadTournAuthContext(req, res, () => {});
@@ -127,11 +117,9 @@ describe('Authorization Middleware', () => {
 		it.each(cases)('allows siteAdmin to bypass checks for %s:%s',async (resource, capability) => {
 			vi.spyOn(buildTargetModule, 'buildTarget').mockResolvedValueOnce({ id: 42, resource, circuitIds: []});
 			const {req,res,next} = createContext({
-				req: {
-					person: { id: 1, siteAdmin: true },
-					params: { tournId: 1 },
-					auth: { perms: [] },
-				},
+				person: { id: 1, siteAdmin: true },
+				params: { tournId: 1 },
+				auth: { perms: [] },
 			});
 			req.actor = createActor(req);
 			await loadTournAuthContext(req, res, () => {});
@@ -142,15 +130,14 @@ describe('Authorization Middleware', () => {
 		it.each(cases)('Allows owner all capabilities for %s',async (resource) => {
 			vi.spyOn(buildTargetModule, 'buildTarget').mockResolvedValueOnce({ id: 42, resource, circuitIds: []});
 			const {req,res,next} = createContext({
-				req: {
-					person: { id: 1, siteAdmin: false },
-					params: { [`${resource}Id`]: 42 },
-					auth: {
-						perms: [
-							{ scope: resource, id: 42, role: 'owner' },
-						],
-					},
-				}});
+				person: { id: 1, siteAdmin: false },
+				params: { [`${resource}Id`]: 42 },
+				auth: {
+					perms: [
+						{ scope: resource, id: 42, role: 'owner' },
+					],
+				},
+			});
 			req.actor = createActor(req);
 
 			await loadTournAuthContext(req, res, () => {});
@@ -164,15 +151,14 @@ describe('Authorization Middleware', () => {
 
 		it('allows access with correct permission and capability', async () => {
 			const {req,res,next} = createContext({
-				req: {
-					person: { id: 1, siteAdmin: false },
-					params: { tournId: 42 },
-					auth: {
-						perms: [
-							{ scope: 'tourn', id: 42, role: 'owner' },
-						],
-					},
-				}});
+				person: { id: 1, siteAdmin: false },
+				params: { tournId: 42 },
+				auth: {
+					perms: [
+						{ scope: 'tourn', id: 42, role: 'owner' },
+					],
+				},
+			});
 			req.actor = createActor(req);
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'read')(req, res, next);
@@ -181,14 +167,12 @@ describe('Authorization Middleware', () => {
 
 		it('denies access if permission does not match resource id', async () => {
 			let {req, res, next} = createContext({
-				req: {
-					person: { id: 1, siteAdmin: false },
-					params: { tournId: 42 },
-					auth: {
-						perms: [
-							{ scope: 'tourn', id: 99, role: 'owner' },
-						],
-					},
+				person: { id: 1, siteAdmin: false },
+				params: { tournId: 42 },
+				auth: {
+					perms: [
+						{ scope: 'tourn', id: 99, role: 'owner' },
+					],
 				},
 			});
 			req.actor = createActor(req);
@@ -201,13 +185,12 @@ describe('Authorization Middleware', () => {
 		it('allows access if parent scope grants capability', async () => {
 			vi.spyOn(buildTargetModule, 'buildTarget').mockResolvedValueOnce({ id: 7, resource: 'category', tournId: 42, circuitIds: []});
 			const {req, res, next} = createContext({
-				req: { person: { id: 1, siteAdmin: false },
-					params: { tournId: 42, categoryId: 7 },
-					auth: {
-						perms: [
-							{ scope: 'tourn', id: 42, role: 'owner' },
-						],
-					},
+				person: { id: 1, siteAdmin: false },
+				params: { tournId: 42, categoryId: 7 },
+				auth: {
+					perms: [
+						{ scope: 'tourn', id: 42, role: 'owner' },
+					],
 				},
 			});
 			req.actor = createActor(req);
@@ -218,15 +201,14 @@ describe('Authorization Middleware', () => {
 
 		it('denies access if role does not grant capability', async () => {
 			let {req, res, next} = createContext({
-				req: {
-					person: { id: 1, siteAdmin: false },
-					params: { tournId: 42 },
-					auth: {
-						perms: [
-							{ scope: 'tourn', id: 42, role: 'tabber' },
-						],
-					},
-				}});
+				person: { id: 1, siteAdmin: false },
+				params: { tournId: 42 },
+				auth: {
+					perms: [
+						{ scope: 'tourn', id: 42, role: 'tabber' },
+					],
+				},
+			});
 			req.actor = createActor(req);
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'owner')(req, res, next);
@@ -236,15 +218,14 @@ describe('Authorization Middleware', () => {
 
 		it('allows access for child resource with parent permission', async () => {
 			let {req, res, next} = createContext({
-				req: {
-					person: { id: 1, siteAdmin: false },
-					params: { tournId: 42, categoryId: 7 },
-					auth: {
-						perms: [
-							{ scope: 'tourn', id: 42, role: 'owner' },
-						],
-					},
-				}});
+				person: { id: 1, siteAdmin: false },
+				params: { tournId: 42, categoryId: 7 },
+				auth: {
+					perms: [
+						{ scope: 'tourn', id: 42, role: 'owner' },
+					],
+				},
+			});
 			req.actor = createActor(req);
 			vi.spyOn(buildTargetModule, 'buildTarget').mockResolvedValueOnce({ id: 42, resource: 'category', tournId: 42});
 
@@ -256,15 +237,14 @@ describe('Authorization Middleware', () => {
 
 		it('denies access if no matching permission', async () => {
 			const {req, res, next} = createContext({
-				req: {
-					person: { id: 1, siteAdmin: false },
-					params: { tournId: 42 },
-					auth: {
-						perms: [
-							{ scope: 'event', id: 99, role: 'owner' },
-						],
-					},
-				}});
+				person: { id: 1, siteAdmin: false },
+				params: { tournId: 42 },
+				auth: {
+					perms: [
+						{ scope: 'event', id: 99, role: 'owner' },
+					],
+				},
+			});
 			await loadTournAuthContext(req, res, () => {});
 			await requireAccess('tourn', 'read')(req, res, next);
 			expect(next).not.toHaveBeenCalled();

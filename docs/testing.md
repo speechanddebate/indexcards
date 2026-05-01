@@ -121,7 +121,7 @@ describe('authController',() => {
 
 		it('returns 400 when password missing', async () => {
 			const { req, res } = createContext({
-				req: { body: { username: 'bob' } },
+				body: { username: 'bob' },
 			});
 
 			await controller.login(req, res);

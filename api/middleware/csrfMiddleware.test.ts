@@ -11,7 +11,7 @@ describe('csrfMiddleware', () => {
 
 	it('skips when authType is not cookie', async () => {
 		const { req, res, next } = createContext({
-			req: { authType: 'bearer' },
+			authType: 'bearer',
 		});
 
 		await csrfMiddleware(req, res, next);
@@ -23,10 +23,8 @@ describe('csrfMiddleware', () => {
 		'skips CSRF check for safe method %s',
 		async (method) => {
 			const { req, res, next } = createContext({
-				req: {
-					authType: 'cookie',
-					method,
-				},
+				authType: 'cookie',
+				method,
 			});
 
 			await csrfMiddleware(req, res, next);
@@ -37,11 +35,9 @@ describe('csrfMiddleware', () => {
 
 	it('skips CSRF check for /auth/login', async () => {
 		const { req, res, next } = createContext({
-			req: {
-				authType: 'cookie',
-				method: 'POST',
-				path: '/v1/auth/login',
-			},
+			authType: 'cookie',
+			method: 'POST',
+			path: '/v1/auth/login',
 		});
 
 		await csrfMiddleware(req, res, next);
@@ -53,14 +49,12 @@ describe('csrfMiddleware', () => {
 		const token = 'csrf123';
 
 		const { req, res, next } = createContext({
-			req: {
-				authType: 'cookie',
-				method: 'POST',
-				path: '/rest/anything',
-				csrfToken: token,
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				get: ((name: string) => name === config.CSRF.HEADER_NAME ? token : undefined) as any,
-			},
+			authType: 'cookie',
+			method: 'POST',
+			path: '/rest/anything',
+			csrfToken: token,
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			get: ((name: string) => name === config.CSRF.HEADER_NAME ? token : undefined) as any,
 		});
 
 		await csrfMiddleware(req, res, next);
@@ -72,13 +66,11 @@ describe('csrfMiddleware', () => {
 		const spy = vi.spyOn(problem, 'Unauthorized');
 
 		const { req, res, next } = createContext({
-			req: {
-				authType: 'cookie',
-				method: 'POST',
-				path: '/rest/anything',
-				csrfToken: 'abc',
-				get: () => undefined,
-			},
+			authType: 'cookie',
+			method: 'POST',
+			path: '/rest/anything',
+			csrfToken: 'abc',
+			get: () => undefined,
 		});
 
 		await csrfMiddleware(req, res, next);
@@ -91,16 +83,14 @@ describe('csrfMiddleware', () => {
 		const spy = vi.spyOn(problem, 'Unauthorized');
 
 		const { req, res, next } = createContext({
-			req: {
-				authType: 'cookie',
-				method: 'POST',
-				path: '/rest/anything',
-				session: {
-					csrfToken: 'expected',
-				},
-				// eslint-disable-next-line @typescript-eslint/no-explicit-any
-				get: (() => 'wrong') as any,
+			authType: 'cookie',
+			method: 'POST',
+			path: '/rest/anything',
+			session: {
+				csrfToken: 'expected',
 			},
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			get: (() => 'wrong') as any,
 		});
 
 		await csrfMiddleware(req, res, next);

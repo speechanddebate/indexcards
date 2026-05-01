@@ -1,6 +1,23 @@
 import z from 'zod';
 import * as utils from './utils.js';
 
+const PersonZod = z.object({
+	id: utils.id,
+	email: z.string().email(),
+	firstName: z.string(),
+	middleName: z.string().nullable(),
+	lastName: z.string(),
+	state: z.string(),
+	country: z.string(),
+	tz: z.string(),
+	createdAt: z.iso.datetime(),
+	settings: z.object().optional(),
+	metadata: z.object().optional(),
+}).meta({
+	id: 'Person',
+	description: 'A person (user) in tabroom',
+});
+
 export const Person = {
 	type : 'object',
 	description: 'A person (user) in tabroom',
@@ -52,33 +69,43 @@ export const Person = {
 	},
 };
 
-export const Session = {
-	type: 'object',
+export const Session = z.object({
+	id: utils.id,
+	person: utils.id,
+	su: utils.id.nullable(),
+	Su: PersonZod.nullable(),
+	Person: PersonZod,
+}).meta({
+	id: 'Session',
 	description: 'A user session',
-	additionalProperties: false,
-	properties: {
-		id: {
-			type: 'integer',
-			example: 111111,
-		},
-		person: {
-			type: 'integer',
-			example: 42,
-		},
-		su: {
-			type: 'integer',
-			nullable: true,
-			example: 7,
-		},
-		Su: {
-			nullable: true,
-			$ref: '#/components/schemas/Person',
-		},
-		Person: {
-			$ref: '#/components/schemas/Person',
-		},
-	},
-};
+});
+//export const Session = {
+//	type: 'object',
+//	description: 'A user session',
+//	additionalProperties: false,
+//	properties: {
+//		id: {
+//			type: 'integer',
+//			example: 111111,
+//		},
+//		person: {
+//			type: 'integer',
+//			example: 42,
+//		},
+//		su: {
+//			type: 'integer',
+//			nullable: true,
+//			example: 7,
+//		},
+//		Su: {
+//			nullable: true,
+//			$ref: '#/components/schemas/Person',
+//		},
+//		Person: {
+//			$ref: '#/components/schemas/Person',
+//		},
+//	},
+//};
 
 export const ParadigmDetails = z.object({
 	id: utils.id.meta({

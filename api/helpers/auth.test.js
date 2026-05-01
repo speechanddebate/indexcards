@@ -12,17 +12,15 @@ describe.todo('Authorization Functions', () => {
 		const testTourn = userData.testUserTournPerm.tourn;
 
 		const { req, res } = createContext({
-			req: {
-				person: {
-					id: userData.testUserSession.person,
-				},
-				config,
-				params: {
-					tournId : testTourn,
-				},
-				cookies : {
-					[config.COOKIE_NAME]: userData.testUserSession.userkey,
-				},
+			person: {
+				id: userData.testUserSession.person,
+			},
+			config,
+			params: {
+				tournId : testTourn,
+			},
+			cookies : {
+				[config.COOKIE_NAME]: userData.testUserSession.userkey,
 			},
 		});
 		// Call the middleware to set req.session
@@ -73,14 +71,12 @@ describe.todo('Authorization Functions', () => {
 
 	it('Finds a session for an GLP Admin user', async () => {
 		const { req, res } = createContext({
-			req: {
-				person: {
-					id: userData.testAdminSession.person,
-				},
-				config,
-				cookies : {
-					[config.COOKIE_NAME]: userData.testAdminSession.userkey,
-				},
+			person: {
+				id: userData.testAdminSession.person,
+			},
+			config,
+			cookies : {
+				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
 			},
 		});
 
@@ -105,16 +101,14 @@ describe.todo('Authorization Functions', () => {
 		const testNotTourn = '9700';
 
 		const { req, res } = createContext({
-			req: {
-				config,
-				params: {
-					tournId : testNotTourn,
-				},
-				cookies : {
-					[config.COOKIE_NAME]: userData.testAdminSession.userkey,
-				},
-				clearCookie: vi.fn(),
+			config,
+			params: {
+				tournId : testNotTourn,
 			},
+			cookies : {
+				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
+			},
+			clearCookie: vi.fn(),
 		});
 
 		// Call the middleware to set req.session

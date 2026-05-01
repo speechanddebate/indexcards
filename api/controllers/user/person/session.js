@@ -1,4 +1,13 @@
-export const getSession = {
+import { NotFound } from '../../../helpers/problem.js';
+
+export async function getSession(req, res) {
+	if(req.session) {
+		return res.status(200).json(req.session);
+	}
+	return NotFound(req,res, 'You have no active user session.');
+}
+/**
+export const getSession2 = {
 
 	GET: async (req, res) => {
 
@@ -64,7 +73,7 @@ export const getSession = {
 	},
 };
 
-getSession.POST.apiDoc = {
+getSession2.POST.apiDoc = {
 	summary: 'Given a Session Key delivers the corresponding session and personal data',
 	operationId: 'findSession',
 	requestBody: {
@@ -92,3 +101,4 @@ getSession.POST.apiDoc = {
 };
 
 export default getSession;
+*/

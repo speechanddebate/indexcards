@@ -7,8 +7,8 @@ import { InboxMessage } from '../../../openapi/schemas/Message.js';
 import messageRepo from '../../../../repos/messageRepo.js';
 
 describe('Inbox Router', () => {
-	let personId;
-	let userkey;
+	let personId : number;
+	let userkey: string;
 	beforeAll(async () => {
 		({ personId } = await factories.person.createTestPerson());
 		await factories.message.createTestMessage({ person: personId });

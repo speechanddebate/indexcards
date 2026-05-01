@@ -4,7 +4,7 @@ import type { ZodObject } from 'zod';
  */
 interface RouteOpenApiConfig {
 	path: string,
-	operationId: string,
+	operationId?: string,
 	requestParams?: {
 		path?: ZodObject<unknown>;
 		query?: ZodObject<unknown>;

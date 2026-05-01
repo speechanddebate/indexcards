@@ -6,7 +6,7 @@ export const FIELD_MAP = {
 	id: 'id',
 	tag: 'tag',
 	value: 'value',
-	content: 'onsite',
+	content: 'content',
 	topic: 'topic',
 	speech: 'speech',
 	position: 'position',

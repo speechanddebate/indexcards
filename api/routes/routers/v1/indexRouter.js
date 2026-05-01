@@ -16,20 +16,24 @@ import legacyUserRouter from './legacy/userRouter.js';
 import legacyCoachRouter from './legacy/coachRouter.js';
 import legacyPublicRouter from './legacy/public/indexRouter.js';
 import { requireLogin, requireSiteAdmin } from '../../../middleware/authorization/authorization.js';
+import { config } from '../../../../config/config.js';
 
 const router = Router({ mergeParams: true });
 
-router.use('/auth'  , authRouter);
-router.use('/admin' ,requireSiteAdmin, adminRouter);
-router.use('/ext'   , extRouter);
+// hide in progress endpoints behind a flag, so that we don't have to worry about them
+if (!config.HIDE_DEV_ENDPOINTS || process.env.NODE_ENV === 'test') {
+	router.use('/coach' , legacyCoachRouter);
+	router.use('/tab'   , tabRouter);
+	router.use('/admin' ,requireSiteAdmin, adminRouter);
+	router.use('/ext'   , extRouter);
+}
+
 router.use('/pages' , pagesRouter);
-router.use('/tab'   , tabRouter);
 router.use('/rest'  , restRouter);
 router.use('/status' , statusRouter);
-
+router.use('/auth'  , authRouter);
 router.use('/public' , legacyPublicRouter);
 router.use('/user'   ,requireLogin, legacyUserRouter);
-router.use('/coach'  , legacyCoachRouter);
 
 // Serve pre-built OpenAPI spec
 const openApiPath = fileURLToPath(new URL('../../openapi/openapi.json', import.meta.url));

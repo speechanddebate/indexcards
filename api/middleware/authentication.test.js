@@ -37,10 +37,8 @@ describe('Authentication Middleware', () => {
 		it('sets req.session and req.person when valid cookie', async () => {
 
 			const { req, res, next } = createContext({
-				req: {
-					cookies: {
-						[config.COOKIE_NAME]: userData.testUserSession.userkey,
-					},
+				cookies: {
+					[config.COOKIE_NAME]: userData.testUserSession.userkey,
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -74,10 +72,8 @@ describe('Authentication Middleware', () => {
 		it('does not set req.session or req.person when invalid cookie', async () => {
 
 			const { req, res, next } = createContext({
-				req: {
-					cookies: {
-						[config.COOKIE_NAME]: 'invalidcookie',
-					},
+				cookies: {
+					[config.COOKIE_NAME]: 'invalidcookie',
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -95,10 +91,8 @@ describe('Authentication Middleware', () => {
 		it('calls next(err) on sessionRepo error', async () => {
 
 			const { req, res, next } = createContext({
-				req: {
-					cookies: {
-						[config.COOKIE_NAME]: 'somecookie',
-					},
+				cookies: {
+					[config.COOKIE_NAME]: 'somecookie',
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -114,10 +108,8 @@ describe('Authentication Middleware', () => {
 		it('attaches actor with correct info', async () => {
 			// Arrange
 			const { req, res, next } = createContext({
-				req: {
-					cookies: {
-						[config.COOKIE_NAME]: userData.testUserSession.userkey,
-					},
+				cookies: {
+					[config.COOKIE_NAME]: userData.testUserSession.userkey,
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -156,10 +148,8 @@ describe('Authentication Middleware', () => {
 			const encoded = Buffer.from('123:myapikey').toString('base64');
 
 			const { req, res, next } = createContext({
-				req: {
-					headers: {
-						authorization: `Basic ${encoded}`,
-					},
+				headers: {
+					authorization: `Basic ${encoded}`,
 				},
 			});
 			vi.spyOn(personRepo, 'getPerson').mockResolvedValue({
@@ -182,10 +172,8 @@ describe('Authentication Middleware', () => {
 			const encoded = Buffer.from('username:invalidapikey').toString('base64');
 
 			const { req, res, next } = createContext({
-				req: {
-					headers: {
-						authorization: `Basic ${encoded}`,
-					},
+				headers: {
+					authorization: `Basic ${encoded}`,
 				},
 			});
 
@@ -200,10 +188,8 @@ describe('Authentication Middleware', () => {
 		it('returns 400 when Authorization header is malformed', async () => {
 			//Arrange
 			const { req, res, next } = createContext({
-				req: {
-					headers: {
-						authorization: `Basic malformedheader`,
-					},
+				headers: {
+					authorization: `Basic malformedheader`,
 				},
 			});
 
@@ -217,10 +203,8 @@ describe('Authentication Middleware', () => {
 		it('returns 400 when Authorization header uses unsupported scheme', async () => {
 			//Arrange
 			const { req, res, next } = createContext({
-				req: {
-					headers: {
-						authorization: `NotBasic sometoken`,
-					},
+				headers: {
+					authorization: `NotBasic sometoken`,
 				},
 			});
 
@@ -236,10 +220,8 @@ describe('Authentication Middleware', () => {
 		it('sets and req.person when valid token', async () => {
 
 			const { req, res, next } = createContext({
-				req: {
-					headers: {
-						authorization: `Bearer ${userData.testUserSession.userkey}`,
-					},
+				headers: {
+					authorization: `Bearer ${userData.testUserSession.userkey}`,
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -271,10 +253,8 @@ describe('Authentication Middleware', () => {
 		it('returns 401 when invalid token', async () => {
 
 			const { req, res, next } = createContext({
-				req: {
-					headers: {
-						authorization: `Bearer badtoken`,
-					},
+				headers: {
+					authorization: `Bearer badtoken`,
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -291,10 +271,8 @@ describe('Authentication Middleware', () => {
 		it('calls next(err) on sessionRepo error', async () => {
 
 			const { req, res, next } = createContext({
-				req: {
-					headers: {
-						authorization: `Bearer somecookie`,
-					},
+				headers: {
+					authorization: `Bearer somecookie`,
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {

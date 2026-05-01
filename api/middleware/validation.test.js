@@ -8,34 +8,32 @@ import { createContext } from '../../tests/httpMocks.ts';
 
 function createValidationContext(){
 	return createContext({
-		req: {
-			params: {
-				value: 'test',
-			},
-			query:{
-				value: 'test',
-			},
-			body: {
-				value: 'test',
-			},
-			route:{
-				openapi: {
-					requestParams: {
-						query: z.object({
-							value: z.string(),
-						}),
-						path: z.object({
-							value: z.string(),
-						}),
-					},
-					requestBody: {
-						required: true,
-						content: {
-							'application/json': {
-								schema: z.object({
-									value: z.string(),
-								}),
-							},
+		params: {
+			value: 'test',
+		},
+		query:{
+			value: 'test',
+		},
+		body: {
+			value: 'test',
+		},
+		route:{
+			openapi: {
+				requestParams: {
+					query: z.object({
+						value: z.string(),
+					}),
+					path: z.object({
+						value: z.string(),
+					}),
+				},
+				requestBody: {
+					required: true,
+					content: {
+						'application/json': {
+							schema: z.object({
+								value: z.string(),
+							}),
 						},
 					},
 				},

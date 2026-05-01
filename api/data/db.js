@@ -3,6 +3,7 @@ import logger, { getCallerFrame } from '../helpers/logger.js';
 import config from '../../config/config.js';
 import initModels from './models/init-models.js';
 
+// How slow is too slow?
 const slowQueryMs = Number(config.SLOW_QUERY_MS || 1000);
 
 const sequelize = new Sequelize(
@@ -34,6 +35,8 @@ const sequelize = new Sequelize(
 
 // initalize all models created by sequelize-auto
 const db = initModels(sequelize);
+// declare relations that aren't automatically detected by sequelize-auto here, if needed
+db.judge.belongsTo(db.school, { as:'school_school',foreignKey: 'school' });
 
 // By default Sequelize wants you to try...catch every single database call
 // for Reasons?  Otherwise all your database errors just go unprinted and you
