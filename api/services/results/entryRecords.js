@@ -23,9 +23,37 @@ export const entryRecords = async (entryId, tournId, options) => {
 			section.id sectionId, section.publish sectionPublish, section.bye sectionBye,
 			ballot.bye, ballot.forfeit, ballot.chair, ballot.side, ballot.speakerorder,
 			score.id scoreId, score.tag scoreTag, score.value scoreValue,
-			(select anon.value from event_setting anon where anon.event = event.id and anon.tag = 'anonymous_public') as anonymousPublic,
-			(select al.value from event_setting al where al.event = event.id and al.tag = 'aff_label') as affLabel,
-			(select nl.value from event_setting nl where nl.event = event.id and nl.tag = 'neg_label') as negLabel,
+
+			(select mode.value
+				from event_setting mode
+				where mode.event = event.id
+				and mode.tag = 'online_mode'
+			) as onlineMode,
+
+			(select primaryScore.value
+				from event_setting primaryScore
+				where primaryScore.event = event.id
+				and primaryScore.tag = 'primary_score'
+			) as primaryScore,
+
+			(select anon.value
+				from event_setting anon
+				where anon.event = event.id
+				and anon.tag = 'anonymous_public'
+			) as anonymousPublic,
+
+			(select al.value
+				from event_setting al
+				where al.event = event.id
+				and al.tag = 'aff_label'
+			) as affLabel,
+
+			(select nl.value
+				from event_setting nl
+				where nl.event = event.id
+				and nl.tag = 'neg_label'
+			) as negLabel,
+
 			(select
 				oppballot.entry
 				from ballot oppballot
@@ -45,6 +73,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 		from (event, entry, round, panel section, ballot)
 
 			left join score on score.ballot = ballot.id
+				and score.tag IN ('point', 'rank', 'refute', 'winloss', 'po')
 			left join student on score.student = student.id
 			left join judge on ballot.judge = judge.id
 			left join room on section.room = room.id
@@ -83,6 +112,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 	if (!resultsData || resultsData.length < 1) return 401;
 
 	let records = {};
+	let primaryScore = '';
 
 	resultsData.forEach( (row) => {
 
@@ -93,26 +123,39 @@ export const entryRecords = async (entryId, tournId, options) => {
 		if (!records?.id) {
 
 			records = {
-				id   : row.id,
-				code : row.code,
-				name : row.name,
+				id       : row.id,
+				code     : row.code,
+				name     : row.name,
+				students : {},
 			};
 
 			records.Event = {
-				id   : row.eventId,
-				abbr : row.eventAbbr,
-				name : row.eventName,
-				nsda : row.nsdaCategory,
-				type : snakeToCamel(row.eventType),
+				id           : row.eventId,
+				abbr         : row.eventAbbr,
+				name         : row.eventName,
+				nsda         : row.nsdaCategory,
+				mode         : snakeToCamel(row.onlineMode),
+				type         : snakeToCamel(row.eventType),
 			};
 
 			if (records.Event.type == 'mockTrial') {
 				if (row.side === 1) records.sideLabel = row.affLabel || 'Pros';
 				if (row.side === 2) records.sideLabel = row.negLabel || 'Def';
 			}
-
 			records.Rounds = {};
 		}
+
+		if (row.studentId && !records.students[row.studentId]) {
+			records.students[row.studentId] = {
+				name  : `${row.studentLast}, ${row.studentFirst}${row.studentMiddle ? ` ${row.studentMiddle}` : '' }`,
+				label : `${row.studentLast}, ${row.studentFirst.substr(0, 1)}${row.studentMiddle ? row.studentMiddle.substr(0,1) : '' }`,
+				last  : row.studentLast,
+				first : row.studentFirst,
+			};
+		}
+
+		if (!records.Event.scoreTags) records.Event.scoreTags = {};
+		if (row.scoreTag && !records.Event.scoreTags[row.scoreTag]) records.Event.scoreTags[row.scoreTag] = true;
 
 		if (!records.Rounds[row.roundName]) {
 			records.Rounds[row.roundName] = {
@@ -126,13 +169,14 @@ export const entryRecords = async (entryId, tournId, options) => {
 			};
 
 			if (['debate', 'wsdc', 'mockTrial'].includes(row.eventType)) {
-				records.Rounds[row.roundName].opponent = {
+				records.Rounds[row.roundName].Opponent = {
 					id   : row.opponentId,
 					code : row.opponentCode,
 				};
 			}
 
 			records.Rounds[row.roundName].label = row.roundLabel || `Round ${row.roundName}`;
+			records.Rounds[row.roundName].name = row.roundName;
 
 			if (row.roomId) {
 				records.Rounds[row.roundName].Room = {
@@ -149,90 +193,81 @@ export const entryRecords = async (entryId, tournId, options) => {
 			round.Judges[row.judgeId] = {
 				name   : `${row.judgeLast}, ${row.judgeFirst}${row.judgeMiddle ? ` ${row.judgeMiddle}` : '' }`,
 				first  : row.judgeFirst,
-				middle : row.judgeMiddle,
 				last   : row.judgeLast,
-				chair  : row.chair,
 			};
 		}
 
+		if (row.bye) records.Rounds[row.roundName].bye = true;
+
 		if (row.postPrimary >= postLevel || row.sectionPublish) {
 
-			if (!results.default)  results.default = {};
-			if (row.sectionBye || row.bye) results.default.primary = 'BYE';
-			if (row.forfeit) results.default.primary = 'FORFEIT';
+			if (row.sectionBye) records.Rounds[row.roundName].bye = true;
+			if (row.forfeit) records.Rounds[row.roundName].forfeit = true;
 
-			if (row.judgeId) {
+			if (!results[row.judgeId]) {
+				results[row.judgeId] = {
+					chair      : row.chair ? true : false,
+					id         : row.judgeId,
+				};
+			}
 
-				if (!results[row.judgeId]) {
-					results[row.judgeId] = {
-						chair      : row.chair ? true : false,
-						id         : row.judgeId,
-						name       : `${row.judgeLast}, ${row.judgeFirst}${row.judgeMiddle ? ` ${row.judgeMiddle}` : '' }`,
-						primary    : '',
-					};
-				}
+			// What is the primary score? If not set yet, then it should be the setting over all.
+			if (!primaryScore && row.primaryScore) primaryScore = row.primaryScore;
 
-				if (row.scoreTag === 'winloss') {
+			// If it is not set explicitly, then debate gets winloss
+			if (!primaryScore && (['debate', 'mockTrial', 'wsdc'].includes(row.eventType))) primaryScore = 'winloss';
+
+			// If it is not set explicitly, then speech & congress get ranks
+			if (!primaryScore) primaryScore = 'rank';
+
+			// What is the scoretag of the row?
+			let scoreTag = row.scoreTag;
+			if (scoreTag === 'refute') scoreTag = 'point';
+
+			if (scoreTag === primaryScore) {
+				if (scoreTag === 'winloss') {
 					if (row.scoreValue == 1) {
-						results[row.judgeId].primary = 'W';
+						results[row.judgeId][scoreTag] = 'W';
 					} else {
-						results[row.judgeId].primary = 'L';
+						results[row.judgeId][scoreTag] = 'L';
 					}
-				}
-
-				// Speech or Congress Ranks
-				if (row.scoreTag === 'rank'
-					&& (row.eventType === 'speech'
-						|| row.eventType === 'congress'
-						|| row.eventType === 'wudc'
-					)
-				) {
-					results[row.judgeId].primary = row.scoreValue;
+				} else {
+					if (!results[row.judgeId][scoreTag]) results[row.judgeId][scoreTag] = 0;
+					results[row.judgeId][scoreTag] += parseFloat(row.scoreValue);
 				}
 			}
 		}
 
-		if (row.postSecondary >= postLevel) {
-			if (row.judgeId) {
+		// Ignore anything that's already been posted, and secondaries that are not published.
+		if (
+			(row.postSecondary >= postLevel)
+			&& (row.scoreTag !== primaryScore)
+		) {
 
-				if (
-					row.scoreTag === 'point'
-					|| row.scoreTag === 'refute'
-					|| (row.scoreTag === 'rank'
-						&& (row.eventType === 'debate'
-							|| row.eventType === 'wsdc'
-						)
-					)
-				) {
+			let scoreTag = row.scoreTag;
+			if (scoreTag === 'refute') scoreTag = 'point';
 
-					if (row.studentId) {
-
-						if (!results[row.judgeId].studentScores) results[row.judgeId].studentScores = {};
-
-						if (!results[row.judgeId].studentScores[row.studentId]) {
-							results[row.judgeId].studentScores[row.studentId] = {
-								name   : `${row.studentLast}, ${row.studentFirst}${row.studentMiddle ? ` ${row.studentMiddle}` : '' }`,
-								id     : row.studentId,
-							};
-						}
-
-						results[row.judgeId].studentScores[row.studentId][row.scoreTag] = parseFloat(row.scoreValue);
-
-					} else {
-
-						if (row.scoreTag === 'point') {
-							results[row.judgeId].teamPoints = parseFloat(row.scoreValue);
-						}
-					}
+			if (scoreTag === 'winloss') {
+				if (row.scoreValue == 1) {
+					results[row.judgeId][scoreTag] = 'W';
+				} else {
+					results[row.judgeId][scoreTag] = 'L';
 				}
 			} else {
+				if (!results[row.judgeId][scoreTag]) results[row.judgeId][scoreTag] = 0;
+				results[row.judgeId][scoreTag] += parseFloat(row.scoreValue);
+			}
 
-				if (row.scoreTag === 'point') {
-					results[row.judgeId].teamPoints = parseFloat(row.scoreValue);
+			// Per speaker scores are also called out separately for secondary scores.
+			if (row.studentId) {
+				if (!results[row.judgeId].students) results[row.judgeId].students = {};
+
+				if (!results[row.judgeId].students[row.studentId]) {
+					results[row.judgeId].students[row.studentId] = {
+					};
 				}
-				if (row.scoreTag === 'rank') {
-					results[row.judgeId].teamRanks = parseFloat(row.scoreValue);
-				}
+
+				results[row.judgeId].students[row.studentId][row.scoreTag] = parseFloat(row.scoreValue);
 			}
 		}
 

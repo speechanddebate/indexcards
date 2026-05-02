@@ -26,6 +26,7 @@ export const publishLevel = (keyLevel) => {
 };
 
 export const snakeToCamel = (snaked) => {
+	if (!snaked || !snaked.toLowerCase) return;
 	return snaked.toLowerCase()
 		.replace(/([-_][a-z])/g, (group) => {
 			return group.toUpperCase().replace('-', '').replace('_', '');
