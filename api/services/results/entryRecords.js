@@ -24,6 +24,13 @@ export const entryRecords = async (entryId, tournId, options) => {
 			ballot.bye, ballot.forfeit, ballot.chair, ballot.side, ballot.speakerorder,
 			score.id scoreId, score.tag scoreTag, score.value scoreValue,
 
+			(select
+				paradigm.person
+				from person_setting paradigm
+				where paradigm.person = judge.person
+				and paradigm.tag = 'paradigm'
+			)  as paradigm,
+
 			(select mode.value
 				from event_setting mode
 				where mode.event = event.id
@@ -195,6 +202,10 @@ export const entryRecords = async (entryId, tournId, options) => {
 				first  : row.judgeFirst,
 				last   : row.judgeLast,
 			};
+
+			if (row.paradigm) {
+				round.Judges[row.judgeId].paradigm = row.paradigm;
+			}
 		}
 
 		if (row.bye) records.Rounds[row.roundName].bye = true;

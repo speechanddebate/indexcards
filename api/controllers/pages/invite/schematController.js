@@ -51,6 +51,13 @@ export async function getSchematic(req,res) {
 			and event.id    = round.event
 			and round.published > 0
 			and round.timeslot = timeslot.id
+			and exists (
+				select panel.id
+				from panel, ballot
+				where panel.round = round.id
+				and panel.id = ballot.panel
+				and ballot.entry > 0
+			)
 	`, {
 		replacements: { ...req.params },
 		type: db.Sequelize.QueryTypes.SELECT,
