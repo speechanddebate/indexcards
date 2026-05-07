@@ -65,9 +65,9 @@ const prettyConsoleFormat = winston.format.combine(
 		let { timestamp, level, message, ...rest } = info;
 		//special format for console request logger
 		if( message === 'Request handled') {
-			const {method, statusCode, url, responseTime, requestId} = rest;
+			const {method, statusCode, url, responseTimeMs, requestId} = rest;
 			const requestIdSection = requestId ? ` ${requestId}` : '';
-			return `${timestamp} ${level}${requestIdSection} ${method} ${statusCode} ${url} ${responseTime}`;
+			return `${timestamp} ${level}${requestIdSection} ${method} ${statusCode} ${url} ${responseTimeMs}ms`;
 		}
 		const msg = typeof message === 'string' ? message : JSON.stringify(message);
 		// include other metadata after the message
@@ -162,7 +162,7 @@ export const setupRequest = (req, res, next) => {
 			method: req.method,
 			url: req.originalUrl ?? '',
 			statusCode: `${res.statusCode ?? ''}`,
-			responseTime: `${duration}ms`,
+			responseTimeMs: `${duration}`,
 		});
 	});
 
