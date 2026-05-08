@@ -5,7 +5,7 @@ import { ValidateRequest } from '../../../../middleware/validation.js';
 import * as controller from '../../../../controllers/rest/tournsController.js';
 import { requirePublicTourn } from '../../../../policy/tournPolicy.js';
 import roundRouter from './roundRouter.js';
-import resultRouter from './resultRouter.js';
+import resultRouter from './resultRouter.ts';
 import eventRouter from './eventRouter.js';
 import entryRouter from './entryRouter.js';
 
