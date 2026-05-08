@@ -152,6 +152,17 @@ const requestLogger = winston.createLogger({
 	],
 });
 
+function normalizePath(urlPath) {
+	// Strip query string first
+	const pathOnly = urlPath.split('?')[0];
+
+	// Single regex for both numeric IDs and UUIDs
+	return pathOnly.replace(
+		/\/(?:\d+|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?=\/|$)/gi,
+		'/{id}'
+	);
+}
+
 export const setupRequest = (req, res, next) => {
 	req.recieved = Date.now();
 
@@ -161,6 +172,7 @@ export const setupRequest = (req, res, next) => {
 		requestLogger.info('Request handled', {
 			method: req.method,
 			url: req.originalUrl ?? '',
+			path: normalizePath(req.originalUrl ?? ''),
 			statusCode: `${res.statusCode ?? ''}`,
 			responseTimeMs: `${duration}`,
 		});
