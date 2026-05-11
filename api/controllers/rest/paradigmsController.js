@@ -111,9 +111,10 @@ async function getJudgingRecord(req, res) {
 
 	const record = await judgeRecord(personId);
 
-	const response = record.map(r =>
+	let response = record.map(r =>
 		Object.fromEntries(Object.entries(r).map(([k, v]) => [k, v ?? '']))
 	);
+	response = record.map(r => r);
 
 	res.json(response);
 }

@@ -11,6 +11,7 @@ export async function judgeRecord(personId){
 						win.value as vote_win,
 						panel.id as panel_id,
 						entry.code as entry_code,
+						tourn.id as tourn_id,
 						tourn.name as tourn_name,
 						tourn.start as round_date,
 						round.label as round_label,
@@ -120,7 +121,10 @@ export async function judgeRecord(personId){
 			}
 
 			groupedByPanel.set(panelId, {
-				tournName: row.tourn_name || '',
+				Tourn: {
+					id: row.tourn_id ?? '',
+					name: row.tourn_name || '',
+				},
 				roundDate,
 				roundLabel: row.round_label || (row.round_name ? `R${row.round_name}` : ''),
 				eventAbbr: row.event_abbr || '',

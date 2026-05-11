@@ -4399,9 +4399,26 @@
       "JudgeRecord": {
         "type": "object",
         "properties": {
-          "tournName": {
-            "type": "string",
-            "description": "Tournament name"
+          "Tourn": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991,
+                "description": "Tournament id"
+              },
+              "name": {
+                "type": "string",
+                "description": "Tournament name"
+              }
+            },
+            "required": [
+              "id",
+              "name"
+            ],
+            "additionalProperties": false,
+            "description": "Tournament details"
           },
           "roundDate": {
             "type": "string",
@@ -4446,7 +4463,7 @@
           }
         },
         "required": [
-          "tournName",
+          "Tourn",
           "roundDate",
           "roundLabel",
           "eventAbbr",
