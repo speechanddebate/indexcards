@@ -96,6 +96,9 @@ describe('PersonRepo', () => {
 					paradigm: 'Some paradigm',
 				},
 			});
+			await factories.judge.createTestJudge({
+				person: personId,
+			});
 			// Act
 			const person = await personRepo.getPerson(personId, {
 				excludeBanned: true,
@@ -105,7 +108,7 @@ describe('PersonRepo', () => {
 					Judges: {
 						fields: ['id'],
 						include: {
-							school: {
+							School: {
 								fields: ['id','name'],
 							},
 						},
@@ -118,6 +121,7 @@ describe('PersonRepo', () => {
 			expect(person.id).toBe(personId);
 			expect(person.Judges).toBeDefined();
 			expect(Array.isArray(person.Judges)).toBe(true);
+			expect(person.Judges.length).toBeGreaterThan(0);
 		});
 		it('attaches PersonQuizzes when include.PersonQuizzes is true', async () => {
 			// Arrange
@@ -189,6 +193,8 @@ describe('PersonRepo', () => {
 			// Arrange
 			const personData = factories.person.createPersonData();
 			const { personId } = await factories.person.createTestPerson(personData);
+			//person must have judged at least once to be included in search results
+			await factories.judge.createTestJudge({ person: personId });
 
 			// Act
 			const results = await personRepo.personSearch(`${personData.firstName} ${personData.lastName}`);

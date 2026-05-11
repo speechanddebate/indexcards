@@ -76,7 +76,7 @@ async function buildPersonQuery(opts = {}) {
 	if (opts.include?.Judges){
 		query.include.push({
 			...judgeInclude(opts.include.Judges),
-			as: 'judges',
+			as: 'person_judges',
 			required: false,
 		});
 	}
@@ -149,7 +149,20 @@ async function personSearch(searchTerm = '', opts = {}) {
 		});
 	}
 
-	query.order = [['last', 'ASC'], ['first', 'ASC']];
+	if (words.length > 0) {
+		//priority order: matches on last name first, then first name, then alphabetical
+		const lastNameMatchCondition = words
+			.map(word => `person.last LIKE '${word}%'`)
+			.join(' OR ');
+
+		query.order = [
+			[db.Sequelize.literal(`CASE WHEN (${lastNameMatchCondition}) THEN 0 ELSE 1 END`), 'ASC'],
+			['last', 'ASC'],
+			['first', 'ASC'],
+		];
+	} else {
+		query.order = [['last', 'ASC'], ['first', 'ASC']];
+	}
 	//query.subQuery = false;
 	//query.distinct = true;
 
