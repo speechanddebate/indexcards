@@ -754,12 +754,12 @@
             "name": "limit",
             "schema": {
               "default": 50,
-              "description": "Maximum number of tournaments to return. Default: 50, Max: 250.",
+              "description": "Maximum number of tournaments to return. Default: 50, Max: 500.",
               "type": "number",
               "minimum": 0,
-              "maximum": 250
+              "maximum": 500
             },
-            "description": "Maximum number of tournaments to return. Default: 50, Max: 250."
+            "description": "Maximum number of tournaments to return. Default: 50, Max: 500."
           },
           {
             "in": "query",
