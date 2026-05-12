@@ -2,8 +2,150 @@
 import factories from '../../tests/factories/index.js';
 import personRepo, { personInclude } from './personRepo.js';
 import { expect } from 'chai';
+import db from '../data/db.js';
+
+//kinda hate this but it allows us to test the paradigm cutoff logic without having to mock out the entire settings system or
+// manipulate time in a way that could affect other tests. will eventually want to setup more robust settings testing
+async function setTabroomDateSetting(tag, valueDate) {
+	const [setting] = await db.tabroomSetting.findOrCreate({
+		where: { tag },
+		defaults: {
+			tag,
+			value: 'date',
+			value_date: valueDate,
+		},
+	});
+
+	await setting.update({
+		value: 'date',
+		value_date: valueDate,
+	});
+}
+
+async function getTabroomDateSettingSnapshot(tag) {
+	const row = await db.tabroomSetting.findOne({ where: { tag } });
+	if (!row) return null;
+
+	return {
+		id: row.id,
+		tag: row.tag,
+		value: row.value,
+		value_text: row.value_text,
+		value_date: row.value_date,
+		person: row.person,
+	};
+}
+
+async function restoreTabroomDateSetting(tag, snapshot) {
+	if (!snapshot) {
+		await db.tabroomSetting.destroy({ where: { tag } });
+		return;
+	}
+
+	await db.tabroomSetting.update(
+		{
+			value: snapshot.value,
+			value_text: snapshot.value_text,
+			value_date: snapshot.value_date,
+			person: snapshot.person,
+		},
+		{ where: { id: snapshot.id } }
+	);
+}
 
 describe('PersonRepo', () => {
+	describe('hasValidParadigm with auto cutoff discovery', () => {
+		let cutoffSnapshot;
+		let startSnapshot;
+
+		beforeEach(async () => {
+			cutoffSnapshot = await getTabroomDateSettingSnapshot('paradigm_review_cutoff');
+			startSnapshot = await getTabroomDateSettingSnapshot('paradigm_review_start');
+		});
+
+		afterEach(async () => {
+			await restoreTabroomDateSetting('paradigm_review_cutoff', cutoffSnapshot);
+			await restoreTabroomDateSetting('paradigm_review_start', startSnapshot);
+		});
+
+		it('includes paradigm when cutoff is not active yet', async () => {
+			const now = new Date();
+			const reviewStart = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+			const cutoffInFuture = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+			await setTabroomDateSetting('paradigm_review_start', reviewStart);
+			await setTabroomDateSetting('paradigm_review_cutoff', cutoffInFuture);
+
+			const { personId } = await factories.person.createTestPerson({
+				settings: {
+					paradigm: 'Legacy paradigm text',
+				},
+			});
+
+			const staleTimestamp = new Date(reviewStart.getTime() - 24 * 60 * 60 * 1000);
+			await db.personSetting.update(
+				{ timestamp: staleTimestamp },
+				{ where: { person: personId, tag: 'paradigm' } }
+			);
+
+			const person = await personRepo.getPerson(personId, { hasValidParadigm: true });
+
+			expect(person).toBeDefined();
+			expect(person.id).toBe(personId);
+		});
+
+		it('excludes paradigm older than review start once cutoff is active', async () => {
+			const now = new Date();
+			const reviewStart = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+			const cutoffInPast = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+			await setTabroomDateSetting('paradigm_review_start', reviewStart);
+			await setTabroomDateSetting('paradigm_review_cutoff', cutoffInPast);
+
+			const { personId } = await factories.person.createTestPerson({
+				settings: {
+					paradigm: 'Stale paradigm text',
+				},
+			});
+
+			const staleTimestamp = new Date(reviewStart.getTime() - 24 * 60 * 60 * 1000);
+			await db.personSetting.update(
+				{ timestamp: staleTimestamp },
+				{ where: { person: personId, tag: 'paradigm' } }
+			);
+
+			const person = await personRepo.getPerson(personId, { hasValidParadigm: true });
+
+			expect(person).toBeNull();
+		});
+
+		it('includes paradigm newer than review start once cutoff is active', async () => {
+			const now = new Date();
+			const reviewStart = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
+			const cutoffInPast = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+			await setTabroomDateSetting('paradigm_review_start', reviewStart);
+			await setTabroomDateSetting('paradigm_review_cutoff', cutoffInPast);
+
+			const { personId } = await factories.person.createTestPerson({
+				settings: {
+					paradigm: 'Fresh paradigm text',
+				},
+			});
+
+			const freshTimestamp = new Date(reviewStart.getTime() + 60 * 1000);
+			await db.personSetting.update(
+				{ timestamp: freshTimestamp },
+				{ where: { person: personId, tag: 'paradigm' } }
+			);
+
+			const person = await personRepo.getPerson(personId, { hasValidParadigm: true });
+
+			expect(person).toBeDefined();
+			expect(person.id).toBe(personId);
+		});
+	});
+
 	describe('buildPersonQuery', () => {
 
 		it('excludes password by default', async () => {
@@ -96,6 +238,9 @@ describe('PersonRepo', () => {
 					paradigm: 'Some paradigm',
 				},
 			});
+			await factories.judge.createTestJudge({
+				person: personId,
+			});
 			// Act
 			const person = await personRepo.getPerson(personId, {
 				excludeBanned: true,
@@ -105,7 +250,7 @@ describe('PersonRepo', () => {
 					Judges: {
 						fields: ['id'],
 						include: {
-							school: {
+							School: {
 								fields: ['id','name'],
 							},
 						},
@@ -118,6 +263,7 @@ describe('PersonRepo', () => {
 			expect(person.id).toBe(personId);
 			expect(person.Judges).toBeDefined();
 			expect(Array.isArray(person.Judges)).toBe(true);
+			expect(person.Judges.length).toBeGreaterThan(0);
 		});
 		it('attaches PersonQuizzes when include.PersonQuizzes is true', async () => {
 			// Arrange
@@ -189,6 +335,8 @@ describe('PersonRepo', () => {
 			// Arrange
 			const personData = factories.person.createPersonData();
 			const { personId } = await factories.person.createTestPerson(personData);
+			//person must have judged at least once to be included in search results
+			await factories.judge.createTestJudge({ person: personId });
 
 			// Act
 			const results = await personRepo.personSearch(`${personData.firstName} ${personData.lastName}`);

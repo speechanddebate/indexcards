@@ -33,7 +33,9 @@ export const toDomain = dbRow => {
 	if (dbRow.chapter_judges && Array.isArray(dbRow.chapter_judges)) {
 		person.ChapterJudges = dbRow.chapter_judges.map(chapterJudgeToDomain);
 	}
-	if (dbRow.judges && Array.isArray(dbRow.judges)) {
+	if (dbRow.person_judges && Array.isArray(dbRow.person_judges)) {
+		person.Judges = dbRow.person_judges.map(judgeToDomain);
+	} else if (dbRow.judges && Array.isArray(dbRow.judges)) {
 		person.Judges = dbRow.judges.map(judgeToDomain);
 	}
 	if (dbRow.person_quizzes && Array.isArray(dbRow.person_quizzes)) {

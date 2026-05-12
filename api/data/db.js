@@ -37,6 +37,8 @@ const sequelize = new Sequelize(
 const db = initModels(sequelize);
 // declare relations that aren't automatically detected by sequelize-auto here, if needed
 db.judge.belongsTo(db.school, { as:'school_school',foreignKey: 'school' });
+//judges is takken by the registered by person association
+db.person.hasMany(db.judge, { as:'person_judges',foreignKey: 'person' });
 
 // By default Sequelize wants you to try...catch every single database call
 // for Reasons?  Otherwise all your database errors just go unprinted and you

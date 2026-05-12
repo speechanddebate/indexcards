@@ -74,7 +74,7 @@ describe('paradigmsController', () => {
 		it('maps results to JudgeRecord schema fields', async () => {
 			vi.spyOn(judgeRecordsService, 'judgeRecord').mockResolvedValue([
 				{
-					tournName: null, //handle empty field
+					Tourn: { id: 1, name: 'Example Tourn' },
 					roundDate: '2026-04-01T00:00:00.000Z',
 					roundLabel: 'R1',
 					eventAbbr: 'PF',

@@ -51,7 +51,7 @@ export async function createJudge(overrides = {}) {
 	});
 
 	const personId = await personRepo.createPerson(data);
-	await factories.judge.createTestJudge({ personId });
+	await factories.judge.createTestJudge({ person: personId });
 
 	return {
 		personId,

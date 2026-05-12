@@ -2,6 +2,8 @@ import { toDomain as genericToDomain, toPersistence as genericToPersistence, toB
 import { toDomain as schoolToDomain } from './schoolMapper.js';
 import { toDomain as ballotToDomain } from './ballotMapper.js';
 import { toDomain as categoryToDomain } from './categoryMapper.js';
+
+//deprecated
 export const FIELD_MAP = {
 	id: 'id',
 	code: 'code',
@@ -12,14 +14,14 @@ export const FIELD_MAP = {
 	ada: { db: 'ada', toDomain: toBool, toDb: fromBool },
 	obligation: 'obligation',
 	hired: 'hired',
-	schoolId: 'school',
-	categoryId: 'category',
-	altCategoryId: 'alt_category',
-	coversId: 'covers',
-	chapterJudgeId: 'chapter_judge',
-	personId: 'person',
-	personRequestId: 'person_request',
-	scoreId: 'score',
+	school: 'school',
+	category: 'category',
+	alt_category: 'alt_category',
+	covers: 'covers',
+	chapter_judge: 'chapter_judge',
+	person: 'person',
+	person_request: 'person_request',
+	score: 'score',
 	tmp: 'tmp',
 	settings: 'judge_settings',
 	updatedAt: { db: 'timestamp', toDb: () => undefined },

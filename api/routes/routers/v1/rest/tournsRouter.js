@@ -5,7 +5,7 @@ import { ValidateRequest } from '../../../../middleware/validation.js';
 import * as controller from '../../../../controllers/rest/tournsController.js';
 import { requirePublicTourn } from '../../../../policy/tournPolicy.js';
 import roundRouter from './roundRouter.js';
-import resultRouter from './resultRouter.js';
+import resultRouter from './resultRouter.ts';
 import eventRouter from './eventRouter.js';
 import entryRouter from './entryRouter.js';
 
@@ -21,7 +21,7 @@ router.route('/').get(ValidateRequest,controller.getTourns).openapi = {
 	tags: ['Tournaments','Orval'],
 	requestParams: {
 		query: z.object({
-			limit: z.coerce.number().max(250).min(0).default(50).meta({ description: 'Maximum number of tournaments to return. Default: 50, Max: 250.' }),
+			limit: z.coerce.number().max(500).min(0).default(50).meta({ description: 'Maximum number of tournaments to return. Default: 50, Max: 500.' }),
 			offset: z.coerce.number().min(0).optional().meta({ description: 'Number of tournaments to skip. Must be a non-negative number.' }),
 			circuit: z.coerce.number().optional().meta({ description: 'Filter tournaments to those approved in this circuit.' }),
 			startAfter: z.iso.datetime().optional().meta({ description: 'Return tournaments with start date after this UTC timestamp.' }),

@@ -6,7 +6,7 @@ describe('Judge Record Service', async () => {
 	let entryId;
 	beforeAll(async () => {
 		({ personId } = await factories.person.createTestPerson());
-		({ judgeId } = await factories.judge.createTestJudge({ personId }));
+		({ judgeId } = await factories.judge.createTestJudge({ person: personId }));
 		({ tournId } = await factories.tourn.createTestTourn({ hidden: 0 })); //public tourn
 		({ eventId } = await factories.event.createTestEvent({ tournId }));
 		({ roundId } = await factories.round.createTestRound({

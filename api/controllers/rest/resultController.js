@@ -4,7 +4,7 @@ import { tiebreakTypes } from '../../services/results/tiebreakTypes.js';
 
 export async function getBracket(req, res) {
 	const bracket = await resultSetRepo.getResultSets({
-		eventId: req.params.eventId,
+		eventId: req.valid.params.eventId,
 		tag: 'bracket',
 	});
 
@@ -13,7 +13,7 @@ export async function getBracket(req, res) {
 }
 
 export async function getResultSet(req,res) {
-	const resultSet = await resultSetRepo.getResultSet(req.params.resultSetId);
+	const resultSet = await resultSetRepo.getResultSet(req.valid.params.resultSetId);
 	if (resultSet) {
 		return res.status(200).json(resultSet);
 	}
@@ -21,7 +21,7 @@ export async function getResultSet(req,res) {
 }
 
 export async function getResultSets(req,res) {
-	const resultSet = await resultSetRepo.getResultSets({ ...req.params }, { noResults: true});
+	const resultSet = await resultSetRepo.getResultSets({ ...req.valid.params }, { noResults: true});
 
 	if (resultSet) {
 		return res.status(200).json(resultSet);
@@ -30,6 +30,6 @@ export async function getResultSets(req,res) {
 }
 
 export async function getTiebreaks(req, res) {
-	const answer = await tiebreakTypes({...req.params});
+	const answer = await tiebreakTypes({...req.valid.params});
 	return res.status(200).json(answer);
 }

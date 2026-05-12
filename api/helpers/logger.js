@@ -65,9 +65,9 @@ const prettyConsoleFormat = winston.format.combine(
 		let { timestamp, level, message, ...rest } = info;
 		//special format for console request logger
 		if( message === 'Request handled') {
-			const {method, statusCode, url, responseTime, requestId} = rest;
+			const {method, statusCode, url, responseTimeMs, requestId} = rest;
 			const requestIdSection = requestId ? ` ${requestId}` : '';
-			return `${timestamp} ${level}${requestIdSection} ${method} ${statusCode} ${url} ${responseTime}`;
+			return `${timestamp} ${level}${requestIdSection} ${method} ${statusCode} ${url} ${responseTimeMs}ms`;
 		}
 		const msg = typeof message === 'string' ? message : JSON.stringify(message);
 		// include other metadata after the message
@@ -107,7 +107,9 @@ const createConsoleTransport = () => {
 		...config.winstonConsoleOptions,
 	});
 };
-
+/**
+ * Main application logger. Transports and formatting are configured based on config values.
+ */
 const logger = winston.createLogger({
 	level: config.LOG_LEVEL,
 	format: winston.format.combine(
@@ -152,6 +154,17 @@ const requestLogger = winston.createLogger({
 	],
 });
 
+function normalizePath(urlPath) {
+	// Strip query string first
+	const pathOnly = urlPath.split('?')[0];
+
+	// Single regex for both numeric IDs and UUIDs
+	return pathOnly.replace(
+		/\/(?:\d+|[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?=\/|$)/gi,
+		'/{id}'
+	);
+}
+
 export const setupRequest = (req, res, next) => {
 	req.recieved = Date.now();
 
@@ -161,8 +174,9 @@ export const setupRequest = (req, res, next) => {
 		requestLogger.info('Request handled', {
 			method: req.method,
 			url: req.originalUrl ?? '',
+			path: normalizePath(req.originalUrl ?? ''),
 			statusCode: `${res.statusCode ?? ''}`,
-			responseTime: `${duration}ms`,
+			responseTimeMs: `${duration}`,
 		});
 	});
 

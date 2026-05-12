@@ -1,3 +1,4 @@
+import * as utils from './utils.js';
 import * as z from 'zod';
 
 export const Judge = {
@@ -10,8 +11,15 @@ export const Judge = {
  *  A record of a judge's decision. used in paradigm record
  */
 export const JudgeRecord = z.object({
-	tournName: z.string().meta({
-		description: 'Tournament name',
+	Tourn: z.object({
+		id: utils.id.meta({
+			description: 'Tournament id',
+		}),
+		name: z.string().meta({
+			description: 'Tournament name',
+		}),
+	}).meta({
+		description: 'Tournament details',
 	}),
 	roundDate: z.string().meta({
 		description: 'Date of the round',
