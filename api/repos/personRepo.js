@@ -54,9 +54,28 @@ async function buildPersonQuery(opts = {}) {
 		);
 	}
 	if(opts.hasValidParadigm) {
+		const reviewCutoff = await db.tabroomSetting.findOne({
+			where: { tag: 'paradigm_review_cutoff' },
+		});
+		const reviewStart = await db.tabroomSetting.findOne({
+			where: { tag: 'paradigm_review_start' },
+		});
+
+		const cutoffDate = reviewCutoff?.value_date ? new Date(reviewCutoff.value_date) : null;
+		const reviewStartDate = reviewStart?.value_date ? new Date(reviewStart.value_date) : null;
+		const now = new Date();
+
+		let validParadigmClause = `EXISTS (SELECT 1 FROM person_setting ps WHERE ps.person = person.id AND ps.tag = 'paradigm'`;
+
+		// Legacy behavior: review filtering is only active after cutoff has passed.
+		if (cutoffDate && reviewStartDate && cutoffDate < now) {
+			validParadigmClause += ` AND ps.timestamp > '${reviewStartDate.toISOString().slice(0, 19).replace('T', ' ')}'`;
+		}
+
+		validParadigmClause += ')';
 		query.where[db.Sequelize.Op.and] = query.where[db.Sequelize.Op.and] || [];
 		query.where[db.Sequelize.Op.and].push(
-			db.Sequelize.literal(`EXISTS (SELECT 1 FROM person_setting ps WHERE ps.person = person.id AND ps.tag = 'paradigm')`)
+			db.Sequelize.literal(validParadigmClause)
 		);
 	}
 	if(opts.hasJudged) {
@@ -76,7 +95,7 @@ async function buildPersonQuery(opts = {}) {
 	if (opts.include?.Judges){
 		query.include.push({
 			...judgeInclude(opts.include.Judges),
-			as: 'judges',
+			as: 'person_judges',
 			required: false,
 		});
 	}
@@ -149,7 +168,20 @@ async function personSearch(searchTerm = '', opts = {}) {
 		});
 	}
 
-	query.order = [['last', 'ASC'], ['first', 'ASC']];
+	if (words.length > 0) {
+		//priority order: matches on last name first, then first name, then alphabetical
+		const lastNameMatchCondition = words
+			.map(word => `person.last LIKE '${word}%'`)
+			.join(' OR ');
+
+		query.order = [
+			[db.Sequelize.literal(`CASE WHEN (${lastNameMatchCondition}) THEN 0 ELSE 1 END`), 'ASC'],
+			['last', 'ASC'],
+			['first', 'ASC'],
+		];
+	} else {
+		query.order = [['last', 'ASC'], ['first', 'ASC']];
+	}
 	//query.subQuery = false;
 	//query.distinct = true;
 

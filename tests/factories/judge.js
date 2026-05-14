@@ -9,8 +9,8 @@ export function buildJudgeData(overrides = {}) {
 
 export async function createTestJudge(overrides = {}) {
 	const data = buildJudgeData(overrides);
-	if (!overrides.personId){
-		({ personId: data.personId } = await factories.person.createTestPerson());
+	if (!overrides.person){
+		({ personId: data.person } = await factories.person.createTestPerson());
 	}
 	const judgeId = await judgeRepo.createJudge(data);
 

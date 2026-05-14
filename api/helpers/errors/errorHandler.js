@@ -3,8 +3,12 @@ import { adminBlast } from '../admin.js';
 import config from '../../../config/config.js';
 
 export const errorHandler = (err, req, res, next) => {
-
-	logger.error(err.message, err);
+	logger.error('Error while processing request', {
+		message: err.message,
+		url: req.originalUrl,
+		method: req.method,
+		stack: err.stack,
+	});
 
 	// Production bugs should find their way to Palmer
 	if (

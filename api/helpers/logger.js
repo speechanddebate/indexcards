@@ -107,7 +107,9 @@ const createConsoleTransport = () => {
 		...config.winstonConsoleOptions,
 	});
 };
-
+/**
+ * Main application logger. Transports and formatting are configured based on config values.
+ */
 const logger = winston.createLogger({
 	level: config.LOG_LEVEL,
 	format: winston.format.combine(

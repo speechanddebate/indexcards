@@ -17,7 +17,7 @@ describe('judgeRepo', () => {
 
 		it('includes Category when requested', async () => {
 			const { categoryId } = await factories.category.createTestCategory();
-			const { judgeId } = await factories.judge.createTestJudge({ categoryId });
+			const { judgeId } = await factories.judge.createTestJudge({ category: categoryId });
 
 			const judge = await judgeRepo.getJudge(judgeId, { include: { Category: true } });
 
@@ -28,7 +28,7 @@ describe('judgeRepo', () => {
 
 		it('includes School when requested', async () => {
 			const { schoolId } = await factories.school.createTestSchool();
-			const { judgeId } = await factories.judge.createTestJudge({ schoolId });
+			const { judgeId } = await factories.judge.createTestJudge({ school: schoolId });
 
 			const judge = await judgeRepo.getJudge(judgeId, { include: { School: true } });
 
@@ -93,7 +93,7 @@ describe('judgeRepo', () => {
 	describe('createJudge', () => {
 		it('creates a judge and returns the new id', async () => {
 			const { personId } = await factories.person.createTestPerson();
-			const newJudgeId = await judgeRepo.createJudge({ personId });
+			const newJudgeId = await judgeRepo.createJudge({ person: personId });
 
 			expect(newJudgeId).toBeDefined();
 
