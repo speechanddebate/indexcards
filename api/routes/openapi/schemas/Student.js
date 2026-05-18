@@ -1,3 +1,4 @@
+import z from 'zod';
 export const Student = {
 	type: 'object',
 	required: ['id', 'firstName', 'lastName', 'chapterId'],
@@ -61,3 +62,14 @@ export const Student = {
 		metadata  : { type : 'object', additionalProperties: { type: ['string', 'integer', 'boolean'] } } ,
 	},
 };
+export const UnlinkedStudentSearch = z.object({
+	first: z.string().nullable(),
+	middle: z.string().nullable(),
+	last: z.string().nullable(),
+	gradYear: z.number().nullable(),
+	Chapter: z.object({
+		name: z.string().nullable(),
+		state: z.string().nullable(),
+	}),
+	tournCount: z.number().nullable(),
+});

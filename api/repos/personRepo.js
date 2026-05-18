@@ -207,10 +207,29 @@ async function createPerson(personData = {}){
 	return dbRow.id;
 }
 
+async function savePersonSettings(personId, settings = {}) {
+	if (!personId) throw new Error('savePersonSettings: personId is required');
+
+	const origin = { table: 'person', id: personId };
+	const entries = Object.entries(settings || {});
+
+	if (!entries.length) {
+		return;
+	}
+
+	await Promise.all(entries.map(([tag, value]) => {
+		if (value instanceof Date) {
+			return db.setting(origin, tag, { date: value });
+		}
+		return db.setting(origin, tag, value);
+	}));
+}
+
 // export the  data functions NOT the mappers
 export default {
 	getPerson,
 	personSearch,
 	getPersonByUsername,
 	createPerson,
+	savePersonSettings,
 };

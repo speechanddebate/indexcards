@@ -403,4 +403,50 @@ describe('PersonRepo', () => {
 			}
 		});
 	});
+
+	describe('savePersonSettings', () => {
+		it('saves person settings for an existing person', async () => {
+			const { personId } = await factories.person.createTestPerson();
+			const now = new Date();
+
+			await personRepo.savePersonSettings(personId, {
+				student_search_count: 3,
+				last_student_search: now,
+			});
+
+			const updated = await personRepo.getPerson(personId, {
+				settings: ['student_search_count', 'last_student_search'],
+			});
+
+			expect(updated.settings.student_search_count).toBe(3);
+			expect(updated.settings.last_student_search).toEqualDate(now);
+		});
+
+		it('updates existing person settings on subsequent saves', async () => {
+			const { personId } = await factories.person.createTestPerson();
+			const firstDate = new Date(Date.now() - 60 * 60 * 1000);
+			const secondDate = new Date();
+
+			await personRepo.savePersonSettings(personId, {
+				student_search_count: 1,
+				last_student_search: firstDate,
+			});
+
+			await personRepo.savePersonSettings(personId, {
+				student_search_count: 7,
+				last_student_search: secondDate,
+			});
+
+			const updated = await personRepo.getPerson(personId, {
+				settings: ['student_search_count', 'last_student_search'],
+			});
+
+			expect(updated.settings.student_search_count).toBe(7);
+			expect(updated.settings.last_student_search).toEqualDate(secondDate);
+		});
+
+		it('throws when personId is missing', async () => {
+			await expect(personRepo.savePersonSettings()).rejects.toThrow('savePersonSettings: personId is required');
+		});
+	});
 });

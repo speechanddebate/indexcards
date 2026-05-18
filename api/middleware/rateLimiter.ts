@@ -1,15 +1,10 @@
 import rateLimiter from 'express-rate-limit';
-import { sendProblem } from '../helpers/problem.js';
+import { RateLimitExceeded } from '../helpers/problem.js';
 import config from '../../config/config.js';
 import { Request, Response, NextFunction } from 'express';
 // Helper for RFC 7807 problem details
 function rateLimitResponse(req: Request, res: Response, detail: string) {
-	return sendProblem(req,res, {
-		title    : 'Rate limit exceeded',
-		status   : 429,
-		detail   : detail,
-		validate : {trustProxy: false},
-	});
+	return RateLimitExceeded(req, res, detail, { validate: { trustProxy: false } });
 }
 
 const globalLimiter = rateLimiter({

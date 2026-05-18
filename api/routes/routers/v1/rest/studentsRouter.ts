@@ -1,0 +1,35 @@
+import { Router } from 'express';
+import * as con from '../../../../controllers/rest/studentsController.js';
+import { ValidateRequest } from '../../../../middleware/validation.js';
+import { requireLogin } from '../../../../middleware/authorization/authorization.js';
+import z from 'zod';
+import { UnlinkedStudentSearch } from '../../../openapi/schemas/Student.js';
+
+const router = Router();
+
+router.route('/unlinked/search')
+    .get(requireLogin, ValidateRequest, con.unlinkedSearch).openapi = {
+		summary: 'Search for unlinked students',
+		operationId: 'RestStudentsUnlinkedSearch',
+		description: 'Search for students that are not linked to a Tabroom account.',
+		path: '/rest/students/unlinked/search',
+		tags: ['Students'],
+		requestParams: {
+			query: z.object({
+				first: z.string().meta({ description: 'First name to search for' }),
+				last: z.string().meta({ description: 'Last name to search for' }),
+			}),
+		},
+		responses: {
+			200: {
+				description: 'List of unlinked students matching search criteria',
+				content: {
+					'application/json': {
+						schema: z.array(UnlinkedStudentSearch),
+					},
+				},
+			},
+		},
+	};
+
+export default router;
