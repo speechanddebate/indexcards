@@ -85,7 +85,7 @@ export async function getPublishedRounds(req, res){
 			'postSecondary' : round.post_secondary,
 			'postFeedback'  : round.post_feedback,
 			'published'     : round.published,
-			'eventId'       : round.event_id,
+			'eventId'       : round.event,
 			'protocolId'    : round.protocol_id,
 			Event              : {
 				'id'           : round.eventId,
