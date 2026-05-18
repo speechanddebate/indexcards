@@ -18,3 +18,5 @@ services:
       - /var/lib/GeoIP:/geoip:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
+      - "masoncards.debatefail.com:host-gateway"
+      - "mason.debatefail.com:host-gateway"
