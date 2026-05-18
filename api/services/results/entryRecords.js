@@ -38,6 +38,12 @@ export const entryRecords = async (entryId, tournId, options) => {
 				and mode.tag = 'online_mode'
 			) as onlineMode,
 
+			(select flip_team_order.value
+				from event_setting flip_team_order
+				where flip_team_order.event = event.id
+				and flip_team_order.tag     = 'online_flip_team_order'
+			) as flipTeamOrder,
+
 			(select recency.value
 				from event_setting recency
 				where recency.event = event.id
@@ -151,6 +157,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 
 			const Settings = {
 				onlineMode      : row.onlineMode,
+				flipTeamOrder   : row.flipTeamOrder,
 				autoRecency     : row.autoRecency,
 				primaryScore    : row.primaryScore,
 				anonymousPublic : row.anonymousPublic,
@@ -162,7 +169,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 				id           : row.eventId,
 				abbr         : row.eventAbbr,
 				name         : row.eventName,
-				nsda         : row.nsdaCategory,
+				nsdaCategory : row.nsdaCategory,
 				mode         : snakeToCamel(row.onlineMode),
 				type         : snakeToCamel(row.eventType),
 				Settings,
@@ -196,13 +203,13 @@ export const entryRecords = async (entryId, tournId, options) => {
 				Judges       : {},
 			};
 
-			if (row.side > 0) {
+			if (row.side > 0 &! row.bye &! row.forfeit &! row.sectionBye) {
 				records.Rounds[row.roundName].side = row.side;
 				if (row.side == 1) records.Rounds[row.roundName].sideLabel = row.AffLabel || 'Aff';
 				if (row.side == 2) records.Rounds[row.roundName].sideLabel = row.NegLabel || 'Neg';
 			}
 
-			if (row.speakerorder) records.Rounds[row.roundName].speakerorder = row.speakerorder;
+			if (row.speakerorder) records.Rounds[row.roundName].speakerOrder = row.speakerorder;
 
 			if (['debate', 'wsdc', 'mockTrial'].includes(row.eventType)) {
 				records.Rounds[row.roundName].Opponent = {
@@ -246,38 +253,52 @@ export const entryRecords = async (entryId, tournId, options) => {
 			if (row.sectionBye) records.Rounds[row.roundName].bye = true;
 			if (row.forfeit) records.Rounds[row.roundName].forfeit = true;
 
-			if (!results[row.judgeId]) {
-				results[row.judgeId] = {
-					id : row.judgeId,
-				};
+			console.log(`Round ${row.roundName} bye ${row.bye} tag ${row.scoreTag} value ${row.scoreValue}`);
+
+			if ((row.sectionBye || row.bye) && row.scoreTag === 'winloss')  {
+
+				if (row.scoreValue) {
+					records.Rounds[row.roundName].advanced = true;
+				} else {
+					records.Rounds[row.roundName].coachedover = true;
+				}
 			}
 
-			// What is the primary score? If not set yet, then it should be the setting over all.
-			if (!primaryScore && row.primaryScore) primaryScore = row.primaryScore;
+			if (row.judgeId) {
 
-			// If it is not set explicitly, then debate gets winloss
-			if (!primaryScore
-				&& (['debate', 'mockTrial', 'wsdc'].includes(row.eventType))
-			) primaryScore = 'winloss';
+				if (!results[row.judgeId]) {
+					results[row.judgeId] = {
+						id : row.judgeId,
+					};
+				}
 
-			// If it is not set explicitly, then speech & congress get ranks
-			if (!primaryScore) primaryScore = 'rank';
+				// What is the primary score? If not set yet, then it should be the setting over all.
+				if (!primaryScore && row.primaryScore) primaryScore = row.primaryScore;
 
-			// What is the scoretag of the row?
-			let scoreTag = row.scoreTag;
-			if (scoreTag === 'refute') scoreTag = 'point';
+				// If it is not set explicitly, then debate gets winloss
+				if (!primaryScore
+					&& (['debate', 'mockTrial', 'wsdc'].includes(row.eventType))
+				) primaryScore = 'winloss';
 
-			if (scoreTag === primaryScore) {
-				if (scoreTag === 'winloss') {
-					if (row.scoreValue == 1) {
-						results[row.judgeId][scoreTag] = 'W';
+				// If it is not set explicitly, then speech & congress get ranks
+				if (!primaryScore) primaryScore = 'rank';
+
+				// What is the scoretag of the row?
+				let scoreTag = row.scoreTag;
+				if (scoreTag === 'refute') scoreTag = 'point';
+
+				if (scoreTag === primaryScore) {
+					if (scoreTag === 'winloss') {
+						if (row.scoreValue == 1) {
+							results[row.judgeId][scoreTag] = 'W';
+						} else {
+							results[row.judgeId][scoreTag] = 'L';
+						}
 					} else {
-						results[row.judgeId][scoreTag] = 'L';
+						if (!results[row.judgeId][scoreTag]) results[row.judgeId][scoreTag] = 0;
+						results[row.judgeId][scoreTag] +=
+							addDecimals([results[row.judgeId][scoreTag], row.scoreValue]);
 					}
-				} else {
-					if (!results[row.judgeId][scoreTag]) results[row.judgeId][scoreTag] = 0;
-					results[row.judgeId][scoreTag] +=
-						Math.add([results[row.judgeId][scoreTag], row.scoreValue]);
 				}
 			}
 		}
@@ -319,7 +340,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 				} else {
 					results[row.judgeId][scoreTag] = 'L';
 				}
-			} else {
+			} else if (row.judgeId) {
 
 				if (!results[row.judgeId][scoreTag]) results[row.judgeId][scoreTag] = 0;
 				results[row.judgeId][scoreTag] =
