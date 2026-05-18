@@ -1,6 +1,7 @@
 /* This delivers the published record for a given entry */
 import db from '../../data/db.js';
 import { snakeToCamel } from '../../helpers/text.js';
+import { addDecimals } from '../../helpers/math.js';
 
 export const entryRecords = async (entryId, tournId, options) => {
 
@@ -14,7 +15,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 			entry.id, entry.code, entry.name,
 			event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType, event.nsda_category nsdaCategory,
 			round.id roundId, round.type roundType, round.name roundName, round.label roundLabel,
-			room.id roomId, room.name roomName,
+			room.id roomId, room.name roomName, room.url roomUrl,
 			round.published roundPublished,
 			round.post_primary postPrimary,
 			round.post_secondary postSecondary,
@@ -36,6 +37,12 @@ export const entryRecords = async (entryId, tournId, options) => {
 				where mode.event = event.id
 				and mode.tag = 'online_mode'
 			) as onlineMode,
+
+			(select recency.value
+				from event_setting recency
+				where recency.event = event.id
+				and recency.tag = 'sort_precedence'
+			) as autoRecency,
 
 			(select primaryScore.value
 				from event_setting primaryScore
@@ -80,7 +87,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 		from (event, entry, round, panel section, ballot)
 
 			left join score on score.ballot = ballot.id
-				and score.tag IN ('point', 'rank', 'refute', 'winloss', 'po')
+				and score.tag IN ('point', 'rank', 'refute', 'winloss', 'po', 'speech')
 			left join student on score.student = student.id
 			left join judge on ballot.judge = judge.id
 			left join room on section.room = room.id
@@ -117,11 +124,17 @@ export const entryRecords = async (entryId, tournId, options) => {
 	}
 
 	if (!resultsData || resultsData.length < 1) return 401;
-
 	let records = {};
 	let primaryScore = '';
 
 	resultsData.forEach( (row) => {
+
+		if (!row.scoreTag
+			&& !row.bye
+			&& !row.forfeit
+		) {
+			return;
+		}
 
 		if ( row.roundPublished !== 1
 			&& (row.postPrimary || 0 < postLevel)
@@ -133,7 +146,16 @@ export const entryRecords = async (entryId, tournId, options) => {
 				id       : row.id,
 				code     : row.code,
 				name     : row.name,
-				students : {},
+				Students : {},
+			};
+
+			const Settings = {
+				onlineMode      : row.onlineMode,
+				autoRecency     : row.autoRecency,
+				primaryScore    : row.primaryScore,
+				anonymousPublic : row.anonymousPublic,
+				affLabel        : row.affLabel || 'Aff',
+				negLabel        : row.negLabel || 'Neg',
 			};
 
 			records.Event = {
@@ -143,6 +165,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 				nsda         : row.nsdaCategory,
 				mode         : snakeToCamel(row.onlineMode),
 				type         : snakeToCamel(row.eventType),
+				Settings,
 			};
 
 			if (records.Event.type == 'mockTrial') {
@@ -152,8 +175,8 @@ export const entryRecords = async (entryId, tournId, options) => {
 			records.Rounds = {};
 		}
 
-		if (row.studentId && !records.students[row.studentId]) {
-			records.students[row.studentId] = {
+		if (row.studentId && !records.Students[row.studentId]) {
+			records.Students[row.studentId] = {
 				name  : `${row.studentLast}, ${row.studentFirst}${row.studentMiddle ? ` ${row.studentMiddle}` : '' }`,
 				label : `${row.studentLast}, ${row.studentFirst.substr(0, 1)}${row.studentMiddle ? row.studentMiddle.substr(0,1) : '' }`,
 				last  : row.studentLast,
@@ -165,15 +188,21 @@ export const entryRecords = async (entryId, tournId, options) => {
 		if (row.scoreTag && !records.Event.scoreTags[row.scoreTag]) records.Event.scoreTags[row.scoreTag] = true;
 
 		if (!records.Rounds[row.roundName]) {
+
 			records.Rounds[row.roundName] = {
 				id           : row.roundId,
 				type         : row.roundType,
-				side         : row.side,
-				sideLabel    : (row.side ? row.side == 1 ? row.affLabel || 'Aff' : row.negLabel || 'Neg' : ''),
-				speakerorder : row.speakeroder,
 				Results      : {},
 				Judges       : {},
 			};
+
+			if (row.side > 0) {
+				records.Rounds[row.roundName].side = row.side;
+				if (row.side == 1) records.Rounds[row.roundName].sideLabel = row.AffLabel || 'Aff';
+				if (row.side == 2) records.Rounds[row.roundName].sideLabel = row.NegLabel || 'Neg';
+			}
+
+			if (row.speakerorder) records.Rounds[row.roundName].speakerorder = row.speakerorder;
 
 			if (['debate', 'wsdc', 'mockTrial'].includes(row.eventType)) {
 				records.Rounds[row.roundName].Opponent = {
@@ -189,6 +218,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 				records.Rounds[row.roundName].Room = {
 					id   : row.roomId,
 					name : row.roomName,
+					url  : row.roomUrl,
 				};
 			}
 		}
@@ -198,9 +228,10 @@ export const entryRecords = async (entryId, tournId, options) => {
 
 		if (!round.Judges[row.judgeId]) {
 			round.Judges[row.judgeId] = {
-				name   : `${row.judgeLast}, ${row.judgeFirst}${row.judgeMiddle ? ` ${row.judgeMiddle}` : '' }`,
-				first  : row.judgeFirst,
-				last   : row.judgeLast,
+				name  : `${row.judgeLast}, ${row.judgeFirst}${row.judgeMiddle ? ` ${row.judgeMiddle}` : '' }`,
+				first : row.judgeFirst,
+				last  : row.judgeLast,
+				chair : row.chair ? true : false,
 			};
 
 			if (row.paradigm) {
@@ -217,8 +248,7 @@ export const entryRecords = async (entryId, tournId, options) => {
 
 			if (!results[row.judgeId]) {
 				results[row.judgeId] = {
-					chair      : row.chair ? true : false,
-					id         : row.judgeId,
+					id : row.judgeId,
 				};
 			}
 
@@ -226,7 +256,9 @@ export const entryRecords = async (entryId, tournId, options) => {
 			if (!primaryScore && row.primaryScore) primaryScore = row.primaryScore;
 
 			// If it is not set explicitly, then debate gets winloss
-			if (!primaryScore && (['debate', 'mockTrial', 'wsdc'].includes(row.eventType))) primaryScore = 'winloss';
+			if (!primaryScore
+				&& (['debate', 'mockTrial', 'wsdc'].includes(row.eventType))
+			) primaryScore = 'winloss';
 
 			// If it is not set explicitly, then speech & congress get ranks
 			if (!primaryScore) primaryScore = 'rank';
@@ -244,12 +276,15 @@ export const entryRecords = async (entryId, tournId, options) => {
 					}
 				} else {
 					if (!results[row.judgeId][scoreTag]) results[row.judgeId][scoreTag] = 0;
-					results[row.judgeId][scoreTag] += parseFloat(row.scoreValue);
+					results[row.judgeId][scoreTag] +=
+						Math.add([results[row.judgeId][scoreTag], row.scoreValue]);
 				}
 			}
 		}
 
-		// Ignore anything that's already been posted, and secondaries that are not published.
+		// Ignore anything that's already been posted, and secondaries that are
+		// not published.
+
 		if (
 			(row.postSecondary >= postLevel)
 			&& (row.scoreTag !== primaryScore)
@@ -258,27 +293,47 @@ export const entryRecords = async (entryId, tournId, options) => {
 			let scoreTag = row.scoreTag;
 			if (scoreTag === 'refute') scoreTag = 'point';
 
-			if (scoreTag === 'winloss') {
+			// The ways we must format things. A 'speech' is a Congress speech,
+			// which to some degree is "where the rules are made up and the
+			// points don't matter" but feedback is feedback.
+
+			if (scoreTag === 'speech') {
+				if (!results[row.judgeId].speechCount) results[row.judgeId].speechCount = 0;
+
+				// We WANT the points to be called out separately here as a
+				// string, not a total! Note to self when writing a type
+				// definition of this mess eventually -- CLP
+
+				if (results[row.judgeId].speechPoints) {
+					results[row.judgeId].speechPoints += ', ';
+				} else {
+					results[row.judgeId].speechPoints = '';
+				}
+				results[row.judgeId].speechCount++;
+				results[row.judgeId].speechPoints += row.scoreValue.toString();
+
+			} else if (scoreTag === 'winloss') {
+				// Only nerds think of 1 as true and 0 as not so let's make winloss a W and an L
 				if (row.scoreValue == 1) {
 					results[row.judgeId][scoreTag] = 'W';
 				} else {
 					results[row.judgeId][scoreTag] = 'L';
 				}
 			} else {
+
 				if (!results[row.judgeId][scoreTag]) results[row.judgeId][scoreTag] = 0;
-				results[row.judgeId][scoreTag] += parseFloat(row.scoreValue);
+				results[row.judgeId][scoreTag] =
+					addDecimals([results[row.judgeId][scoreTag], row.scoreValue]);
 			}
 
 			// Per speaker scores are also called out separately for secondary scores.
 			if (row.studentId) {
-				if (!results[row.judgeId].students) results[row.judgeId].students = {};
-
-				if (!results[row.judgeId].students[row.studentId]) {
-					results[row.judgeId].students[row.studentId] = {
+				if (!results[row.judgeId].Students) results[row.judgeId].Students = {};
+				if (!results[row.judgeId].Students[row.studentId]) {
+					results[row.judgeId].Students[row.studentId] = {
 					};
 				}
-
-				results[row.judgeId].students[row.studentId][row.scoreTag] = parseFloat(row.scoreValue);
+				results[row.judgeId].Students[row.studentId][row.scoreTag] = row.scoreValue;
 			}
 		}
 

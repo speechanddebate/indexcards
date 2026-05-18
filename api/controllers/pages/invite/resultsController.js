@@ -125,7 +125,6 @@ export async function getEntryRecord(req,res) {
 	});
 
 	const rawResults = await db.Sequelize.query(`
-
 		select
 			round.id, round.name, round.label, round.type,
 

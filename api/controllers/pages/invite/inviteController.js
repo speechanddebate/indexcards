@@ -38,8 +38,8 @@ export async function getTournIdByWebname(req,res){
 
 	// If the original query was by ID I need to find the webname and other
 	// parallel tournaments that go with it.
-	if (parseInt(webname) === tourn.id) {
 
+	if (parseInt(webname) === tourn.id) {
 		const others = await db.sequelize.query(`
 			select
 				tourn.*
@@ -61,6 +61,7 @@ export async function getTournIdByWebname(req,res){
 			tourn.settings.multiYear = true;
 			if (others[0].start > tourn.start) {
 				tourn.settings.notCurrent = true;
+				tourn.webname = tourn.id;
 			}
 		}
 	} else if (results.length > 0) {
