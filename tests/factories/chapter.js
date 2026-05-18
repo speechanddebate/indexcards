@@ -1,14 +1,21 @@
 import db from '../../api/data/db.js';
 
-const data = async (props = {}) => {
-
+function createChapterData(overrides = {}) {
 	return {
-		...props,
+		name: 'Test Chapter',
+		...overrides,
 	};
-};
-
-export default async function chapterFactory(props = {}) {
-	const chapterData = await data(props);
-
-	return db.chapter.create(chapterData);
 }
+
+export async function createTestChapter(overrides = {}) {
+	const chapterData = await createChapterData(overrides);
+
+	const chapter = await db.chapter.create(chapterData);
+	const chapterId = chapter.chapterId ?? chapter.id;
+
+	return { chapterId };
+}
+export default {
+	createTestChapter,
+	createChapterData,
+};
