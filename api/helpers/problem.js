@@ -85,3 +85,11 @@ export function NotImplemented(req, res, detail, extras = {}){
 		...extras,
 	});
 }
+export function RateLimitExceeded(req, res, detail, extras = {}){
+	return sendProblem(req, res, {
+		title: 'Rate limit exceeded',
+		status: 429,
+		detail,
+		...extras,
+	});
+}

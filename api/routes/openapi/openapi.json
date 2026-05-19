@@ -188,6 +188,10 @@
       "description": "Auto-discovered tag"
     },
     {
+      "name": "Students",
+      "description": "Auto-discovered tag"
+    },
+    {
       "name": "legacy",
       "description": "Auto-discovered tag"
     }
@@ -246,6 +250,7 @@
         "Round",
         "Rounds",
         "Schematic",
+        "Students",
         "Tournaments",
         "event",
         "eventAbbr",
@@ -1828,6 +1833,57 @@
                   "type": "array",
                   "items": {
                     "$ref": "#/components/schemas/JudgeRecord"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/rest/students/unlinked/search": {
+      "get": {
+        "summary": "Search for unlinked students",
+        "operationId": "RestStudentsUnlinkedSearch",
+        "description": "Search for students that are not linked to a Tabroom account.",
+        "tags": [
+          "Students"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "first",
+            "schema": {
+              "description": "First name to search for",
+              "type": "string"
+            },
+            "description": "First name to search for"
+          },
+          {
+            "in": "query",
+            "name": "last",
+            "schema": {
+              "description": "Last name to search for",
+              "type": "string"
+            },
+            "description": "Last name to search for"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of unlinked students matching search criteria",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UnlinkedStudentSearch"
                   }
                 }
               }
@@ -4688,6 +4744,100 @@
         ],
         "additionalProperties": false,
         "description": "A user session"
+      },
+      "UnlinkedStudentSearch": {
+        "type": "object",
+        "properties": {
+          "first": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "middle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "gradYear": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "Chapter": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "state": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "state"
+            ],
+            "additionalProperties": false
+          },
+          "tournCount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "first",
+          "middle",
+          "last",
+          "gradYear",
+          "Chapter",
+          "tournCount"
+        ],
+        "additionalProperties": false
       },
       "PersonOutput": {
         "type": "object",
