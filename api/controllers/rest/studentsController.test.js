@@ -167,8 +167,8 @@ describe('studentsController', () => {
 				valid: { query: {} },
 				actor: {
 					id: 10, Person: {
-						first: 'Test',
-						last: 'Student',
+						firstName: 'Test',
+						lastName: 'Student',
 						siteAdmin: false,
 					},
 				},
