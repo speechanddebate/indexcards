@@ -32,7 +32,7 @@ describe('GET /rest/paradigms', () => {
 	});
 	it('returns paradigms with search params', async () => {
 		const res = await request(server)
-            .get(`/v1/rest/paradigms?search="${Person.firstName} ${Person.lastName}"`)
+            .get(`/v1/rest/paradigms?search="${Person.first} ${Person.last}"`)
 			.set('Authorization', `Bearer ${userkey}`)
             .set('Accept', 'application/json')
             .expect('Content-Type', /json/)

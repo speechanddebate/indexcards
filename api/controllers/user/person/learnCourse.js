@@ -11,7 +11,7 @@ export const updateLearnCourses = {
 
 		let targetPersonId = 0;
 
-		if (req.params.personId && req.person.siteAdmin) {
+		if (req.params.personId && req.person.site_admin) {
 			targetPersonId = req.params.personId;
 		} else if (req.session.person) {
 			targetPersonId = req.session.person;

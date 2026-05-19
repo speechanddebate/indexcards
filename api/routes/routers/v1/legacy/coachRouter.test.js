@@ -5,7 +5,7 @@ import factories from '../../../../../tests/factories/index.js';
 describe('coachRouter', () => {
 	let userkey;
 	beforeAll(async () => {
-		({ userkey } = await factories.session.createTestSession({ Person: {siteAdmin: true} }));
+		({ userkey } = await factories.session.createTestSession({ Person: {site_admin: true} }));
 	});
 	describe('/:chapterId/school/:schoolId/updateContact', async () => {
 		it('does not explode', async () => {

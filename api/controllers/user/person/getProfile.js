@@ -9,7 +9,7 @@ export const getProfile = {
 		}
 		let person;
 
-		if (req.params.personId && req.person.siteAdmin) {
+		if (req.params.personId && req.person.site_admin) {
 			person = await personRepo.getPerson(req.params.personId, { settings: true });
 
 		} else if (req.params.personId ) {

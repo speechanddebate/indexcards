@@ -46,7 +46,7 @@ describe('Authentication Middleware', () => {
 					id          : 1,
 					person      : {
 						id          : 69,
-						siteAdmin   : false,
+						site_admin   : false,
 						email       : '',
 						first      : 'I',
 						middle     : 'Am',
@@ -117,7 +117,7 @@ describe('Authentication Middleware', () => {
 					id          : 1,
 					person      : {
 						id          : 69,
-						siteAdmin   : false,
+						site_admin   : false,
 						email       : '',
 						first      : 'I',
 						middle     : 'Am',
@@ -229,7 +229,7 @@ describe('Authentication Middleware', () => {
 					id          : 1,
 					person      : {
 						id          : 69,
-						siteAdmin   : false,
+						site_admin   : false,
 						email       : '',
 						first      : 'I',
 						middle     : 'Am',

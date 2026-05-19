@@ -154,8 +154,8 @@ describe('Auth Router', () => {
 				.send({
 					email: personData.email,
 					password: personData.password,
-					firstName: personData.firstName,
-					lastName: personData.lastName,
+					first: personData.first,
+					last: personData.last,
 				})
 				.set('Accept', 'application/json')
 				.expect('Content-Type', /json/)

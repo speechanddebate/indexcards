@@ -50,7 +50,7 @@ export const getSession2 = {
 					last      : local.person_last,
 					email     : local.email,
 					noEmail   : local.no_email,
-					siteAdmin : local.site_admin,
+					site_admin : local.site_admin,
 					nsda      : local.nsda,
 					accesses  : local.accesses,
 				},

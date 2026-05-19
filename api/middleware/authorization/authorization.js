@@ -26,7 +26,7 @@ export function requireSiteAdmin(req,res,next) {
 	if (!req.actor) {
 		return Unauthorized(req, res,'User not Authenticated');
 	}
-	if (!req.actor.Person?.siteAdmin){
+	if (!req.actor.Person?.site_admin){
 		return Forbidden(req, res,'This Resource is Restricted to Site Administrators');
 	}
 	next();
@@ -89,7 +89,7 @@ function createAuthContext(req) {
 			throw new Error('Invalid auth call');
 		}
 
-		if(req.person && req.person.siteAdmin){
+		if(req.person && req.person.site_admin){
 			return true;
 		}
 
@@ -140,7 +140,7 @@ function createAuthContext(req) {
 		if (!req.person) {
 			return { all: false, ids: [] };
 		}
-		if (req.person.siteAdmin) {
+		if (req.person.site_admin) {
 			return { all: true, ids: [] };
 		}
 		const perms = req.auth?.perms;

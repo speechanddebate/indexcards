@@ -7,9 +7,9 @@ export function createPersonData(overrides = {}) {
 	const uniqueEmail = `user_${Math.random().toString(36).substring(2, 10)}_${Date.now()}@example.com`;
 	return {
 		email: uniqueEmail,
-		firstName: faker.person.firstName(),
-		middleName: faker.datatype.boolean() ? faker.person.middleName() : null,
-		lastName: faker.person.lastName(),
+		first: faker.person.firstName(),
+		middle: faker.datatype.boolean() ? faker.person.middleName() : null,
+		last: faker.person.lastName(),
 		state: faker.location.state({abbreviated: true}),
 		country: faker.location.countryCode(),
 		tz: faker.location.timeZone(),

@@ -1,22 +1,22 @@
 import z from 'zod';
 export const Student = {
 	type: 'object',
-	required: ['id', 'firstName', 'lastName', 'chapterId'],
+	required: ['id', 'first', 'last', 'chapterId'],
 	properties: {
 		id: {
 			type: 'integer',
 			readOnly: true,
 			description: 'Unique identifier for the student',
 		},
-		firstName: {
+		first: {
 			type: 'string',
 			description: 'First name of the student',
 		},
-		middleName: {
+		middle: {
 			type: 'string',
 			description: 'Middle name of the student',
 		},
-		lastName: {
+		last: {
 			type: 'string',
 			description: 'Last name of the student',
 		},

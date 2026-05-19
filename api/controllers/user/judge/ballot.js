@@ -49,7 +49,7 @@ export async function checkBallotAccess (req, res) {
 		for (const ballot of access) {
 			if (stop < 1) {
 				if (!req.session?.person
-					|| (ballot.personId !== req.session.person && !req.person.siteAdmin)
+					|| (ballot.personId !== req.session.person && !req.person.site_admin)
 				) {
 					stop++;
 					return res.status(200).json({

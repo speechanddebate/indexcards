@@ -11,7 +11,7 @@ describe('Attendee Search Function', () => {
 	beforeAll(async () => {
 		const session = await factories.session.createTestSession({
 			Person: {
-				siteAdmin: true,
+				site_admin: true,
 			},
 		});
 		userkey = session.userkey;

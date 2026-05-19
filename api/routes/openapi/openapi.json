@@ -2695,7 +2695,7 @@
             "type": "integer",
             "description": "NSDA ID number of the contact if they are a coach"
           },
-          "firstName": {
+          "first": {
             "type": "string",
             "example": "John"
           },
@@ -2704,7 +2704,7 @@
             "nullable": true,
             "example": "Quincy"
           },
-          "lastName": {
+          "last": {
             "type": "string",
             "example": "Doe"
           },
@@ -3076,10 +3076,10 @@
             "format": "email",
             "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
           },
-          "firstName": {
+          "first": {
             "type": "string"
           },
-          "middleName": {
+          "middle": {
             "anyOf": [
               {
                 "type": "string"
@@ -3089,7 +3089,7 @@
               }
             ]
           },
-          "lastName": {
+          "last": {
             "type": "string"
           },
           "state": {
@@ -3118,9 +3118,9 @@
         "required": [
           "id",
           "email",
-          "firstName",
-          "middleName",
-          "lastName",
+          "first",
+          "middle",
+          "last",
           "state",
           "country",
           "tz",
@@ -3360,8 +3360,8 @@
         "type": "object",
         "required": [
           "id",
-          "firstName",
-          "lastName",
+          "first",
+          "last",
           "chapterId"
         ],
         "properties": {
@@ -3370,15 +3370,15 @@
             "readOnly": true,
             "description": "Unique identifier for the student"
           },
-          "firstName": {
+          "first": {
             "type": "string",
             "description": "First name of the student"
           },
-          "middleName": {
+          "middle": {
             "type": "string",
             "description": "Middle name of the student"
           },
-          "lastName": {
+          "last": {
             "type": "string",
             "description": "Last name of the student"
           },
@@ -3964,7 +3964,7 @@
             "type": "string",
             "description": "The password for the new user"
           },
-          "firstName": {
+          "first": {
             "type": "string",
             "description": "The first name of the new user"
           },
@@ -3979,7 +3979,7 @@
               }
             ]
           },
-          "lastName": {
+          "last": {
             "type": "string",
             "description": "The last name of the new user"
           },
@@ -4033,8 +4033,8 @@
         "required": [
           "email",
           "password",
-          "firstName",
-          "lastName"
+          "first",
+          "last"
         ],
         "description": "A request to register a new user"
       },
@@ -4852,10 +4852,10 @@
             "format": "email",
             "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
           },
-          "firstName": {
+          "first": {
             "type": "string"
           },
-          "middleName": {
+          "middle": {
             "anyOf": [
               {
                 "type": "string"
@@ -4865,7 +4865,7 @@
               }
             ]
           },
-          "lastName": {
+          "last": {
             "type": "string"
           },
           "state": {
@@ -4896,9 +4896,9 @@
         "required": [
           "id",
           "email",
-          "firstName",
-          "middleName",
-          "lastName",
+          "first",
+          "middle",
+          "last",
           "state",
           "country",
           "tz",

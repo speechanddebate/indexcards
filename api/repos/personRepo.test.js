@@ -178,13 +178,13 @@ describe('PersonRepo', () => {
 			const { personId } = await factories.person.createTestPerson();
 
 			// Act
-			const person = await personRepo.getPerson(personId, { fields: { exclude: ['firstName', 'lastName'] } });
+			const person = await personRepo.getPerson(personId, { fields: { exclude: ['first', 'last'] } });
 
 			// Assert
 			expect(person).toBeDefined();
 			expect(person.password).toBeUndefined();
-			expect(person.firstName).toBeUndefined();
-			expect(person.lastName).toBeUndefined();
+			expect(person.first).toBeUndefined();
+			expect(person.last).toBeUndefined();
 		});
 
 		it('includes password when requested', async () => {
@@ -339,7 +339,7 @@ describe('PersonRepo', () => {
 			await factories.judge.createTestJudge({ person: personId });
 
 			// Act
-			const results = await personRepo.personSearch(`${personData.firstName} ${personData.lastName}`);
+			const results = await personRepo.personSearch(`${personData.first} ${personData.last}`);
 
 			// Assert: expect the search results to include the created person
 			expect(Array.isArray(results)).toBe(true);

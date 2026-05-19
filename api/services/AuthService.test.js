@@ -74,8 +74,8 @@ describe('AuthService', () => {
 			const userData = {
 				email: 'test@example.com',
 				password: 'securepassword',
-				firstName: 'Test',
-				lastName: 'User',
+				first: 'Test',
+				last: 'User',
 			};
 
 			personRepo.getPersonByUsername.mockResolvedValue(null);
@@ -83,8 +83,8 @@ describe('AuthService', () => {
 			personRepo.createPerson.mockResolvedValue({
 				id: 1,
 				email: userData.email,
-				firstName: userData.firstName,
-				lastName: userData.lastName,
+				first: userData.first,
+				last: userData.last,
 			});
 
 			sessionRepo.createSession.mockResolvedValue({
@@ -107,8 +107,8 @@ describe('AuthService', () => {
 			await expect(AuthService.register({
 				email: personData.email,
 				password: 'anotherpassword',
-				firstName: 'Test',
-				lastName: 'User',
+				first: 'Test',
+				last: 'User',
 			})).rejects.toThrow(ValidationError);
 		});
 		it('throws ValidationError if password is missing', async () => {

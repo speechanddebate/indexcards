@@ -32,7 +32,7 @@ export const tabAuth = async (req) => {
 
 	let perms = {};
 
-	if (req.person.siteAdmin) {
+	if (req.person.site_admin) {
 
 		req.session.perms.tourn[tournId] = 'owner';
 		req.session.tourn = tourn;
@@ -426,7 +426,7 @@ export const checkJudgePerson = async (req, judgeId) => {
 		return false;
 	}
 
-	if (req.session.siteAdmin) {
+	if (req.session.site_admin) {
 		return true;
 	}
 

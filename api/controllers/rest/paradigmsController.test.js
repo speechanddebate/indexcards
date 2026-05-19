@@ -46,7 +46,7 @@ describe('paradigmsController', () => {
 		it('should return paradigms for a given personId', async () => {
 			vi.spyOn(personRepo, 'getPerson').mockResolvedValue({
 				id: 1,
-				firstName: 'Mark',
+				first: 'Mark',
 				settings: {
 					paradigm: 'test',
 				},

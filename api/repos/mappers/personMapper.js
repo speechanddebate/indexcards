@@ -1,4 +1,4 @@
-import { toDomain as genericToDomain, toPersistence as genericToPersistence, toBool, fromBool } from './mapperUtils.js';
+import { toDomain as genericToDomain, toBool, fromBool } from './mapperUtils.js';
 import { toDomain as chapterJudgeToDomain } from './chapterJudgeMapper.js';
 import { toDomain as judgeToDomain } from './judgeMapper.js';
 import { toDomain as personQuizToDomain } from './personQuizMapper.js';
@@ -6,9 +6,9 @@ import { toDomain as personQuizToDomain } from './personQuizMapper.js';
 export const FIELD_MAP = {
 	id            : 'id',
 	email         : 'email',
-	firstName     : 'first',
-	middleName    : 'middle',
-	lastName      : 'last',
+	first     : 'first',
+	middle    : 'middle',
+	last      : 'last',
 	state         : 'state',
 	country       : 'country',
 	tz            : 'tz',
@@ -16,12 +16,12 @@ export const FIELD_MAP = {
 	phone         : 'phone',
 	gender        : 'gender',
 	pronoun       : 'pronoun',
-	noEmail       : {db: 'no_email', toDomain: toBool, toPersistence: fromBool },
-	siteAdmin     : {db: 'site_admin', toDomain: toBool, toPersistence: fromBool },
+	no_email       : {db: 'no_email', toDomain: toBool, toPersistence: fromBool },
+	site_admin     : {db: 'site_admin', toDomain: toBool, toPersistence: fromBool },
 	accesses      : 'accesses',
-	lastAccess    : 'last_access',
+	last_access    : 'last_access',
 	password      : 'password',
-	passTimestamp : 'pass_timestamp',
+	pass_timestamp : 'pass_timestamp',
 	settings: 'person_settings',
 	updatedAt: { db: 'timestamp', toDb: () => undefined },
 	createdAt: { db: 'created_at', toDb: () => undefined },
@@ -29,13 +29,13 @@ export const FIELD_MAP = {
 
 export const toDomain = dbRow => {
 	if (!dbRow) return null;
-	var person = genericToDomain(dbRow, FIELD_MAP);
+	var person = genericToDomain(dbRow,FIELD_MAP);
 	if (dbRow.chapter_judges && Array.isArray(dbRow.chapter_judges)) {
 		person.ChapterJudges = dbRow.chapter_judges.map(chapterJudgeToDomain);
 	}
 	if (dbRow.person_judges && Array.isArray(dbRow.person_judges)) {
 		person.Judges = dbRow.person_judges.map(judgeToDomain);
-	} else if (dbRow.judges && Array.isArray(dbRow.judges)) {
+	} else if (person.judges && Array.isArray(dbRow.judges)) {
 		person.Judges = dbRow.judges.map(judgeToDomain);
 	}
 	if (dbRow.person_quizzes && Array.isArray(dbRow.person_quizzes)) {
@@ -44,10 +44,8 @@ export const toDomain = dbRow => {
 
 	return person;
 };
-export const toPersistence = domainObj => genericToPersistence(domainObj, FIELD_MAP);
 
 export default {
 	toDomain,
-	toPersistence,
 	FIELD_MAP,
 };

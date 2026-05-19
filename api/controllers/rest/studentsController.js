@@ -11,8 +11,8 @@ export async function unlinkedSearch(req, res) {
 	let { first, last } = req.valid.query;
 
 	if (!first || !last) {
-		first = req.actor.Person.firstName;
-		last = req.actor.Person.lastName;
+		first = req.actor.Person.first;
+		last = req.actor.Person.last;
 	}
 	// log access to student search to the change log
 	logStudentSearch(req.session, first, last).catch(err => {
@@ -20,7 +20,7 @@ export async function unlinkedSearch(req, res) {
 	});
 
 	// if person is not site admin, apply rate limiting logic via person settings
-	if (!req.actor.Person?.siteAdmin) {
+	if (!req.actor.Person?.site_admin) {
 		const person = await personRepo.getPerson(req.actor.id, {
 			settings: ['last_student_search', 'student_search_count'],
 		});

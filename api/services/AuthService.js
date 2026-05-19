@@ -40,9 +40,9 @@ export async function register(userData, context = {}) {
 	const newPersonData = {
 		email      : userData.email,
 		password   : hashPassword(userData.password),
-		firstName  : userData.firstName,
-		middleName : userData.middleName,
-		lastName   : userData.lastName,
+		first  : userData.first,
+		middle : userData.middle,
+		last   : userData.lasts,
 		state      : userData.state,
 		country    : userData.country,
 		tz         : userData.tz,

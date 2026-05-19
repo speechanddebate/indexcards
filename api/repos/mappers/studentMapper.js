@@ -5,9 +5,9 @@ import { toDomain as studentToDomain } from './studentMapper.js';
 
 export const FIELD_MAP = {
 	id: 'id',
-	firstName: 'first',
-	middleName: 'middle',
-	lastName: 'last',
+	first: 'first',
+	middle: 'middle',
+	last: 'last',
 	phonetic: 'phonetic',
 	gradYear: 'grad_year',
 	novice: { db: 'novice', fromDb: toBool, toDb: fromBool },

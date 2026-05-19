@@ -33,7 +33,7 @@ export const Contact = {
 			type        : 'integer',
 			description : 'NSDA ID number of the contact if they are a coach',
 		},
-		firstName: {
+		first: {
 			type    : 'string',
 			example : 'John',
 		},
@@ -42,7 +42,7 @@ export const Contact = {
 			nullable : true,
 			example  : 'Quincy',
 		},
-		lastName: {
+		last: {
 			type: 'string',
 			example: 'Doe',
 		},

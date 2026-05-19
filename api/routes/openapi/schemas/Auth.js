@@ -30,13 +30,13 @@ export const RegisterRequest = z.object({
 	password: z.string().meta({
 		description: 'The password for the new user',
 	}),
-	firstName: z.string().meta({
+	first: z.string().meta({
 		description: 'The first name of the new user',
 	}),
 	middleName: z.string().nullish().meta({
 		description: 'The middle name of the new user',
 	}),
-	lastName: z.string().meta({
+	last: z.string().meta({
 		description: 'The last name of the new user',
 	}),
 	phoneNumber: z.string().nullish().meta({

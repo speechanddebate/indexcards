@@ -1,6 +1,6 @@
 
 import db from '../data/db.js';
-import { FIELD_MAP,toDomain,toPersistence } from './mappers/personMapper.js';
+import { FIELD_MAP,toDomain } from './mappers/personMapper.js';
 import { withSettingsInclude, saveSettings } from './utils/settings.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { chapterJudgeInclude } from './chapterJudge.js';
@@ -141,7 +141,7 @@ export async function getPerson(personId, opts = {}) {
  * Search for persons with flexible filters and includes.
  * @param {string} searchTerm - Search term to match against first or last name (prefix match)
  * @param {Object} opts - Additional options (limit, filters, includes)
- * @returns {Array} [{id, firstName, lastName, chapters}, ...]
+ * @returns {Array} [{id, first, last, chapters}, ...]
  */
 async function personSearch(searchTerm = '', opts = {}) {
 	// Sanitize and split search term into words
@@ -196,7 +196,7 @@ async function getPersonByUsername(username, opts = {}) {
 }
 
 async function createPerson(personData = {}){
-	const dbRow = await db.person.create(toPersistence(personData));
+	const dbRow = await db.person.create(personData);
 
 	await saveSettings({
 		model: db.personSetting,

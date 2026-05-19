@@ -26,7 +26,7 @@ async function getParadigms(req, res) {
 		},
 	});
 	const results = paradigms.map(p => {
-		const nameParts = [p.firstName, p.middleName, p.lastName].filter(Boolean);
+		const nameParts = [p.first, p.middle, p.last].filter(Boolean);
 		// Get all schools from Judges
 		const schools = p.Judges
 			? p.Judges
@@ -87,7 +87,7 @@ async function getParadigmByPersonId(req, res) {
 
 	res.json({
 		id: person.id,
-		name: [person.firstName, person.middleName, person.lastName].filter(Boolean).join(' '),
+		name: [person.first, person.middle, person.last].filter(Boolean).join(' '),
 		lastReviewed: person.settingsTimestamps['paradigm']?.updatedAt || null,
 		paradigm: person.settings['paradigm'] || null,
 		certifications: person.PersonQuizzes?.map(pq => ({

@@ -6,7 +6,7 @@ import factories from '../../../../tests/factories';
 
 describe('User Profile Loader', () => {
 	it('Returns correct JSON for a self profile request', async () => {
-		const { personId, getPerson } = await factories.person.createTestPerson({siteAdmin: true});
+		const { personId, getPerson } = await factories.person.createTestPerson({site_admin: true});
 		const { userkey } = await factories.session.createTestSession({ person: personId });
 		const res = await request(server)
 			.get(`/v1/user/profile`)
@@ -24,11 +24,11 @@ describe('User Profile Loader', () => {
 			'Correct fake user profile is returned'
 		);
 
-		assert.isTrue(res.body.siteAdmin, 'Site Admin powers are enabled');
+		assert.isTrue(res.body.site_admin, 'Site Admin powers are enabled');
 	});
 
 	it('Returns correct JSON for another user profile request', async () => {
-		const { personId } = await factories.person.createTestPerson({siteAdmin: true});
+		const { personId } = await factories.person.createTestPerson({site_admin: true});
 		const { userkey } = await factories.session.createTestSession({ person: personId });
 		const res = await request(server)
 			.get(`/v1/user/profile/1`)

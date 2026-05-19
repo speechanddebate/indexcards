@@ -10,7 +10,7 @@ let adminId, userId;
 describe('Auth Router', () => {
 	beforeAll(async () => {
 		adminId = (await factories.person.createTestPerson({
-			siteAdmin: true,
+			site_admin: true,
 		})).personId;
 		userId = (await factories.person.createTestPerson()).personId;
 	});
@@ -101,8 +101,8 @@ describe('Auth Router', () => {
 				.send({
 					email: personData.email,
 					password: personData.password,
-					firstName: personData.firstName,
-					lastName: personData.lastName,
+					first: personData.first,
+					last: personData.last,
 				})
 				.set('Accept', 'application/json')
 				.expect('Content-Type', /json/);
@@ -117,7 +117,7 @@ describe('Auth Router', () => {
 	describe('/su', () => {
 		it('starts an su session', async () => {
 			const person = await (await factories.person.createTestPerson({
-				siteAdmin: true,
+				site_admin: true,
 				password: hashPassword('securepassword'),
 			})).getPerson();
 
@@ -147,7 +147,7 @@ describe('Auth Router', () => {
 		});
 		it('fails to start an su session with invalid suId', async () => {
 			const person = await (await factories.person.createTestPerson({
-				siteAdmin: true,
+				site_admin: true,
 				password: hashPassword('securepassword'),
 			})).getPerson();
 

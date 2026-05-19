@@ -4,9 +4,9 @@ import * as utils from './utils.js';
 const PersonZod = z.object({
 	id: utils.id,
 	email: z.string().email(),
-	firstName: z.string(),
-	middleName: z.string().nullable(),
-	lastName: z.string(),
+	first: z.string(),
+	middle: z.string().nullable(),
+	last: z.string(),
 	state: z.string(),
 	country: z.string(),
 	tz: z.string(),
@@ -22,7 +22,7 @@ export const Person = {
 	type : 'object',
 	description: 'A person (user) in tabroom',
 	additionalProperties: false,
-	required: ['id', 'email', 'firstName', 'lastName'],
+	required: ['id', 'email', 'first', 'last'],
 	properties : {
 		id: {
 			type: 'integer',
@@ -33,16 +33,16 @@ export const Person = {
 			format: 'email',
 			example: 'johndoe@tabroom.com',
 		},
-		firstName: {
+		first: {
 			type: 'string',
 			example: 'John',
 		},
-		middleName: {
+		middle: {
 			type: 'string',
 			nullable: true,
 			example: 'Quincy',
 		},
-		lastName: {
+		last: {
 			type: 'string',
 			example: 'Doe',
 		},

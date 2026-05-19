@@ -4,9 +4,9 @@ import factories from './index.js';
 
 export function buildStudentData(overrides = {}) {
 	return {
-		firstName: faker.person.firstName(),
-		middleName: faker.datatype.boolean() ? faker.person.middleName() : null,
-		lastName: faker.person.lastName(),
+		first: faker.person.firstName(),
+		middle: faker.datatype.boolean() ? faker.person.middleName() : null,
+		last: faker.person.lastName(),
 		...overrides,
 	};
 }

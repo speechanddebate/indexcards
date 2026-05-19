@@ -6,20 +6,20 @@ import { UnlinkedStudentSearch } from '../../../openapi/schemas/Student.js';
 
 describe('GET /rest/students/unlinked/search', () => {
   let userkey: string;
-  let firstName: string;
-  let lastName: string;
+  let first: string;
+  let last: string;
 
   beforeAll(async () => {
     const { chapterId } = await factories.chapter.createTestChapter();
     const { getStudent } = await factories.student.createTestUnlinkedStudent({ chapterId });
-    const student = await getStudent() as { firstName: string; lastName: string };
-    firstName = student.firstName;
-    lastName = student.lastName;
+    const student = await getStudent() as { first: string; last: string };
+    first = student.first;
+    last = student.last;
 
     ({ userkey } = await factories.session.createTestSession({
       Person: {
-        firstName,
-        lastName,
+        first,
+        last,
       }
     }));
   });
@@ -27,7 +27,7 @@ describe('GET /rest/students/unlinked/search', () => {
   it('returns 401 without authentication', async () => {
     const res = await request(server)
       .get('/v1/rest/students/unlinked/search')
-      .query({ first: firstName, last: lastName })
+      .query({ first: first, last: last })
       .set('Accept', 'application/json')
       .expect(401);
 
@@ -37,7 +37,7 @@ describe('GET /rest/students/unlinked/search', () => {
   it('returns a list of matching unlinked students', async () => {
     const res = await request(server)
       .get('/v1/rest/students/unlinked/search')
-      .query({ first: firstName, last: lastName })
+      .query({ first: first, last: last })
       .set('Accept', 'application/json')
       .set('Authorization', `Bearer ${userkey}`)
       .expect('Content-Type', /json/)

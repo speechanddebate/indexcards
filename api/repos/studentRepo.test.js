@@ -11,38 +11,38 @@ describe('unlinkedSearch', () => {
 		const { chapterId } = await factories.chapter.createTestChapter();
 
 		const { studentId: includedId } = await factories.student.createTestUnlinkedStudent({
-			firstName: `${firstPrefix}A`,
-			lastName: `${lastPrefix}A`,
+			first: `${firstPrefix}A`,
+			last: `${lastPrefix}A`,
 			gradYear: schoolYear + 1,
 			chapterId,
 		});
 
 		const { studentId: linkedByPersonId } = await factories.student.createTestUnlinkedStudent({
-			firstName: `${firstPrefix}B`,
-			lastName: `${lastPrefix}B`,
+			first: `${firstPrefix}B`,
+			last: `${lastPrefix}B`,
 			gradYear: schoolYear + 1,
 			personId: 123,
 			chapterId,
 		});
 
 		const { studentId: linkedByRequestId } = await factories.student.createTestUnlinkedStudent({
-			firstName: `${firstPrefix}C`,
-			lastName: `${lastPrefix}C`,
+			first: `${firstPrefix}C`,
+			last: `${lastPrefix}C`,
 			gradYear: schoolYear + 1,
 			personRequestId: 321,
 			chapterId,
 		});
 
 		await factories.student.createTestUnlinkedStudent({
-			firstName: `${firstPrefix}D`,
-			lastName: `${lastPrefix}D`,
+			first: `${firstPrefix}D`,
+			last: `${lastPrefix}D`,
 			gradYear: schoolYear,
 			chapterId,
 		});
 
 		await factories.student.createTestUnlinkedStudent({
-			firstName: `${firstPrefix}E`,
-			lastName: `X${lastPrefix}`,
+			first: `${firstPrefix}E`,
+			last: `X${lastPrefix}`,
 			gradYear: schoolYear + 1,
 			chapterId,
 		});
@@ -69,8 +69,8 @@ describe('unlinkedSearch', () => {
 		const schoolYear = new Date().getFullYear();
 		const { chapterId } = await factories.chapter.createTestChapter();
 		const { studentId } = await factories.student.createTestUnlinkedStudent({
-			firstName: `${firstPrefix}Main`,
-			lastName: `${lastPrefix}Main`,
+			first: `${firstPrefix}Main`,
+			last: `${lastPrefix}Main`,
 			gradYear: schoolYear + 1,
 			chapterId,
 		});
@@ -113,15 +113,15 @@ describe('unlinkedSearch', () => {
 		const currentYear = new Date().getFullYear();
 		const { chapterId } = await factories.chapter.createTestChapter();
 		const { studentId: includedId } = await factories.student.createTestUnlinkedStudent({
-			firstName: `${firstPrefix}A`,
-			lastName: `${lastPrefix}A`,
+			first: `${firstPrefix}A`,
+			last: `${lastPrefix}A`,
 			gradYear: currentYear + 1,
 			chapterId,
 		});
 
 		await factories.student.createTestUnlinkedStudent({
-			firstName: `${firstPrefix}B`,
-			lastName: `${lastPrefix}B`,
+			first: `${firstPrefix}B`,
+			last: `${lastPrefix}B`,
 			gradYear: currentYear - 1,
 			chapterId,
 		});
