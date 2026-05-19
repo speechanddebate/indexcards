@@ -1860,20 +1860,18 @@
             "in": "query",
             "name": "first",
             "schema": {
-              "type": "string",
-              "description": "First name to search for"
+              "description": "First name to search for",
+              "type": "string"
             },
-            "required": true,
             "description": "First name to search for"
           },
           {
             "in": "query",
             "name": "last",
             "schema": {
-              "type": "string",
-              "description": "Last name to search for"
+              "description": "Last name to search for",
+              "type": "string"
             },
-            "required": true,
             "description": "Last name to search for"
           }
         ],

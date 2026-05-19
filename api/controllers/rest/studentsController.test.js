@@ -124,7 +124,7 @@ describe('studentsController', () => {
 		it('logs an error when change log save fails', async () => {
 			const logError = new Error('change log write failed');
 			vi.spyOn(changeLogRepo, 'createChangeLog').mockRejectedValue(logError);
-			const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => {});
+			const loggerErrorSpy = vi.spyOn(logger, 'error').mockImplementation(() => { });
 			vi.spyOn(studentRepo, 'unlinkedSearch').mockResolvedValue([]);
 
 			const { req, res } = createContext({
@@ -142,6 +142,64 @@ describe('studentsController', () => {
 			);
 			expect(res.statusCode).toBe(200);
 		});
+		it('defaults to the users first and last on no params', async () => {
+			vi.spyOn(changeLogRepo, 'createChangeLog').mockResolvedValue({});
+			vi.spyOn(personRepo, 'getPerson').mockResolvedValue({
+				id: 10,
+				settings: {
+					student_search_count: 0,
+				},
+			});
+			const savePersonSettingsSpy = vi.spyOn(personRepo, 'savePersonSettings').mockResolvedValue(undefined);
+			vi.spyOn(studentRepo, 'unlinkedSearch').mockResolvedValue([
+				{
+					id: 101,
+					first: 'Test',
+					middle: 'Q',
+					last: 'Student',
+					chapter_name: 'Lincoln',
+					chapter_state: 'NE',
+					tourn_count: 2,
+				},
+			]);
 
+			const { req, res } = createContext({
+				valid: { query: {} },
+				actor: {
+					id: 10, Person: {
+						first: 'Test',
+						last: 'Student',
+						siteAdmin: false,
+					},
+				},
+				session: { id: 88, person: 10, su: null },
+			});
+
+			await controller.unlinkedSearch(req, res);
+
+			expect(personRepo.getPerson).toHaveBeenCalledWith(10, {
+				settings: ['last_student_search', 'student_search_count'],
+			});
+			expect(savePersonSettingsSpy).toHaveBeenCalledWith(10, {
+				student_search_count: 1,
+				last_student_search: expect.any(Date),
+			});
+			expect(studentRepo.unlinkedSearch).toHaveBeenCalledWith({ first: 'Test', last: 'Student' });
+			expect(res.body).toEqual([
+				{
+					id: 101,
+					first: 'Test',
+					middle: 'Q',
+					last: 'Student',
+					gradYear: null,
+					Chapter: {
+						name: 'Lincoln',
+						state: 'NE',
+					},
+					tournCount: 2,
+				},
+			]);
+
+		});
 	});
 });

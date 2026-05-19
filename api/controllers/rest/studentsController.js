@@ -8,8 +8,12 @@ const STUDENT_SEARCH_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000;
 const STUDENT_SEARCH_LIMIT_MAX = 9;
 
 export async function unlinkedSearch(req, res) {
-	const { first, last } = req.valid.query;
+	let { first, last } = req.valid.query;
 
+	if (!first || !last) {
+		first = req.actor.Person.firstName;
+		last = req.actor.Person.lastName;
+	}
 	// log access to student search to the change log
 	logStudentSearch(req.session, first, last).catch(err => {
 		logger.error('Failed to log student search usage to changeLog:', err);
@@ -28,9 +32,9 @@ export async function unlinkedSearch(req, res) {
 
 		if (
 			lastSearch
-			&& !Number.isNaN(lastSearch.getTime())
-			&& lastSearch > then
-			&& studentSearchCount > STUDENT_SEARCH_LIMIT_MAX
+      && !Number.isNaN(lastSearch.getTime())
+      && lastSearch > then
+      && studentSearchCount > STUDENT_SEARCH_LIMIT_MAX
 		) {
 			return RateLimitExceeded(req, res,
 				'Due to privacy concerns, you may only search for student records a few times every 24 hours.',
@@ -39,8 +43,8 @@ export async function unlinkedSearch(req, res) {
 		}
 
 		const nextStudentSearchCount = person?.settings?.student_search_count
-			? 1
-			: studentSearchCount + 1;
+      ? 1
+      : studentSearchCount + 1;
 
 		await personRepo.savePersonSettings(req.actor.id, {
 			student_search_count: nextStudentSearchCount,
