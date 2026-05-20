@@ -24,16 +24,16 @@ const router = Router({ mergeParams: true });
 if (!config.HIDE_DEV_ENDPOINTS || process.env.NODE_ENV === 'test') {
 	router.use('/coach' , legacyCoachRouter);
 	router.use('/tab'   , tabRouter);
-	router.use('/admin' ,requireSiteAdmin, adminRouter);
+	router.use('/admin' , requireSiteAdmin, adminRouter);
 	router.use('/ext'   , extRouter);
 }
 
-router.use('/pages' , pagesRouter);
-router.use('/rest'  , restRouter);
+router.use('/pages'  , pagesRouter);
+router.use('/rest'   , restRouter);
 router.use('/status' , statusRouter);
-router.use('/auth'  , authRouter);
+router.use('/auth'   , authRouter);
 router.use('/public' , legacyPublicRouter);
-router.use('/user'   ,requireLogin, legacyUserRouter);
+router.use('/user'   , requireLogin, legacyUserRouter);
 
 // Serve pre-built OpenAPI spec
 const openApiPath = fileURLToPath(new URL('../../openapi/openapi.json', import.meta.url));

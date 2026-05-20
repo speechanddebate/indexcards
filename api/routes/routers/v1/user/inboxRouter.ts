@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import * as c from '../../../../controllers/user/inbox.js';
+import * as controller from '../../../../controllers/user/inbox.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
 import { InboxMessage } from '../../../openapi/schemas/Message.js';
 import z from 'zod';
@@ -10,11 +10,11 @@ const router = Router();
 
 router.use(requireLogin);
 
-router.route('/').get(c.inboxList).openapi = {
-	path: '/user/inbox',
-	operationId: 'UserInbox',
-	summary: 'Get messages',
-	description: 'Get the list of messages for the logged-in user',
+router.route('/').get(controller.inboxList).openapi = {
+	path        : '/user/inbox',
+	operationId : 'UserInbox',
+	summary     : 'Get messages',
+	description : 'Get the list of messages for the logged-in user',
 	tags: ['Orval','Inbox'],
 	responses: {
 		200: {
@@ -27,7 +27,8 @@ router.route('/').get(c.inboxList).openapi = {
 		},
 	},
 };
-router.route('/unread').get(c.getUnreadCount).openapi = {
+
+router.route('/unread').get(controller.getUnreadCount).openapi = {
 	path: '/user/inbox/unread',
 	summary: 'Unread count',
 	description: 'Get the count of unread messages for the logged-in user',
@@ -50,7 +51,7 @@ router.route('/unread').get(c.getUnreadCount).openapi = {
 	},
 };
 
-router.route('/markAllRead').post(c.readAllMessages).openapi = {
+router.route('/markAllRead').post(controller.readAllMessages).openapi = {
 	path: '/user/inbox/markAllRead',
 	operationId: 'UserInboxMarkAllRead',
 	summary: 'Mark all messages as read',
@@ -58,9 +59,10 @@ router.route('/markAllRead').post(c.readAllMessages).openapi = {
 	tags: ['Orval', 'Inbox'],
 	responses: { 204: { description: 'All messages marked as read' } },
 };
+
 router.route('/:messageId')
-	.get(ValidateRequest, c.getMessage)
-	.delete(ValidateRequest, c.deleteMessage).openapi = {
+	.get(ValidateRequest, controller.getMessage)
+	.delete(ValidateRequest, controller.deleteMessage).openapi = {
 		path: '/user/inbox/{messageId}',
 		tags: ['Orval', 'Inbox'],
 		requestParams: {
@@ -91,7 +93,7 @@ router.route('/:messageId')
 		},
 	};
 
-router.route('/:messageId/markRead').post(ValidateRequest, c.readMessage).openapi = {
+router.route('/:messageId/markRead').post(ValidateRequest, controller.readMessage).openapi = {
 	path: '/user/inbox/{messageId}/markRead',
 	operationId: 'UserInboxMarkRead',
 	summary: 'Mark message as read',
@@ -105,7 +107,7 @@ router.route('/:messageId/markRead').post(ValidateRequest, c.readMessage).openap
 	responses: { 204: { description: 'Message marked as read' } },
 };
 
-router.route('/:messageId/markUnread').post(ValidateRequest, c.unreadMessage).openapi = {
+router.route('/:messageId/markUnread').post(ValidateRequest, controller.unreadMessage).openapi = {
 	path: '/user/inbox/{messageId}/markUnread',
 	operationId: 'UserInboxMarkUnread',
 	summary: 'Mark message as unread',

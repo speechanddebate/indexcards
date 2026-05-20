@@ -96,6 +96,10 @@
       "name": "Tournaments"
     },
     {
+      "name": "Ext",
+      "description": "Auto-discovered tag"
+    },
+    {
       "name": "Invite",
       "description": "Auto-discovered tag"
     },
@@ -136,22 +140,6 @@
       "description": "Auto-discovered tag"
     },
     {
-      "name": "Events",
-      "description": "Auto-discovered tag"
-    },
-    {
-      "name": "Results",
-      "description": "Auto-discovered tag"
-    },
-    {
-      "name": "Records",
-      "description": "Auto-discovered tag"
-    },
-    {
-      "name": "Entries",
-      "description": "Auto-discovered tag"
-    },
-    {
       "name": "Rounds",
       "description": "Auto-discovered tag"
     },
@@ -165,6 +153,22 @@
     },
     {
       "name": "pairings",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "Events",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "Results",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "Records",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "Entries",
       "description": "Auto-discovered tag"
     },
     {
@@ -189,6 +193,10 @@
     },
     {
       "name": "Students",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "User Tournament",
       "description": "Auto-discovered tag"
     },
     {
@@ -252,6 +260,7 @@
         "Schematic",
         "Students",
         "Tournaments",
+        "User Tournament",
         "event",
         "eventAbbr",
         "futureTourns",
@@ -267,6 +276,2146 @@
     }
   ],
   "paths": {
+    "/tab/tourns": {
+      "post": {
+        "summary": "Create tournament",
+        "tags": [
+          "Tournament"
+        ],
+        "description": "POST /tab/tourns is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TournRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Tournament created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tourn"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}": {
+      "get": {
+        "summary": "Get tournament",
+        "tags": [
+          "Tournament"
+        ],
+        "description": "GET /tab/tourns/{tournId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Tournament information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Tourn"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update tournament",
+        "tags": [
+          "Tournament"
+        ],
+        "description": "PUT /tab/tourns/{tournId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete tournament",
+        "tags": [
+          "Tournament"
+        ],
+        "description": "DELETE /tab/tourns/{tournId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}/backup": {
+      "post": {
+        "summary": "Tournament Backup",
+        "description": "Creates a backup dump of the tournament data in JSON format",
+        "tags": [
+          "Backup and Restore"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "requestBody": {
+          "description": "Parameters for the backup request",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BackupRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Backup data"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}/categories": {
+      "get": {
+        "summary": "Get categories",
+        "tags": [
+          "Category"
+        ],
+        "description": "GET /tab/tourns/{tournId}/categories is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of categories",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Category"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create category",
+        "tags": [
+          "Category"
+        ],
+        "description": "POST /tab/tourns/{tournId}/categories is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}/categories/{categoryId}": {
+      "get": {
+        "summary": "Get category",
+        "tags": [
+          "Category"
+        ],
+        "description": "GET /tab/tourns/{tournId}/categories/{categoryId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Category details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Category"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete category",
+        "tags": [
+          "Category"
+        ],
+        "description": "DELETE /tab/tourns/{tournId}/categories/{categoryId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update category",
+        "tags": [
+          "Category"
+        ],
+        "description": "PUT /tab/tourns/{tournId}/categories/{categoryId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "categoryId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}/schools": {
+      "get": {
+        "summary": "Get Schools for Tournament",
+        "description": "Retrieves all schools associated with the specified tournament.",
+        "tags": [
+          "Schools"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schools retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/School"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create School",
+        "description": "Creates a new school within the specified tournament.",
+        "tags": [
+          "Schools"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSchool"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "School created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "description": "ID of the created school"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}/schools/{schoolId}": {
+      "get": {
+        "summary": "Get School by ID",
+        "description": "Retrieves a school by its ID within the specified tournament.",
+        "tags": [
+          "Schools"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "schoolId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "School retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/School"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update School",
+        "description": "Updates an existing school within the specified tournament.",
+        "tags": [
+          "Schools"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "schoolId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSchool"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "School updated successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete School",
+        "description": "Deletes a school within the specified tournament.",
+        "tags": [
+          "Schools"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "schoolId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "School deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}/sites": {
+      "get": {
+        "summary": "Get sites",
+        "tags": [
+          "Sites & Rooms"
+        ],
+        "description": "GET /tab/tourns/{tournId}/sites is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A list of sites for the tourn",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SiteResponse"
+                  }
+                },
+                "examples": {
+                  "sites": {
+                    "summary": "Example response",
+                    "value": [
+                      {
+                        "id": 1,
+                        "name": "Lincoln High School",
+                        "online": false,
+                        "directions": "123 Main St, Anytown, USA",
+                        "dropoff": "Use the side entrance on 2nd Ave.",
+                        "hostId": 5,
+                        "circuitId": 2,
+                        "createdAt": "2023-01-01T00:00:00Z",
+                        "updatedAt": "2023-01-02T00:00:00Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create site",
+        "tags": [
+          "Sites & Rooms"
+        ],
+        "description": "POST /tab/tourns/{tournId}/sites is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}/sites/{siteId}": {
+      "get": {
+        "summary": "Get site",
+        "tags": [
+          "Sites & Rooms"
+        ],
+        "description": "GET /tab/tourns/{tournId}/sites/{siteId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A site object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteResponse"
+                },
+                "examples": {
+                  "site": {
+                    "summary": "Example response",
+                    "value": {
+                      "id": 1,
+                      "name": "Lincoln High School",
+                      "online": false,
+                      "directions": "123 Main St, Anytown, USA",
+                      "dropoff": "Use the side entrance on 2nd Ave.",
+                      "hostId": 5,
+                      "circuitId": 2,
+                      "createdAt": "2023-01-01T00:00:00Z",
+                      "updatedAt": "2023-01-02T00:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update site",
+        "tags": [
+          "Sites & Rooms"
+        ],
+        "description": "PUT /tab/tourns/{tournId}/sites/{siteId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete site",
+        "tags": [
+          "Sites & Rooms"
+        ],
+        "description": "DELETE /tab/tourns/{tournId}/sites/{siteId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}/sites/{siteId}/rooms": {
+      "get": {
+        "summary": "Get rooms",
+        "tags": [
+          "Sites & Rooms"
+        ],
+        "description": "GET /tab/tourns/{tournId}/sites/{siteId}/rooms is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create room",
+        "tags": [
+          "Sites & Rooms"
+        ],
+        "description": "POST /tab/tourns/{tournId}/sites/{siteId}/rooms is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}/sites/{siteId}/rooms/{roomId}": {
+      "get": {
+        "summary": "Get room",
+        "tags": [
+          "Sites & Rooms"
+        ],
+        "description": "GET /tab/tourns/{tournId}/sites/{siteId}/rooms/{roomId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update room",
+        "tags": [
+          "Sites & Rooms"
+        ],
+        "description": "PUT /tab/tourns/{tournId}/sites/{siteId}/rooms/{roomId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete room",
+        "tags": [
+          "Sites & Rooms"
+        ],
+        "description": "DELETE /tab/tourns/{tournId}/sites/{siteId}/rooms/{roomId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "siteId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "roomId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}/timeslots": {
+      "get": {
+        "summary": "Get all timeslots for a tournament",
+        "description": "Returns an array of timeslot objects for the given tournament.",
+        "tags": [
+          "Timeslots"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "An array of timeslot objects",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TimeslotResponse"
+                  }
+                },
+                "examples": {
+                  "timeslotsResponse": {
+                    "summary": "Example response",
+                    "value": [
+                      {
+                        "id": 1,
+                        "name": "Round 1",
+                        "start": "2023-01-01T09:00:00Z",
+                        "end": "2023-01-01T10:00:00Z",
+                        "tournId": 42,
+                        "createdAt": "2023-01-01T00:00:00Z",
+                        "updatedAt": "2023-01-02T00:00:00Z"
+                      },
+                      {
+                        "id": 2,
+                        "name": "Round 2",
+                        "start": "2023-01-01T10:30:00Z",
+                        "end": "2023-01-01T11:30:00Z",
+                        "tournId": 42,
+                        "createdAt": "2023-01-01T00:00:00Z",
+                        "updatedAt": "2023-01-02T00:00:00Z"
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "summary": "Create a new timeslot",
+        "description": "Creates a new timeslot with the provided data and returns the created object.",
+        "tags": [
+          "Timeslots"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimeslotRequest"
+              },
+              "examples": {
+                "timeslotRequest": {
+                  "summary": "Example request",
+                  "value": {
+                    "name": "Round 1",
+                    "start": "2023-01-01T09:00:00Z",
+                    "end": "2023-01-01T10:00:00Z",
+                    "tournId": 42
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Timeslot created successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/tab/tourns/{tournId}/timeslots/{timeslotId}": {
+      "get": {
+        "summary": "Get a timeslot by ID",
+        "description": "Returns a timeslot object for the given ID.",
+        "tags": [
+          "Timeslots"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "timeslotId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "timeslotId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "A timeslot object",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TimeslotResponse"
+                },
+                "examples": {
+                  "timeslotResponse": {
+                    "summary": "Example response",
+                    "value": {
+                      "id": 1,
+                      "name": "Round 1",
+                      "start": "2023-01-01T09:00:00Z",
+                      "end": "2023-01-01T10:00:00Z",
+                      "tournId": 42,
+                      "createdAt": "2023-01-01T00:00:00Z",
+                      "updatedAt": "2023-01-02T00:00:00Z"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update an existing timeslot",
+        "description": "Updates the timeslot with the given ID using the provided data and returns the updated object.",
+        "tags": [
+          "Timeslots"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "timeslotId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "timeslotId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TimeslotRequest"
+              },
+              "examples": {
+                "timeslotRequest": {
+                  "summary": "Example request",
+                  "value": {
+                    "name": "Round 1 - Updated",
+                    "start": "2023-01-01T09:30:00Z",
+                    "end": "2023-01-01T10:30:00Z",
+                    "tournId": 42
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Timeslot updated successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "summary": "Delete a timeslot",
+        "description": "Deletes the timeslot with the given ID and returns a success message.",
+        "tags": [
+          "Timeslots"
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "timeslotId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "name": "timeslotId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Timeslot deleted successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/admin/servers/usage": {
+      "get": {
+        "summary": "TODO write spec",
+        "tags": [
+          "Admin : Servers"
+        ],
+        "description": "GET /admin/servers/usage is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/admin/servers/show": {
+      "get": {
+        "summary": "TODO write spec",
+        "tags": [
+          "Admin : Servers"
+        ],
+        "description": "GET /admin/servers/show is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/admin/servers/show/{linodeId}": {
+      "get": {
+        "summary": "TODO write spec",
+        "tags": [
+          "Admin : Servers"
+        ],
+        "description": "GET /admin/servers/show/{linodeId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "name": "linodeId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/admin/servers/status": {
+      "get": {
+        "summary": "TODO write spec",
+        "tags": [
+          "Admin : Servers"
+        ],
+        "description": "GET /admin/servers/status is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/admin/servers/count": {
+      "get": {
+        "summary": "TODO write spec",
+        "tags": [
+          "Admin : Servers"
+        ],
+        "description": "GET /admin/servers/count is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/admin/servers/reboot": {
+      "post": {
+        "summary": "TODO write spec",
+        "tags": [
+          "Admin : Servers"
+        ],
+        "description": "POST /admin/servers/reboot is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/admin/servers/changeCount": {
+      "post": {
+        "summary": "TODO write spec",
+        "tags": [
+          "Admin : Servers"
+        ],
+        "description": "POST /admin/servers/changeCount is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/admin/servers/changeCount/{id}": {
+      "delete": {
+        "summary": "TODO write spec",
+        "tags": [
+          "Admin : Servers"
+        ],
+        "description": "DELETE /admin/servers/changeCount/{id} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/admin/mailtest/error": {
+      "get": {
+        "summary": "Undocumented Endpoint",
+        "tags": [
+          "Admin : Mail"
+        ],
+        "security": [
+          {
+            "basic": []
+          }
+        ],
+        "description": "GET /admin/mailtest/error is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/admin/mailtest/slack": {
+      "get": {
+        "summary": "Undocumented Endpoint",
+        "tags": [
+          "Admin : Mail"
+        ],
+        "description": "GET /admin/mailtest/slack is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/login": {
+      "post": {
+        "summary": "External login",
+        "tags": [
+          "Ext"
+        ],
+        "description": "POST /ext/login is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Login successful"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/caselist/chapters": {
+      "get": {
+        "summary": "Load chapters for a person ID",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : Caselist"
+        ],
+        "description": "GET /ext/caselist/chapters is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "person_id",
+            "description": "ID of person whose chapters you wish to access",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Person Chapters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Chapter"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/caselist/rounds": {
+      "get": {
+        "summary": "Load rounds for a person ID",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : Caselist"
+        ],
+        "description": "GET /ext/caselist/rounds is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "person_id",
+            "description": "Person ID to get rounds for",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "slug",
+            "description": "Slug of page to match rounds",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "current",
+            "description": "Whether to return only current rounds",
+            "required": false,
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Person Rounds",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Round"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/caselist/students": {
+      "get": {
+        "summary": "Load students for a person ID",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : Caselist"
+        ],
+        "description": "GET /ext/caselist/students is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "person_id",
+            "description": "ID of person whose students you wish to access",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Person Students",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Student"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/caselist/link": {
+      "post": {
+        "summary": "Create a link to a caselist page",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : Caselist"
+        ],
+        "description": "POST /ext/caselist/link is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "requestBody": {
+          "description": "The caselist link",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CaselistLink"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Caselist Link",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CaselistLink"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/share/sendShareFile": {
+      "post": {
+        "summary": "Sends a document to the docchain email list for a room",
+        "operationId": "sendShareFile",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : Share"
+        ],
+        "description": "POST /ext/share/sendShareFile is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "requestBody": {
+          "description": "Initialize the doc chain room and emails",
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Share"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Success",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/share/makeShareRooms": {
+      "post": {
+        "summary": "Create share rooms",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : Share"
+        ],
+        "description": "POST /ext/share/makeShareRooms is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Rooms created successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/nsda/history": {
+      "get": {
+        "summary": "Load history for a NSDA membership ID",
+        "operationId": "getPersonHistory",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : NSDA"
+        ],
+        "description": "GET /ext/nsda/history is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "nsda_id",
+            "description": "NSDA Membership ID of person whose history you wish to access",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Person History",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/nsda/payment": {
+      "get": {
+        "summary": "Get payment information",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : NSDA"
+        ],
+        "description": "GET /ext/nsda/payment is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Payment information"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "summary": "Process payment",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : NSDA"
+        ],
+        "description": "POST /ext/nsda/payment is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Payment processed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/nsda/payment/tourn/{tournId}": {
+      "get": {
+        "summary": "Get payment information for tournament",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : NSDA"
+        ],
+        "description": "GET /ext/nsda/payment/tourn/{tournId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Payment information"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "post": {
+        "summary": "Process payment for tournament",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : NSDA"
+        ],
+        "description": "POST /ext/nsda/payment/tourn/{tournId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Payment processed"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/nsda/nats/appearances": {
+      "get": {
+        "summary": "Sync NSDA Nationals appearances",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : NSDA"
+        ],
+        "description": "GET /ext/nsda/nats/appearances is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Appearances synced"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/nsda/nats/placements": {
+      "get": {
+        "summary": "Get NSDA Nationals individual placements",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : NSDA"
+        ],
+        "description": "GET /ext/nsda/nats/placements is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Individual placements"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/mason/round/{roundId}/blast": {
+      "post": {
+        "summary": "Send a round pairing blast",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : Mason"
+        ],
+        "description": "POST /ext/mason/round/{roundId}/blast is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "roundId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/roundId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Round pairing blast sent"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/mason/blast": {
+      "post": {
+        "summary": "Send a blast message",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : Mason"
+        ],
+        "description": "POST /ext/mason/blast is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Message sent successfully"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/ext/mason/section/{sectionId}/blastPairing": {
+      "post": {
+        "summary": "Send a pairing blast for a section",
+        "security": [
+          {
+            "extApiKey": []
+          }
+        ],
+        "tags": [
+          "Ext : Mason"
+        ],
+        "description": "POST /ext/mason/section/{sectionId}/blastPairing is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "sectionId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "name": "sectionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pairing blast sent"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
     "/pages/invite/nsdaCategories": {
       "get": {
         "summary": "Get NSDA Event Categories",
@@ -896,44 +3045,10 @@
         }
       }
     },
-    "/rest/tourns/{tournId}/rounds/{roundId}/records": {
-      "get": {
-        "summary": "Get Published Entry Records by Round",
-        "description": "Given an Round ID, get a bunch of win loss data about the entries up to but not including that round",
-        "tags": [
-          "Events",
-          "Results",
-          "Records",
-          "Entries"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          },
-          {
-            "$ref": "#/components/parameters/roundId"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Entries with Win Loss data attached"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          }
-        }
-      }
-    },
     "/rest/tourns/{tournId}/rounds": {
       "get": {
-        "summary": "Get Published Rounds",
-        "description": "Retrieve a list of published rounds for a specific tournament.",
+        "summary": "Get Tourn Published Rounds",
+        "description": "Retrieve a list of published rounds for an entire tournament.",
         "tags": [
           "Tournaments",
           "Rounds"
@@ -961,7 +3076,7 @@
     },
     "/rest/tourns/{tournId}/rounds/{roundId}": {
       "get": {
-        "summary": "Returns round information given an ID if it is public",
+        "summary": "Returns a single Round object an ID if it is published",
         "operationId": "getRound",
         "tags": [
           "invite",
@@ -1024,7 +3139,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Object of Round with public information on it for a schematic, which includes a list of entries or sections as appropriate.",
+            "description": "Object of Round with public information on it for a schematic,\n\t\t\t \t\twhich includes a list of entries or sections as appropriate.",
             "content": {
               "application/json": {
                 "schema": {
@@ -1040,6 +3155,74 @@
             "$ref": "#/components/responses/ErrorResponse"
           },
           "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/rest/tourns/{tournId}/rounds/{roundId}/brackets": {
+      "get": {
+        "summary": "Get published primary results data leading up to this round for brackets",
+        "description": "Gets the outcome scores of the present round if published",
+        "tags": [
+          "Events",
+          "Results",
+          "Records",
+          "Entries"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "$ref": "#/components/parameters/roundId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entries with Win Loss data attached"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/rest/tourns/{tournId}/rounds/{roundId}/results": {
+      "get": {
+        "summary": "Get Published Results for a Round",
+        "description": "Gets the outcome scores of the present round if published",
+        "tags": [
+          "Events",
+          "Results",
+          "Records",
+          "Entries"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/tournId"
+          },
+          {
+            "$ref": "#/components/parameters/roundId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entries with Win Loss data attached"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
         }
@@ -1259,8 +3442,8 @@
     },
     "/rest/tourns/{tournId}/events/{eventId}/entryWins": {
       "get": {
-        "summary": "Get Published Entry Winloss Records by Event",
-        "description": "Given an Event ID, get a bunch of win loss data about each entry",
+        "summary": "Get Published Results by Event",
+        "description": "Given an Event ID, get published result records of the entries therein",
         "tags": [
           "Events",
           "Results",
@@ -1277,53 +3460,6 @@
             "required": true,
             "schema": {
               "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Entries with Win Loss data attached"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          }
-        }
-      }
-    },
-    "/rest/tourns/{tournId}/events/{eventId}/entryWins/{roundName}": {
-      "get": {
-        "summary": "Get Published Entry WinLoss Records by Event up to specified round",
-        "description": "Given an Event ID, get a bunch of win loss data about that entry, up to but not including a named round",
-        "tags": [
-          "Events",
-          "Results",
-          "Records",
-          "Entries"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/tournId"
-          },
-          {
-            "name": "eventId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          },
-          {
-            "name": "roundName",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
             }
           }
         ],
@@ -1395,9 +3531,10 @@
         }
       }
     },
-    "/rest/tourns/{tournId}/events/{eventAbbr}": {
+    "/rest/tourns/{tournId}/events/byAbbr/{eventAbbr}": {
       "get": {
-        "summary": "Returns some limited data about an event together with published rounds by event abbreviation",
+        "summary": "Get Event and Round List by Abbr",
+        "description": "Returns Event object with list of published rounds given an event abbreviation",
         "operationId": "getEventByAbbr",
         "tags": [
           "invite",
@@ -1406,7 +3543,6 @@
           "eventAbbr",
           "rounds"
         ],
-        "description": "GET /rest/tourns/{tournId}/events/{eventAbbr} is undocumented. Need to add .openapi to handler",
         "parameters": [
           {
             "$ref": "#/components/parameters/tournId"
@@ -1422,7 +3558,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Event and Round in JSON format for parsing",
+            "description": "Event and Round List",
             "content": {
               "application/json": {
                 "schema": {
@@ -2080,41 +4216,29 @@
         }
       }
     },
-    "/user/push/find": {
+    "/user/tourn/{tournId}": {
       "get": {
         "tags": [
-          "legacy",
-          "Push Notifications"
+          "User Tournament"
         ],
-        "summary": "GET /user/push/find",
-        "description": "GET /user/push/find is undocumented. Need to add .openapi to handler",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Subscription"
+        "description": "Get a user connections to a tournament, if any",
+        "summary": "GET /user/tourn/{tournId}",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
           },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "500": {
-            "$ref": "#/components/responses/ErrorResponse"
-          },
-          "default": {
-            "$ref": "#/components/responses/ErrorResponse"
+          {
+            "$ref": "#/components/parameters/tournId"
           }
-        }
-      },
-      "delete": {
-        "tags": [
-          "legacy",
-          "Push Notifications"
         ],
-        "summary": "DELETE /user/push/find",
-        "description": "DELETE /user/push/find is undocumented. Need to add .openapi to handler",
-        "parameters": [],
         "responses": {
           "200": {
-            "description": "Subscription deleted"
+            "description": "Person tournament presence"
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -2428,6 +4552,54 @@
             "$ref": "#/components/responses/NotFound"
           },
           "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/user/push/find": {
+      "get": {
+        "tags": [
+          "legacy",
+          "Push Notifications"
+        ],
+        "summary": "GET /user/push/find",
+        "description": "GET /user/push/find is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Subscription"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "legacy",
+          "Push Notifications"
+        ],
+        "summary": "DELETE /user/push/find",
+        "description": "DELETE /user/push/find is undocumented. Need to add .openapi to handler",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Subscription deleted"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
             "$ref": "#/components/responses/ErrorResponse"
           }
         }

@@ -4,6 +4,11 @@ import * as controller from '../../../../controllers/rest/entryController.js';
 const router = Router({ mergeParams: true });
 // Bolted onto /tourns/:tournId/entries/:entryId
 
+// NAMING CONVENTION:
+// schemats == round assignemnts and pairings
+// results == round outcomes and scores
+// records == both!
+
 router.route('/:entryId/records').get(controller.getEntryRecords).openapi = {
 	path        : '/rest/tourns/{tournId}/entries/{entryId}/records',
 	summary     : 'Get Tournament Records for a given Entry',

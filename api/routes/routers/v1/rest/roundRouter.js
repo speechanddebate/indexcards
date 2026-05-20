@@ -5,25 +5,16 @@ const router = Router({ mergeParams: true });
 
 // Bolted onto /tourns/:tournId/rounds
 
-router.route('/:roundId/records').get(controller.getEntryRecordsByRound).openapi = {
-	path        : '/rest/tourns/{tournId}/rounds/{roundId}/records',
-	summary     : 'Get Published Entry Records by Round',
-	description : 'Given an Round ID, get a bunch of win loss data about the entries up to but not including that round',
-	tags        : ['Events', 'Results', 'Records', 'Entries'],
-	responses :{
-		200             : {
-			description : 'Entries with Win Loss data attached',
-		},
-		404: {
-			$ref: '#/components/responses/NotFound',
-		},
-	},
-};
+// NAMING CONVENTION:
+// schemats == round assignments and pairings
+// results  == round outcomes and scores
+// brackets == primary results data up to this round
+// records  == both!
 
 router.route('/').get(controller.getPublishedRounds).openapi = {
 	path: '/rest/tourns/{tournId}/rounds',
-	summary: 'Get Published Rounds',
-	description: 'Retrieve a list of published rounds for a specific tournament.',
+	summary: 'Get Tourn Published Rounds',
+	description: 'Retrieve a list of published rounds for an entire tournament.',
 	tags: ['Tournaments', 'Rounds'],
 	responses: {
 		200: {
@@ -35,13 +26,34 @@ router.route('/').get(controller.getPublishedRounds).openapi = {
 	},
 };
 
-router.route('/:roundId').get(controller.getRound).openapi = {
+router.route('/:roundId').get(controller.getPublishedRound).openapi = {
 	path: '/rest/tourns/{tournId}/rounds/{roundId}',
-	summary     : 'Returns round information given an ID if it is public',
+	summary     : 'Returns a single Round object an ID if it is published',
 	operationId : 'getRound',
 	responses: {
 		200: {
 			description: 'Object of Round with public information on it',
+			content: {
+				'application/json': {
+					schema: {
+						type: 'object', // There is a schemat for it somewhere...urk.
+					},
+				},
+			},
+		},
+		default: { $ref: '#/components/responses/ErrorResponse' },
+	},
+	tags: ['invite', 'public', 'schematics', 'rounds', 'pairings'],
+};
+
+router.route('/:roundId/schematic').get(controller.getPublishedSchematic).openapi = {
+	path        : '/rest/tourns/{tournId}/rounds/{roundId}/schematic',
+	summary     : 'Returns public round information necessary to create a full schematic',
+	operationId : 'getSchematic',
+	responses: {
+		200: {
+			description: `Object of Round with public information on it for a schematic,
+			 		which includes a list of entries or sections as appropriate.`,
 			content: {
 				'application/json': {
 					schema: {
@@ -55,24 +67,34 @@ router.route('/:roundId').get(controller.getRound).openapi = {
 	tags: ['invite', 'public', 'schematics', 'rounds', 'pairings'],
 };
 
-router.route('/:roundId/schematic').get(controller.getSchematic).openapi = {
-	path: '/rest/tourns/{tournId}/rounds/{roundId}/schematic',
-	summary     : 'Returns public round information necessary to create a full schematic',
-	operationId : 'getSchematic',
-	responses: {
-		200: {
-			description: 'Object of Round with public information on it for a schematic, which includes a list of entries or sections as appropriate.',
-			content: {
-				'application/json': {
-					schema: {
-						type: 'object',
-					},
-				},
-			},
+router.route('/:roundId/brackets').get(controller.getPublishedBrackets).openapi = {
+	path        : '/rest/tourns/{tournId}/rounds/{roundId}/brackets',
+	summary     : 'Get published primary results data leading up to this round for brackets',
+	description : 'Gets the outcome scores of the present round if published',
+	tags        : ['Events', 'Results', 'Records', 'Entries'],
+	responses :{
+		200             : {
+			description : 'Entries with Win Loss data attached',
 		},
-		default: { $ref: '#/components/responses/ErrorResponse' },
+		404: {
+			$ref: '#/components/responses/NotFound',
+		},
 	},
-	tags: ['invite', 'public', 'schematics', 'rounds', 'pairings'],
+};
+
+router.route('/:roundId/results').get(controller.getPublishedResults).openapi = {
+	path        : '/rest/tourns/{tournId}/rounds/{roundId}/results',
+	summary     : 'Get Published Results for a Round',
+	description : 'Gets the outcome scores of the present round if published',
+	tags        : ['Events', 'Results', 'Records', 'Entries'],
+	responses :{
+		200             : {
+			description : 'Entries with Win Loss data attached',
+		},
+		404: {
+			$ref: '#/components/responses/NotFound',
+		},
+	},
 };
 
 export default router;

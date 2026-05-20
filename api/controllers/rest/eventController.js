@@ -2,7 +2,11 @@ import db from '../../data/db.js';
 import { NotImplemented, NotFound } from '../../helpers/problem.js';
 import { entryWins } from '../../services/results/entryWins.js';
 
-export async function getTournEvents(req, res) {
+export async function getEvents(req, res) {
+	return NotImplemented(req,res,'Not implemented');
+};
+
+export async function getResults(req, res) {
 	return NotImplemented(req,res,'Not implemented');
 };
 
@@ -14,7 +18,7 @@ export async function getEntryWinsByEvent(req, res) {
 	return res.status(200).json(records);
 };
 
-export async function getEntryFieldByEvent(req,res) {
+export async function getField(req,res) {
 
 	const events = await db.sequelize.query(`
 		select
@@ -136,7 +140,7 @@ export async function getEntryFieldByEvent(req,res) {
 	return res.status(200).json(event);
 };
 
-export async function getScheduleByEvent(req,res) {
+export async function getSchedule(req,res) {
 	const rounds = await db.sequelize.query(`
         select
             round.id, round.name, round.label, round.type,

@@ -4,8 +4,13 @@ import  z from 'zod';
 import * as utils from '../../../openapi/schemas/utils.js';
 import { ValidateRequest } from '../../../../middleware/validation.js';
 
-const router = Router({ mergeParams: true });
+// Note that this endpoint is for the delivery of result sets, which are
+// collated and calculated sets of results organized by tiebreakers, not for
+// individual round outcomes like win/loss or points of Round 4.
+
 // Bolted onto /tourns/:tournId/results
+
+const router = Router({ mergeParams: true });
 
 router.route('/').get(ValidateRequest, controller.getResultSets).openapi = {
 	path: '/rest/tourns/{tournId}/results',

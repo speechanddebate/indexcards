@@ -4,7 +4,15 @@ import * as controller from '../../../../controllers/rest/eventController.js';
 const router = Router({ mergeParams: true });
 // Bolted onto /tourns/:tournId/events
 
-router.route('/').get(controller.getTournEvents).openapi = {
+// NAMING CONVENTION:
+// field      == list of entries in that event and public info thereon.
+// schemats   == round assignments and pairings
+// results    == round outcomes and scores
+// resultSets == calculated tables of results
+// brackets   == primary results data up to this round
+// records    == both schematis and results in one big ol blob of fun.
+
+router.route('/').get(controller.getEvents).openapi = {
 	path: '/rest/tourns/{tournId}/events',
 	summary: 'Get Tournament Events',
 	description: 'Retrieve a list of events associated with a specific tournament.',
@@ -19,10 +27,10 @@ router.route('/').get(controller.getTournEvents).openapi = {
 	},
 };
 
-router.route('/:eventId/entryWins').get(controller.getEntryWinsByEvent).openapi = {
+router.route('/:eventId/results').get(controller.getResults).openapi = {
 	path        : '/rest/tourns/{tournId}/events/{eventId}/entryWins',
-	summary     : 'Get Published Entry Winloss Records by Event',
-	description : 'Given an Event ID, get a bunch of win loss data about each entry',
+	summary     : 'Get Published Results by Event',
+	description : 'Given an Event ID, get published result records of the entries therein',
 	tags        : ['Events', 'Results', 'Records', 'Entries'],
 	responses :{
 		200             : {
@@ -34,23 +42,7 @@ router.route('/:eventId/entryWins').get(controller.getEntryWinsByEvent).openapi 
 	},
 };
 
-// input is a round.name, must be numeric
-router.route('/:eventId/entryWins/:roundName').get(controller.getEntryWinsByEvent).openapi = {
-	path        : '/rest/tourns/{tournId}/events/{eventId}/entryWins/{roundName}',
-	summary     : 'Get Published Entry WinLoss Records by Event up to specified round',
-	description : 'Given an Event ID, get a bunch of win loss data about that entry, up to but not including a named round',
-	tags        : ['Events', 'Results', 'Records', 'Entries'],
-	responses :{
-		200             : {
-			description : 'Entries with Win Loss data attached',
-		},
-		404: {
-			$ref: '#/components/responses/NotFound',
-		},
-	},
-};
-
-router.route('/:eventAbbr/field').get(controller.getEntryFieldByEvent).openapi = {
+router.route('/:eventAbbr/field').get(controller.getField).openapi = {
 	path: '/rest/tourns/{tournId}/events/{eventAbbr}/field',
 	summary: 'Get Entry Field by Event',
 	description: 'Retrieve entries in the field for a specific event.',
@@ -79,15 +71,15 @@ router.route('/:eventAbbr/field').get(controller.getEntryFieldByEvent).openapi =
 };
 
 // router.get('/:eventId', controller.getEventById);
-// Need to distinguish this from a normal request by event ID which will be
-// needed
+// Need to distinguish this from a normal request by event ID which will be needed
 router.route('/byAbbr/:eventAbbr').get(controller.getEventByAbbr).openapi = {
-	path: '/rest/tourns/{tournId}/events/{eventAbbr}',
-	summary     : 'Returns some limited data about an event together with published rounds by event abbreviation',
+	path        : '/rest/tourns/{tournId}/events/byAbbr/{eventAbbr}',
+	summary     : 'Get Event and Round List by Abbr',
+	description : 'Returns Event object with list of published rounds given an event abbreviation',
 	operationId : 'getEventByAbbr',
 	responses: {
 		200: {
-			description: 'Event and Round in JSON format for parsing',
+			description: 'Event and Round List',
 			content: {
 				'application/json': {
 					schema: {

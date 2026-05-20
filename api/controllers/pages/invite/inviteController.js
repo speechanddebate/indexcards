@@ -9,7 +9,7 @@ import {
 import { ucfirst } from '../../../helpers/text.js';
 import { NotFound } from '../../../helpers/problem.js';
 
-export async function getTournIdByWebname(req,res){
+export async function getTournIdByWebname(req,res) {
 
 	// Remove non alphanumerics.
 	const webname = req.params.webname.replace(/\W/g, '');

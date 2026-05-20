@@ -4,29 +4,33 @@
 import db from '../../data/db.js';
 import roundRepo from '../../repos/roundRepo.js';
 
-export const entryWins = async ({eventId, roundName, roundId, ...options}) => {
+export const entryWins = async ({eventId, roundId, ...options}) => {
+
+	const replacements = {};
 
 	// This has to be filled in by whatever convoluted bullshit RT did to auth :)
-	let postLevel = '3';
-	let publicLimiter = '';
-	if (options.isCoach) postLevel = 1;
-	if (options.isEntry) postLevel = 2;
+	replacements.postLevel = '3';
+	if (options.isCoach) replacements.postLevel = 1;
+	if (options.isEntry) replacements.postLevel = 2;
 
-	if (!options.admin) publicLimiter = 'and round.post_primary = :postLevel';
+	let publicLimiter = 'and round.post_primary = :postLevel';
+	let roundLimiter = '';
 
-	if (roundId && !eventId) {
+	if (roundId) {
+
+		roundLimiter = 'and round.name < :roundName';
 		const round = await roundRepo.getRound(roundId);
-		eventId     = round.eventId;
-		roundName   = round.name;
-	}
 
-	let roundNameLimiter = '';
+		if (!round) return {error: 'No such round found'};
 
-	if (roundName) {
-		// Always check as of the round before because the default expression
-		// here is the "record going into this round" for schematics or
-		// powermatching.
-		roundNameLimiter = 'and round.name < :roundName';
+		replacements.eventId   = round.eventId;
+		replacements.roundName = round.name;
+		if (options.includePresent) replacements.roundName = parseInt(round.name) + 1;
+
+	} else if (eventId) {
+		replacements.eventId   = eventId;
+	} else {
+		return {error: 'Improper parameters sent so I cannot find results for you.'};
 	}
 
 	const resultsData = await db.sequelize.query(`
@@ -46,7 +50,7 @@ export const entryWins = async ({eventId, roundName, roundId, ...options}) => {
 			left join score winloss on winloss.ballot = ballot.id and winloss.tag = 'winloss'
 		where 1=1
 			and round.event = :eventId
-			${ roundNameLimiter }
+			${ roundLimiter }
 			${ publicLimiter }
 			and round.id = panel.round
 			and panel.id = ballot.panel
@@ -58,11 +62,7 @@ export const entryWins = async ({eventId, roundName, roundId, ...options}) => {
 			)
 	`, {
 		type: db.Sequelize.QueryTypes.SELECT,
-		replacements: {
-			eventId,
-			roundName,
-			postLevel,
-		},
+		replacements,
 	});
 
 	// First aggregate the ballots by round so we can tell who won or lost a
@@ -89,8 +89,6 @@ export const entryWins = async ({eventId, roundName, roundId, ...options}) => {
 				ballotWins   : 0,
 				ballotLosses : 0,
 				record       : '',
-				bye          : false,
-				forfeit      : false,
 			};
 		}
 
@@ -212,18 +210,18 @@ export const entryWins = async ({eventId, roundName, roundId, ...options}) => {
 
 		entry.record = `${entry.wins}-`;
 		entry.record += `${entry.losses}`;
-		if (splits) entry.record += `${entry.splits}`;
+		if (splits) entry.record += `-${entry.splits}`;
 
 		if (entry.prelim) {
 			entry.prelim.record = `${entry.prelim.wins}-`;
 			entry.prelim.record += `${entry.prelim.losses}`;
-			if (splits) entry.prelim.record += `${entry.prelim.splits}`;
+			if (splits) entry.prelim.record += `-${entry.prelim.splits}`;
 		}
 
 		if (entry.elim) {
 			entry.elim.record = `${entry.elim.wins}-`;
 			entry.elim.record += `${entry.elim.losses}`;
-			if (splits) entry.elim.record += `${entry.elim.splits}`;
+			if (splits) entry.elim.record += `-${entry.elim.splits}`;
 		}
 
 		// not necessary but makes it clearer this was intended
