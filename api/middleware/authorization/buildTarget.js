@@ -23,9 +23,9 @@ export async function buildTarget(resource, resourceId, targetCache) {
 	//build tourn target
 	switch (resource) {
 		case 'category': {
-			const category = await categoryRepo.getCategory(resourceId, { fields: ['tournId'] });
+			const category = await categoryRepo.getCategory(resourceId, { fields: ['tourn'] });
 			if (category) {
-				target.tournId = category.tournId;
+				target.tournId = category.tourn;
 				target ={
 					...await buildTarget('tourn', target.tournId, targetCache),
 					...target,

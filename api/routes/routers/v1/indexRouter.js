@@ -1,12 +1,12 @@
 import { Router } from 'express';
 import { fileURLToPath } from 'node:url';
 
-import authRouter from './authRouter.js';
+import authRouter from './authRouter.ts';
 import adminRouter from './admin/adminRouter.js';
 import extRouter from './ext/extRouter.js';
 import pagesRouter from './pages/pagesRouter.js';
 import tabRouter from './tab/indexRouter.js';
-import restRouter from './rest/restRouter.js';
+import restRouter from './rest/restRouter.ts';
 import { apiReference } from '@scalar/express-api-reference';
 
 // needed for monitoring and testing
