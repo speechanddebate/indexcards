@@ -9,8 +9,8 @@ import resultRouter from './resultRouter.ts';
 import eventRouter from './eventRouter.js';
 import entryRouter from './entryRouter.js';
 
-import { File } from '../../../openapi/schemas/index.js';
-import * as utils from '../../../openapi/schemas/utils.js';
+import { File } from '../../../openapi/schemas/index.ts';
+import * as utils from '../../../openapi/schemas/utils.ts';
 const router = Router({ mergeParams: true });
 
 router.route('/').get(ValidateRequest,controller.getTourns).openapi = {

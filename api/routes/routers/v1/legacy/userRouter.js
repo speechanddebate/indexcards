@@ -19,6 +19,7 @@ import updateLearnCoursesMod from '../../../../controllers/user/person/learnCour
 import inboxRouter from '../user/inboxRouter.ts';
 import tournRouter from '../user/tournRouter.ts';
 import sessionRouter from '../user/sessionRouter.ts';
+import judgesRouter from '../user/judgesRouter.ts';
 
 const router = Router();
 
@@ -37,6 +38,7 @@ router.use('/tourn', tournRouter);
 router.use('/inbox', inboxRouter);
 //sessions
 router.use('/session', sessionRouter);
+router.use('/judges', judgesRouter);
 // User session/profile/payment/learn
 
 // User chapters

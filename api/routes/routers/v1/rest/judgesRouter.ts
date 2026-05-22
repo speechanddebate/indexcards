@@ -3,6 +3,7 @@ import { ValidateRequest } from '../../../../middleware/validation.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
 import z from 'zod';
 import judgesController from '../../../../controllers/rest/judgesController.js';
+import { UnlinkedJudge } from '../../../openapi/schemas/index.ts';
 
 const router = Router();
 
@@ -24,7 +25,7 @@ router.route('/unlinked/search')
 			description: 'A list of unlinked judges matching the search criteria',
 			content: {
 				'application/json': {
-					schema: z.array(z.object({})),
+					schema: z.array(UnlinkedJudge),
 				},
 			},
 		},

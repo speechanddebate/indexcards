@@ -1,0 +1,106 @@
+import z from 'zod';
+import type { ZodOpenApiSchemaObject } from 'zod-openapi';
+import * as utils from './utils.ts';
+
+const PersonZod = z.object({
+	id: utils.id,
+	email: z.string().email(),
+	first: z.string(),
+	middle: z.string().nullable(),
+	last: z.string(),
+	state: z.string(),
+	country: z.string(),
+	tz: z.string(),
+	createdAt: z.iso.datetime(),
+	settings: z.object().optional(),
+	metadata: z.object().optional(),
+}).meta({
+	id: 'Person',
+	description: 'A person (user) in tabroom',
+}) satisfies ZodOpenApiSchemaObject;
+
+export const Person = {
+	type : 'object',
+	description: 'A person (user) in tabroom',
+	additionalProperties: false,
+	required: ['id', 'email', 'first', 'last'],
+	properties : {
+		id: {
+			type: 'integer',
+			example: 42,
+		},
+		email: {
+			type: 'string',
+			format: 'email',
+			example: 'johndoe@tabroom.com',
+		},
+		first: {
+			type: 'string',
+			example: 'John',
+		},
+		middle: {
+			type: ['string', 'null'],
+			example: 'Quincy',
+		},
+		last: {
+			type: 'string',
+			example: 'Doe',
+		},
+		state: {
+			type: 'string',
+			example: 'CA',
+		},
+		country: {
+			type: 'string',
+			example: 'USA',
+		},
+		tz: {
+			type: 'string',
+			example: 'America/Los_Angeles',
+		},
+		createdAt: {
+			type        : 'string',
+			readOnly    : true,
+			format      : 'date-time',
+			description : 'Creation timestamp',
+		},
+		settings  : { type : 'object', additionalProperties: { type: 'string' } } ,
+		metadata  : { type : 'object', additionalProperties: { type: 'string' } } ,
+	},
+} satisfies ZodOpenApiSchemaObject;
+
+export const Session = z.object({
+	id: utils.id,
+	person: utils.id,
+	su: utils.id.nullable(),
+	Su: PersonZod.nullable(),
+	Person: PersonZod,
+}).meta({
+	id: 'Session',
+	description: 'A user session',
+}) satisfies ZodOpenApiSchemaObject;
+
+export const ParadigmDetails = z.object({
+	id: utils.id.meta({
+		description: 'The id of the person associated with the paradigm',
+	}),
+	name: z.string().nullable().meta({
+		description: 'The name of the person associated with the paradigm',
+	}),
+	lastReviewed: z.iso.datetime().nullable().meta({
+		description: 'The last reviewed timestamp of the paradigm',
+	}),
+	paradigm: z.string().nullable().meta({
+		description: 'The content of the paradigm',
+	}),
+	certifications: z.array(z.object({
+		title: z.string().meta({ description: 'The title of the certification' }),
+		description: z.string().meta({ description: 'The description of the certification' }),
+		updatedAt: z.iso.datetime().meta({ description: 'The last updated timestamp of the certification' }),
+		badge: z.object({
+			altText: z.string().nullable().meta({ description: 'The alt text for the badge image' }),
+			link: z.url().nullable().meta({ description: 'The link to the badge' }),
+			imageUrl: z.url().nullable().meta({ description: 'The URL of the badge image' }),
+		}).optional().meta({ description: 'The badge associated with the certification' }),
+	})).meta({ description: 'The list of certifications associated with the paradigm' }),
+}) satisfies ZodOpenApiSchemaObject;

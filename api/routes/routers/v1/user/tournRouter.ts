@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/user/tourn/index.js';
 import z from 'zod';
-//import * as schemas from '../../../openapi/schemas/index.js';
+//import * as schemas from '../../../openapi/schemas/index.ts';
 
 const router = Router();
 

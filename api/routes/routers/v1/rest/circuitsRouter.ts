@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as c from '../../../../controllers/rest/circuitsController.js';
-import { restCircuit, activeCircuitsResponse } from '../../../openapi/schemas/Circuit.js';
+import { restCircuit, activeCircuitsResponse } from '../../../openapi/schemas/index.ts';
 import { ValidateRequest } from '../../../../middleware/validation.js';
 import z from 'zod';
 

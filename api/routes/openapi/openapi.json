@@ -93,7 +93,8 @@
       "description": "Endpoints for managing timeslots within tournaments"
     },
     {
-      "name": "Tournaments"
+      "name": "Tournaments",
+      "description": "Endpoints for managing tournaments"
     },
     {
       "name": "Invite",
@@ -619,67 +620,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "integer",
-                        "exclusiveMinimum": 0,
-                        "maximum": 9007199254740991,
-                        "description": "The unique identifier of the circuit"
-                      },
-                      "name": {
-                        "type": "string",
-                        "maxLength": 63,
-                        "description": "The name of the circuit"
-                      },
-                      "abbr": {
-                        "type": "string",
-                        "maxLength": 15,
-                        "description": "The abbreviation of the circuit"
-                      },
-                      "state": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "pattern": "^[A-Z]{2}$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "The state of the circuit"
-                      },
-                      "country": {
-                        "anyOf": [
-                          {
-                            "type": "string",
-                            "pattern": "^[A-Z]{2}$"
-                          },
-                          {
-                            "type": "null"
-                          }
-                        ],
-                        "description": "The country of the circuit"
-                      },
-                      "tournCount": {
-                        "type": "integer",
-                        "exclusiveMinimum": 0,
-                        "maximum": 9007199254740991,
-                        "description": "The number of tournaments in the circuit"
-                      }
-                    },
-                    "required": [
-                      "id",
-                      "name",
-                      "abbr",
-                      "state",
-                      "country",
-                      "tournCount"
-                    ],
-                    "additionalProperties": false
-                  }
+                  "$ref": "#/components/schemas/activeCircuitsResponse"
                 }
               }
             }
@@ -778,9 +719,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "type": "object",
-                    "properties": {},
-                    "additionalProperties": false
+                    "$ref": "#/components/schemas/UnlinkedJudge"
                   }
                 }
               }
@@ -2460,6 +2399,26 @@
           }
         }
       }
+    },
+    "user/judges/linkRequests": {
+      "get": {
+        "summary": "Search for unlinked judges",
+        "operationId": "UserJudgesLinkRequests",
+        "description": "GET user/judges/linkRequests is undocumented. Need to add .openapi to handler",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -2520,16 +2479,22 @@
             "type": "integer"
           },
           "slug": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "caselist_key": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "eventcode": {
-            "type": "integer",
-            "nullable": true
+            "type": [
+              "integer",
+              "null"
+            ]
           }
         }
       },
@@ -2555,8 +2520,10 @@
             "type": "integer"
           },
           "pattern": {
-            "type": "integer",
-            "nullable": true
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "settings": {
             "type": "array",
@@ -2585,21 +2552,18 @@
             }
           }
         },
-        "examples": {
-          "example1": {
-            "summary": "Example category",
-            "value": {
-              "id": 1,
-              "name": "Lincoln-Douglas",
-              "abbr": "LD",
-              "tournId": 42,
-              "patternId": 7,
-              "settings": [],
-              "createdAt": "2023-01-01T00:00:00Z",
-              "updatedAt": "2023-01-02T00:00:00Z"
-            }
+        "examples": [
+          {
+            "id": 1,
+            "name": "Lincoln-Douglas",
+            "abbr": "LD",
+            "tournId": 42,
+            "patternId": 7,
+            "settings": [],
+            "createdAt": "2023-01-01T00:00:00Z",
+            "updatedAt": "2023-01-02T00:00:00Z"
           }
-        }
+        ]
       },
       "Chapter": {
         "type": "object",
@@ -2611,76 +2575,108 @@
             "type": "string"
           },
           "formal": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "street": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "city": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "state": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "zip": {
-            "type": "integer",
-            "nullable": true
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "postal": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "country": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "coaches": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "selfPrefs": {
             "type": "boolean"
           },
           "level": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "nsdaId": {
-            "type": "integer",
-            "nullable": true
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "districtId": {
-            "type": "integer",
-            "nullable": true
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "naudl": {
             "type": "boolean"
           },
           "ipeds": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "nces": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "ceeb": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "timestamp": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           },
           "createdAt": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           }
         }
       },
@@ -2728,8 +2724,10 @@
             "example": "John"
           },
           "middleName": {
-            "type": "string",
-            "nullable": true,
+            "type": [
+              "string",
+              "null"
+            ],
             "example": "Quincy"
           },
           "last": {
@@ -2810,21 +2808,19 @@
           }
         },
         "additionalProperties": false,
-        "examples": {
-          "example1": {
-            "value": {
-              "name": "Shermer High School",
-              "code": "SHS",
-              "onsite": true,
-              "chapterId": 456,
-              "state": "IL",
-              "regionId": 789,
-              "settings": {
-                "allowGuests": true
-              }
+        "examples": [
+          {
+            "name": "Shermer High School",
+            "code": "SHS",
+            "onsite": true,
+            "chapterId": 456,
+            "state": "IL",
+            "regionId": 789,
+            "settings": {
+              "allowGuests": true
             }
           }
-        }
+        ]
       },
       "Email": {
         "type": "object",
@@ -3035,8 +3031,10 @@
             }
           },
           "nsdaCategoryId": {
-            "type": "integer",
-            "nullable": true
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "NSDACategory": {
             "$ref": "#/components/schemas/NSDACategory"
@@ -3048,8 +3046,10 @@
         "type": "object",
         "properties": {
           "name": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -3082,14 +3082,14 @@
             "type": "boolean"
           }
         },
-        "examples": {
-          "example1": {
+        "examples": [
+          {
             "id": 202,
             "name": "Extemporaneous",
             "type": "s",
             "code": 202
           }
-        }
+        ]
       },
       "Person": {
         "type": "object",
@@ -3197,12 +3197,16 @@
             "type": "integer"
           },
           "name": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "timestamp": {
-            "type": "string",
-            "nullable": true,
+            "type": [
+              "string",
+              "null"
+            ],
             "pattern": "^([0-9]{2,4})-([0-1][0-9])-([0-3][0-9])(?:( [0-2][0-9]):([0-5][0-9]):([0-5][0-9]))?$"
           }
         }
@@ -3296,33 +3300,33 @@
           }
         },
         "additionalProperties": false,
-        "examples": {
-          "example1": {
-            "value": {
-              "id": 1985,
-              "name": "Shermer High School",
-              "code": "SHS",
-              "onsite": true,
-              "tournId": 123,
-              "chapterId": 456,
-              "state": "IL",
-              "regionId": 789,
-              "districtId": 987,
-              "settings": {
-                "allowGuests": true
-              },
-              "updatedAt": "2024-01-15T12:34:56Z",
-              "createdAt": "2023-09-01T08:00:00Z"
-            }
+        "examples": [
+          {
+            "id": 1985,
+            "name": "Shermer High School",
+            "code": "SHS",
+            "onsite": true,
+            "tournId": 123,
+            "chapterId": 456,
+            "state": "IL",
+            "regionId": 789,
+            "districtId": 987,
+            "settings": {
+              "allowGuests": true
+            },
+            "updatedAt": "2024-01-15T12:34:56Z",
+            "createdAt": "2023-09-01T08:00:00Z"
           }
-        }
+        ]
       },
       "Search": {
         "type": "object",
         "properties": {
           "result": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -3330,16 +3334,22 @@
         "type": "object",
         "properties": {
           "panels": {
-            "type": "array",
-            "nullable": true
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "files": {
-            "type": "array",
-            "nullable": true
+            "type": [
+              "array",
+              "null"
+            ]
           },
           "from": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -3357,20 +3367,28 @@
             "type": "boolean"
           },
           "directions": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "dropoff": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "hostId": {
-            "type": "integer",
-            "nullable": true
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "circuitId": {
-            "type": "integer",
-            "nullable": true
+            "type": [
+              "integer",
+              "null"
+            ]
           },
           "createdAt": {
             "type": "string",
@@ -3741,8 +3759,10 @@
             "example": "John"
           },
           "middle": {
-            "type": "string",
-            "nullable": true,
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "The middle name of the contact person",
             "example": "A."
           },
@@ -3884,20 +3904,18 @@
           }
         },
         "additionalProperties": false,
-        "examples": {
-          "example1": {
-            "value": {
-              "name": "Shermer High School",
-              "code": "SHS",
-              "onsite": true,
-              "state": "IL",
-              "regionId": 789,
-              "settings": {
-                "allowGuests": true
-              }
+        "examples": [
+          {
+            "name": "Shermer High School",
+            "code": "SHS",
+            "onsite": true,
+            "state": "IL",
+            "regionId": 789,
+            "settings": {
+              "allowGuests": true
             }
           }
-        }
+        ]
       },
       "Webpage": {
         "type": "object",
@@ -3910,14 +3928,18 @@
             "readOnly": true
           },
           "title": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 63,
-            "nullable": true,
             "description": "Title of the page"
           },
           "content": {
-            "type": "string",
-            "nullable": true,
+            "type": [
+              "string",
+              "null"
+            ],
             "description": "Page content"
           },
           "published": {
@@ -3929,27 +3951,35 @@
             "description": "Whether the page is visible sitewide"
           },
           "special": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 15,
-            "nullable": true,
             "description": "Special page identifier or mode"
           },
           "slug": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "maxLength": 63,
-            "nullable": true,
             "description": "page slug"
           },
           "pageOrder": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int16",
-            "nullable": true,
             "description": "Ordering value for page display"
           },
           "parentId": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "format": "int32",
-            "nullable": true,
             "description": "Parent page ID (for hierarchical pages)"
           },
           "updatedAt": {
@@ -4066,98 +4096,126 @@
         ],
         "description": "A request to register a new user"
       },
-      "RestCircuit": {
+      "File": {
         "type": "object",
         "properties": {
           "id": {
-            "readOnly": true,
-            "type": "number",
-            "exclusiveMinimum": 0
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "description": "The unique identifier for the file"
           },
-          "name": {
+          "tag": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "filename": {
             "anyOf": [
               {
                 "type": "string",
-                "maxLength": 63
+                "maxLength": 255
               },
               {
                 "type": "null"
               }
             ]
           },
-          "abbr": {
+          "published": {
+            "type": "boolean"
+          },
+          "pageOrder": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "uploaded": {
             "anyOf": [
               {
                 "type": "string",
-                "maxLength": 15
+                "format": "date-time",
+                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
               },
               {
                 "type": "null"
               }
             ]
           },
-          "tz": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 63,
-                "description": "Time zone of the circuit"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "active": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "state": {
-            "example": "MN",
-            "anyOf": [
-              {
-                "type": "string",
-                "pattern": "^[A-Z]{2}$"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "country": {
-            "example": "US",
-            "anyOf": [
-              {
-                "type": "string",
-                "pattern": "^[A-Z]{2}$"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "webname": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 31
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
           }
         },
         "required": [
-          "id"
+          "id",
+          "tag",
+          "type",
+          "label",
+          "filename",
+          "published",
+          "pageOrder",
+          "uploaded",
+          "updatedAt"
         ],
         "additionalProperties": false
+      },
+      "HomepageAd": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "The URL that the ad should link to when clicked"
+          },
+          "imgSrc": {
+            "type": "string",
+            "format": "uri",
+            "description": "The source URL of the image to be displayed in the ad"
+          },
+          "background": {
+            "description": "Optional background color for the ad, in hex format (e.g., #FFFFFF)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url",
+          "imgSrc"
+        ],
+        "additionalProperties": false,
+        "description": "An ad to be displayed on the homepage"
       },
       "InboxMessage": {
         "type": "object",
@@ -4358,127 +4416,6 @@
           "Email"
         ],
         "additionalProperties": false
-      },
-      "File": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "maximum": 9007199254740991,
-            "description": "The unique identifier for the file"
-          },
-          "tag": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "type": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "label": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "filename": {
-            "anyOf": [
-              {
-                "type": "string",
-                "maxLength": 255
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "published": {
-            "type": "boolean"
-          },
-          "pageOrder": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "minimum": -9007199254740991,
-                "maximum": 9007199254740991
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "uploaded": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time",
-                "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time",
-            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
-          }
-        },
-        "required": [
-          "id",
-          "tag",
-          "type",
-          "label",
-          "filename",
-          "published",
-          "pageOrder",
-          "uploaded",
-          "updatedAt"
-        ],
-        "additionalProperties": false
-      },
-      "HomepageAd": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string",
-            "format": "uri",
-            "description": "The URL that the ad should link to when clicked"
-          },
-          "imgSrc": {
-            "type": "string",
-            "format": "uri",
-            "description": "The source URL of the image to be displayed in the ad"
-          },
-          "background": {
-            "description": "Optional background color for the ad, in hex format (e.g., #FFFFFF)",
-            "type": "string"
-          }
-        },
-        "required": [
-          "url",
-          "imgSrc"
-        ],
-        "additionalProperties": false,
-        "description": "An ad to be displayed on the homepage"
       },
       "JudgeRecord": {
         "type": "object",
@@ -4773,6 +4710,76 @@
         "additionalProperties": false,
         "description": "A user session"
       },
+      "UnlinkedJudge": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "judge",
+              "chapter_judge"
+            ]
+          },
+          "first": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "schoolName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tournName": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tournCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "first",
+          "last",
+          "schoolName"
+        ],
+        "additionalProperties": false
+      },
       "UnlinkedStudentSearch": {
         "type": "object",
         "properties": {
@@ -4867,6 +4874,162 @@
         ],
         "additionalProperties": false
       },
+      "activeCircuitsResponse": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "description": "The unique identifier of the circuit"
+            },
+            "name": {
+              "type": "string",
+              "maxLength": 63,
+              "description": "The name of the circuit"
+            },
+            "abbr": {
+              "type": "string",
+              "maxLength": 15,
+              "description": "The abbreviation of the circuit"
+            },
+            "state": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Z]{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The state of the circuit"
+            },
+            "country": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "pattern": "^[A-Z]{2}$"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "The country of the circuit"
+            },
+            "tournCount": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991,
+              "description": "The number of tournaments in the circuit"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "abbr",
+            "state",
+            "country",
+            "tournCount"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "RestCircuit": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "readOnly": true,
+            "type": "number",
+            "exclusiveMinimum": 0
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 63
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "abbr": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 15
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "tz": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 63,
+                "description": "Time zone of the circuit"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "example": "MN",
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "country": {
+            "example": "US",
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "webname": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 31
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "additionalProperties": false
+      },
       "PersonOutput": {
         "type": "object",
         "properties": {
@@ -4934,76 +5097,6 @@
         ],
         "additionalProperties": false,
         "description": "A person (user) in tabroom"
-      },
-      "UnlinkedJudgeSearch": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "maximum": 9007199254740991
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "judge",
-              "chapter_judge"
-            ]
-          },
-          "first": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "last": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "schoolName": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "tournName": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "tournCount": {
-            "type": "integer",
-            "minimum": 0,
-            "maximum": 9007199254740991
-          }
-        },
-        "required": [
-          "id",
-          "type",
-          "first",
-          "last",
-          "schoolName"
-        ],
-        "additionalProperties": false
       }
     },
     "responses": {

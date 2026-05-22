@@ -3,8 +3,7 @@ import factories from '../../../tests/factories/index.js';
 import { createContext } from '../../../tests/httpMocks.ts';
 import paradigmsController from './paradigmsController';
 import * as judgeRecordsService from '../../services/results/judgeRecords.js';
-import { JudgeRecord } from '../../routes/openapi/schemas/Judge.js';
-import { ParadigmDetails } from '../../routes/openapi/schemas/Person.js';
+import { JudgeRecord, ParadigmDetails } from '../../routes/openapi/schemas/index.ts';
 afterEach(() => {
 	vi.restoreAllMocks();
 });

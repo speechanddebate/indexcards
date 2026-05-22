@@ -3,7 +3,7 @@ import { createContext } from '../../../tests/httpMocks.ts';
 import messageRepo from '../../repos/messageRepo';
 import * as inbox from './inbox.js';
 import { expect } from 'chai';
-import { InboxMessage } from '../../routes/openapi/schemas/Message';
+import { InboxMessage } from '../../routes/openapi/schemas/index.ts';
 
 describe('markDeleted', () => {
 	it('returns 404 if message not found', async () => {

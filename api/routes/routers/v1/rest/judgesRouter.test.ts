@@ -2,7 +2,7 @@ import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories/index.js';
 import z from 'zod';
-import { UnlinkedJudgeSearch } from '../../../openapi/schemas/Judge.js';
+import { UnlinkedJudge } from '../../../openapi/schemas/index.ts';
 
 describe('GET /rest/judges/unlinked/search', () => {
   let userkey: string;
@@ -54,7 +54,7 @@ describe('GET /rest/judges/unlinked/search', () => {
     expect(res).not.toBeProblemResponse();
     expect(Array.isArray(res.body)).toBe(true);
     expect(res.body.length).toBeGreaterThanOrEqual(1);
-    expect(res.body).toMatchSchema(z.array(UnlinkedJudgeSearch));
+    expect(res.body).toMatchSchema(z.array(UnlinkedJudge));
   });
 
   it('returns an empty list when no judges match', async () => {
@@ -80,7 +80,7 @@ describe('GET /rest/judges/unlinked/search', () => {
     expect(res).not.toBeProblemResponse();
     expect(Array.isArray(res.body)).toBe(true);
     expect(res.body.length).toBeGreaterThanOrEqual(1);
-    expect(res.body).toMatchSchema(z.array(UnlinkedJudgeSearch));
+    expect(res.body).toMatchSchema(z.array(UnlinkedJudge));
   });
 
   it('returns chapter judges in results with correct type', async () => {
@@ -92,7 +92,7 @@ describe('GET /rest/judges/unlinked/search', () => {
       .expect(200);
 
     expect(res).not.toBeProblemResponse();
-    expect(res.body).toMatchSchema(z.array(UnlinkedJudgeSearch));
+    expect(res.body).toMatchSchema(z.array(UnlinkedJudge));
     const found = res.body.find((r: { id: number }) => r.id === chapterJudgeId);
     expect(found).toBeDefined();
     expect(found.type).toBe('chapter_judge');
@@ -113,7 +113,7 @@ describe('GET /rest/judges/unlinked/search', () => {
       .expect(200);
 
     expect(res).not.toBeProblemResponse();
-    expect(res.body).toMatchSchema(z.array(UnlinkedJudgeSearch));
+    expect(res.body).toMatchSchema(z.array(UnlinkedJudge));
     const types = res.body.map((r: { type: string }) => r.type);
     expect(types).toContain('judge');
     expect(types).toContain('chapter_judge');

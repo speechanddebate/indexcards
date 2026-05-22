@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { createOpenApiSpec } from '../api/routes/openapi/createOpenApiSpec.js';
+import { createOpenApiSpec } from '../api/routes/openapi/createOpenApiSpec.ts';
 import apiRouter from '../api/routes/routers/v1/indexRouter.js';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';

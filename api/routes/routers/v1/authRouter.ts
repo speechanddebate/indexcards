@@ -2,8 +2,8 @@ import { Router } from 'express';
 import z from 'zod';
 import { ValidateRequest } from '../../../middleware/validation.js';
 import { requireLogin, requireSiteAdmin } from '../../../middleware/authorization/authorization.js';
-import * as schemas from '../../openapi/schemas/index.js';
-import * as examples from '../../openapi/examples/index.js';
+import * as schemas from '../../openapi/schemas/index.ts';
+import * as examples from '../../openapi/examples/index.ts';
 import * as controller from '../../../controllers/authController.js';
 
 const router = Router();
