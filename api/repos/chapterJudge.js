@@ -41,8 +41,42 @@ async function createChapterJudge(data) {
 	const dbRow = await db.chapterJudge.create(toPersistence(data));
 	return dbRow.id;
 }
+async function unlinkedSearch({ first, last }, opts = {}) {
+	if (!first || !last) {
+		throw new Error('unlinkedSearch requires first and last parameters');
+	}
+
+	const sql = `
+		SELECT
+			cj.id,
+			cj.first,
+			cj.middle,
+			cj.last,
+			chapter.name AS chapter_name,
+			COUNT(DISTINCT category.tourn) AS tourn_count
+		FROM chapter_judge cj
+		LEFT JOIN chapter ON cj.chapter = chapter.id
+		LEFT JOIN judge ON judge.chapter_judge = cj.id
+		LEFT JOIN category ON judge.category = category.id
+		WHERE cj.first LIKE :first
+			AND cj.last LIKE :last
+			AND (:notRequestedBy IS NULL OR cj.person_request IS NULL OR cj.person_request != :notRequestedBy)
+		GROUP BY cj.id, cj.first, cj.middle, cj.last, chapter.name
+		ORDER BY cj.last ASC, cj.first ASC
+	`;
+
+	return db.sequelize.query(sql, {
+		replacements: {
+			first: `${first}%`,
+			last:  `${last}%`,
+			notRequestedBy: opts.notRequestedBy ?? null,
+		},
+		type: db.Sequelize.QueryTypes.SELECT,
+	});
+};
 
 export default {
 	getChapterJudge,
 	createChapterJudge,
+	unlinkedSearch,
 };

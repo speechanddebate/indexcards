@@ -8,6 +8,18 @@ export const Judge = {
 	},
 };
 /**
+ * Unlinked judge search result
+ */
+export const UnlinkedJudgeSearch = z.object({
+	id: utils.id,
+	type: z.enum(['judge', 'chapter_judge']),
+	first: z.string().nullable(),
+	last: z.string().nullable(),
+	schoolName: z.string().nullable(),
+	tournName: z.string().nullable().optional(),
+	tournCount: z.number().int().nonnegative().optional(), // for chapter judges
+});
+/**
  *  A record of a judge's decision. used in paradigm record
  */
 export const JudgeRecord = z.object({

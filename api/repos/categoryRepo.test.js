@@ -39,16 +39,16 @@ describe('getCategory', () => {
 describe('getCategories', () => {
 	it('retrieves all categories for a given tournament', async () => {
 		const { tournId } = await factories.tourn.createTestTourn();
-		const category1Data = factories.category.createCategoryData({ tournId });
-		const category2Data = factories.category.createCategoryData({ tournId });
+		const category1Data = factories.category.createCategoryData({ tourn: tournId });
+		const category2Data = factories.category.createCategoryData({ tourn: tournId });
 
 		await categoryRepo.createCategory(category1Data);
 		await categoryRepo.createCategory(category2Data);
-		const results = await categoryRepo.getCategories({ tournId: tournId });
+		const results = await categoryRepo.getCategories({ tournId });
 		expect(results).toBeDefined();
 		expect(results.length).toBeGreaterThanOrEqual(2);
 		results.forEach(c => {
-			expect(c.tournId, `expected tournId to be ${tournId} but was ${c.tournId}`).toBe(tournId);
+			expect(c.tourn, `expected tournId to be ${tournId} but was ${c.tourn}`).toBe(tournId);
 		});
 		expect(results.map(c => c.name)).toEqual(expect.arrayContaining([category1Data.name, category2Data.name]));
 	});
