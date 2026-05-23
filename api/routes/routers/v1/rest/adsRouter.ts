@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/rest/adController.js';
 import z from 'zod';
-import { HomepageAd } from '../../../openapi/schemas/Ad.ts';
+import { HomepageAd } from '../../../openapi/schemas/index.ts';
 import { HomepageAdExample } from '../../../openapi/examples/Ad.ts';
 
 const router = Router();

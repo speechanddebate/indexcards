@@ -3,7 +3,7 @@ import * as con from '../../../../controllers/rest/studentsController.js';
 import { ValidateRequest } from '../../../../middleware/validation.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
 import z from 'zod';
-import { UnlinkedStudentSearch } from '../../../openapi/schemas/Student.js';
+import { UnlinkedStudentSearch } from '../../../openapi/schemas/index.ts';
 
 const router = Router();
 

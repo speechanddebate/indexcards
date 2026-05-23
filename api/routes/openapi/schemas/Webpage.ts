@@ -1,0 +1,65 @@
+import type { ZodOpenApiSchemaObject } from 'zod-openapi';
+
+export const Webpage = {
+	type : 'object',
+	description: 'A webpage',
+	properties: {
+		id: {
+			type: 'integer',
+			format: 'int32',
+			description: 'Unique identifier',
+			readOnly: true,
+		},
+
+		title: {
+			type: ['string', 'null'],
+			maxLength: 63,
+			description: 'Title of the page',
+		},
+
+		content: {
+			type: ['string', 'null'],
+			description: 'Page content',
+		},
+
+		published: {
+			type: 'boolean',
+			description: 'Whether the page is published',
+		},
+
+		sitewide: {
+			type: 'boolean',
+			description: 'Whether the page is visible sitewide',
+		},
+
+		special: {
+			type: ['string', 'null'],
+			maxLength: 15,
+			description: 'Special page identifier or mode',
+		},
+		slug: {
+			type: ['string', 'null'],
+			maxLength: 63,
+			description: 'page slug',
+		},
+		pageOrder: {
+			type: ['integer', 'null'],
+			format: 'int16',
+			description: 'Ordering value for page display',
+		},
+
+		parentId: {
+			type: ['integer', 'null'],
+			format: 'int32',
+			description: 'Parent page ID (for hierarchical pages)',
+		},
+
+		updatedAt: {
+			type: 'string',
+			format: 'date-time',
+			description: 'Timestamp when the page was last modified',
+			readOnly: true,
+			example: '2023-10-26T15:51:32.000Z',
+		},
+	},
+} as const satisfies ZodOpenApiSchemaObject;

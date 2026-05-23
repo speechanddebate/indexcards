@@ -102,4 +102,86 @@ describe('judgeRepo', () => {
 			expect(judge.id).toBe(newJudgeId);
 		});
 	});
+	describe('unlinkedSearch', () => {
+		it('throws when first or last is missing', async () => {
+			await expect(judgeRepo.unlinkedSearch({ first: 'Pat' })).rejects.toThrow(
+				'unlinkedSearch requires first and last parameters'
+			);
+		});
+
+		it('returns active unlinked judges with tournament and school names', async () => {
+			const { tournId } = await factories.tourn.createTestTourn({name: 'Test Tournament'});
+			const { categoryId } = await factories.category.createTestCategory({ tourn: tournId });
+			const { schoolId } = await factories.school.createTestSchool({ name: 'Central High' });
+
+			const { judgeId, getJudge } = await factories.judge.createTestJudge({
+				category: categoryId,
+				school: schoolId,
+				person: null,
+				person_request: null,
+			});
+			const Judge = await getJudge();
+
+			const results = await judgeRepo.unlinkedSearch({ first: Judge.first, last: Judge.last });
+
+			expect(results).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({
+						id: judgeId,
+						first: Judge.first,
+						last: Judge.last,
+						school_name: 'Central High',
+						tourn_name: 'Test Tournament',
+					}),
+				])
+			);
+		});
+
+		it('excludes ended tournaments and rows requested by the excluded person', async () => {
+			const requesterId = (await factories.person.createTestPerson()).personId;
+			const otherRequesterId = (await factories.person.createTestPerson()).personId;
+			const now = new Date();
+
+			const { tournId: activeTournId } = await factories.tourn.createTestTourn({
+				start: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+				end: new Date(now.getTime() + 2 * 24 * 60 * 60 * 1000),
+			});
+			const { tournId: endedTournId } = await factories.tourn.createTestTourn({
+				start: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000),
+				end: new Date(now.getTime() - 24 * 60 * 60 * 1000),
+			});
+
+			const { categoryId: activeCategoryId } = await factories.category.createTestCategory({ tourn: activeTournId });
+			const { categoryId: endedCategoryId } = await factories.category.createTestCategory({ tourn: endedTournId });
+
+			const { judgeId: includedJudgeId } = await factories.judge.createTestJudge({
+				first: 'Alex',
+				last: 'Jordan',
+				category: activeCategoryId,
+				person_request: otherRequesterId,
+			});
+			const { judgeId: excludedByRequesterJudgeId } = await factories.judge.createTestJudge({
+				first: 'Alex',
+				last: 'Jordan',
+				category: activeCategoryId,
+				person_request: requesterId,
+			});
+			const { judgeId: excludedByEndedTournJudgeId } = await factories.judge.createTestJudge({
+				first: 'Alex',
+				last: 'Jordan',
+				category: endedCategoryId,
+			});
+
+			const results = await judgeRepo.unlinkedSearch(
+				{ first: 'Alex', last: 'Jordan' },
+				{ notRequestedBy: requesterId }
+			);
+
+			const resultIds = results.map(judge => judge.id);
+			expect(resultIds).toContain(includedJudgeId);
+			expect(resultIds).not.toContain(excludedByRequesterJudgeId);
+			expect(resultIds).not.toContain(excludedByEndedTournJudgeId);
+		});
+
+	});
 });

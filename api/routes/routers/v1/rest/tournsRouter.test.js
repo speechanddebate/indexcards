@@ -2,7 +2,7 @@ import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories';
 import { faker } from '@faker-js/faker';
-import { File } from '../../../openapi/schemas';
+import { File } from '../../../openapi/schemas/index.ts';
 
 let testTourn;
 beforeAll(async () => {

@@ -1,8 +1,7 @@
 import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories/index.js';
-import { ParadigmDetails } from '../../../openapi/schemas/Person.js';
-import { JudgeRecord } from '../../../openapi/schemas/Judge.js';
+import { JudgeRecord, ParadigmDetails } from '../../../openapi/schemas/index.ts';
 import { expect } from 'chai';
 import z from 'zod';
 

@@ -1,22 +1,12 @@
-import type { ZodObject } from 'zod';
-/**
- * extends the default route type to add our openapi definition.
- */
-interface RouteOpenApiConfig {
-	path: string,
-	operationId?: string,
-	requestParams?: {
-		path?: ZodObject<unknown>;
-		query?: ZodObject<unknown>;
-		body?: ZodObject<unknown>;
-	};
-	[key: string]: unknown;
-}
+import type { ZodOpenApiOperationObject, ZodOpenApiPathItemObject } from 'zod-openapi';
+
+export type RouteOpenApiConfig = (ZodOpenApiPathItemObject | ZodOpenApiOperationObject) & {
+	path: string;
+};
 
 declare module 'express-serve-static-core' {
 	interface IRoute<Route extends string = string> {
-		openapi?: RouteOpenApiConfig;
+		openapi?: RouteOpenApiConfig; 
 	}
 }
 
-export {};

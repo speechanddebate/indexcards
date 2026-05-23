@@ -2,6 +2,7 @@ import ad from './ad.js';
 import ballot from './ballot.js';
 import category from './category.js';
 import chapter from './chapter.js';
+import chapterJudge from './chapterJudge.js';
 import changeLog from './changelog.js';
 import circuit from './circuit.js';
 import entry from './entry.js';
@@ -31,6 +32,7 @@ const factories = {
 	ballot,
 	category,
 	chapter,
+	chapterJudge,
 	changeLog,
 	circuit,
 	entry,

@@ -64,7 +64,42 @@ async function createJudge(data){
 	return judge.id;
 }
 
+async function unlinkedSearch({ first, last }, opts = {}) {
+	if (!first || !last) {
+		throw new Error('unlinkedSearch requires first and last parameters');
+	}
+
+	const sql = `
+		SELECT 
+			judge.id,
+			judge.first,
+			judge.middle,
+			judge.last,
+			tourn.name AS tourn_name,
+			school.name AS school_name
+		FROM judge
+		LEFT JOIN category ON judge.category = category.id
+		LEFT JOIN tourn ON category.tourn = tourn.id
+		LEFT JOIN school ON judge.school = school.id
+		WHERE judge.first LIKE :first
+			AND judge.last LIKE :last
+			AND (tourn.end IS NULL OR tourn.end > NOW())
+			AND (:notRequestedBy IS NULL OR judge.person_request IS NULL OR judge.person_request != :notRequestedBy)
+		ORDER BY tourn.start, judge.last ASC, judge.first ASC
+	`;
+
+	return db.sequelize.query(sql, {
+		replacements: {
+			first: `${first}%`,
+			last: `${last}%`,
+			notRequestedBy: opts.notRequestedBy ?? null,
+		},
+		type: db.Sequelize.QueryTypes.SELECT,
+	});
+}
+
 export default {
 	getJudge,
 	createJudge,
+	unlinkedSearch,
 };

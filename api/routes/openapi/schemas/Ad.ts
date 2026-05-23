@@ -1,4 +1,5 @@
 import z from 'zod';
+import type { ZodOpenApiSchemaObject } from 'zod-openapi';
 
 export const HomepageAd = z.object({
 	url: z.url().meta({
@@ -14,4 +15,4 @@ export const HomepageAd = z.object({
 	id: 'HomepageAd',
 	description: 'An ad to be displayed on the homepage',
 }
-);
+) satisfies ZodOpenApiSchemaObject;

@@ -2,7 +2,7 @@ import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories/index.js';
 import z from 'zod';
-import { UnlinkedStudentSearch } from '../../../openapi/schemas/Student.js';
+import { UnlinkedStudentSearch } from '../../../openapi/schemas/index.ts';
 
 describe('GET /rest/students/unlinked/search', () => {
   let userkey: string;

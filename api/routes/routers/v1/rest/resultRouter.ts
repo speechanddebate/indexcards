@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/rest/resultController.js';
 import  z from 'zod';
-import * as utils from '../../../openapi/schemas/utils.js';
+import * as utils from '../../../openapi/schemas/utils.ts';
 import { ValidateRequest } from '../../../../middleware/validation.js';
 
 // Note that this endpoint is for the delivery of result sets, which are

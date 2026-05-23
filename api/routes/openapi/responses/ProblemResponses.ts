@@ -1,0 +1,108 @@
+type ProblemDetails = {
+	type: string;
+	title: string;
+	status: number;
+	detail?: string;
+	instance?: string;
+	[key: string]: unknown;
+};
+
+type ProblemResponse = {
+	description: string;
+	content: {
+		'application/problem+json': {
+			schema: {
+				$ref: '#/components/schemas/Problem';
+			};
+			examples: Record<string, {
+				summary: string;
+				value: ProblemDetails;
+			}>;
+		};
+	};
+};
+
+//Modeled after RFC 7807
+export const ErrorResponse = {
+	description: 'Unexpected Error',
+	content: {
+		'application/problem+json': {
+			schema: {
+				$ref: '#/components/schemas/Problem',
+			},
+			examples:{
+				error: {
+					summary: '500 Internal Server Error',
+					value: {
+						type: 'about:blank',
+						title: 'Internal Server Error',
+						status: 500,
+						detail: 'An unexpected error occurred.',
+						instance: '/api/v1/example',
+					},
+				},
+			},
+		},
+	},
+} satisfies ProblemResponse;
+export const Unauthorized = {
+	description: 'Unauthorized - authentication failed or was not provided.',
+	content: {
+		'application/problem+json': {
+			schema: { $ref: '#/components/schemas/Problem' },
+			examples: {
+				unauthorized: {
+					summary: '401 Unauthorized',
+					value: {
+						type: 'about:blank',
+						title: 'Unauthorized',
+						status: 401,
+						detail: 'You are not authorized to access this resource.',
+					},
+				},
+			},
+		},
+
+	},
+} satisfies ProblemResponse;
+export const NotFound = {
+	description: 'NotFound - the requested resource was not found or you do not have access.',
+	content: {
+		'application/problem+json': {
+			schema: { $ref: '#/components/schemas/Problem' },
+			examples:{
+				notfound: {
+					summary: '404 Not Found',
+					value: {
+						type: 'about:blank',
+						title: 'Not Found',
+						status: 404,
+						detail: 'The requested resource foo with ID bar was not found.',
+						instance: '/api/v1/example',
+					},
+				},
+			},
+		},
+	},
+} satisfies ProblemResponse;
+export const BadRequest = {
+	description: 'BadRequest - the request was invalid or cannot be otherwise served.',
+	content: {
+		'application/problem+json': {
+			schema: { $ref: '#/components/schemas/Problem' },
+			examples:{
+				badrequest: {
+					summary: '400 Bad Request',
+					value: {
+						type: 'about:blank',
+						title: 'Bad Request',
+						status: 400,
+						detail: 'The request was invalid or cannot be otherwise served.',
+						instance: '/api/v1/example',
+					},
+				},
+			},
+		},
+	},
+} satisfies ProblemResponse;
+

@@ -2,9 +2,8 @@ import z from 'zod';
 import controller from '../../../../controllers/rest/paradigmsController.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
 import { ValidateRequest } from '../../../../middleware/validation.js';
-import { JudgeRecord } from '../../../openapi/schemas/Judge.js';
+import { JudgeRecord, ParadigmDetails } from '../../../openapi/schemas/index.ts';
 import { Router } from 'express';
-import { ParadigmDetails } from '../../../openapi/schemas/Person.js';
 
 const router = Router();
 

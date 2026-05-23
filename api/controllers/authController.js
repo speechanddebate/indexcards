@@ -4,7 +4,7 @@ import config from '../../config/config.js';
 import personRepo from '../repos/personRepo.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import { ValidationError } from '../helpers/errors/errors.js';
-import { LoginResponse } from '../routes/openapi/schemas/index.js';
+import { LoginResponse } from '../routes/openapi/schemas/index.ts';
 
 export async function login(req, res) {
 	const { username, password } = req.valid.body;
