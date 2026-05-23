@@ -38,7 +38,7 @@ export async function getPersonTournPresence(req, res) {
 
 	// Unique lists of stuff that is me as an individual
 	Object.keys(tournPresence.me).forEach( (key) => {
-		tournPresence.me[key] =Array.from(new Set([
+		tournPresence.me[key] = Array.from(new Set([
 			...edata[key],
 			...jdata[key],
 		]));
@@ -48,7 +48,9 @@ export async function getPersonTournPresence(req, res) {
 	Object.keys(tournPresence.mine).forEach( (key) => {
 		tournPresence.mine[key] =Array.from(new Set([
 			...sdata[key],
-		]));
+		])).filter( ( mine ) => {
+			return !tournPresence.me[key].includes( mine );
+		});
 	});
 	return res.status(200).json(tournPresence);
 };

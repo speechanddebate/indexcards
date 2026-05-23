@@ -332,6 +332,7 @@ export async function getSchematic (req,res) {
 
 				Object.keys(section.Entries).forEach( (entryOrder) => {
 					const entryId = section.Entries[entryOrder].id;
+					if (!brackets[entryId]) return;
 					section.Entries[entryOrder].record = brackets[entryId].record;
 					section.Entries[entryOrder].wins = brackets[entryId].wins;
 					if (section.bracket < brackets[entryId].wins) {
@@ -341,6 +342,7 @@ export async function getSchematic (req,res) {
 
 				Object.keys(section.Entries).forEach( (entryOrder) => {
 					const entryId = section.Entries[entryOrder].id;
+					if (!brackets[entryId]) return;
 					if (section.bracket > brackets[entryId].wins) {
 						section.Entries[entryOrder].pullup = section.bracket - brackets[entryId].wins;
 					}
