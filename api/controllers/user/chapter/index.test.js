@@ -71,7 +71,7 @@ describe('User Chapter', () => {
 
 		assert.equal(
 			res.body.chapters[1].name,
-			'University School of Nashville',
+			'University School Of Nashville',
 			'Correct school delivered with dashboard access'
 		);
 

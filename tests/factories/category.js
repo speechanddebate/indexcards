@@ -5,7 +5,7 @@ export function createCategoryData(overrides = {}) {
 	const category = fakeCategory();
 	return {
 		name: category.name,
-		abbr: category.abbr,
+		abbr: category.abbr + (Math.random().toString(36).substring(2, 6)), // ensure uniqueness
 		...overrides,
 	};
 }
