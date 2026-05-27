@@ -6,7 +6,7 @@ export type RouteOpenApiConfig = (ZodOpenApiPathItemObject | ZodOpenApiOperation
 
 declare module 'express-serve-static-core' {
 	interface IRoute<Route extends string = string> {
-		openapi?: RouteOpenApiConfig; 
+		openapi?: RouteOpenApiConfig;
 	}
 }
 

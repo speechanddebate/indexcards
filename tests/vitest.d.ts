@@ -15,6 +15,15 @@ interface CustomMatchers<R = unknown> {
 }
 
 declare module 'vitest' {
-	interface Assertion<T = unknown> extends CustomMatchers<T> {}
-	interface AsymmetricMatchersContaining extends CustomMatchers {}
+	interface Assertion<T = unknown> {
+		toEqualDate(expected: Date | string | number): T;
+		toBeProblemResponse(code?: 400 | 401 | 404 | 429 | 500): T;
+		toMatchSchema(schema: SchemaMatcherInput): T;
+	}
+
+	interface AsymmetricMatchersContaining {
+		toEqualDate(expected: Date | string | number): unknown;
+		toBeProblemResponse(code?: 400 | 401 | 404 | 429 | 500): unknown;
+		toMatchSchema(schema: SchemaMatcherInput): unknown;
+	}
 }
