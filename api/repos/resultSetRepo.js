@@ -68,8 +68,8 @@ export const getResultSets = async (scope = {}, opts = {}) => {
 	const rsen = await db.sequelize.query(`
 		select
 			rs.id, rs.tag, rs.label, rs.published, rs.coach,
-			rs.tourn, rs.event, rs.circuit, rs.code, rs.cache,
-			rs.nsda_category nsdaCategory,
+			rs.tourn, rs.event, rs.circuit, rs.code, rs.cache results,
+			event.nsda_category nsdaCategory, event.abbr eventAbbr,
 			rs.sweep_set sweepSet,
 			rs.sweep_award sweepAward,
 			rs.generated createdAt
@@ -92,16 +92,16 @@ export const getResultSets = async (scope = {}, opts = {}) => {
 			rs.Event = await getEvent(rs.event, {...opts?.include?.Event} );
 		}
 
+		console.log(`No results is ${opts.noResults}`);
+
 		if (!opts.noResults) {
 
 			const rawResults = await db.sequelize.query(`
 				select result.id,
 					result.rank, result.place, result.percentile,
-					result.result_set resultSet,
 					result.entry, result.student, result.school,
 					result.round, result.panel section,
-					result.cache,
-					result.created_at createdAt
+					result.cache resultsData
 				from result
 					where 1=1
 					and result.result_set = :resultSetId
@@ -109,6 +109,8 @@ export const getResultSets = async (scope = {}, opts = {}) => {
 				type: db.Sequelize.QueryTypes.SELECT,
 				replacements : { resultSetId: rs.id },
 			});
+
+			console.log(`Raw results is ${rawResults.length}`);
 
 			rs.Results = {};
 
@@ -132,12 +134,12 @@ export const getResultSets = async (scope = {}, opts = {}) => {
 			};
 		}
 
-		if (rs.cache) {
-			rs.cache = JSON.parse(rs.cache);
+		if (rs.results) {
+			rs.results = JSON.parse(rs.results);
 		} else {
 
 			const { headers, results } = await createResultCache( rs.id );
-			rs.cache = headers;
+			rs.results = headers;
 
 			const update = db.sequelize.query(`
 				update result_set
@@ -157,7 +159,7 @@ export const getResultSets = async (scope = {}, opts = {}) => {
 			if (!opts.noResults) {
 				for (const tagId in Object.keys(results)) {
 
-					rs.Results[tagId].cache = results[tagId];
+					rs.Results[tagId].results = results[tagId];
 					const resUpdate = db.sequelize.query(`
 						update result
 						set cache = :result
@@ -264,7 +266,9 @@ export const createResultCache = async (resultSetId) => {
 		replacements : { eventId },
 	});
 
-	if (!rawScoreSet || !rawScoreSet[0].id) {
+	console.log(`Raw score set is ${JSON.stringify(rawScoreSet, null, 2)}`);
+
+	if (!rawScoreSet || !rawScoreSet[0]?.id) {
 
 		const resultScores = await db.sequelize.query(`
 			select
@@ -276,8 +280,8 @@ export const createResultCache = async (resultSetId) => {
 				score.student
 			from (result, ballot, panel, round)
 				left join score on score.ballot = ballot.id
-					and score.tag IN ('winloss', 'point', 'rank', 'refute')
-			where 1                   = 1
+					and score.tag IN ('winloss', 'point', 'rank', 'refute', 'po')
+			where 1 = 1
 				and result.result_set = :resultSetId
 				and result.entry      = ballot.entry
 				and ballot.panel      = panel.id

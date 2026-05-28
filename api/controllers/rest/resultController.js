@@ -21,7 +21,7 @@ export async function getResultSet(req,res) {
 }
 
 export async function getResultSets(req,res) {
-	const resultSet = await resultSetRepo.getResultSets({ ...req.valid.params }, { noResults: true});
+	const resultSet = await resultSetRepo.getResultSets({ ...req.valid.params }, { noResults: false});
 
 	if (resultSet) {
 		return res.status(200).json(resultSet);
