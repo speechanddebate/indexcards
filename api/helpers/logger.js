@@ -117,7 +117,7 @@ const logger = winston.createLogger({
 		winston.format.json(),
 	),
 	exitOnError: false,
-	silent: process.env.NODE_ENV === 'test',
+	//silent: process.env.NODE_ENV === 'test',
 	transports: [
 		createConsoleTransport(),
 		createFileTransport(),
@@ -139,6 +139,26 @@ export function setupLoggers(){
 		logger.warn(`Loki host is not configured. logging to ${logPath} only`);
 	}
 }
+
+//write progress messages that can be overwritten by later messages (e.g. for progress bars or status updates) no-op is not a TTY
+logger.progress = (msg) => {
+	if(process.stdout.isTTY){
+		process.stdout.clearLine();
+		process.stdout.cursorTo(0);
+		process.stdout.write(msg);
+	}
+};
+
+//clear the progress message and optionally write a final message (e.g. "done")
+logger.progressEnd = (msg) => {
+	if(process.stdout.isTTY){
+		process.stdout.clearLine();
+		process.stdout.cursorTo(0);
+	}
+	if(msg){
+		logger.info(msg);
+	}
+};
 
 const requestLogger = winston.createLogger({
 	level: config.LOG_LEVEL,

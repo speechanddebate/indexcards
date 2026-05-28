@@ -11,7 +11,11 @@ export default class resultSet extends Model {
 						primaryKey: true
 				},
 				tag: {
-						type: DataTypes.ENUM('final','bracket','seed','speaker','qualifier','sweep','toc','nsda','table','chamber','other'),
+						type: DataTypes.ENUM('final','bracket','seed','speaker','qualifier','sweep','cume','nsda','table','chamber','scores','circuit','other'),
+						allowNull: true
+				},
+				entity: {
+						type: DataTypes.ENUM('entry','student','school','judge'),
 						allowNull: true
 				},
 				label: {

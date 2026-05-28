@@ -1,7 +1,10 @@
 import { execSync, spawnSync } from 'node:child_process';
+import { once } from 'node:events';
 import fs from 'node:fs';
 import path from 'node:path';
+import readline from 'node:readline';
 import config from '../config/config.js';
+import logger from '../api/helpers/logger.js';
 
 // adjust these to match your config shape
 const DB_USER = config.DB_USER;
@@ -19,6 +22,7 @@ if (!DB_USER || !DB_PASS || !DB_NAME) {
 // 1. Build the test DB
 execSync('NODE_ENV=test node tests/createTestDatabase.js', { stdio: 'inherit' });
 
+logger.info('Dumping test database...');
 // 2. Build dump args
 const dumpArgs = [
 	`-u${DB_USER}`,
@@ -39,10 +43,15 @@ const dumpCommand = fs.existsSync('/usr/bin/mariadb-dump')
 	? '/usr/bin/mariadb-dump'
 	: 'mariadb-dump';
 
+const outputPath = path.resolve(process.cwd(), 'tests/test.sql');
+const tempDumpPath = path.resolve(process.cwd(), 'tests/test.raw.sql');
+const tempDumpFd = fs.openSync(tempDumpPath, 'w');
+
 const dumpResult = spawnSync(dumpCommand, dumpArgs, {
+	stdio: ['ignore', tempDumpFd, 'pipe'],
 	encoding: 'utf8',
-	maxBuffer: 1024 * 1024 * 300, // 300 MB
 });
+fs.closeSync(tempDumpFd);
 
 if (dumpResult.error) {
 	throw dumpResult.error;
@@ -52,14 +61,25 @@ if (dumpResult.status !== 0) {
 	throw new Error(`mariadb-dump failed with code ${dumpResult.status}: ${dumpResult.stderr || 'no stderr output'}`);
 }
 
-// 4. Remove DEFINER tags
-const cleaned = (dumpResult.stdout || '')
-	.replace(/\/\*![0-9]{5} DEFINER=`[^`]+`@`[^`]+`\*\//g, '')
-	.replace(/DEFINER=`[^`]+`@`[^`]+`/g, '');
+// 4. Remove DEFINER tags without loading the full dump into memory
+const reader = readline.createInterface({
+	input: fs.createReadStream(tempDumpPath, { encoding: 'utf8' }),
+	crlfDelay: Infinity,
+});
+const writer = fs.createWriteStream(outputPath, { encoding: 'utf8' });
 
-console.log('removed DEFINER tags');
+for await (const line of reader) {
+	const cleanedLine = line
+		.replace(/\/\*![0-9]{5} DEFINER=`[^`]+`@`[^`]+`\*\//g, '')
+		.replace(/DEFINER=`[^`]+`@`[^`]+`/g, '');
+	writer.write(`${cleanedLine}\n`);
+}
+
+writer.end();
+await once(writer, 'finish');
+fs.unlinkSync(tempDumpPath);
+
+logger.info('Removed DEFINER tags');
 // 5. Write output
-const outputPath = path.resolve(process.cwd(), 'tests/test.sql');
-fs.writeFileSync(outputPath, cleaned, 'utf8');
 
-console.log(`Wrote ${outputPath}`);
+logger.info(`Wrote new test file to ${outputPath}`);

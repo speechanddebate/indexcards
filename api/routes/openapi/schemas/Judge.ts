@@ -14,8 +14,8 @@ export const UnlinkedJudge = z.object({
 	type: z.enum(['judge', 'chapter_judge']),
 	first: z.string().nullable(),
 	last: z.string().nullable(),
-	schoolName: z.string().nullable(),
-	tournName: z.string().nullable().optional(),
+	schoolName: z.string().nullish(),
+	tournName: z.string().nullish(),
 	tournCount: z.number().int().nonnegative().optional(), // for chapter judges
 }) satisfies ZodOpenApiSchemaObject;
 /**

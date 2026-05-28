@@ -60,6 +60,15 @@ export default class chapterSetting extends Model {
 								]
 						},
 						{
+								name: "cs_tag",
+								unique: true,
+								using: "BTREE",
+								fields: [
+										{ name: "chapter" },
+										{ name: "tag" },
+								]
+						},
+						{
 								name: "chapter",
 								using: "BTREE",
 								fields: [

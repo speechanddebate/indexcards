@@ -3,7 +3,7 @@ import { createDocument } from 'zod-openapi';
 import * as responses from './responses/index.ts';
 import { tags as declaredTags, declaredTagGroups } from './tags.ts';
 import { parameters } from './parameters.ts';
-
+import logger from '../../helpers/logger.js';
 import { readFile } from 'node:fs/promises';
 
 import type { ZodOpenApiObject, ZodOpenApiOperationObject } from 'zod-openapi';
@@ -106,7 +106,7 @@ export function collectOpenApi(router: RouterLike) {
 
 				// Routes must have explicit .openapi.path set at definition time
 				if (!openapi?.path) {
-					console.warn(`Warning: Route ${route.path} missing .openapi.path, skipping`);
+					logger.warn(`Route ${route.path} missing .openapi.path, skipping`);
 					continue;
 				}
 

@@ -70,8 +70,11 @@ export default class judge extends Model {
 				},
 				person: {
 						type: DataTypes.INTEGER,
-						allowNull: false,
-						defaultValue: 0
+						allowNull: true,
+						references: {
+								model: 'person',
+								key: 'id'
+						}
 				},
 				person_request: {
 						type: DataTypes.INTEGER,

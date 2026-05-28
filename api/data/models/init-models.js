@@ -355,8 +355,10 @@ export default function initModels(sequelize) {
 		person.hasMany(contact, { as: "created_by_contacts", foreignKey: "created_by"});
 		entry.belongsTo(person, { as: "registered_by_person", foreignKey: "registered_by"});
 		person.hasMany(entry, { as: "entries", foreignKey: "registered_by"});
+		judge.belongsTo(person, { as: "person_person", foreignKey: "person"});
+		person.hasMany(judge, { as: "judges", foreignKey: "person"});
 		judge.belongsTo(person, { as: "registered_by_person", foreignKey: "registered_by"});
-		person.hasMany(judge, { as: "judges", foreignKey: "registered_by"});
+		person.hasMany(judge, { as: "registered_by_judges", foreignKey: "registered_by"});
 		message.belongsTo(person, { as: "person_person", foreignKey: "person"});
 		person.hasMany(message, { as: "messages", foreignKey: "person"});
 		message.belongsTo(person, { as: "sender_person", foreignKey: "sender"});
