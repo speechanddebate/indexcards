@@ -10,7 +10,7 @@ let userkey = null;
 describe('Timeslots', () => {
 	beforeAll(async () => {
 		({tournId} = await factories.tourn.createTestTourn());
-		({personId} = await factories.person.createTestPerson({site_admin: true}));
+		({personId} = await factories.person.create({site_admin: true}));
 		({userkey} = await factories.session.createTestSession({person: personId}));
 	});
 

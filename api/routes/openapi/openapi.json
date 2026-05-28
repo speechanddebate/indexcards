@@ -2434,6 +2434,51 @@
           }
         }
       }
+    },
+    "/user/judges/claim": {
+      "post": {
+        "summary": "Claim a judge",
+        "description": "Claim a judge or chapter judge as the logged in user.",
+        "operationId": "UserJudgesClaim",
+        "tags": [
+          "Orval"
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "judgeId",
+            "schema": {
+              "description": "ID of the judge to claim (if claiming a judge)",
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "description": "ID of the judge to claim (if claiming a judge)"
+          },
+          {
+            "in": "query",
+            "name": "chapterJudgeId",
+            "schema": {
+              "description": "ID of the chapter judge to claim (if claiming a chapter judge)",
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "description": "ID of the chapter judge to claim (if claiming a chapter judge)"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful response with no content"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
     }
   },
   "components": {

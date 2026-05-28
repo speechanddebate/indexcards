@@ -9,15 +9,15 @@ import { expect } from 'chai';
 let adminId, userId;
 describe('Auth Router', () => {
 	beforeAll(async () => {
-		adminId = (await factories.person.createTestPerson({
+		adminId = (await factories.person.create({
 			site_admin: true,
 		})).personId;
-		userId = (await factories.person.createTestPerson()).personId;
+		userId = (await factories.person.create()).personId;
 	});
 	describe('/login' , () => {
 		it('Logs in an existing user', async () => {
 			const password = 'securepassword';
-			const person = await (await factories.person.createTestPerson({
+			const person = await (await factories.person.create({
 				password: hashPassword('securepassword'),
 			})).getPerson();
 
@@ -38,7 +38,7 @@ describe('Auth Router', () => {
 			expect(session.person).toBe(person.id);
 		});
 		it('Fails to log in with incorrect password', async () => {
-			const person = await (await factories.person.createTestPerson({
+			const person = await (await factories.person.create({
 				password: hashPassword('securepassword'),
 			})).getPerson();
 
@@ -65,7 +65,7 @@ describe('Auth Router', () => {
 	});
 	describe('/logout', () => {
 		it('logs out an existing user', async () => {
-			const person = await (await factories.person.createTestPerson({
+			const person = await (await factories.person.create({
 				password: hashPassword('securepassword'),
 			})).getPerson();
 
@@ -116,7 +116,7 @@ describe('Auth Router', () => {
 	});
 	describe('/su', () => {
 		it('starts an su session', async () => {
-			const person = await (await factories.person.createTestPerson({
+			const person = await (await factories.person.create({
 				site_admin: true,
 				password: hashPassword('securepassword'),
 			})).getPerson();
@@ -133,7 +133,7 @@ describe('Auth Router', () => {
 
 			const token = loginRes.body.token;
 
-			const suTarget = await (await factories.person.createTestPerson({
+			const suTarget = await (await factories.person.create({
 				password: hashPassword('securepassword'),
 			})).getPerson();
 
@@ -146,7 +146,7 @@ describe('Auth Router', () => {
 			expect(res).not.toBeProblemResponse();
 		});
 		it('fails to start an su session with invalid suId', async () => {
-			const person = await (await factories.person.createTestPerson({
+			const person = await (await factories.person.create({
 				site_admin: true,
 				password: hashPassword('securepassword'),
 			})).getPerson();

@@ -3,7 +3,7 @@ import sessionRepo from './sessionRepo.js';
 import db from '../data/db.js';
 import factories from '../../tests/factories/index.js';
 
-const { personId }  = await factories.person.createTestPerson();
+const { personId }  = await factories.person.create();
 
 describe('sessionRepo', () => {
 
@@ -21,7 +21,7 @@ describe('sessionRepo', () => {
 
 		it('includes su when requested', async () => {
 			//Arrange
-			const { personId: su } = await factories.person.createTestPerson();
+			const { personId: su } = await factories.person.create();
 			const { sessionId } = await factories.session.createTestSession({ su, person: personId });
 
 			//Act

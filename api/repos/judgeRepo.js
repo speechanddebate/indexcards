@@ -13,6 +13,10 @@ function buildJudgeQuery(opts = {}) {
 		include: [],
 	};
 
+	if (opts.where) {
+		query.where = { ...query.where, ...opts.where };
+	}
+
 	if (opts.include?.Category) {
 		query.include.push({
 			...categoryInclude(opts.include.Category),
@@ -59,9 +63,20 @@ async function getJudge(id,opts){
 	return toDomain(judge);
 }
 
+async function getJudges(opts = {}) {
+	const query = buildJudgeQuery(opts);
+	const judges = await db.judge.findAll(query);
+	return judges.map(toDomain);
+}
+
 async function createJudge(data){
 	const judge = await db.judge.create(toPersistence(data));
 	return judge.id;
+}
+
+async function updateJudge(id, data){
+	await db.judge.update(toPersistence(data), { where: { id } });
+	return getJudge(id);
 }
 
 async function unlinkedSearch({ first, last }, opts = {}) {
@@ -83,6 +98,7 @@ async function unlinkedSearch({ first, last }, opts = {}) {
 		LEFT JOIN school ON judge.school = school.id
 		WHERE judge.first LIKE :first
 			AND judge.last LIKE :last
+			AND (judge.person = 0 OR judge.person IS NULL)
 			AND (tourn.end IS NULL OR tourn.end > NOW())
 			AND (:notRequestedBy IS NULL OR judge.person_request IS NULL OR judge.person_request != :notRequestedBy)
 		ORDER BY tourn.start, judge.last ASC, judge.first ASC
@@ -100,6 +116,8 @@ async function unlinkedSearch({ first, last }, opts = {}) {
 
 export default {
 	getJudge,
+	getJudges,
 	createJudge,
+	updateJudge,
 	unlinkedSearch,
 };

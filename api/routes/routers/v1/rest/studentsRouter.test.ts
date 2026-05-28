@@ -10,7 +10,7 @@ describe('GET /rest/students/unlinked/search', () => {
 	let last: string;
 
 	beforeAll(async () => {
-		const { chapterId } = await factories.chapter.createTestChapter();
+		const { chapterId } = await factories.chapter.create();
 		const { getStudent } = await factories.student.createTestUnlinkedStudent({ chapterId });
 		const student = await getStudent() as { first: string; last: string };
 		first = student.first;

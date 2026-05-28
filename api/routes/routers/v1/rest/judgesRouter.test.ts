@@ -18,7 +18,7 @@ describe('GET /rest/judges/unlinked/search', () => {
 		first = judge.first;
 		last = judge.last;
 
-		const { chapterJudgeId: cjId, getChapterJudge } = await factories.chapterJudge.createTestChapterJudge();
+		const { chapterJudgeId: cjId, getChapterJudge } = await factories.chapterJudge.create();
 		chapterJudgeId = cjId;
 		const cj = await getChapterJudge() as { first: string; last: string };
 		cjFirst = cj.first;
@@ -99,7 +99,7 @@ describe('GET /rest/judges/unlinked/search', () => {
 	});
 
 	it('returns both judge and chapter_judge types in a combined search', async () => {
-		const { chapterJudgeId: cjId2, getChapterJudge } = await factories.chapterJudge.createTestChapterJudge({
+		const { chapterJudgeId: cjId2, getChapterJudge } = await factories.chapterJudge.create({
 			first,
 			last,
 		});

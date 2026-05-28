@@ -76,7 +76,7 @@ describe('PersonRepo', () => {
 			await setTabroomDateSetting('paradigm_review_start', reviewStart);
 			await setTabroomDateSetting('paradigm_review_cutoff', cutoffInFuture);
 
-			const { personId } = await factories.person.createTestPerson({
+			const { personId } = await factories.person.create({
 				settings: {
 					paradigm: 'Legacy paradigm text',
 				},
@@ -102,7 +102,7 @@ describe('PersonRepo', () => {
 			await setTabroomDateSetting('paradigm_review_start', reviewStart);
 			await setTabroomDateSetting('paradigm_review_cutoff', cutoffInPast);
 
-			const { personId } = await factories.person.createTestPerson({
+			const { personId } = await factories.person.create({
 				settings: {
 					paradigm: 'Stale paradigm text',
 				},
@@ -127,7 +127,7 @@ describe('PersonRepo', () => {
 			await setTabroomDateSetting('paradigm_review_start', reviewStart);
 			await setTabroomDateSetting('paradigm_review_cutoff', cutoffInPast);
 
-			const { personId } = await factories.person.createTestPerson({
+			const { personId } = await factories.person.create({
 				settings: {
 					paradigm: 'Fresh paradigm text',
 				},
@@ -151,7 +151,7 @@ describe('PersonRepo', () => {
 		it('excludes password by default', async () => {
 
 			// Arrange
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 
 			// Act
 			const person = await personRepo.getPerson(personId);
@@ -163,7 +163,7 @@ describe('PersonRepo', () => {
 
 		it('includes password when requested via fields', async () => {
 			// Arrange
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 
 			// Act
 			const person = await personRepo.getPerson(personId, { fields: ['password'] });
@@ -175,7 +175,7 @@ describe('PersonRepo', () => {
 
 		it('excludes password even when other fields are excluded', async () => {
 			// Arrange
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 
 			// Act
 			const person = await personRepo.getPerson(personId, { fields: { exclude: ['first', 'last'] } });
@@ -190,7 +190,7 @@ describe('PersonRepo', () => {
 		it('includes password when requested', async () => {
 			// Arrange
 			const password = 'test password';
-			const { personId } = await factories.person.createTestPerson({ password });
+			const { personId } = await factories.person.create({ password });
 
 			// Act
 			const person = await personRepo.getPerson(personId, { includePassword: true });
@@ -202,7 +202,7 @@ describe('PersonRepo', () => {
 		});
 		it('excludes banned persons when excludeBanned is true', async () => {
 			// Arrange
-			const { personId } = await factories.person.createTestPerson({
+			const { personId } = await factories.person.create({
 				settings: {
 					banned: '1',
 				},
@@ -217,7 +217,7 @@ describe('PersonRepo', () => {
 
 		it('excludes persons with unconfirmed emails when excludeUnconfirmedEmail is true', async () => {
 			// Arrange
-			const { personId } = await factories.person.createTestPerson({
+			const { personId } = await factories.person.create({
 				settings: {
 					email_unconfirmed: '1',
 				},
@@ -233,7 +233,7 @@ describe('PersonRepo', () => {
 			//await db.tabroomSetting.delete( tag: 'paradigm_review_cutoff', value: 'date');
 			// Arrange
 			// Create person with paradigm setting timestamp between review start and cutoff
-			const { personId } = await factories.person.createTestPerson({
+			const { personId } = await factories.person.create({
 				settings: {
 					paradigm: 'Some paradigm',
 				},
@@ -267,7 +267,7 @@ describe('PersonRepo', () => {
 		});
 		it('attaches PersonQuizzes when include.PersonQuizzes is true', async () => {
 			// Arrange
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			const { quizId } = await factories.quiz.createTestQuiz({ person: personId });
 			await factories.personQuiz.createTestPersonQuiz({
 				person: personId,
@@ -295,7 +295,7 @@ describe('PersonRepo', () => {
 		describe('filters by hasValidParadigm', () => {
 			it('excludes persons without a paradigm setting', async () => {
 				// Arrange
-				const { personId } = await factories.person.createTestPerson();
+				const { personId } = await factories.person.create();
 				// Act
 				const person = await personRepo.getPerson(personId, { hasValidParadigm: true });
 				// Assert
@@ -315,7 +315,7 @@ describe('PersonRepo', () => {
 	describe('getPerson', () => {
 		it('returns the person when the id is valid', async () => {
 			// Arrange
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			// Act
 			const result = await personRepo.getPerson(personId);
 			// Assert
@@ -334,7 +334,7 @@ describe('PersonRepo', () => {
 		it('returns persons matching the search query', async () => {
 			// Arrange
 			const personData = factories.person.createPersonData();
-			const { personId } = await factories.person.createTestPerson(personData);
+			const { personId } = await factories.person.create(personData);
 			//person must have judged at least once to be included in search results
 			await factories.judge.createTestJudge({ person: personId });
 
@@ -349,7 +349,7 @@ describe('PersonRepo', () => {
 		it('returns an empty array when no persons match the search query', async () => {
 			// Arrange
 			const personData = factories.person.createPersonData();
-			await factories.person.createTestPerson(personData);
+			await factories.person.create(personData);
 
 			// Act
 			const results = await personRepo.personSearch('Nonexistent Name');
@@ -361,7 +361,7 @@ describe('PersonRepo', () => {
 		it('returns results when search query is empty', async () => {
 			// Arrange
 			const personData = factories.person.createPersonData();
-			await factories.person.createTestPerson(personData);
+			await factories.person.create(personData);
 
 			// Act
 			const results = await personRepo.personSearch();
@@ -375,7 +375,7 @@ describe('PersonRepo', () => {
 	describe('getPersonByUsername', () => {
 		it('returns the person when the username is valid', async () => {
 			// Arrange
-			const { personId, getPerson } = await factories.person.createTestPerson();
+			const { personId, getPerson } = await factories.person.create();
 			const person = await getPerson();
 
 			// Act
@@ -406,7 +406,7 @@ describe('PersonRepo', () => {
 
 	describe('savePersonSettings', () => {
 		it('saves person settings for an existing person', async () => {
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			const now = new Date();
 
 			await personRepo.savePersonSettings(personId, {
@@ -423,7 +423,7 @@ describe('PersonRepo', () => {
 		});
 
 		it('updates existing person settings on subsequent saves', async () => {
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			const firstDate = new Date(Date.now() - 60 * 60 * 1000);
 			const secondDate = new Date();
 

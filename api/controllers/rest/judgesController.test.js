@@ -6,14 +6,14 @@ vi.mock('../../repos/judgeRepo.js', () => ({
 		unlinkedSearch: vi.fn(),
 	},
 }));
-vi.mock('../../repos/chapterJudge.js', () => ({
+vi.mock('../../repos/chapterJudgeRepo.js', () => ({
 	default: {
 		unlinkedSearch: vi.fn(),
 	},
 }));
 
 import judgeRepo from '../../repos/judgeRepo.js';
-import chapterJudgeRepo from '../../repos/chapterJudge.js';
+import chapterJudgeRepo from '../../repos/chapterJudgeRepo.js';
 
 describe('judgesController.unlinkedSearch', () => {
 	beforeEach(() => {
@@ -61,27 +61,9 @@ describe('judgesController.unlinkedSearch', () => {
 
 		expect(judgeRepo.unlinkedSearch).toHaveBeenCalledWith(
 			{ first: 'Jordan', last: 'Lee' },
-			{ notRequestedBy: 5 }
 		);
 		expect(chapterJudgeRepo.unlinkedSearch).toHaveBeenCalledWith(
 			{ first: 'Jordan', last: 'Lee' },
-			{ notRequestedBy: 5 }
 		);
-	});
-
-	it('passes notRequestedBy from actor id to both repos', async () => {
-		vi.mocked(judgeRepo.unlinkedSearch).mockResolvedValue([]);
-		vi.mocked(chapterJudgeRepo.unlinkedSearch).mockResolvedValue([]);
-
-		const req = createReq({
-			valid: { query: { first: 'Sam', last: 'Jones' } },
-			actor: { id: 42, Person: { first: 'Sam', last: 'Jones' } },
-		});
-		const res = createRes();
-
-		await judgesController.unlinkedSearch(req, res);
-
-		expect(judgeRepo.unlinkedSearch).toHaveBeenCalledWith({ first: 'Sam', last: 'Jones' }, { notRequestedBy: 42 });
-		expect(chapterJudgeRepo.unlinkedSearch).toHaveBeenCalledWith({ first: 'Sam', last: 'Jones' }, { notRequestedBy: 42 });
 	});
 });

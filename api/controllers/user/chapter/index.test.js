@@ -11,11 +11,11 @@ describe('User Chapter', () => {
 		const session = await factories.session.createTestSession();
 		userkey = session.userkey;
 		personId = session.personId;
-		await factories.permission.createTestPermission({
-			chapterId : 130737,
-			schoolId  : 699354,
-			tournId   : 31059,
-			personId  : personId,
+		await factories.permission.create({
+			chapter : 130737,
+			school  : 699354,
+			tourn   : 31059,
+			person  : personId,
 			tag     : 'chapter',
 		});
 		await db.contact.create({

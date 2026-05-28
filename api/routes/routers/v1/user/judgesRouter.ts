@@ -45,6 +45,11 @@ router.route('/claim')
 				}),
 			}),
 		},
+		responses: {
+			204: {
+				description: 'Successful response with no content',
+			},
+		},
 	}
 
 export default router;

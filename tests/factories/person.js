@@ -17,7 +17,7 @@ export function createPersonData(overrides = {}) {
 	};
 }
 
-export async function createTestPerson(overrides = {}) {
+export async function create(overrides = {}) {
 
 	const data = createPersonData({
 		...overrides,
@@ -60,7 +60,7 @@ export async function createJudge(overrides = {}) {
 }
 
 export default {
-	createTestPerson,
+	create,
 	createPersonData,
 	createPersonQuiz,
 	createJudge,

@@ -7,7 +7,7 @@ function createChapterData(overrides = {}) {
 	};
 }
 
-export async function createTestChapter(overrides = {}) {
+export async function create(overrides = {}) {
 	const chapterData = await createChapterData(overrides);
 
 	const chapter = await db.chapter.create(chapterData);
@@ -16,6 +16,6 @@ export async function createTestChapter(overrides = {}) {
 	return { chapterId };
 }
 export default {
-	createTestChapter,
+	create,
 	createChapterData,
 };

@@ -10,11 +10,11 @@ export function buildChapterJudgeData(overrides = {}) {
 	};
 }
 
-export async function createTestChapterJudge(overrides = {}) {
+export async function create(overrides = {}) {
 	const data = buildChapterJudgeData(overrides);
 
 	if (!data.chapter) {
-		({ chapterId: data.chapter } = await factories.chapter.createTestChapter());
+		({ chapterId: data.chapter } = await factories.chapter.create());
 	}
 
 	const row = await db.chapterJudge.create(data);
@@ -25,6 +25,6 @@ export async function createTestChapterJudge(overrides = {}) {
 }
 
 export default {
-	createTestChapterJudge,
+	create,
 	buildChapterJudgeData,
 };

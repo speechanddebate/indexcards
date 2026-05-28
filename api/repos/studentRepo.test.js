@@ -8,7 +8,7 @@ describe('unlinkedSearch', () => {
 		const firstPrefix = `ULF${stamp}`;
 		const lastPrefix = `ULL${stamp}`;
 		const schoolYear = new Date().getFullYear();
-		const { chapterId } = await factories.chapter.createTestChapter();
+		const { chapterId } = await factories.chapter.create();
 
 		const { studentId: includedId } = await factories.student.createTestUnlinkedStudent({
 			first: `${firstPrefix}A`,
@@ -67,7 +67,7 @@ describe('unlinkedSearch', () => {
 		const firstPrefix = `TCF${stamp}`;
 		const lastPrefix = `TCL${stamp}`;
 		const schoolYear = new Date().getFullYear();
-		const { chapterId } = await factories.chapter.createTestChapter();
+		const { chapterId } = await factories.chapter.create();
 		const { studentId } = await factories.student.createTestUnlinkedStudent({
 			first: `${firstPrefix}Main`,
 			last: `${lastPrefix}Main`,
@@ -111,7 +111,7 @@ describe('unlinkedSearch', () => {
 		const firstPrefix = `SYF${stamp}`;
 		const lastPrefix = `SYL${stamp}`;
 		const currentYear = new Date().getFullYear();
-		const { chapterId } = await factories.chapter.createTestChapter();
+		const { chapterId } = await factories.chapter.create();
 		const { studentId: includedId } = await factories.student.createTestUnlinkedStudent({
 			first: `${firstPrefix}A`,
 			last: `${lastPrefix}A`,
