@@ -690,7 +690,9 @@
         "summary": "Search for unlinked judges",
         "operationId": "RestJudgesUnlinkedSearch",
         "description": "Search for judges that are not linked to a Tabroom account.",
-        "tags": [],
+        "tags": [
+          "Orval"
+        ],
         "parameters": [
           {
             "in": "query",
@@ -2400,16 +2402,29 @@
         }
       }
     },
-    "user/judges/linkRequests": {
+    "/user/judges/linkRequests": {
       "get": {
-        "summary": "Search for unlinked judges",
+        "summary": "Get judge link requests",
+        "description": "Get active judge link requests for the logged in user",
         "operationId": "UserJudgesLinkRequests",
-        "description": "GET user/judges/linkRequests is undocumented. Need to add .openapi to handler",
-        "tags": [],
+        "tags": [
+          "Orval"
+        ],
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Success"
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UnlinkedJudge"
+                  },
+                  "description": "List of unlinked judges that have requested to be linked to the user"
+                }
+              }
+            }
           },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
@@ -4775,8 +4790,7 @@
           "id",
           "type",
           "first",
-          "last",
-          "schoolName"
+          "last"
         ],
         "additionalProperties": false
       },

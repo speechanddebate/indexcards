@@ -9,27 +9,27 @@ const router = Router();
 
 router.route('/unlinked/search')
   .get(requireLogin, ValidateRequest, con.unlinkedSearch).openapi = {
-  summary: 'Search for unlinked students',
-  operationId: 'RestStudentsUnlinkedSearch',
-  description: 'Search for students that are not linked to a Tabroom account.',
-  path: '/rest/students/unlinked/search',
-  tags: ['Students'],
-  requestParams: {
-    query: z.object({
-      first: z.string().optional().meta({ description: 'First name to search for' }),
-      last: z.string().optional().meta({ description: 'Last name to search for' }),
-    }),
-  },
-  responses: {
-    200: {
-      description: 'List of unlinked students matching search criteria',
-      content: {
-        'application/json': {
-          schema: z.array(UnlinkedStudentSearch),
-        },
-      },
-    },
-  },
-};
+  	summary: 'Search for unlinked students',
+  	operationId: 'RestStudentsUnlinkedSearch',
+  	description: 'Search for students that are not linked to a Tabroom account.',
+  	path: '/rest/students/unlinked/search',
+  	tags: ['Students'],
+  	requestParams: {
+  		query: z.object({
+  			first: z.string().optional().meta({ description: 'First name to search for' }),
+  			last: z.string().optional().meta({ description: 'Last name to search for' }),
+  		}),
+  	},
+  	responses: {
+  		200: {
+  			description: 'List of unlinked students matching search criteria',
+  			content: {
+  				'application/json': {
+  					schema: z.array(UnlinkedStudentSearch),
+  				},
+  			},
+  		},
+  	},
+  };
 
 export default router;

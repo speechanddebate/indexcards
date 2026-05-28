@@ -1,4 +1,4 @@
-import type { ZodOpenApiSchemaObject } from "zod-openapi";
+import type { ZodOpenApiSchemaObject } from 'zod-openapi';
 
 export const Email = {
 	type : 'object',

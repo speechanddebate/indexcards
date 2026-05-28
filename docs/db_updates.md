@@ -19,14 +19,14 @@ After regenerating, review the diff in `api/data/models/init-models.js` to confi
 
 ## 2. Regenerate the test SQL snapshot
 
-The integration tests load a pre-built SQL dump (`tests/test.sql`) that seeds the test database. After a schema change that snapshot must be regenerated so the test database schema matches the updated models.
+The integration tests load a pre-built SQL dump (`tests/test.sql`) that seeds the test database. After a schema change that snapshot must be regenerated so the test database schema matches the updated models. First, load a full database into the test env and run:
 
 ```bash
 npm run updateTestFile
 ```
 
 This script:
-1. Prunes the development database to a minimal known-good state (`tests/createTestDatabase.js`)
+1. Prunes the test database to a minimal known-good state (`tests/createTestDatabase.js`)
 2. Dumps the result with `mariadb-dump`
 3. Strips `DEFINER` tags and writes the output to `tests/test.sql`
 
@@ -37,7 +37,7 @@ Commit the updated `tests/test.sql` alongside any schema-related code changes.
 
 ## 3. Reload the test database
 
-The updated `tests/test.sql` must be loaded into your local test database before running tests. The test runner does **not** do this automatically.
+The updated `tests/test.sql` must be loaded into your local test database before running tests. The test runner does **not** do this automatically. If you just ran `npm run updateTestFile` this will already be done.
 
 ```bash
 mysql -u <user> -p tabtest < tests/test.sql

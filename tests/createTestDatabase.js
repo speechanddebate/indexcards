@@ -45,6 +45,7 @@ const pruneDatabase = async () => {
 	];
 
 	await batchDelete('event', `delete from event where id NOT IN (:keeperEvents)`, { keeperEvents });
+	// deleting tourns without these two queries leads to a FK error
 	await db.sequelize.query(`
 		DELETE r
 		FROM round r
