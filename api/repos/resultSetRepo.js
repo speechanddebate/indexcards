@@ -264,7 +264,7 @@ export const createResultCache = async (resultSetId) => {
 		replacements : { eventId },
 	});
 
-	if (!rawScoreSet || !rawScoreSet[0].id) {
+	if (!rawScoreSet || !rawScoreSet.length || !rawScoreSet[0].id) {
 
 		const resultScores = await db.sequelize.query(`
 			select
