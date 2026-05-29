@@ -75,13 +75,13 @@ describe('judgesController', () => {
 			await con.claimRequest(req, res);
 			expect(res).toBeProblemResponse(400);
 		});
-		it('should return 204 and update judge if valid judgeId is provided', async () => {
+		it('should return 200 and update judge if valid judgeId is provided', async () => {
 			const { req, res } = createContext({ actor: { id: 123 }, valid: { query: { judgeId: 1 } } });
 			judgeRepo.getJudge.mockResolvedValue({ id: 1, category: 123 });
 			judgeRepo.getJudges.mockResolvedValue([]);
 			await con.claimRequest(req, res);
 			expect(res).not.toBeProblemResponse();
-			expect(res.status).toBeCalledWith(204);
+			expect(res.status).toBeCalledWith(200);
 			expect(judgeRepo.updateJudge).toHaveBeenCalledWith(1, { person_request: 123 });
 		});
 		it('should return 400 if chapterJudgeId is invalid', async () => {
@@ -105,14 +105,14 @@ describe('judgesController', () => {
 			await con.claimRequest(req, res);
 			expect(res).toBeProblemResponse(400);
 		});
-		it('should return 204 and update chapter judge if valid chapterJudgeId is provided', async () => {
+		it('should return 200 and update chapter judge if valid chapterJudgeId is provided', async () => {
 			const { req, res } = createContext({ actor: { id: 123 }, valid: { query: { chapterJudgeId: 1 } } });
 			chapterJudgeRepo.getChapterJudge.mockResolvedValue({ id: 1, chapter: 123 });
 			chapterJudgeRepo.getChapterJudges.mockResolvedValue([]);
 			chapterRepo.getAdmins.mockResolvedValue([]);
 			await con.claimRequest(req, res);
 			expect(res).not.toBeProblemResponse();
-			expect(res.status).toBeCalledWith(204);
+			expect(res.status).toBeCalledWith(200);
 			expect(chapterJudgeRepo.updateChapterJudge).toHaveBeenCalledWith(1, { person_request: 123 });
 		});
 		it('should send notification email to chapter admins when a chapter judge is claimed', async () => {

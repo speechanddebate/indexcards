@@ -58,7 +58,10 @@ async function claimRequest(req, res) {
 			return BadRequest(req, res, `You are already linked to another ${judge.category} judge.  You may only link to one judge in a given tournament.  If you are trying to link yourself to all your school's judges, please DO NOT.  Every judge must be linked to their OWN Tabroom account.`);
 		}
 		await judgeRepo.updateJudge(judgeId, { person_request: req.actor.id });
-		return res.status(204).end();
+		return res.status(200).json({
+			message: 'Judge claim request submitted',
+			detail: 'A message has been sent to your chapter admins to approve this request.',
+		});
 	}
 	//grab chapter judge, verify it has a chapter
 	const chapterJudge = await chapterJudgeRepo.getChapterJudge(chapterJudgeId);
@@ -78,21 +81,31 @@ async function claimRequest(req, res) {
 	if (already.length > 0) {
 		return BadRequest(req, res, `You are already linked to another judge on that school's roster. You can only be linked to 1 judge per roster at a time. If you are linking yourself to all your school's judges, DO NOT. Each judge must have their OWN Tabroom account for the system to function.`);
 	}
-	await chapterJudgeRepo.updateChapterJudge(chapterJudgeId, { person_request: req.actor.id });
 
 	// get the chapter admins
 	const admins = await chapterRepo.getAdmins(chapterJudge.chapter);
 
-	if(!admins.some(a => a.email && !a.no_email)) {
-		logger.warn('Chapter with id ' + chapterJudge.chapter + ' has no admins setup to receive emails. Cannot send judge claim notification email.');
-		return res.status(204).end();
+	if(admins.some(a => a.id === req.actor.id)) {
+		await chapterJudgeRepo.updateChapterJudge(chapterJudgeId, { person: req.actor.id, person_request: null });
+		return res.status(200).json({
+			message: 'Judge linked successfully.',
+			detail: 'Because you are a chapter admin, your request to link to this judge has been automatically approved.',
+		});
 	}
-	const emailData = buildChapterJudgeClaimEmail(chapterJudge, req.actor.Person);
-	await notify({
-		ids: [...admins.filter(a => a.email && !a.no_email).map(a => a.id)],
-		...emailData,
+	if(admins.some(a => a.email && !a.no_email)) {
+		const emailData = buildChapterJudgeClaimEmail(chapterJudge, req.actor.Person);
+		await notify({
+			ids: [...admins.filter(a => a.email && !a.no_email).map(a => a.id)],
+			...emailData,
+		});
+	} else {
+		logger.warn('Chapter with id ' + chapterJudge.chapter + ' has no admins setup to receive emails. Cannot send judge claim notification email.');
+	}
+	await chapterJudgeRepo.updateChapterJudge(chapterJudgeId, { person_request: req.actor.id });
+	return res.status(200).json({
+		message: 'Judge claim request submitted',
+		detail: 'A message has been sent to your chapter admins to approve this request.',
 	});
-	return res.status(204).end();
 
 };
 

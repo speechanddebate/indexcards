@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/ext/caselistController.js';
+import z from 'zod';
+import { Student } from '../../../openapi/schemas/index.ts';
 
 const router = Router();
 
@@ -108,10 +110,7 @@ router.route('/students').get(controller.getPersonStudents).openapi = {
 			description: 'Person Students',
 			content: {
 				'application/json': {
-					schema: {
-						type: 'array',
-						items: { $ref: '#/components/schemas/Student' },
-					},
+					schema: z.array(Student),
 				},
 			},
 		},

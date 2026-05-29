@@ -13,7 +13,7 @@ router.route('/unlinked/search')
   	operationId: 'RestStudentsUnlinkedSearch',
   	description: 'Search for students that are not linked to a Tabroom account.',
   	path: '/rest/students/unlinked/search',
-  	tags: ['Students'],
+  	tags: ['Students', 'Orval'],
   	requestParams: {
   		query: z.object({
   			first: z.string().optional().meta({ description: 'First name to search for' }),

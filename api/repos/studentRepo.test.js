@@ -19,14 +19,14 @@ describe('unlinkedSearch', () => {
 		const { studentId: linkedByPersonId } = await factories.student.create({
 			first: `${firstPrefix}B`,
 			last: `${lastPrefix}B`,
-			personId: 123,
+			person: 123,
 			chapter: chapterId,
 		});
 
 		const { studentId: linkedByRequestId } = await factories.student.create({
 			first: `${firstPrefix}C`,
 			last: `${lastPrefix}C`,
-			personRequestId: 321,
+			person_request: 321,
 			chapter: chapterId,
 		});
 
