@@ -10,41 +10,36 @@ describe('unlinkedSearch', () => {
 		const schoolYear = new Date().getFullYear();
 		const { chapterId } = await factories.chapter.create();
 
-		const { studentId: includedId } = await factories.student.createTestUnlinkedStudent({
+		const { studentId: includedId } = await factories.student.create({
 			first: `${firstPrefix}A`,
 			last: `${lastPrefix}A`,
-			gradYear: schoolYear + 1,
-			chapterId,
+			chapter: chapterId,
 		});
 
-		const { studentId: linkedByPersonId } = await factories.student.createTestUnlinkedStudent({
+		const { studentId: linkedByPersonId } = await factories.student.create({
 			first: `${firstPrefix}B`,
 			last: `${lastPrefix}B`,
-			gradYear: schoolYear + 1,
 			personId: 123,
-			chapterId,
+			chapter: chapterId,
 		});
 
-		const { studentId: linkedByRequestId } = await factories.student.createTestUnlinkedStudent({
+		const { studentId: linkedByRequestId } = await factories.student.create({
 			first: `${firstPrefix}C`,
 			last: `${lastPrefix}C`,
-			gradYear: schoolYear + 1,
 			personRequestId: 321,
-			chapterId,
+			chapter: chapterId,
 		});
 
-		await factories.student.createTestUnlinkedStudent({
+		await factories.student.create({
 			first: `${firstPrefix}D`,
 			last: `${lastPrefix}D`,
-			gradYear: schoolYear,
-			chapterId,
+			chapter: chapterId,
 		});
 
-		await factories.student.createTestUnlinkedStudent({
+		await factories.student.create({
 			first: `${firstPrefix}E`,
 			last: `X${lastPrefix}`,
-			gradYear: schoolYear + 1,
-			chapterId,
+			chapter: chapterId,
 		});
 
 		const results = await studentRepo.unlinkedSearch({
@@ -68,11 +63,10 @@ describe('unlinkedSearch', () => {
 		const lastPrefix = `TCL${stamp}`;
 		const schoolYear = new Date().getFullYear();
 		const { chapterId } = await factories.chapter.create();
-		const { studentId } = await factories.student.createTestUnlinkedStudent({
+		const { studentId } = await factories.student.create({
 			first: `${firstPrefix}Main`,
 			last: `${lastPrefix}Main`,
-			gradYear: schoolYear + 1,
-			chapterId,
+			chapter: chapterId,
 		});
 
 		const { tournId: tournA } = await factories.tourn.createTestTourn({ name: `Tourn A ${stamp}` });
@@ -112,18 +106,16 @@ describe('unlinkedSearch', () => {
 		const lastPrefix = `SYL${stamp}`;
 		const currentYear = new Date().getFullYear();
 		const { chapterId } = await factories.chapter.create();
-		const { studentId: includedId } = await factories.student.createTestUnlinkedStudent({
+		const { studentId: includedId } = await factories.student.create({
 			first: `${firstPrefix}A`,
 			last: `${lastPrefix}A`,
-			gradYear: currentYear + 1,
-			chapterId,
+			chapter: chapterId,
 		});
 
-		await factories.student.createTestUnlinkedStudent({
+		await factories.student.create({
 			first: `${firstPrefix}B`,
 			last: `${lastPrefix}B`,
-			gradYear: currentYear - 1,
-			chapterId,
+			chapter: chapterId,
 		});
 
 		const results = await studentRepo.unlinkedSearch({

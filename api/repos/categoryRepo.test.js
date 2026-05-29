@@ -39,8 +39,8 @@ describe('getCategory', () => {
 describe('getCategories', () => {
 	it('retrieves all categories for a given tournament', async () => {
 		const { tournId } = await factories.tourn.createTestTourn();
-		const category1Data = factories.category.createCategoryData({ tourn: tournId });
-		const category2Data = factories.category.createCategoryData({ tourn: tournId });
+		const category1Data = factories.category.createCategoryData({ tourn: tournId, name: `Cat1 ${tournId}` });
+		const category2Data = factories.category.createCategoryData({ tourn: tournId, name: `Cat2 ${tournId}` });
 
 		await categoryRepo.createCategory(category1Data);
 		await categoryRepo.createCategory(category2Data);
