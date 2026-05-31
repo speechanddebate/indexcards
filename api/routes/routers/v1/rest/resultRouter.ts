@@ -14,7 +14,7 @@ const router = Router({ mergeParams: true });
 
 router.route('/').get(ValidateRequest, controller.getResultSets).openapi = {
 	path: '/rest/tourns/{tournId}/results',
-	summary: 'Get tournament results',
+	summary: "Get tournament results",
 	description: 'Returns public result information for a given tournament',
 	operationId : 'getTournResultSets',
 	requestParams: {
@@ -39,7 +39,7 @@ router.route('/').get(ValidateRequest, controller.getResultSets).openapi = {
 
 router.route('/:resultSetId').get(ValidateRequest, controller.getResultSet).openapi = {
 	path: '/rest/tourns/{tournId}/results/{resultSetId}',
-	summary: 'Get tourn resultSet',
+	summary: "Get tourn resultSet",
 	description: 'Returns result information given a result set ID if it is public',
 	operationId : 'getResultSet',
 	requestParams: {
@@ -65,7 +65,7 @@ router.route('/:resultSetId').get(ValidateRequest, controller.getResultSet).open
 
 router.route('/event/:eventId').get(ValidateRequest, controller.getResultSets).openapi = {
 	path: '/rest/tourns/{tournId}/results/event/{eventId}',
-	summary: 'Get event results',
+	summary: "Get event results",
 	description: 'Returns public result information for a given event',
 	operationId : 'getEventResultSets',
 	requestParams: {
