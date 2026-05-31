@@ -9,6 +9,10 @@ function buildStudentQuery(opts = {}) {
 		attributes: resolveAttributesFromFields(opts.fields, FIELD_MAP),
 		include: [],
 	};
+	if (opts.where) {
+		query.where = { ...query.where, ...opts.where };
+	}
+
 	return query;
 }
 
@@ -28,6 +32,15 @@ async function getStudent(id, opts = {}) {
 async function createStudent(data) {
 	const student = await db.student.create(toPersistence(data));
 	return student.id;
+}
+async function updateStudent(id, data){
+	await db.student.update(toPersistence(data), { where: { id } });
+	return getStudent(id);
+}
+async function getStudents(opts = {}) {
+	const query = buildStudentQuery(opts);
+	const students = await db.student.findAll(query);
+	return students.map(toDomain);
 }
 /**
   * Search for students that are not linked to a tabroom account.
@@ -80,5 +93,7 @@ async function unlinkedSearch(params) {
 export default {
 	getStudent,
 	createStudent,
+	updateStudent,
+	getStudents,
 	unlinkedSearch,
 };

@@ -14,7 +14,7 @@ export async function loadTournAuthContext(req, res, next, tournId){
 
 	if (tournId){
 		//fetch all or a persons perms for a tourn
-		const perms = await permissionRepo.getPermissions({ tournId, personId });
+		const perms = await permissionRepo.getPermissions({ tourn: tournId, person: personId });
 
 		// Collect unique event IDs for batch enrichment (only need categoryId)
 		const eventIds = new Set();
@@ -39,22 +39,22 @@ export async function loadTournAuthContext(req, res, next, tournId){
 			let categoryId = null;
 			let permTournId = null;
 
-			if (perm.eventId) {
+			if (perm.event) {
 				//event level perm
 				scope = 'event';
-				id = perm.eventId;
-				categoryId = eventMap.get(perm.eventId);
-				permTournId = perm.tournId; // already populated
+				id = perm.event;
+				categoryId = eventMap.get(perm.event);
+				permTournId = perm.tourn; // already populated
 			}
-			else if (perm.categoryId) {
+			else if (perm.category) {
 				scope = 'category';
-				id = perm.categoryId;
-				permTournId = perm.tournId; // already populated
+				id = perm.category;
+				permTournId = perm.tourn; // already populated
 			}
-			else if (perm.tournId) {
+			else if (perm.tourn) {
 				scope = 'tourn';
-				id = perm.tournId;
-				permTournId = perm.tournId	;
+				id = perm.tourn;
+				permTournId = perm.tourn	;
 			}
 
 			if (scope && id) {
@@ -103,14 +103,14 @@ export async function loadChapterAuthContext(req, res, next,chapterId) {
 	if(!req.actor?.Person?.id) return next();
 
 	const perms = await permissionRepo.getPermissions({
-		personId: req.actor.Person.id,
-		chapterId,
+		person: req.actor.Person.id,
+		chapter: chapterId,
 	});
 
 	for (const perm of perms) {
 		req.auth.perms.push({
 			scope: 'chapter',
-			id: perm.chapterId,
+			id: perm.chapter,
 			role: req.tag === 'chapter' ? 'chapterAdmin' : 'prefs',
 		});
 	}

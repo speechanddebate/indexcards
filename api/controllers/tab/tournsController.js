@@ -15,8 +15,8 @@ async function createTourn(req, res) {
 	const data = req.body;
 	const tournId = await tournRepo.createTourn(data);
 	await permissionRepo.createPermission({
-		tournId,
-		personId: req.person.id,
+		tourn: tournId,
+		person: req.person.id,
 		tag: 'owner',
 	});
 	const tourn = await tournRepo.getTourn(tournId);

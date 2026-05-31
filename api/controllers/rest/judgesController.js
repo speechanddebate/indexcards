@@ -1,5 +1,5 @@
 import judgeRepo from '../../repos/judgeRepo.js';
-import chapterJudgeRepo from '../../repos/chapterJudge.js';
+import chapterJudgeRepo from '../../repos/chapterJudgeRepo.js';
 
 async function unlinkedSearch(req, res) {
 	let { first, last } = req.valid.query;
@@ -10,12 +10,8 @@ async function unlinkedSearch(req, res) {
 	}
 
 	const [unlinkedJudges, unlinkedChapterJudges] = await Promise.all([
-		judgeRepo.unlinkedSearch({ first, last },{
-			notRequestedBy: req.actor.id,
-		}),
-		chapterJudgeRepo.unlinkedSearch({ first, last },{
-			notRequestedBy: req.actor.id,
-		}),
+		judgeRepo.unlinkedSearch({ first, last }),
+		chapterJudgeRepo.unlinkedSearch({ first, last }),
 	]);
 
 	let results = [];

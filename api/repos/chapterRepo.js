@@ -1,7 +1,7 @@
 import db from '../data/db.js';
 import { FIELD_MAP, toDomain, toPersistence } from './mappers/chapterMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
-import { chapterJudgeInclude } from './chapterJudge.js';
+import { chapterJudgeInclude } from './chapterJudgeRepo.js';
 
 function buildChapterQuery(opts = {}) {
 	const query = {
@@ -41,7 +41,24 @@ async function createChapter(data) {
 	return dbRow.id;
 }
 
+async function getAdmins(chapterId) {
+	if (!chapterId) throw new Error('getChapterAdmins: chapterId is required');
+	const dbRows = await db.person.findAll({
+		include: [{
+			model: db.permission,
+			as: 'permissions',
+			where: {
+				chapter: chapterId,
+				tag: 'chapter',
+			},
+			required: true,
+		}],
+	});
+	return dbRows;
+}
+
 export default {
 	getChapter,
 	createChapter,
+	getAdmins,
 };

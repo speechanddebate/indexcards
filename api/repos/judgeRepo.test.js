@@ -1,4 +1,4 @@
-import judgeRepo, { judgeInclude } from './judgeRepo.js';
+import judgeRepo, { judgeInclude } from './judgeRepo';
 import factories from '../../tests/factories/index.js';
 import db from '../data/db.js';
 
@@ -92,7 +92,7 @@ describe('judgeRepo', () => {
 
 	describe('createJudge', () => {
 		it('creates a judge and returns the new id', async () => {
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			const newJudgeId = await judgeRepo.createJudge({ person: personId });
 
 			expect(newJudgeId).toBeDefined();
@@ -117,7 +117,6 @@ describe('judgeRepo', () => {
 			const { judgeId, getJudge } = await factories.judge.createTestJudge({
 				category: categoryId,
 				school: schoolId,
-				person: null,
 				person_request: null,
 			});
 			const Judge = await getJudge();
@@ -138,8 +137,8 @@ describe('judgeRepo', () => {
 		});
 
 		it('excludes ended tournaments and rows requested by the excluded person', async () => {
-			const requesterId = (await factories.person.createTestPerson()).personId;
-			const otherRequesterId = (await factories.person.createTestPerson()).personId;
+			const requesterId = (await factories.person.create()).personId;
+			const otherRequesterId = (await factories.person.create()).personId;
 			const now = new Date();
 
 			const { tournId: activeTournId } = await factories.tourn.createTestTourn({

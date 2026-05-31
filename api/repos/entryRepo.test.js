@@ -13,7 +13,7 @@ describe('entryRepo', () => {
 		});
 		it('should include students when specified', async () => {
 			const { entryId } =  await factories.entry.createTestEntry();
-			const { studentId } = await factories.student.createTestStudent();
+			const { studentId } = await factories.student.create();
 
 			await db.entryStudent.create({
 				entry: entryId,

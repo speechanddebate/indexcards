@@ -13,7 +13,7 @@ export function createMessageData(overrides = {}) {
 
 export async function createTestMessage(overrides = {}) {
 	if(overrides.sender === undefined){
-		const { personId: senderId } = await factories.person.createTestPerson();
+		const { personId: senderId } = await factories.person.create();
 		overrides.sender = senderId;
 	}
 	const data = createMessageData({

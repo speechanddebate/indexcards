@@ -11,7 +11,7 @@ export function createSessionData(overrides = {}) {
 
 export async function createTestSession(overrides = {}) {
 	if(!overrides.person ||overrides.Person) {
-		const { personId } = await factories.person.createTestPerson(overrides.Person);
+		const { personId } = await factories.person.create(overrides.Person);
 		overrides.person = personId;
 	}
 
@@ -28,7 +28,7 @@ export async function createTestSession(overrides = {}) {
 
 export async function createUser(overrides = {}) {
 	if(!overrides.person || overrides.Person) {
-		const { personId } = await factories.person.createTestPerson(overrides.Person);
+		const { personId } = await factories.person.create(overrides.Person);
 		overrides.person = personId;
 	}
 

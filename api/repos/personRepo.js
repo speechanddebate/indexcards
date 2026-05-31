@@ -3,7 +3,7 @@ import db from '../data/db.js';
 import { FIELD_MAP,toDomain } from './mappers/personMapper.js';
 import { withSettingsInclude, saveSettings } from './utils/settings.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
-import { chapterJudgeInclude } from './chapterJudge.js';
+import { chapterJudgeInclude } from './chapterJudgeRepo.js';
 import { judgeInclude } from './judgeRepo.js';
 import { personQuizInclude } from './personQuizRepo.js';
 

@@ -5,8 +5,8 @@ import { faker } from '@faker-js/faker';
 describe('messageRepo',() =>{
 	describe('buildMessageQuery', () => {
 		it('does not include associations by default', async () => {
-			const { personId: recipientId } = await factories.person.createTestPerson();
-			const { personId: senderId } = await factories.person.createTestPerson();
+			const { personId: recipientId } = await factories.person.create();
+			const { personId: senderId } = await factories.person.create();
 			const { tournId } = await factories.tourn.createTestTourn();
 			const { messageId } = await factories.message.createTestMessage({
 				person: recipientId,
@@ -23,8 +23,8 @@ describe('messageRepo',() =>{
 		});
 
 		it('includes sender when requested', async () => {
-			const { personId: recipientId } = await factories.person.createTestPerson();
-			const { personId: senderId } = await factories.person.createTestPerson();
+			const { personId: recipientId } = await factories.person.create();
+			const { personId: senderId } = await factories.person.create();
 			const { messageId } = await factories.message.createTestMessage({
 				person: recipientId,
 				sender: senderId,
@@ -42,7 +42,7 @@ describe('messageRepo',() =>{
 		});
 
 		it('includes tourn when requested', async () => {
-			const { personId: recipientId } = await factories.person.createTestPerson();
+			const { personId: recipientId } = await factories.person.create();
 			const { tournId } = await factories.tourn.createTestTourn();
 			const { messageId } = await factories.message.createTestMessage({
 				person: recipientId,
@@ -63,26 +63,26 @@ describe('messageRepo',() =>{
 
 	describe('getMessage',() =>{
 		it('returns a specific message for a specific person', async () => {
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			const { messageId } = await factories.message.createTestMessage({ person: personId });
 			const message = await messageRepo.getMessage(messageId, personId);
 			expect(message).not.toBeNull();
 			expect(message.id).toBe(messageId);
 		});
 		it('returns null for a message that does not belong to the person', async () => {
-			const { personId: personId1 } = await factories.person.createTestPerson();
-			const { personId: personId2 } = await factories.person.createTestPerson();
+			const { personId: personId1 } = await factories.person.create();
+			const { personId: personId2 } = await factories.person.create();
 			const { messageId } = await factories.message.createTestMessage({ person: personId1 });
 			const message = await messageRepo.getMessage(messageId, personId2);
 			expect(message).toBeNull();
 		});
 		it('returns null for a message that does not exist', async () => {
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			const message = await messageRepo.getMessage(9999, personId);
 			expect(message).toBeNull();
 		});
 		it('returns a message when no person is specified', async () => {
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			const { messageId } = await factories.message.createTestMessage({ person: personId });
 			const message = await messageRepo.getMessage(messageId);
 			expect(message).not.toBeNull();
@@ -91,7 +91,7 @@ describe('messageRepo',() =>{
 	});
 	describe('getMessages',() =>{
 		it('returns all messages for a specific person', async () => {
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			await factories.message.createTestMessage({ person: personId });
 			await factories.message.createTestMessage({ person: personId });
 			const messages = await messageRepo.getMessages(personId);
@@ -100,7 +100,7 @@ describe('messageRepo',() =>{
 	});
 	describe('getUnreadCount',() =>{
 		it('should return the count of unread messages for a specific person', async () => {
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			await factories.message.createTestMessage({ person: personId });
 			await factories.message.createTestMessage({ person: personId });
 			const count = await messageRepo.getUnreadCount(personId);
@@ -113,7 +113,7 @@ describe('messageRepo',() =>{
 	});
 	describe('markAllMessagesRead',() =>{
 		it('should mark all messages as read for a specific person', async () => {
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			const { messageId: messageId1 } = await factories.message.createTestMessage({ person: personId });
 			const { messageId: messageId2 } = await factories.message.createTestMessage({ person: personId });
 			const result = await messageRepo.markAllMessagesRead(personId);
@@ -124,7 +124,7 @@ describe('messageRepo',() =>{
 			expect(message2.read_at).not.toBeNull();
 		});
 		it('returns the number of messages marked as read', async () => {
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			await factories.message.createTestMessage({ person: personId });
 			await factories.message.createTestMessage({ person: personId });
 			let result = await messageRepo.markAllMessagesRead(personId);
@@ -133,8 +133,8 @@ describe('messageRepo',() =>{
 			expect(result).toBe(0);
 		});
 		it('does not mark messages as read for a different person', async () => {
-			const { personId: personId1 } = await factories.person.createTestPerson();
-			const { personId: personId2 } = await factories.person.createTestPerson();
+			const { personId: personId1 } = await factories.person.create();
+			const { personId: personId2 } = await factories.person.create();
 			const { messageId } = await factories.message.createTestMessage({ person: personId1 });
 			const result = await messageRepo.markAllMessagesRead(personId2);
 			expect(result).toBe(0);
@@ -142,7 +142,7 @@ describe('messageRepo',() =>{
 			expect(message.read_at).toBeNull();
 		});
 		it('does not mark messages as read if they are not yet visible', async () => {
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			const { messageId } = await factories.message.createTestMessage({
 				person: personId,
 				visible_at: faker.date.future(),
@@ -155,7 +155,7 @@ describe('messageRepo',() =>{
 		});
 		it('does not mark messages as read if they are already read', async () => {
 			const oldReadDate = new Date();
-			const { personId } = await factories.person.createTestPerson();
+			const { personId } = await factories.person.create();
 			const { messageId } = await factories.message.createTestMessage({
 				person: personId,
 				read_at: oldReadDate,

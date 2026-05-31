@@ -45,6 +45,23 @@ router.route('/claim')
 				}),
 			}),
 		},
+		responses: {
+			200: {
+				description: 'Successful response',
+				content: {
+					'application/json': {
+						schema: z.object({
+							message: z.string().meta({
+								description: 'A message indicating the claim request was submitted',
+							}),
+							detail: z.string().meta({
+								description: 'Additional details about the claim request submission',
+							}),
+						}),
+					},
+				},
+			},
+		},
 	}
 
 export default router;

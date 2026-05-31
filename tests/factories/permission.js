@@ -6,7 +6,7 @@ export function createPermissionData(overrides = {}) {
 	};
 }
 
-export async function createTestPermission(overrides = {}) {
+export async function create(overrides = {}) {
 	const data = createPermissionData(overrides);
 	const permissionId = await permissionRepo.createPermission(data);
 
@@ -17,5 +17,5 @@ export async function createTestPermission(overrides = {}) {
 }
 export default {
 	createPermissionData,
-	createTestPermission,
+	create,
 };

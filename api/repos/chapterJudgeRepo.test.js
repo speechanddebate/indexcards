@@ -1,4 +1,4 @@
-import chapterJudgeRepo from './chapterJudge.js';
+import chapterJudgeRepo from './chapterJudgeRepo.js';
 import factories from '../../tests/factories/index.js';
 
 describe('chapterJudgeRepo', () => {
@@ -10,7 +10,7 @@ describe('chapterJudgeRepo', () => {
 		});
 
 		it('returns unlinked chapter judges with chapter name and tourn count', async () => {
-			const { chapterJudgeId, getChapterJudge } = await factories.chapterJudge.createTestChapterJudge();
+			const { chapterJudgeId, getChapterJudge } = await factories.chapterJudge.create();
 			const cj = await getChapterJudge();
 
 			const { tournId } = await factories.tourn.createTestTourn();
@@ -28,7 +28,7 @@ describe('chapterJudgeRepo', () => {
 		});
 
 		it('counts distinct tournaments across multiple judge records', async () => {
-			const { chapterJudgeId, getChapterJudge } = await factories.chapterJudge.createTestChapterJudge();
+			const { chapterJudgeId, getChapterJudge } = await factories.chapterJudge.create();
 			const cj = await getChapterJudge();
 
 			const { tournId: tournId1 } = await factories.tourn.createTestTourn();
@@ -47,15 +47,15 @@ describe('chapterJudgeRepo', () => {
 		});
 
 		it('excludes rows requested by the excluded person', async () => {
-			const requesterId = (await factories.person.createTestPerson()).personId;
-			const otherRequesterId = (await factories.person.createTestPerson()).personId;
+			const requesterId = (await factories.person.create()).personId;
+			const otherRequesterId = (await factories.person.create()).personId;
 
-			const { chapterJudgeId: includedId } = await factories.chapterJudge.createTestChapterJudge({
+			const { chapterJudgeId: includedId } = await factories.chapterJudge.create({
 				first: 'River',
 				last: 'Unlinked',
 				person_request: otherRequesterId,
 			});
-			const { chapterJudgeId: excludedId } = await factories.chapterJudge.createTestChapterJudge({
+			const { chapterJudgeId: excludedId } = await factories.chapterJudge.create({
 				first: 'River',
 				last: 'Unlinked',
 				person_request: requesterId,
@@ -72,9 +72,9 @@ describe('chapterJudgeRepo', () => {
 		});
 
 		it('includes chapter judges with no person_request when notRequestedBy is set', async () => {
-			const requesterId = (await factories.person.createTestPerson()).personId;
+			const requesterId = (await factories.person.create()).personId;
 
-			const { chapterJudgeId } = await factories.chapterJudge.createTestChapterJudge({
+			const { chapterJudgeId } = await factories.chapterJudge.create({
 				first: 'Morgan',
 				last: 'Norequest',
 				person_request: null,

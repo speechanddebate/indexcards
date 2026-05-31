@@ -20,6 +20,7 @@ import inboxRouter from '../user/inboxRouter.ts';
 import tournRouter from '../user/tournRouter.ts';
 import sessionRouter from '../user/sessionRouter.ts';
 import judgesRouter from '../user/judgesRouter.ts';
+import studentsRouter from '../user/studentsRouter.ts';
 
 const router = Router();
 
@@ -39,6 +40,7 @@ router.use('/inbox', inboxRouter);
 //sessions
 router.use('/session', sessionRouter);
 router.use('/judges', judgesRouter);
+router.use('/students', studentsRouter);
 // User session/profile/payment/learn
 
 // User chapters
