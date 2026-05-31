@@ -20,7 +20,7 @@ const sequelize = new Sequelize(
 						durationMs: timingMs,
 						caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),
 					});
-				} else {
+				} else if (!config.DB_NO_LOGGING) {
 					logger.debug('SQL query', {
 						durationMs: timingMs,
 						caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),

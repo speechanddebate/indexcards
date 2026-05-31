@@ -10,6 +10,10 @@ export const ucfirst = (lowered) => {
 	return String(lowered).charAt(0).toUpperCase() + String(lowered).slice(1);
 };
 
+export const lcfirst = (lowered) => {
+	return String(lowered).charAt(0).toLowerCase() + String(lowered).slice(1);
+};
+
 export const eventType = (rawType) => {
 	if (rawType === 'mock_trial') return 'Mock Trial';
 	if (rawType === 'wsdc') return 'World Schools';
@@ -31,6 +35,22 @@ export const snakeToCamel = (snaked) => {
 		.replace(/([-_][a-z])/g, (group) => {
 			return group.toUpperCase().replace('-', '').replace('_', '');
 		});
+};
+
+export const dbToObject = (object, tag) => {
+
+	const newObject = {};
+	const oldObject = { ...object };
+
+	Object.keys(oldObject).forEach( (key) => {
+		if (key.includes(tag)) {
+			const newTag = lcfirst(key.replace(tag, ''));
+			newObject[newTag] = oldObject[key];
+			delete oldObject[key];
+		}
+	});
+	oldObject[ucfirst(tag)] = newObject;
+	return oldObject;
 };
 
 export default addZero;
