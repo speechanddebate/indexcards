@@ -66,7 +66,7 @@ async function getParadigmByPersonId(req, res) {
 			fields: ['id', 'updatedAt'],
 			include: {
 				Quiz: {
-					fields: ['id', 'label', 'description', 'badgeDescription', 'badge', 'badgeLink'],
+					fields: ['id', 'label', 'description', 'badge_description', 'badge', 'badge_link'],
 				},
 			},
 		},
@@ -95,10 +95,10 @@ async function getParadigmByPersonId(req, res) {
 			description: pq.Quiz?.description,
 			updatedAt: pq.updatedAt?.toISOString() || null,
 			badge: {
-				altText: pq.Quiz?.badgeDescription || null,
+				altText: pq.Quiz?.badge_description || null,
 				imageUrl: (pq.Quiz?.id && pq.Quiz?.badge) ? `${config.S3_URL}/badges/${pq.Quiz.id}/${pq.Quiz.badge}`
 					: null,
-				link: pq.Quiz?.badgeLink || null,
+				link: pq.Quiz?.badge_link || null,
 			},
 		})) ?? [],
 	});
