@@ -63,8 +63,7 @@ describe('GET /rest/paradigms/:personId', () => {
             .expect('Content-Type', /json/)
             .expect(200);
 
-		const body = res.body;
-		expect(body).toMatchSchema(ParadigmDetails);
+		expect(res.body).toMatchSchema(ParadigmDetails);
 	});
 });
 describe('GET /rest/paradigms/:personId/record', () => {
