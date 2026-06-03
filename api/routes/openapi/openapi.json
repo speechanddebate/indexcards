@@ -1840,7 +1840,26 @@
           "Quizzes",
           "Orval"
         ],
-        "parameters": [],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "description": "Number of quizzes to return",
+              "type": "number"
+            },
+            "description": "Number of quizzes to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "description": "Number of quizzes to skip",
+              "type": "number"
+            },
+            "description": "Number of quizzes to skip"
+          }
+        ],
         "responses": {
           "200": {
             "description": "List of quizzes",

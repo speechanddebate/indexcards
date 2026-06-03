@@ -13,6 +13,8 @@ async function getQuizzes(req, res) {
 	} : undefined;
 
 	const quizzes = await quizRepo.getQuizzes({
+		limit: req.valid?.query?.limit ?? undefined,
+		offset: req.valid?.query?.offset ?? undefined,
 		where: {
 			sitewide: true,
 			hidden: false,
