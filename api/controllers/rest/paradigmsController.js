@@ -62,11 +62,14 @@ async function getParadigmByPersonId(req, res) {
 
 	const certInclude = {
 		PersonQuizzes: {
-			isValid: true,
-			fields: ['id', 'updatedAt'],
+			where: {
+				hidden: false,
+				pending: false,
+			},
+			fields: ['id', 'updatedAt', 'pending', 'approved_by'],
 			include: {
 				Quiz: {
-					fields: ['id', 'label', 'description', 'badgeDescription', 'badge', 'badgeLink'],
+					fields: ['id', 'tag', 'label', 'description', 'badge_description', 'badge', 'badge_link', 'circuit	'],
 				},
 			},
 		},
@@ -91,15 +94,25 @@ async function getParadigmByPersonId(req, res) {
 		lastReviewed: person.settingsTimestamps['paradigm']?.updatedAt || null,
 		paradigm: person.settings['paradigm'] || null,
 		certifications: person.PersonQuizzes?.map(pq => ({
-			title: pq.Quiz?.label,
-			description: pq.Quiz?.description,
-			updatedAt: pq.updatedAt?.toISOString() || null,
-			badge: {
-				altText: pq.Quiz?.badgeDescription || null,
+			id: pq.Quiz.id,
+			tag: pq.Quiz.tag,
+			label: pq.Quiz.label,
+			description: pq.Quiz.description,
+			circuit: pq.Quiz.circuit,
+			Badge: {
+				altText: pq.Quiz?.badge_description || null,
 				imageUrl: (pq.Quiz?.id && pq.Quiz?.badge) ? `${config.S3_URL}/badges/${pq.Quiz.id}/${pq.Quiz.badge}`
 					: null,
-				link: pq.Quiz?.badgeLink || null,
+				link: pq.Quiz?.badge_link || null,
 			},
+			PersonQuizzes: [{
+				id: pq.id,
+				person: pq.person,
+				quiz: pq.quiz,
+				pending: pq.pending,
+				approvedBy: pq.approved_by,
+				updatedAt: pq.updatedAt,
+			}],
 		})) ?? [],
 	});
 };

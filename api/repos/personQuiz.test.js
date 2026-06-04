@@ -6,7 +6,7 @@ describe('PersonQuizRepo', () => {
 		it('creates a new PersonQuiz and returns its id', async () => {
 			// Arrange
 			const { personId } = await factories.person.create();
-			const { quizId } = await factories.quiz.createTestQuiz({ person: personId });
+			const { quizId } = await factories.quiz.create({ person: personId });
 			const personQuizData = {
 				person: personId,
 				quiz: quizId,

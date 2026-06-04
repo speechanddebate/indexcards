@@ -268,10 +268,8 @@ describe('PersonRepo', () => {
 		it('attaches PersonQuizzes when include.PersonQuizzes is true', async () => {
 			// Arrange
 			const { personId } = await factories.person.create();
-			const { quizId } = await factories.quiz.createTestQuiz({ person: personId });
-			await factories.personQuiz.createTestPersonQuiz({
+			await factories.personQuiz.create({
 				person: personId,
-				quiz: quizId,
 				hidden: false,
 				pending: false,
 				completed: true,

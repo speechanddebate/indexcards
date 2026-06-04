@@ -4,7 +4,8 @@ import circuitsRouter from './circuitsRouter.ts';
 import judgesRouter from './judgesRouter.ts';
 import pageRouter from './pageRouter.js';
 import tournsRouter from './tournsRouter.js';
-import paradigmsRouter from './paradigmsRouter.js';
+import paradigmsRouter from './paradigmsRouter.ts';
+import quizzesRouter from './quizzesRouter.ts';
 import studentsRouter from './studentsRouter.ts';
 
 const router = Router();
@@ -15,6 +16,7 @@ router.use('/judges', judgesRouter);
 router.use('/pages', pageRouter);
 router.use('/tourns', tournsRouter);
 router.use('/paradigms', paradigmsRouter);
+router.use('/quizzes', quizzesRouter);
 router.use('/students', studentsRouter);
 
 export default router;

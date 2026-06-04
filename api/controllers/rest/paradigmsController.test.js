@@ -1,5 +1,4 @@
 import personRepo from '../../repos/personRepo.js';
-import factories from '../../../tests/factories/index.js';
 import { createContext } from '../../../tests/httpMocks.ts';
 import paradigmsController from './paradigmsController';
 import * as judgeRecordsService from '../../services/results/judgeRecords.js';
@@ -50,7 +49,19 @@ describe('paradigmsController', () => {
 					paradigm: 'test',
 				},
 				settingsTimestamps:{},
-				PersonQuizzes: [await factories.person.createPersonQuiz()],
+				PersonQuizzes: [{
+					updatedAt: new Date(),
+					Quiz: {
+						id: 1,
+						tag: null,
+						label: 'Test Quiz',
+						description: 'A test quiz',
+						badge_description: 'A test badge description',
+						badge: 'Test Badge',
+						badge_link: 'http://example.com/badge',
+						circuit: null,
+					},
+				}],
 			});
 			const { req, res } = createContext({
 				valid: {params: { personId: 1 }},

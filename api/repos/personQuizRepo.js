@@ -11,17 +11,15 @@ function buildPersonQuizQuery(opts = {}) {
 		include: [],
 	};
 
-	if(opts.include?.Quiz){
-		query.include.push({
-			...quizInclude(opts.include.Quiz),
-			as: 'quiz_quiz',
-		});
+	if (opts.where) {
+		query.where = { ...query.where, ...opts.where };
 	}
 
-	//return only published and not hidden quizzes
-	if(opts.isValid) {
-		query.where.hidden = false;
-		query.where.pending = false;
+	if(opts.include?.Quiz){
+		query.include.push({
+			as: 'quiz_quiz',
+			...quizInclude(opts.include.Quiz),
+		});
 	}
 
 	if (opts.limit) {
