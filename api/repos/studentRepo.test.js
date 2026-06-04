@@ -45,6 +45,7 @@ describe('unlinkedSearch', () => {
 		const results = await studentRepo.unlinkedSearch({
 			first: firstPrefix,
 			last: lastPrefix,
+		}, {
 			schoolYear,
 		});
 
@@ -87,6 +88,7 @@ describe('unlinkedSearch', () => {
 		const results = await studentRepo.unlinkedSearch({
 			first: firstPrefix,
 			last: lastPrefix,
+		}, {
 			schoolYear,
 		});
 

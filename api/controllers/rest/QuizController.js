@@ -2,7 +2,7 @@ import quizRepo from '../../repos/quizRepo.js';
 import config from '../../../config/config.js';
 
 async function getQuizzes(req, res) {
-	//if a person is requesting, include their PersonQuiz data to determine if they've taken any quizzes or not	
+	//if a person is requesting, include their PersonQuiz data to determine if they've taken any quizzes or not
 	const personId = req.actor?.Person?.id;
 	const include = personId ? {
 		PersonQuizzes: {

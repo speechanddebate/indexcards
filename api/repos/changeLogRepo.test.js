@@ -1,4 +1,4 @@
-import changeLogRepo from './changeLogRepo';
+import changeLogRepo from './changeLogRepo.js';
 import factories from '../../tests/factories/index.js';
 describe('changeLogRepo', () => {
 	it('fetches a changelog with a given id', async () => {

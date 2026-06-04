@@ -8,7 +8,7 @@ const STUDENT_SEARCH_LIMIT_WINDOW_MS = 24 * 60 * 60 * 1000;
 const STUDENT_SEARCH_LIMIT_MAX = 9;
 
 export async function unlinkedSearch(req, res) {
-	let { first, last } = req.valid.query;
+	let { first, last, limit, offset } = req.valid.query;
 
 	if (!first || !last) {
 		first = req.actor.Person.first;
@@ -52,7 +52,7 @@ export async function unlinkedSearch(req, res) {
 		});
 	}
 
-	const results = await studentRepo.unlinkedSearch({ first, last });
+	const results = await studentRepo.unlinkedSearch({ first, last }, { limit, offset });
 
 	res.json(results.map(s => ({
 		id: s.id,

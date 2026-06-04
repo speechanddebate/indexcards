@@ -137,6 +137,10 @@
       "description": "Auto-discovered tag"
     },
     {
+      "name": "Judges",
+      "description": "Auto-discovered tag"
+    },
+    {
       "name": "Rounds",
       "description": "Auto-discovered tag"
     },
@@ -247,6 +251,7 @@
         "Entries",
         "Events",
         "Invite",
+        "Judges",
         "Orval",
         "Paradigms",
         "Public",
@@ -696,9 +701,30 @@
         "operationId": "RestJudgesUnlinkedSearch",
         "description": "Search for judges that are not linked to a Tabroom account.",
         "tags": [
-          "Orval"
+          "Orval",
+          "Judges"
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100,
+              "description": "Maximum number of results to return",
+              "type": "number"
+            },
+            "description": "Maximum number of results to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "description": "Number of results to skip for pagination",
+              "type": "number"
+            },
+            "description": "Number of results to skip for pagination"
+          },
           {
             "in": "query",
             "name": "first",
@@ -1902,6 +1928,26 @@
           "Orval"
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "default": 100,
+              "description": "Maximum number of results to return",
+              "type": "number"
+            },
+            "description": "Maximum number of results to return"
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "schema": {
+              "default": 0,
+              "description": "Number of results to skip for pagination",
+              "type": "number"
+            },
+            "description": "Number of results to skip for pagination"
+          },
           {
             "in": "query",
             "name": "first",

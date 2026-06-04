@@ -45,15 +45,13 @@ async function getStudents(opts = {}) {
 /**
   * Search for students that are not linked to a tabroom account.
   */
-async function unlinkedSearch(params) {
-	if(!params?.first || !params?.last) {
+async function unlinkedSearch({ first, last }, opts = {}) {
+	if(!first || !last) {
 		throw new Error('unlinkedSearch requires first and last parameters');
 	}
-	const first = params.first;
-	const last = params.last;
-	const schoolYear = params.schoolYear ?? schoolYearDateRange().start.getFullYear();
+	const schoolYear = opts.schoolYear ?? schoolYearDateRange().start.getFullYear();
 
-	const sql = `
+	let sql = `
 		SELECT
 			student.id,
 			student.first,
@@ -79,11 +77,16 @@ async function unlinkedSearch(params) {
 			AND student.grad_year > :schoolYear
 		GROUP BY student.id
 	`;
+	if (opts.limit && opts.offset) {
+		sql += ' LIMIT :limit OFFSET :offset';
+	}
 
 	return db.sequelize.query(sql, {
 		replacements: {
 			first: `${first}%`,
 			last: `${last}%`,
+			limit: opts.limit,
+			offset: opts.offset,
 			schoolYear,
 		},
 		type: db.Sequelize.QueryTypes.SELECT,

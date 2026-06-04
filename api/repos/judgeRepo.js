@@ -16,6 +16,8 @@ function buildJudgeQuery(opts = {}) {
 	if (opts.where) {
 		query.where = { ...query.where, ...opts.where };
 	}
+	if (opts.limit) query.limit = opts.limit;
+	if (opts.offset) query.offset = opts.offset;
 
 	if (opts.include?.Category) {
 		query.include.push({
@@ -84,7 +86,7 @@ async function unlinkedSearch({ first, last }, opts = {}) {
 		throw new Error('unlinkedSearch requires first and last parameters');
 	}
 
-	const sql = `
+	let sql = `
 		SELECT 
 			judge.id,
 			judge.first,
@@ -103,11 +105,15 @@ async function unlinkedSearch({ first, last }, opts = {}) {
 			AND (:notRequestedBy IS NULL OR judge.person_request IS NULL OR judge.person_request != :notRequestedBy)
 		ORDER BY tourn.start, judge.last ASC, judge.first ASC
 	`;
-
+	if(opts.limit && opts.offset !== undefined) {
+		sql += ' LIMIT :limit OFFSET :offset';
+	}
 	return db.sequelize.query(sql, {
 		replacements: {
 			first: `${first}%`,
 			last: `${last}%`,
+			limit: opts.limit,
+			offset: opts.offset,
 			notRequestedBy: opts.notRequestedBy ?? null,
 		},
 		type: db.Sequelize.QueryTypes.SELECT,

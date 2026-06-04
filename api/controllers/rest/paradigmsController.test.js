@@ -50,7 +50,12 @@ describe('paradigmsController', () => {
 				},
 				settingsTimestamps:{},
 				PersonQuizzes: [{
-					updatedAt: new Date(),
+					id: 1,
+					person: 1,
+					quiz: 1,
+					approved_by: null,
+					pending: false,
+					updatedAt: '2026-01-01T00:00:00.000Z',
 					Quiz: {
 						id: 1,
 						tag: null,

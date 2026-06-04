@@ -60,10 +60,12 @@ describe('judgesController.unlinkedSearch', () => {
 		await judgesController.unlinkedSearch(req, res);
 
 		expect(judgeRepo.unlinkedSearch).toHaveBeenCalledWith(
-			{ first: 'Jordan', last: 'Lee' },
+			expect.objectContaining({ first: 'Jordan', last: 'Lee' }),
+			expect.any(Object),
 		);
 		expect(chapterJudgeRepo.unlinkedSearch).toHaveBeenCalledWith(
-			{ first: 'Jordan', last: 'Lee' },
+			expect.objectContaining({ first: 'Jordan', last: 'Lee' }),
+			expect.any(Object),
 		);
 	});
 });

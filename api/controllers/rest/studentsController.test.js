@@ -47,7 +47,7 @@ describe('studentsController', () => {
 				student_search_count: 1,
 				last_student_search: expect.any(Date),
 			});
-			expect(studentRepo.unlinkedSearch).toHaveBeenCalledWith({ first: 'Te', last: 'St' });
+			expect(studentRepo.unlinkedSearch).toHaveBeenCalledWith({ first: 'Te', last: 'St' }, expect.any(Object));
 			expect(res.body).toEqual([
 				{
 					id: 101,
@@ -184,7 +184,7 @@ describe('studentsController', () => {
 				student_search_count: 1,
 				last_student_search: expect.any(Date),
 			});
-			expect(studentRepo.unlinkedSearch).toHaveBeenCalledWith({ first: 'Test', last: 'Student' });
+			expect(studentRepo.unlinkedSearch).toHaveBeenCalledWith({ first: 'Test', last: 'Student' }, expect.any(Object));
 			expect(res.body).toEqual([
 				{
 					id: 101,
