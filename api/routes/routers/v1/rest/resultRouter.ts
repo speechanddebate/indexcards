@@ -13,9 +13,9 @@ import { ValidateRequest } from '../../../../middleware/validation.js';
 const router = Router({ mergeParams: true });
 
 router.route('/').get(ValidateRequest, controller.getResultSets).openapi = {
-	path: '/rest/tourns/{tournId}/results',
-	summary: "Get tournament results",
-	description: 'Returns public result information for a given tournament',
+	path        : '/rest/tourns/{tournId}/results',
+	summary     : 'Get tourn public result sets',
+	description : 'Returns public result information for a given tournament',
 	operationId : 'getTournResultSets',
 	requestParams: {
 		path: z.object({
@@ -38,14 +38,19 @@ router.route('/').get(ValidateRequest, controller.getResultSets).openapi = {
 };
 
 router.route('/:resultSetId').get(ValidateRequest, controller.getResultSet).openapi = {
-	path: '/rest/tourns/{tournId}/results/{resultSetId}',
-	summary: "Get tourn resultSet",
-	description: 'Returns result information given a result set ID if it is public',
+	path        : '/rest/tourns/{tournId}/results/{resultSetId}',
+	summary     : 'Get public result set',
+	description : 'Returns result set with full display information given a result set ID if it is public',
 	operationId : 'getResultSet',
 	requestParams: {
+		query: z.object({
+			nocache: z.coerce.boolean().optional().meta({
+				description: 'Admin only option on whether to invalidate the cache',
+			}),
+		}),
 		path: z.object({
-			tournId: utils.id.meta({ description: 'ID of the tournament to get results for' }),
-			resultSetId: utils.id.meta({ description: 'ID of the result set to get' }),
+			tournId     : utils.id.meta({ description: 'ID of the tournament to get results for' }),
+			resultSetId : utils.id.meta({ description: 'ID of the result set to get' }),
 		}),
 	},
 	responses: {
@@ -64,9 +69,9 @@ router.route('/:resultSetId').get(ValidateRequest, controller.getResultSet).open
 };
 
 router.route('/event/:eventId').get(ValidateRequest, controller.getResultSets).openapi = {
-	path: '/rest/tourns/{tournId}/results/event/{eventId}',
-	summary: "Get event results",
-	description: 'Returns public result information for a given event',
+	path        : '/rest/tourns/{tournId}/results/event/{eventId}',
+	summary     : "Get event results",
+	description : 'Returns public result information for a given event',
 	operationId : 'getEventResultSets',
 	requestParams: {
 		path: z.object({

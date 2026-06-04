@@ -1,29 +1,47 @@
 import db from '../data/db.js';
-import { dbToObject } from '../helpers/text.js';
-import { eventInclude } from './eventRepo.js';
+import { stripNulls, dbToObject } from '../helpers/text.js';
 
-const buildResultSetQuery = (opts = {}) => {
+const buildResultSetQuery = ({opts = {}, scope = {}}) => {
 
-	let limiter = '';
+	let limiter = {
+		condition : '',
+		joins     : '',
+		fields    : '',
+	};
+
 	const query = {
 		where: {},
 		include: [],
 	};
 
-	if(opts?.include?.Event){
-		query.include.push({
-			...eventInclude(opts?.include?.Event),
-			as       : 'event_event',
-			required : false,
-		});
-	}
-
 	if(opts.coach) {
 		query.where.coach = 1;
-		limiter = 'and rs.coach = 1';
+		limiter.condition += 'and rs.coach = 1 ';
 	} else if(!opts.unpublished){
 		query.where.published = 1;
-		limiter = ' and rs.published = 1';
+		limiter.condition += ' and rs.published = 1 ';
+	}
+
+	const conditionals = [];
+
+	Object.keys(scope).forEach( (rawField) => {
+		if (rawField === 'resultSetId') {
+			limiter.condition += '\n and rs.id = :resultSetId ';
+		} else if (rawField === 'tournId' && !scope.eventId) {
+			limiter.fields += ', event';
+			limiter.condition += '\n and rs.event = event.id and event.tourn = :tournId ';
+			conditionals.push('event');
+		} else {
+			// invalid request.  BEGONE!
+			limiter.condition += '\n and 1=2 ';
+		}
+
+		let field = rawField.replace('Id', '');
+		if (scope.eventId) limiter.condition += ` and rs.${field} = :${rawField}`;
+	});
+
+	if (!conditionals.includes('event')) {
+		limiter.joins = ' left join event on event.id = rs.event ';
 	}
 
 	return {query, limiter};
@@ -35,91 +53,71 @@ const buildResultSetQuery = (opts = {}) => {
 
 export const getResultSets = async (scope = {}, opts = {}) => {
 
-	let { limiter } = buildResultSetQuery(opts);
-	let limiterFields = '';
-	let joinEvent = '';
+	let { limiter } = buildResultSetQuery({opts, scope});
 
-	Object.keys(scope).forEach( (rawField) => {
-
-		if (rawField === 'resultSetId') {
-			limiter += ' and rs.id = :resultSetId ';
-			return;
-		}
-
-		if (rawField === 'tournId' && !scope.eventId) {
-			limiterFields = ', event';
-			limiter += ' and rs.event = event.id and event.tourn = :tournId ';
-			return;
-		}
-
-		if (!limiterFields) {
-			joinEvent = 'left join event on event.id = rs.event';
-		}
-
-		let field = rawField.replace('Id', '');
-		if (scope.eventId) limiter += ` and rs.${field} = :${rawField}`;
-	});
-
-	const rsen = await db.sequelize.query(`
+	const resultSetData = await db.sequelize.query(`
 		select
 			rs.id, rs.tag, rs.label, rs.published, rs.coach, rs.entity,
 			rs.nsda_category rsNSDA,
 			event.nsda_category eventNsdaCategory,
-			event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType, rs.code eventCode,
+			event.id eventId, event.name eventName, event.abbr eventAbbr, event.level eventLevel,
+			event.type eventType, rs.code eventCode,
 			circuit.id circuitId, circuit.name circuitName, circuit.abbr circuitAbbr,
 			rs.sweep_set sweepSet,
 			rs.sweep_award sweepAward,
 			rs.generated createdAt
-		from (result_set rs ${limiterFields})
+		from (result_set rs ${limiter.fields})
 			left join circuit on circuit.id = rs.circuit
-			${joinEvent}
-			and rs.published = 1
+			${limiter.joins}
 		where 1=1
-			${limiter}
+			${limiter.condition || 'and rs.published = 1'}
+		group by rs.id
+		order by event.nsda_category, rs.nsda_category, event.level, event.abbr, rs.generated DESC
 	`, {
 		type: db.Sequelize.QueryTypes.SELECT,
 		replacements: { ...scope},
 	});
 
-	return rsen.map( (rs) => {
+	const events = {};
+
+	resultSetData.forEach( (rs) => {
 
 		let resultSet = { ...rs};
+		const eventId = rs.eventId;
+		resultSet = dbToObject(resultSet, 'event');
 
 		// Process Event into standard format if there is one
-		if (resultSet.eventId) resultSet = dbToObject(resultSet, 'event');
-
-		if (resultSet.Event &! resultSet.Event.nsdaCategory && resultSet.resultSetNSDA) {
-			resultSet.Event.nsdaCategory = resultSet.resultSetNSDA;
-		} else {
-			delete resultSet.rsNSDA;
+		if (!events[eventId]) {
+			if (resultSet.Event?.nsdaCategory && resultSet.rsNSDA) {
+				resultSet.Event.nsdaCategory = resultSet.rsNSDA;
+			}
+			events[eventId] = {...resultSet.Event};
+			events[eventId].ResultSets = [];
 		}
 
 		//Format Circuit too if there is one.
 		if (resultSet.circuitId) resultSet = dbToObject(resultSet, 'circuit');
 
+		delete resultSet.Event;
+		delete resultSet.rsNSDA;
 		delete resultSet.published;
 		delete resultSet.coach;
 
 		if (resultSet.bracket) resultSet.bracket = true;
 		if (!resultSet.bracket) delete resultSet.bracket;
 
-		Object.keys(resultSet).forEach( (key) => {
-			if (!resultSet[key] || resultSet[key] === 'null') {
-				delete resultSet[key];
-			}
-		});
-
-		return resultSet;
+		events[eventId].ResultSets.push(stripNulls(resultSet));
 	});
+
+	return events;
 };
 
-/**
- *
- * Return a single result set with full results.  Creates cached results where
- * none exist.
- **/
+// Return a single result set with full results.  Creates cached results where
+// none exist.
 
-export const getResultSet = async (resultSetId) => {
+export const getResultSet = async (scope = {}, query = {}, opts = {}) => {
+
+	let { limiter } = buildResultSetQuery({opts, scope});
 
 	const rsen = await db.sequelize.query(`
 		select
@@ -127,20 +125,21 @@ export const getResultSet = async (resultSetId) => {
 			rs.cache,
 			rs.nsda_category rsNSDA,
 			event.nsda_category eventNsdaCategory,
-			event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType, rs.code eventCode,
+			event.id eventId, event.name eventName, event.abbr eventAbbr,
+			event.level eventLevel, event.type eventType, rs.code eventCode,
 			circuit.id circuitId, circuit.name circuitName, circuit.abbr circuitAbbr,
 			rs.sweep_set sweepSet,
 			rs.sweep_award sweepAward,
 			rs.generated createdAt
-		from (result_set rs)
+		from (result_set rs ${limiter.fields})
 			left join circuit on circuit.id = rs.circuit
-			left join event on event.id = rs.event
+			${limiter.joins}
 		where 1=1
-			and rs.published = 1
+			${limiter.condition || 'and rs.published = 1'}
 			and rs.id = :resultSetId
 	`, {
-		type: db.Sequelize.QueryTypes.SELECT,
-		replacements: { resultSetId },
+		type         : db.Sequelize.QueryTypes.SELECT,
+		replacements : { ...scope },
 	});
 
 	const resultSets = [];
@@ -164,12 +163,9 @@ export const getResultSet = async (resultSetId) => {
 
 		if (resultSet.bracket) resultSet.bracket = true;
 		if (!resultSet.bracket) delete resultSet.bracket;
+		resultSet = stripNulls(resultSet);
 
-		Object.keys(resultSet).forEach( (key) => {
-			if (!resultSet[key] || resultSet[key] === 'null') {
-				delete resultSet[key];
-			}
-		});
+		if (query.nocache) delete resultSet.cache;
 
 		let cache = {};
 		if (resultSet.cache) cache = JSON.parse(resultSet.cache);
@@ -177,12 +173,18 @@ export const getResultSet = async (resultSetId) => {
 		if (Object.keys(cache).length > 0) {
 
 			// If the results are already cached, deliver 'em up.
-			resultSet.headers = cache.headers;
+			if (cache.headers) resultSet.headers = cache.headers;
+			if (cache.rounds) resultSet.rounds = cache.rounds;
+
 			delete resultSet.cache;
 
 			const rawResults = await db.sequelize.query(`
 				select
-					result.*
+					result.rank,
+					result.place,
+					result.percentile,
+					result.cache,
+					result.panel section
 				from result
 				where 1=1
 					and result_set = :resultSetId
@@ -192,7 +194,16 @@ export const getResultSet = async (resultSetId) => {
 				type         : db.Sequelize.QueryTypes.SELECT,
 			});
 
-			resultSet.results = mapResults(rawResults);
+			resultSet.results = rawResults.map( (result) => {
+				if (result.cache) {
+					cache = JSON.parse(result.cache);
+					Object.keys(cache).forEach( (key) => {
+						result[key] = cache[key];
+					});
+					delete result.cache;
+				}
+				return result;
+			});
 
 		} else {
 
@@ -200,15 +211,32 @@ export const getResultSet = async (resultSetId) => {
 			// the cache for next time. The cache generator will save the result
 			// specific ones (scores and values).
 
-			const { headers, results } = await createResultCache( resultSet );
-			resultSet.headers = headers;
-			resultSet.results = results;
+			let newCache = {};
+
+			if (resultSet.tag === 'bracket') {
+
+				newCache = await createBracketCache( resultSet );
+				if (newCache.rounds) resultSet.rounds = newCache.rounds;
+
+			} else {
+
+				newCache = await createResultCache( resultSet );
+				if (newCache.headers) resultSet.headers = newCache.headers;
+
+				// These are already cached in the results, so do not save them
+				// to the result_set, but available now.
+
+				if (newCache.results) {
+					resultSet.results = newCache.results;
+					delete newCache.results;
+				}
+			}
 
 			await db.sequelize.query(`
 				update result_set set cache = :cache where id = :resultSetId
 			`, {
 				replacements: {
-					cache       : JSON.stringify({ headers }),
+					cache       : JSON.stringify({ ...newCache }),
 					resultSetId : resultSet.id,
 				},
 				type: db.Sequelize.QueryTypes.UPDATE,
@@ -216,7 +244,6 @@ export const getResultSet = async (resultSetId) => {
 
 			delete resultSet.cache;
 		}
-
 		resultSets.push(resultSet);
 	};
 
@@ -241,13 +268,17 @@ const createResultCache = async (resultSet) => {
 			result.*,
 			entry.id entryId, entry.code entryCode, entry.name entryName,
 			school.id schoolId, school.code schoolCode, school.name schoolName,
+			entrySchool.id entrySchoolId, entrySchool.code entrySchoolCode, entrySchool.name entrySchoolName,
 			student.id studentId, student.first studentFirst, student.last studentLast,
 				student.middle studentMiddle,
-			(select round.name from round where round.id = result.round) as roundName
+			(select round.name from round where round.id = result.round) as roundName,
+			section.letter section
 		from (result)
 			left join school on school.id = result.school
 			left join student on student.id = result.student
 			left join entry on entry.id = result.entry
+			left join school entrySchool on entrySchool.id = entry.school
+			left join panel section on section.id = result.panel
 		where 1=1
 			and result.result_set = :resultSetId
 			order by entry.code
@@ -274,7 +305,6 @@ const createResultCache = async (resultSet) => {
 		headersById[header.id] = {
 			tag         : header.tag,
 			description : header.description,
-			sortable    : true,
 		};
 
 		if (header.no_sort)  headersById[header.id].sortable     = false;
@@ -309,7 +339,6 @@ const createResultCache = async (resultSet) => {
 	// but for now...
 
 	rawValues.forEach( (rv) => {
-
 		// 999 was the Terrible, Horrible, No Good, Very Bad way of handling
 		// raw scores that I once "designed."  I cannot even blame Jon for this
 		// one, unfortunately. I'm going to pull from scratch because otherwise
@@ -332,24 +361,33 @@ const createResultCache = async (resultSet) => {
 			headerKey++;
 		}
 
-		delete rv.protocolId;
-		delete rv.protocolName;
 		if (!results[rv.result].values)		results[rv.result].values = {};
-
 		const sortedHeader = idToKey[rv.header];
-		delete rv.header;
-		delete rv.priority;
-		results[rv.result].values[sortedHeader] = { ...rv };
+		results[rv.result].values[sortedHeader] = rv.value;
 	});
 
 	// Raw scores that went into the creation of this set, when they exist.
 	// Skipping school based raw scores for now since they are far too complex
 	// to calculate if they are not in the initial set.
 
-	if (resultSet.entity === 'school' || resultSet.tag == 'sweeps') {
+	// Actually I'm reconsidering.  This leads to a lot of duplicated data and
+	// if a tournament wants to release raw scores there is a result set for
+	// that.  Skipping this for now but leaving it here for when I flip flop
+	// again. So set it to skip if 1=1 and then wait.
 
-		// No scores for schools because dear Lord that's complex. Eventually
-		// the score generator should itself save the per entry scoring.
+	if (
+		// eslint-disable-next-line no-constant-binary-expression
+		1 === 1
+		|| resultSet.entity === 'school'
+		|| resultSet.tag == 'sweeps'
+		|| resultSet.tag == 'scores'
+	) {
+
+		// No scores for schools because dear Lord that's complex.
+		// Eventually the score generator should itself save the per entry
+		// scoring.
+
+		// And if the report itself is scores, then duh.
 
 	} else {
 
@@ -394,32 +432,25 @@ const createResultCache = async (resultSet) => {
 		if (rawScores.length > 1) {
 			rawScores.forEach( (score) => {
 
-				Object.keys(score).forEach( (key) => {
-					if (
-						key !== 'winloss'
-						&& (!score[key] || score[key] === 'null')
-					) {
-						delete score[key];
-					}
-				});
+				const cleanScore = stripNulls(score, ['winloss']);
 
-				const resultId = score.resultId;
-				delete score.resultId;
+				const resultId = cleanScore.resultId;
+				delete cleanScore.resultId;
 
-				const roundName = score.roundName;
-				delete score.roundName;
+				const roundName = cleanScore.roundName;
+				delete cleanScore.roundName;
 
 				if (!results[resultId].scores) 	results[resultId].scores = {};
 				if (!results[resultId].scores[roundName]) 	results[resultId].scores[roundName] = [];
 
-				if (score.tag === 'winloss') {
-					if (score.value) score.value = 'W';
-					if (!score.value) score.value = 'L';
+				if (cleanScore.tag === 'winloss') {
+					if (cleanScore.value) cleanScore.value = 'W';
+					if (!cleanScore.value) cleanScore.value = 'L';
 				}
-				score[score.tag] = score.value || 0;
-				delete score.tag;
-				delete score.value;
-				results[resultId].scores[roundName].push(score);
+				cleanScore[cleanScore.tag] = cleanScore.value || 0;
+				delete cleanScore.tag;
+				delete cleanScore.value;
+				results[resultId].scores[roundName].push(cleanScore);
 			});
 		}
 	}
@@ -431,10 +462,7 @@ const createResultCache = async (resultSet) => {
 			update result set cache = :cache where id = :resultId
 		`, {
 			replacements : {
-				cache    : JSON.stringify({
-					values: results[resultId].values,
-					scores: results[resultId].scores,
-				}),
+				cache    : JSON.stringify(results[resultId]),
 				resultId,
 			},
 			type: db.Sequelize.QueryTypes.UPDATE,
@@ -444,7 +472,95 @@ const createResultCache = async (resultSet) => {
 
 	await Promise.all(promises);
 
-	return {headers: headersByKey, results};
+	// There really isn't much need for all those ID number keys.
+	const resultArray = Object.keys(results).map( (resultId) => {
+		return results[resultId];
+	});
+
+	return {headers: headersByKey, results: resultArray};
+};
+
+const createBracketCache = async (resultSet) => {
+
+	if (resultSet.tag !== 'bracket') return {error: 'Result set not valid for bracketing'};
+
+	// Brackets are totally different. The old system used to just consult the
+	// rounds in the system but since I'm trying to use result sets as a data
+	// independent thing, recreate that here.
+
+	const rawSections = await db.sequelize.query(`
+		select
+			round.id roundId, round.name roundName, round.label roundLabel,
+			round.type roundType,
+			panel.id panelId, panel.letter, panel.bracket,
+			panel.bye, ballot.side,
+			entry.id entryId, entry.code entryCode,
+			(select room.name from room where panel.room = room.id) as roomName
+		from (round, panel, ballot, entry)
+			where 1=1
+			and round.event = :eventId
+			and round.type IN ('elim', 'final')
+			and round.published IN (1, 2)
+			and round.id = panel.round
+			and panel.id = ballot.panel
+			and ballot.entry = entry.id
+		group by entry.id, round.id
+		order by round.name, panel.bracket, ballot.side
+	`, {
+		replacements: { eventId: resultSet.Event.id },
+		type: db.Sequelize.QueryTypes.SELECT,
+	});
+
+	const rounds = {};
+	let order = 1;
+
+	rawSections.forEach( (resultData) => {
+
+		if (!rounds[resultData.roundName]) {
+			rounds[resultData.roundName] = {
+				label : resultData.roundLabel || `Round ${resultData.roundName}`,
+				type  : resultData.roundType,
+				order,
+				Sections : {},
+			};
+			order++;
+		}
+
+		const round = stripNulls(rounds[resultData.roundName]);
+
+		if (!round.Sections[resultData.bracket]) {
+			round.Sections[resultData.bracket] = {
+				letter  : resultData.letter,
+				bye     : resultData.bye,
+				room    : resultData.roomName,
+				Entries : {},
+			};
+		}
+
+		const section = stripNulls(round.Sections[resultData.bracket]);
+
+		// CHAIN OF DOOM
+		section.Entries[resultData.side] = {
+			id   : resultData.entryId,
+			code : resultData.entryCode,
+		};
+
+		round.Sections[resultData.bracket] = section;
+		rounds[resultData.roundName] = round;
+
+	});
+
+	await db.sequelize.query(`
+		update result_set set cache = :cache where id = :resultSetId
+	`, {
+		replacements: {
+			cache       : JSON.stringify({ rounds }),
+			resultSetId : resultSet.id,
+		},
+		type: db.Sequelize.QueryTypes.UPDATE,
+	});
+
+	return { rounds };
 };
 
 const mapResults = (rawResults) => {
@@ -453,27 +569,44 @@ const mapResults = (rawResults) => {
 
 	rawResults.forEach( (result) => {
 
-		if (result.entryId) {
-			result.Entry = {
-				id   : result.entryId,
-				code : result.entryCode,
-				name : result.entryName,
-			};
-			delete result.entryId;
-			delete result.entryName;
-			delete result.entryCode;
-		}
-
 		if (result.schoolId) {
-			result.entityName = result.schoolName;
-			result.Entry = {
+			result.School = {
 				id   : result.schoolId,
 				code : result.schoolCode,
 				name : result.schoolName,
 			};
 			delete result.schoolId;
+			delete result.school;
 			delete result.schoolName;
 			delete result.schoolCode;
+			result.entityName = result.schoolName;
+		}
+
+		if (result.entryId) {
+
+			result.Entry = {
+				id   : result.entryId,
+				code : result.entryCode,
+				name : result.entryName,
+			};
+
+			if (result.entrySchoolId) {
+				result.School = {
+					id   : result.entrySchoolId,
+					code : result.entrySchoolCode,
+					name : result.entrySchoolName,
+				};
+
+				delete result.entrySchoolId;
+				delete result.entrySchoolCode;
+				delete result.entrySchoolName;
+			}
+
+			delete result.entryId;
+			delete result.entry;
+			delete result.entryName;
+			delete result.entryCode;
+			result.entityName = result.entryCode;
 		}
 
 		if (result.studentId) {
@@ -486,6 +619,7 @@ const mapResults = (rawResults) => {
 			result.entityName = `${result.studentFirst} ${result.studentMiddle} ${result.studentLast}`;
 			result.entityName = result.entityName.replace(/  +/g, ' ');;
 			delete result.studentId;
+			delete result.student;
 			delete result.studentFirst;
 			delete result.studentMiddle;
 			delete result.studentLast;
@@ -493,21 +627,15 @@ const mapResults = (rawResults) => {
 
 		if (result.cache) {
 			result.values = result.cache.values;
-			result.scores = result.cache.scores;
 		}
 
 		delete result.cache;
-		Object.keys(result).forEach( (key) => {
-			if (!result[key] || result[key] === 'null') {
-				delete result[key];
-			}
-		});
 
 		delete result.timestamp;
 		delete result.created_at;
 		delete result.result_set;
-
-		results[result.id] = result;
+		results[result.id] = stripNulls(result);
+		delete results[result.id].id;
 	});
 
 	return results;

@@ -3217,7 +3217,7 @@
     },
     "/rest/tourns/{tournId}/results": {
       "get": {
-        "summary": "Get tournament results",
+        "summary": "Get tourn public result sets",
         "description": "Returns public result information for a given tournament",
         "operationId": "getTournResultSets",
         "tags": [
@@ -3265,8 +3265,8 @@
     },
     "/rest/tourns/{tournId}/results/{resultSetId}": {
       "get": {
-        "summary": "Get tourn resultSet",
-        "description": "Returns result information given a result set ID if it is public",
+        "summary": "Get public result set",
+        "description": "Returns result set with full display information given a result set ID if it is public",
         "operationId": "getResultSet",
         "tags": [
           "invite",
@@ -3275,6 +3275,15 @@
           "pairings"
         ],
         "parameters": [
+          {
+            "in": "query",
+            "name": "nocache",
+            "schema": {
+              "description": "Admin only option on whether to invalidate the cache",
+              "type": "boolean"
+            },
+            "description": "Admin only option on whether to invalidate the cache"
+          },
           {
             "in": "path",
             "name": "tournId",

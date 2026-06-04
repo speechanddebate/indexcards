@@ -2,18 +2,18 @@ import { NotFound } from '../../helpers/problem.js';
 import resultSetRepo from '../../repos/resultSetRepo.js';
 import { tiebreakTypes } from '../../services/results/tiebreakTypes.js';
 
-export async function getBracket(req, res) {
-	const bracket = await resultSetRepo.getResultSets({
-		eventId: req.valid.params.eventId,
-		tag: 'bracket',
-	});
-
-	if (bracket && bracket.published) return res.status(200).json(bracket);
-	return NotFound( req, res, 'No bracket was found for event');
-}
-
 export async function getResultSet(req,res) {
-	const resultSet = await resultSetRepo.getResultSet(req.valid.params.resultSetId);
+
+	// For now the site admins get to do nocache but nobody else does
+	let queryParams;
+	if (req.person.site_admin || req.person.siteAdmin) {
+		queryParams = { ...req.valid.query };
+	}
+
+	const resultSet = await resultSetRepo.getResultSet(
+		{ ...req.valid.params },
+		{ ...queryParams },
+	);
 	if (resultSet) {
 		return res.status(200).json(resultSet);
 	}
@@ -21,7 +21,17 @@ export async function getResultSet(req,res) {
 }
 
 export async function getResultSets(req,res) {
-	const resultSet = await resultSetRepo.getResultSets({ ...req.valid.params }, { noResults: true});
+
+	// For now the site admins get to do nocache but nobody else does
+	let queryParams;
+	if (req.person.site_admin || req.person.siteAdmin) {
+		queryParams = { ...req.valid.query };
+	}
+
+	const resultSet = await resultSetRepo.getResultSets(
+		{ ...req.valid.params },
+		{ ...queryParams },
+	);
 
 	if (resultSet) {
 		return res.status(200).json(resultSet);

@@ -37,8 +37,7 @@ export const snakeToCamel = (snaked) => {
 		});
 };
 
-export const dbToObject = (object, tag) => {
-
+export const dbToObject = (object, tag, options = {}) => {
 	const newObject = {};
 	const oldObject = { ...object };
 
@@ -49,8 +48,23 @@ export const dbToObject = (object, tag) => {
 			delete oldObject[key];
 		}
 	});
+
 	oldObject[ucfirst(tag)] = newObject;
+	if (!options.keepNulls) oldObject[ucfirst(tag)] = stripNulls(newObject);
 	return oldObject;
+};
+
+export const stripNulls = (target, exclude = []) => {
+	const returnObject = { ...target };
+	Object.keys(returnObject).forEach( (key) => {
+		if (
+			!exclude.includes[key]
+			&& !returnObject[key] || returnObject[key] === 'null'
+		) {
+			delete returnObject[key];
+		}
+	});
+	return returnObject;
 };
 
 export default addZero;
