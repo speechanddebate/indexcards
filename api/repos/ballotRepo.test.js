@@ -6,7 +6,7 @@ let sectionId = null;
 
 describe('ballotRepo', async () => {
 	beforeAll(async () => {
-		({ sectionId } = await factories.section.createTestSection());
+		({ sectionId } = await factories.section.create());
 	});
 	describe('buildBallotQuery', () => {
 		it('does not include associations by default', async () => {

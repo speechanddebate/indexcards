@@ -1,5 +1,5 @@
 import ballotRepo from '../../api/repos/ballotRepo.js';
-import { createTestSection } from './section.js';
+import { create as createSection } from './section.js';
 
 export function buildBallotData(overrides = {}) {
 	return {
@@ -7,12 +7,12 @@ export function buildBallotData(overrides = {}) {
 	};
 }
 
-export async function createTestBallot(overrides = {}) {
+export async function create(overrides = {}) {
 	let sectionId = overrides.sectionId;
 	let getSection = null;
 
 	if (!sectionId) {
-		const section = await createTestSection();
+		const section = await createSection();
 		sectionId = section.sectionId;
 		getSection = section.getSection;
 	}
@@ -33,5 +33,5 @@ export async function createTestBallot(overrides = {}) {
 }
 
 export default {
-	createTestBallot,
+	create,
 };

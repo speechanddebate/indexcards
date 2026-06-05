@@ -6,7 +6,7 @@ let ballotId = null;
 
 describe('scoreRepo', async () => {
 	beforeAll(async () => {
-		({ ballotId } = await factories.ballot.createTestBallot());
+		({ ballotId } = await factories.ballot.create());
 	});
 	describe('buildScoreQuery', () => {
 

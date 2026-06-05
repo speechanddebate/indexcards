@@ -39,7 +39,7 @@ describe('judgeRepo', () => {
 
 		it('includes Ballots when requested', async () => {
 			const { judgeId } = await factories.judge.createTestJudge();
-			await factories.ballot.createTestBallot({ judgeId });
+			await factories.ballot.create({ judgeId });
 
 			const judge = await judgeRepo.getJudge(judgeId, { include: { Ballots: true } });
 
@@ -182,5 +182,24 @@ describe('judgeRepo', () => {
 			expect(resultIds).not.toContain(excludedByEndedTournJudgeId);
 		});
 
+	});
+	describe('getJudgeHistory', () => {
+		it('returns judge history for a person', async () => {
+			const { personId } = await factories.person.create();
+			const { tournId } = await factories.tourn.createTestTourn(); // start is past by default
+			const { categoryId } = await factories.category.createTestCategory({ tourn: tournId });
+			const { judgeId } = await factories.judge.createTestJudge({ person: personId, category: categoryId });
+
+			// Create event → round → panel → ballot chain
+			const { eventId } = await factories.event.create({ category: categoryId });
+			const { roundId } = await factories.round.create({ event: eventId, published: true });
+			const { sectionId } = await factories.section.create({ round: roundId });
+			await factories.ballot.create({ sectionId, judgeId });
+			const history = await judgeRepo.getJudgeHistory(personId, 10, 0);
+
+			expect(history.length).toBeGreaterThan(0);
+			expect(history[0].id).toBe(judgeId);
+			expect(history[0].Category.id).toBe(categoryId);
+		});
 	});
 });

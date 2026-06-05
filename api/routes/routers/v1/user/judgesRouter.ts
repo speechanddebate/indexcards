@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ValidateRequest } from '../../../../middleware/validation.js';
 import judgesController from '../../../../controllers/user/judgesController.js';
-import { UnlinkedJudge } from '../../../openapi/schemas/index.ts';
+import { UnlinkedJudge, JudgeHistory } from '../../../openapi/schemas/index.ts';
 import z from 'zod';
 import * as utils from '../../../openapi/schemas/utils.ts';
 
@@ -64,4 +64,28 @@ router.route('/claim')
 		},
 	}
 
+router.route('/history')
+	.get(ValidateRequest,judgesController.history).openapi = {
+		summary: 'get judging history',
+		description: 'Gets a persons history of judging',
+		path: '/user/judges/history',
+		operationId: 'UserJudgesHistory',
+		tags: ['Orval','Judges'],
+		requestParams: {
+			query: z.object({
+				limit: utils.limit.default(100),
+				offset: utils.offset.default(0),
+			})
+		},
+		responses: {
+			200: {
+				description: 'Successful response',
+				content: {
+					'application/json': {
+						schema: JudgeHistory,
+					},
+				},
+			},
+		},
+	}
 export default router;

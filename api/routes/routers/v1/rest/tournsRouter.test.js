@@ -18,7 +18,7 @@ describe('GET /rest/tourns', () => {
 		const tournDate = faker.date.between({from: startAfter, to: startBefore});
 		const { circuitId } = await factories.circuit.createTestCircuit();
 		const { tournId } = await factories.tourn.createTestTourn({ circuit: circuitId, start: tournDate });
-		await factories.event.createTestEvent({ tournId, abbr: 'ABBR' });
+		await factories.event.create({ tournId, abbr: 'ABBR' });
 		const res = await request(server)
             .get(`/v1/rest/tourns?circuit=${circuitId}&startAfter=${startAfter.toISOString()}&startBefore=${startBefore.toISOString()}&fields[events]=abbr,type&limit=10`)
             .set('Accept', 'application/json')

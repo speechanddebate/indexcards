@@ -1,5 +1,5 @@
 import scoreRepo from '../../api/repos/scoreRepo.js';
-import { createTestBallot } from './ballot.js';
+import { create as createBallot } from './ballot.js';
 
 export function buildScoreData(overrides = {}) {
 	return {
@@ -12,7 +12,7 @@ export async function createTestScore(overrides = {}) {
 	let getBallot = null;
 
 	if (!ballot) {
-		const Ballot = await createTestBallot(overrides);
+		const Ballot = await createBallot(overrides);
 		ballot = Ballot.ballotId;
 		getBallot = Ballot.getBallot;
 	}

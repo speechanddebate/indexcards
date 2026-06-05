@@ -120,10 +120,89 @@ async function unlinkedSearch({ first, last }, opts = {}) {
 	});
 }
 
+async function getJudgeHistory(personId, limit, offset) {
+	let sql = `
+	select
+	judge.id AS judge_id, judge.first, judge.last, judge.code,
+	judge.obligation, judge.hired,
+	category.id AS category_id, category.name as category_name, category.abbr,
+	tourn.id AS tourn_id, tourn.name, tourn.city, tourn.state,
+	CONVERT_TZ(tourn.start, '+00:00', tourn.tz),
+	CONVERT_TZ(tourn.end, '+00:00', tourn.tz),
+	CONVERT_TZ(weekend.start, '+00:00', tourn.tz),
+	CONVERT_TZ(weekend.end, '+00:00', tourn.tz),
+	COUNT(distinct round.id) AS round_count
+
+	from (judge, category, tourn)
+
+		left join event on event.category = category.id
+
+		left join event_setting es
+			on es.event = event.id
+			and es.tag = 'weekend'
+
+		left join weekend on weekend.id = es.value
+
+		left join ballot on ballot.judge = judge.id
+
+		left join panel on ballot.panel = panel.id
+
+		left join round on round.id = panel.round
+			and round.published = 1
+
+	where judge.person = :personId
+		and judge.category = category.id
+		and category.tourn = tourn.id
+		and tourn.start < NOW()
+		and tourn.hidden != 1
+	group by judge.id
+	order by tourn.start DESC
+	`;
+	if(limit && offset !== undefined) {
+		sql += ' LIMIT :limit OFFSET :offset';
+	}
+
+	const result = await db.sequelize.query(sql, {
+		replacements: {
+			personId,
+			limit,
+			offset,
+		},
+		type: db.Sequelize.QueryTypes.SELECT,
+	});
+	return result.map(row => ({
+		id: row.judge_id,
+		first: row.first,
+		last: row.last,
+		code: row.code,
+		obligation: row.obligation,
+		hired: row.hired,
+		Category: {
+			id: row.category_id,
+			name: row.category_name,
+			abbr: row.abbr,
+		},
+		Tourn: {
+			id: row.tourn_id,
+			name: row.name,
+			city: row.city,
+			state: row.state,
+			start: row['CONVERT_TZ(tourn.start, \'+00:00\', tourn.tz)'],
+			end: row['CONVERT_TZ(tourn.end, \'+00:00\', tourn.tz)'],
+		},
+		Weekend: {
+			start: row['CONVERT_TZ(weekend.start, \'+00:00\', tourn.tz)'],
+			end: row['CONVERT_TZ(weekend.end, \'+00:00\', tourn.tz)'],
+		},
+		roundCount: row.round_count,
+	}));
+}
+
 export default {
 	getJudge,
 	getJudges,
 	createJudge,
 	updateJudge,
 	unlinkedSearch,
+	getJudgeHistory,
 };

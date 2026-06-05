@@ -6,7 +6,7 @@ export function createSectionData(overrides = {}) {
 	};
 }
 
-export async function createTestSection(overrides = {}) {
+export async function create(overrides = {}) {
 	const data = createSectionData(overrides);
 	const sectionId = await sectionRepo.createSection(data);
 
@@ -17,5 +17,5 @@ export async function createTestSection(overrides = {}) {
 }
 export default {
 	createSectionData,
-	createTestSection,
+	create,
 };
