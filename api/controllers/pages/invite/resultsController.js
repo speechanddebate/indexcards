@@ -141,12 +141,6 @@ export const getRoundResults = async (req,res) => {
 			}
 
 			entry.Ballots = {};
-
-			if (ballot.ballotBye) {
-				entry.Ballots.bye = true;
-			} else if (ballot.ballotForfeit) {
-				entry.Ballots.forfeit = true;
-			}
 			section.Entries[entryKey] = entry;
 		}
 		round.Sections[ballot.sectionId] = section;
@@ -189,7 +183,6 @@ export const getRoundResults = async (req,res) => {
 		if (!entry.Ballots[score.judgeId]) entry.Ballots[score.judgeId] = {};
 
 		const ballot = entry.Ballots[score.judgeId];
-
 		const winlossTypes = ['debate', 'wsdc', 'mockTrial'];
 		const rankTypes    = ['speech', 'congress', 'wudc'];
 

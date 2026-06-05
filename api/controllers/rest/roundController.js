@@ -18,7 +18,12 @@ export async function getPublishedRounds(req, res) {
 			event.abbr eventAbbr,
 			event.type eventType,
 			event.level eventLevel,
-			event.nsda_category nsdaCategory
+			event.nsda_category nsdaCategory,
+			(select jpr.value
+				from event_setting jpr
+				where jpr.tag = 'judge_publish_results'
+				and jpr.event = round.event
+			) publishResults
 		from round, event, tourn
 			where 1=1
 			and round.published = 1
@@ -41,17 +46,17 @@ export async function getPublishedRounds(req, res) {
 
 	const mappedRounds = rounds.map( (round) => {
 		return {
-			'id'            : round.id,
-			'type'          : round.type,
-			'name'          : round.name,
-			'label'         : round.label,
-			'flighted'      : round.flighted,
-			'postPrimary'   : round.post_primary,
-			'postSecondary' : round.post_secondary,
-			'postFeedback'  : round.post_feedback,
-			'published'     : round.published,
-			'eventId'       : round.event,
-			'protocolId'    : round.protocol_id,
+			'id'               : round.id,
+			'type'             : round.type,
+			'name'             : round.name,
+			'label'            : round.label,
+			'flighted'         : round.flighted,
+			'postPrimary'      : round.post_primary,
+			'postSecondary'    : round.post_secondary,
+			'postFeedback'     : round.post_feedback,
+			'published'        : round.published,
+			'eventId'          : round.event,
+			'protocolId'       : round.protocol_id,
 			Event              : {
 				'id'           : round.eventId,
 				'name'         : round.eventName,
@@ -59,6 +64,9 @@ export async function getPublishedRounds(req, res) {
 				'type'         : round.eventType,
 				'level'        : round.eventLevel,
 				'nsdaCategory' : round.nsdaCategory,
+				Settings: {
+					publishResults : round.publishResults,
+				},
 			},
 		};
 	});
