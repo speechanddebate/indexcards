@@ -15,7 +15,7 @@ describe('TimeslotRepo', () => {
 		});
 		it('includes rounds when requested', async () => {
 			const {timeslotId} = await factories.timeslot.createTestTimeslot();
-			await factories.round.createTestRound({ timeslotId });
+			await factories.round.create({ timeslotId });
 
 			const timeslot = await timeslotRepo.getTimeslot(
 				timeslotId,

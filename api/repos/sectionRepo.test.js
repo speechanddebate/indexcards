@@ -4,7 +4,7 @@ import factories from '../../tests/factories/index.js';
 describe('SectionRepo', () => {
 	describe('buildSectionQuery', () => {
 		it('does not include associations by default', async () => {
-			const { sectionId } = await factories.section.createTestSection();
+			const { sectionId } = await factories.section.create();
 
 			const section = await sectionRepo.getSection(sectionId);
 
@@ -13,7 +13,7 @@ describe('SectionRepo', () => {
 			expect(section.Ballots).toBeUndefined();
 		});
 		it('includes ballots when requested', async () => {
-			const { sectionId } = await factories.section.createTestSection();
+			const { sectionId } = await factories.section.create();
 
 			const section = await sectionRepo.getSection(
 				sectionId,
@@ -25,7 +25,7 @@ describe('SectionRepo', () => {
 			expect(Array.isArray(section.Ballots)).toBe(true);
 		});
 		it('includes settings when requested', async () => {
-			const { sectionId } = await factories.section.createTestSection();
+			const { sectionId } = await factories.section.create();
 
 			const section = await sectionRepo.getSection(
 				sectionId,
@@ -58,9 +58,9 @@ describe('SectionRepo', () => {
 	});
 	describe('getSections', () => {
 		it('retrieves all sections for a given round', async () => {
-			const { roundId } = await factories.round.createTestRound();
-			const { sectionId: section1Id } = await factories.section.createTestSection({ roundId });
-			const { sectionId: section2Id } = await factories.section.createTestSection({ roundId });
+			const { roundId } = await factories.round.create();
+			const { sectionId: section1Id } = await factories.section.create({ roundId });
+			const { sectionId: section2Id } = await factories.section.create({ roundId });
 
 			const results = await sectionRepo.getSections({ roundId });
 			expect(results).toBeDefined();
@@ -71,8 +71,8 @@ describe('SectionRepo', () => {
 			expect(results.map(s => s.id)).toEqual(expect.arrayContaining([section1Id, section2Id]));
 		});
 		it('retrieves all sections when no scope is provided', async () => {
-			const { sectionId: section1Id } = await factories.section.createTestSection();
-			const { sectionId: section2Id } = await factories.section.createTestSection();
+			const { sectionId: section1Id } = await factories.section.create();
+			const { sectionId: section2Id } = await factories.section.create();
 
 			const results = await sectionRepo.getSections();
 			expect(results).toBeDefined();
@@ -93,7 +93,7 @@ describe('SectionRepo', () => {
 	});
 	describe('updateSection', () => {
 		it('updates section when provided valid data', async () => {
-			const { sectionId } = await factories.section.createTestSection();
+			const { sectionId } = await factories.section.create();
 			const newData = factories.section.createSectionData({letter: 'Z'});
 			const result = await sectionRepo.updateSection(sectionId, newData);
 			expect(result).toBe(true);
@@ -112,7 +112,7 @@ describe('SectionRepo', () => {
 	describe('deleteSection', () => {
 		it('deletes a section and returns true', async () => {
 			// Arrange
-			const { sectionId } = await factories.section.createTestSection();
+			const { sectionId } = await factories.section.create();
 			// Act
 			const result = await sectionRepo.deleteSection(sectionId);
 			// Assert

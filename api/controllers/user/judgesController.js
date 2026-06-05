@@ -109,9 +109,31 @@ async function claimRequest(req, res) {
 
 };
 
+//get the judge history for /user/judge/history page.
+async function history(req, res) {
+	const { limit, offset } = req.valid.query;
+
+	if(!req.actor.Person.id) {
+		return BadRequest(req, res, 'Request not made by a person');
+	}
+
+	const judgeHistory = await judgeRepo.getJudgeHistory(req.actor.Person.id, limit, offset);
+	return res.status(200).json(judgeHistory.map(j => ({
+		Tourn: {
+			id: j.Tourn.id,
+			name: j.Tourn.name,
+			start: j.Tourn.start,
+			end: j.Tourn.end,
+		},
+		division: j.Category.name,
+		roundsJudged: j.roundCount,
+		roundsObligated: (j.obligation ?? 0) + (j.hired ?? 0),
+	})));
+};
 export default {
 	linkRequests,
 	claimRequest,
+	history,
 };
 
 function buildChapterJudgeClaimEmail(chapterJudge, person) {

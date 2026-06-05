@@ -67,3 +67,30 @@ export const JudgeRecord = z.object({
 	id: 'JudgeRecord',
 	description: "A record of a judge's decision. used in paradigm details",
 }) satisfies ZodOpenApiSchemaObject;
+
+export const JudgeHistory = z.object({
+	Tourn: z.object({
+		id: utils.id.meta({
+			description: 'Tournament id',
+		}),
+		name: z.string().meta({ description: 'Tournament name' }),
+		start: z.iso.datetime().meta({
+			description: 'start date',
+		}),
+		end: z.iso.datetime().meta({
+			description: 'end date',
+		}),
+	}).meta({
+		description: 'Tournament details',
+	}),
+	division: z.string().meta({ description: 'Division name (e.g., Open, JV)' }),
+	roundsJudged: z.number().int().nonnegative().meta({
+		description: 'Number of rounds judged at the tournament',
+	}),
+	roundsObligated: z.number().int().nonnegative().meta({
+		description: 'Number of rounds obligated at the tournament',
+	}),
+}).meta({
+	id: 'JudgeHistory',
+	description: "A person's history of judging",
+}) satisfies ZodOpenApiSchemaObject;

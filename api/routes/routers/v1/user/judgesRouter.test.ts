@@ -2,6 +2,7 @@ import factories from '../../../../../tests/factories/index.js';
 import request from 'supertest';
 import server from '../../../../../app.js';
 import z from 'zod';
+import { JudgeHistory } from '../../../openapi/schemas/index.ts';
 
 describe('judgesRouter', () => {
 	let personId : number;
@@ -52,6 +53,26 @@ describe('judgesRouter', () => {
 			//setup - create a judge with no person_request
 			//make the request to claim the judge
 			//assert that the judge's person_request is updated and that an email was sent to the chapter email with the correct content
+		});
+	});
+	describe("GET /user/judges/history", () => {
+		it('should return the judge history for the logged in user', async () => {
+			const { tournId } = await factories.tourn.createTestTourn(); // start is past by default
+			const { categoryId } = await factories.category.createTestCategory({ tourn: tournId });
+			const { judgeId } = await factories.judge.createTestJudge({ person: personId, category: categoryId });
+
+			// Create event → round → panel → ballot chain
+			const { eventId } = await factories.event.create({ category: categoryId });
+			const { roundId } = await factories.round.create({ event: eventId, published: true });
+			const { sectionId } = await factories.section.create({ round: roundId });
+			await factories.ballot.create({ sectionId, judgeId });
+			
+			const res = await request(server)
+				.get('/v1/user/judges/history')
+				.set('Accept', 'application/json')
+				.set('Authorization', `Bearer ${userkey}`)
+				.expect(200);
+			expect(res.body).toMatchSchema(z.array(JudgeHistory));
 		});
 	});
 });

@@ -7,7 +7,7 @@ export function createRoundData(overrides = {}) {
 	};
 }
 
-export async function createTestRound(overrides = {}) {
+export async function create(overrides = {}) {
 	const data = createRoundData(overrides);
 	const roundId = await roundRepo.createRound(data);
 
@@ -19,5 +19,5 @@ export async function createTestRound(overrides = {}) {
 
 export default {
 	createRoundData,
-	createTestRound,
+	create,
 };
