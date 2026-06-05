@@ -1,7 +1,8 @@
-FROM node:24 AS base
+FROM node:22.13.0 AS base
 WORKDIR /indexcards
 
-COPY package*.json .
+COPY package.json ./
+COPY package-lock.json ./
 
 FROM base AS dev
 ENV NODE_ENV=development
@@ -18,7 +19,8 @@ WORKDIR /indexcards
 
 ENV NODE_ENV=production
 
-COPY package*.json ./
+COPY package.json ./
+COPY package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts
 COPY . .
 
