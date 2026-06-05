@@ -157,8 +157,6 @@ export async function getSchematic (req,res) {
 
 	const sets = settingsMapper(rawEventSettings);
 	round.Event.Settings = sets.settings;
-	console.log(JSON.stringify(round.Event.Settings, null, 2));
-	console.log('hello');
 
 	// Mapping start times and decision deadlines. Doing it here and not on the
 	// front end because syncing up this logic together with reactivity is a
