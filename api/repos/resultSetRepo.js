@@ -195,6 +195,8 @@ export const getResultSet = async (scope = {}, query = {}, opts = {}) => {
 			});
 
 			resultSet.results = rawResults.map( (result) => {
+				if (query.nocache) delete result.cache;
+
 				if (result.cache) {
 					cache = JSON.parse(result.cache);
 					Object.keys(cache).forEach( (key) => {
@@ -202,7 +204,7 @@ export const getResultSet = async (scope = {}, query = {}, opts = {}) => {
 					});
 					delete result.cache;
 				}
-				return result;
+				return stripNulls(result);
 			});
 
 		} else {
@@ -221,6 +223,7 @@ export const getResultSet = async (scope = {}, query = {}, opts = {}) => {
 			} else {
 
 				newCache = await createResultCache( resultSet );
+
 				if (newCache.headers) resultSet.headers = newCache.headers;
 
 				// These are already cached in the results, so do not save them
@@ -243,6 +246,10 @@ export const getResultSet = async (scope = {}, query = {}, opts = {}) => {
 			});
 
 			delete resultSet.cache;
+		}
+
+		if (!resultSet.results[0]?.place > 0) {
+			resultSet.noPlacement = true;
 		}
 		resultSets.push(resultSet);
 	};
@@ -281,7 +288,7 @@ const createResultCache = async (resultSet) => {
 			left join panel section on section.id = result.panel
 		where 1=1
 			and result.result_set = :resultSetId
-			order by entry.code
+			order by result.rank
 	`, {
 		replacements: { resultSetId: resultSet.id },
 		type: db.Sequelize.QueryTypes.SELECT,
@@ -299,8 +306,11 @@ const createResultCache = async (resultSet) => {
 		type: db.Sequelize.QueryTypes.SELECT,
 	});
 
+	console.log(`I should be here`);
+
 	const headersById = {};
 	rawHeaders.forEach( (header) => {
+		console.log(`I have tag ${header.tag} id ${header.id}`);
 
 		headersById[header.id] = {
 			tag         : header.tag,
@@ -361,6 +371,7 @@ const createResultCache = async (resultSet) => {
 			headerKey++;
 		}
 
+		if (!results[rv.result]) results[rv.result] = {};
 		if (!results[rv.result].values)		results[rv.result].values = {};
 		const sortedHeader = idToKey[rv.header];
 		results[rv.result].values[sortedHeader] = rv.value;
@@ -458,6 +469,7 @@ const createResultCache = async (resultSet) => {
 	const promises = []; // batch process the updates pls
 
 	Object.keys(results).forEach( (resultId) => {
+
 		const promise = db.sequelize.query(`
 			update result set cache = :cache where id = :resultId
 		`, {
@@ -630,7 +642,6 @@ const mapResults = (rawResults) => {
 		}
 
 		delete result.cache;
-
 		delete result.timestamp;
 		delete result.created_at;
 		delete result.result_set;

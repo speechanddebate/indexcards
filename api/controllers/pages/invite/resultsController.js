@@ -1,193 +1,261 @@
 import db from '../../../data/db.js';
 import { NotFound } from '../../../helpers/problem.js';
+import { dbToObject, stripNulls } from '../../../helpers/text.js';
 
-export async function getEntryRecord(req,res) {
+export const getRoundResults = async (req,res) => {
 
-	const rawEntries = await db.sequelize.query(`
+	// Be agnostic about accepting round ID or the human interface stuff.
+	let finderQuery = ` and round.id = :roundId `;
+
+	if (!req.valid.params.roundId) {
+		finderQuery =` and event.tourn = :tournId
+			and event.abbr   = :eventAbbr
+			and round.name   = :roundName `;
+	}
+
+	const rawBallots = await db.sequelize.query(`
 		select
-			entry.id, entry.code, entry.name,
+			round.id roundId, round.name roundName, round.label roundLabel,
+			round.flighted roundFlighted,
 
-			student.id studentId, student.first studentFirst, student.last studentLast, student.middle studentMiddle,
-			hybrid.id hybridId, hybrid.name hybridName, hybrid.code hybridCode,
+			event.abbr eventAbbr, event.name eventName,
+			event.type eventType, event.id eventId,
 
-			school.id schoolId, school.name schoolName, school.code schoolCode,
-			school.chapter chapterId,
+			(select maxEntry.value
+				from event_setting maxEntry
+				where maxEntry.tag = 'max_entry'
+				and maxEntry.event = round.event
+			) maxEntrySize,
 
-			event.id eventId, event.name eventName, event.abbr eventAbbr, event.type eventType,
-			tourn.id tournId, tourn.name tournName,
-			tourn.start tournStart, tourn.city tournCity,
-			tourn.state tournState,
-			tourn.country tournCountry,
+			(select aff.value
+				from event_setting aff
+				where aff.tag = 'aff_label'
+				and aff.event = round.event
+			) affLabel,
 
-			(select anonymous_public.value
-				from event_setting anonymous_public
-				where anonymous_public.event = event.id
-				and anonymous_public.tag ='anonymous_public'
-			) as anonymousPublic,
+			(select neg.value
+				from event_setting neg
+				where neg.tag = 'neg_label'
+				and neg.event = round.event
+			) negLabel,
 
-			(select liveUpdates.value
-				from event_setting liveUpdates
-				where liveUpdates.event = event.id
-				and liveUpdates.tag ='live_updates'
-			) as liveUpdates,
+			(select jpr.value
+				from event_setting jpr
+				where jpr.tag = 'judge_publish_results'
+				and jpr.event = round.event
+			) publishResults,
 
-			(select affLabel.value
-				from event_setting affLabel
-				where affLabel.event = event.id
-				and affLabel.tag ='aff_label'
-			) as affLabel,
+			round.post_primary postPrimary,
+			round.post_secondary postSecondary,
 
-			(select negLabel.value
-				from event_setting negLabel
-				where negLabel.event = event.id
-				and negLabel.tag ='neg_label'
-			) as negLabel
-
-		from (entry, entry_student es, student, event, tourn)
-
-			left join school on entry.school = school.id
-
-			left join chapter hybrid
-				on hybrid.id = student.chapter
-				and hybrid.id != school.chapter
-
-		where 1=1
-			and entry.id = :entryId
-			and entry.id = es.entry
-			and es.student = student.id
-			and entry.event = event.id
-			and event.tourn = tourn.id
-		group by student.id
-	`, {
-		replacements: { ...req.params },
-		type: db.Sequelize.QueryTypes.SELECT,
-	});
-
-	let entryResult = {};
-
-	rawEntries.forEach( (entry) => {
-
-		if (entry.anonymous_public) {
-			return NotFound(req, res,
-				`This tournament is set for anonymized public postings, so entry records are not visible`
-			);
-		}
-
-		if (!entryResult) {
-			entryResult = {
-				id: entry.id,
-				name: entry.name,
-				code: entry.code,
-				School : {
-					id      : entry.schoolId,
-					name    : entry.schoolName,
-					code    : entry.schoolCode,
-				},
-				Tourn: {
-					id      : entry.tournId,
-					name    : entry.tournName,
-					start   : entry.tournStart,
-					end     : entry.tournEnd,
-					city    : entry.tournCity,
-					state   : entry.tournState,
-					country : entry.tournCountry,
-				},
-				Event: {
-					id   : entry.eventId,
-					name : entry.eventName,
-					abbr : entry.eventAbbr,
-					type : entry.eventType,
-					settings : {
-						anonymousPublic : entry.anonymousPublic ? true : false,
-						liveUpdates     : entry.liveUpdates ? true     : false,
-						affLabel        : entry.affLabel || 'Aff',
-						negLabel        : entry.negLabel || 'Neg',
-					},
-				},
-				Students: [],
-			};
-
-			if (entry.hybridId) {
-				entryResult.Hybrid = {
-					id      : entry.hybridId,
-					name    : entry.hybridName,
-					code    : entry.hybridCode,
-				};
-			};
-		}
-
-		entryResult.Students.push({
-			id     : entry.studentId,
-			first  : entry.studentFirst,
-			middle : entry.studentMiddle,
-			last   : entry.studentLast,
-		});
-	});
-
-	const rawResults = await db.Sequelize.query(`
-		select
-			round.id, round.name, round.label, round.type,
-
-			round.published, round.postPrimary, round.postSecondary,
-
-			panel.bye panelBye,
-			ballot.side side, ballot.speakerorder speakerorder,
-			ballot.bye ballotBye, ballot.forfeit ballotForfeit,
-			ballot.entry entryId,
-
+			section.id sectionId, section.letter sectionLetter,
+			section.bye sectionBye, section.flight,
+			section.publish sectionPublished,
+			ballot.id ballotId, ballot.bye ballotBye, ballot.forfeit ballotForfeit,
+			ballot.side, ballot.speakerorder, ballot.chair judgeChair,
 			judge.id judgeId, judge.first judgeFirst, judge.last judgeLast,
+			entry.id entryId, entry.code entryCode, entry.name entryName,
+			school.id schoolId, school.name schoolName
 
-			winloss.id winlossId,
-			winloss.value winloss,
-			rank.value rank, rank.student rankStudent,
-			point.value point, point.value pointStudent,
-
-			opp_entry.id oppId,
-			opp_entry.code oppCode
-
-		from (round, panel, ballot)
-
-			left join judge on ballot.judge = judge.id
-
-			left join ballot opp_ballot
-				on opp_ballot.panel = panel.id
-				and opp_ballot.judge = judge.id
-				and opp_ballot.id != ballot.id
-				and opp_ballot.entry != ballot.entry
-
-			left join entry opp_entry
-				on opp_entry.id = opp_ballot.entry
-
-			left join score winloss
-				on winloss.ballot = ballot.id
-				and winloss.tag   = 'winloss'
-				and winloss.value = 1
-
-			left join score rank
-				on rank.ballot = ballot.id
-				and rank.tag   = 'rank'
-
-			left join score point
-				on point.ballot = ballot.id
-				and point.tag   = 'point'
+		from (panel as section, ballot, round, event)
+			left join entry on entry.id = ballot.entry
+			left join judge on judge.id = ballot.judge
+			left join school on school.id = entry.school
 
 		where 1=1
-
-			and ballot.entry    = ?
-			and ballot.panel    = panel.id
-			and panel.round     = round.id
+			${finderQuery}
 			and round.published = 1
-
-		group by ballot.id
-		order by round.name DESC
+			and section.round   = round.id
+			and section.id      = ballot.panel
+			and round.event     = event.id
+		order by section.bye, ballot.forfeit, ballot.bye, section.flight, judge.last
 	`, {
-		replacements: { ...req.params },
+		replacements: { ...req.valid.params },
 		type: db.Sequelize.QueryTypes.SELECT,
 	});
 
-	entryResult.rawResult = rawResults;
-	// obviously not but I wanted to check in mid progress for this unused API
-	// and the linter woudln't STFU
+	if (rawBallots.length < 1) 	return NotFound(req, res, 'No public results matching your search exist');
 
-	return res.status(200).json(entryResult);
+	let round = {};
+
+	rawBallots.forEach( (ballot) => {
+
+		if (!round.name) {
+
+			round = dbToObject(ballot, 'round', { justTag: true});
+			round.label = ballot.roundLabel || `Round ${ballot.roundName}`;
+
+			// 3 for Posting means Public and this is a public only API so...
+			if (ballot.postPrimary === 3) 		round.postPrimary   = true;
+			if (ballot.postSecondary === 3) 	round.postSecondary = true;
+			if (ballot.flighted) 				round.flighted      = ballot.flighted;
+
+			round.Event = dbToObject(ballot, 'event', { justTag: true});
+			round.Event.Settings = {
+				affLabel       : ballot.affLabel || 'Aff',
+				negLabel       : ballot.negLabel || 'Neg',
+				publishResults : ballot.publishResults,
+				maxEntrySize   : ballot.maxEntrySize,
+			};
+
+			delete ballot.affLabel;
+			delete ballot.negLabel;
+			delete ballot.publishResults;
+			delete ballot.maxEntrySize;
+
+			round.Sections = {};
+			round.scoreTypes = {};
+		}
+
+		if (!round.Sections[ballot.sectionId]) {
+			round.Sections[ballot.sectionId] = dbToObject(ballot, 'section', { justTag: true });
+			round.Sections[ballot.sectionId].Judges  = {};
+			round.Sections[ballot.sectionId].Entries = {};
+		}
+
+		const section = round.Sections[ballot.sectionId];
+
+		if (ballot.judgeId && (!section.Judges[ballot.judgeId])) {
+			section.Judges[ballot.judgeId] = dbToObject(ballot, 'judge', { justTag: true });
+			delete section.Judges[ballot.judgeId].id;
+		}
+
+		const entryKey = ballot.side || ballot.speakerorder || ballot.entryId;
+
+		if (ballot.entryId && (!section.Entries[entryKey])) {
+			const entry = dbToObject(ballot, 'entry', {justTag: true});
+
+			if (!section.bye) {
+				if (parseInt(ballot.side) == 1) 	entry.side = round.Event.Settings.affLabel;
+				if (parseInt(ballot.side) == 2) 	entry.side = round.Event.Settings.negLabel;
+				if (ballot.speakerorder) 			entry.speakerorder = ballot.speakerorder;
+			}
+
+			if (ballot.schoolId) {
+				entry.schoolId = ballot.schoolId;
+				entry.schoolName = ballot.schoolName;
+			}
+
+			if (round.Event.Settings.maxEntrySize > 1) {
+				entry.Speakers = {};
+			}
+
+			entry.Ballots = {};
+
+			if (ballot.ballotBye) {
+				entry.Ballots.bye = true;
+			} else if (ballot.ballotForfeit) {
+				entry.Ballots.forfeit = true;
+			}
+			section.Entries[entryKey] = entry;
+		}
+		round.Sections[ballot.sectionId] = section;
+	});
+
+	const rawScores = await db.sequelize.query(`
+		select
+			panel.id sectionId,
+			score.tag, score.value, score.speech,
+			ballot.entry entryId, ballot.judge judgeId,
+			ballot.id ballotId, ballot.bye ballotBye, ballot.forfeit ballotForfeit,
+			ballot.side, ballot.speakerorder,
+			student.id studentId, student.first studentFirst, student.last studentLast
+		from (ballot, panel, score)
+			left join student on score.student = student.id
+		where 1=1
+			and panel.round = :roundId
+			and panel.id = ballot.panel
+			and ballot.id = score.ballot
+			and score.tag IN ('winloss', 'rank', 'point', 'refute', 'po', 'speech')
+	`,{
+		replacements: { roundId: round.id },
+		type: db.Sequelize.QueryTypes.SELECT,
+	});
+
+	rawScores.forEach( (score) => {
+
+		const section = round.Sections[score.sectionId];
+		const entryKey = score.side || score.speakerorder || score.entryId;
+		const entry = section.Entries[entryKey];
+
+		// If there is a student make sure they exist in the Entry
+		if (score.studentId && round.Event.Settings.maxEntrySize > 1) {
+			if (!section.Entries[entryKey].Speakers[score.studentId]) {
+				section.Entries[entryKey].Speakers[score.studentId] = dbToObject(score, 'student', { justTag: true });
+			};
+		}
+
+		if (!entry.Ballots) entry.Ballots = {};
+		if (!entry.Ballots[score.judgeId]) entry.Ballots[score.judgeId] = {};
+
+		const ballot = entry.Ballots[score.judgeId];
+
+		const winlossTypes = ['debate', 'wsdc', 'mockTrial'];
+		const rankTypes    = ['speech', 'congress', 'wudc'];
+
+		if (round.postPrimary
+			|| (section.published && round.Event.Settings.publishResults)
+		) {
+
+			if (winlossTypes.includes(round.Event.type) && score.tag == 'winloss') {
+				ballot.winloss = 'L';
+				if (score.value > 0) 		ballot.winloss = 'W';
+				if (score.ballotBye) 		ballot.winloss = 'Bye';
+				if (score.ballotForfeit) 	ballot.winloss = 'Fft';
+				round.Event.Settings.primaryScore = 'winloss';
+				round.Event.Settings = stripNulls(round.Event.Settings);
+				round.scoreTypes[score.tag] = true;
+			}
+
+			if (rankTypes.includes(round.Event.type) && score.tag == 'rank') {
+				if (!ballot.rank)	ballot.rank = 0;
+				ballot.rank += score.value;
+				round.Event.Settings.primaryScore = 'rank';
+				round.scoreTypes[score.tag] = true;
+			}
+		}
+
+		if (round.postSecondary
+			|| (section.published && round.Event.Settings.publishResults === 'all')
+		) {
+
+			if (
+				(!winlossTypes.includes(round.Event.type) || score.tag !== 'winloss')
+				&& (!rankTypes.includes(round.Event.type) || score.tag !== 'rank')
+			) {
+				round.scoreTypes[score.tag] = true;
+				if (score.tag === 'refute') {
+					if (!ballot['point'])  ballot['point'] = 0;
+					ballot['point'] += score.value;
+				} else if (score.tag === 'speech') {
+					if (!ballot[score.tag]) {
+						ballot[score.tag] = '';
+					} else {
+						ballot[score.tag] += ', ';
+					}
+					ballot[score.tag] += score.value;
+				} else {
+					if (!ballot[score.tag])  ballot[score.tag] = 0;
+					ballot[score.tag] += score.value;
+				}
+
+				if (score.studentId && round.Event.Settings.maxEntrySize > 1) {
+					if (!ballot.Speakers) ballot.Speakers = {};
+					if (!ballot.Speakers[score.studentId]) ballot.Speakers[score.studentId] = {};
+					ballot.Speakers[score.studentId][score.tag] = score.value;
+				}
+			}
+		}
+
+		entry.Ballots[score.judgeId]    = ballot;
+		section.Entries[entryKey]       = entry;
+		round.Sections[score.sectionId] = section;
+	});
+
+	return res.status(200).json(round);
+
+};
+
+export default {
+	getRoundResults,
 };

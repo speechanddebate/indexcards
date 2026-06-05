@@ -38,19 +38,21 @@ export const snakeToCamel = (snaked) => {
 };
 
 export const dbToObject = (object, tag, options = {}) => {
-	const newObject = {};
+	let newObject = {};
 	const oldObject = { ...object };
 
 	Object.keys(oldObject).forEach( (key) => {
 		if (key.includes(tag)) {
-			const newTag = lcfirst(key.replace(tag, ''));
+			const newTag = snakeToCamel(lcfirst(key.replace(tag, '')));
 			newObject[newTag] = oldObject[key];
 			delete oldObject[key];
 		}
 	});
 
+	if (!options.keepNulls) newObject = stripNulls(newObject);
+	if (options.justTag) return newObject;
+
 	oldObject[ucfirst(tag)] = newObject;
-	if (!options.keepNulls) oldObject[ucfirst(tag)] = stripNulls(newObject);
 	return oldObject;
 };
 
