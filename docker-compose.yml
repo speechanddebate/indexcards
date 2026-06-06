@@ -1,15 +1,14 @@
-version: '3'
 services:
   indexcards:
     container_name: indexcards
     image: indexcards:latest
     restart: always
     ports:
-        - 9001:3000
+      - 3000:3000
     environment:
-      - NODE_ENV=staging
+      - NODE_ENV=production
     volumes:
-      - /etc/tabroom/indexcards.config.js:/indexcards/config/config.js:ro
+      - /etc/indexcards/indexcards.config.js:/indexcards/config/config.js:ro
       - /var/log/indexcards:/var/log/indexcards:rw
       - /var/lib/GeoIP:/geoip:ro
     extra_hosts:

@@ -1,4 +1,4 @@
-FROM node:22.13.0 AS base
+FROM node:24.13.0 AS base
 WORKDIR /indexcards
 
 COPY package.json ./
@@ -12,7 +12,6 @@ COPY . .
 ENV TZ="UTC"
 ENV PORT=3000
 CMD ["npm" , "run" , "dev"]
-
 
 FROM node:24-slim AS prod
 WORKDIR /indexcards
