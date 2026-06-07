@@ -165,11 +165,8 @@ export async function getThisWeekTourns(req,res){
 		from (tourn, category)
 
 			left join school on school.tourn = tourn.id
-
 			left join entry on entry.school = school.id and entry.active = 1
-
 			left join entry_student es on es.entry = entry.id
-
 			left join judge on judge.category = category.id
 
 		where 1=1
@@ -261,7 +258,7 @@ export async function getFutureTourns(req,res){
 			tourn.reg_end regEnd,
 			tourn.reg_start regStart,
 			YEAR(tourn.start) as year,
-			WEEK(CONVERT_TZ(tourn.start, '+00:00', tourn.tz), 3) as week,
+			WEEK(CONVERT_TZ(tourn.end, '+00:00', tourn.tz), 3) as week,
 			(
 				select ts.value
 				from tourn_setting ts
@@ -388,7 +385,7 @@ export async function getFutureTourns(req,res){
 			)
 
 			group by tourn.id
-			order by tourn.end, schoolCount DESC
+			order by special DESC, week, tourn.end, schoolCount DESC
 			${ endLimit }
 	`, {
 		type : db.sequelize.QueryTypes.SELECT,
@@ -408,7 +405,7 @@ export async function getFutureTourns(req,res){
 			weekend.reg_start regStart,
 			YEAR(weekend.start) as year,
 
-			WEEK(CONVERT_TZ(weekend.start, '+00:00', tourn.tz), 3) as week,
+			WEEK(CONVERT_TZ(weekend.end, '+00:00', tourn.tz), 3) as week,
 
 			( SELECT COUNT(school.id)
 				FROM school
@@ -533,7 +530,7 @@ export async function getFutureTourns(req,res){
 			and weekend.tourn = tourn.id
 
 		group by weekend.id
-		order by weekend.start
+		order by week, weekend.end
 		${ endLimit }
 	`, {
 		type : db.sequelize.QueryTypes.SELECT,
@@ -601,6 +598,8 @@ export async function getFutureTourns(req,res){
 			fullDates: tournDateRange.fullOutput,
 		};
 	}).sort( (a, b) => {
+		if (a.special !== b.special) return b.special - a.special;
+		if (a.week !== b.week) return a.week - b.week;
 		return a.sortnumeric - b.sortnumeric;
 	});
 
