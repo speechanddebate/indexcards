@@ -8,11 +8,11 @@ import config from '../../config/config.js';
 // command line scripts outside of the full app.
 
 const sequelize = new Sequelize(
-	config.DB_DATABASE,
-	config.DB_USER,
-	config.DB_PASS,
+	config.DB.DATABASE,
+	config.DB.USER,
+	config.DB.PASS,
 	{
-		...config.sequelizeOptions,
+		...config.DB.sequelizeOptions,
 		logging: false,
 	}
 );

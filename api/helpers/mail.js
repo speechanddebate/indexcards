@@ -14,7 +14,7 @@ export const emailBlast = async (inputData) => {
 	if (messageData.share) {
 
 		transporter = nodemailer.createTransport({
-			host           : config.SHARE_SMTP_HOST,
+			host           : config.SHARE.SMTP_HOST,
 			port           : 25,
 			secure         : false, // Still allows STARTTLS
 			pool           : true,
@@ -25,16 +25,16 @@ export const emailBlast = async (inputData) => {
 				rejectUnauthorized : false,
 			},
 			auth: {
-				user: config.SHARE_SMTP_USER,
-				pass: config.SHARE_SMTP_PASS,
+				user: config.SHARE.SMTP_USER,
+				pass: config.SHARE.SMTP_PASS,
 			},
 		});
 
-	} else if (config.MAIL_TEST) {
+	} else if (config.MAIL.TEST) {
 
 		transporter = nodemailer.createTransport({
-			host           : config.MAIL_SERVER,
-			port           : config.MAIL_PORT,
+			host           : config.MAIL.SERVER,
+			port           : config.MAIL.PORT,
 			secure         : false,
 			pool           : true,
 			maxConnections : 400,
@@ -48,11 +48,11 @@ export const emailBlast = async (inputData) => {
 
 	} else {
 		transporter = nodemailer.createTransport({
-			host           : config.MAIL_SERVER,
-			port           : config.MAIL_PORT,
+			host           : config.MAIL.SERVER,
+			port           : config.MAIL.PORT,
 			secure         : false,
 			pool           : true,
-			maxConnections : config.MAIL_POOL || 128,
+			maxConnections : config.MAIL.POOL || 128,
 			maxMessages    : 'Infinity',
 		});
 	}
@@ -73,8 +73,8 @@ export const emailBlast = async (inputData) => {
 	// etc. And then add the sender as the To as well so it will not deliver.
 
 	messageData.bcc = Array.from(new Set(messageData.email));
-	messageData.to = messageData.to || config.MAIL_FROM;
-	messageData.from = messageData.from || config.MAIL_FROM;
+	messageData.to = messageData.to || config.MAIL.FROM;
+	messageData.from = messageData.from || config.MAIL.FROM;
 	messageData.replyTo = messageData.replyTo || messageData.from;
 	messageData.subject = messageData.subject || 'Message from Tab';
 	messageData.subject = `[TAB] ${messageData.subject}`;
@@ -117,7 +117,7 @@ export const emailBlast = async (inputData) => {
 
 	if (
 		process.env.NODE_ENV === 'production'
-		|| config.MAIL_TEST
+		|| config.MAIL.TEST
 	) {
 		try {
 			const result = transporter.sendMail(messageData);

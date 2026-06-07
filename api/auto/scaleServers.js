@@ -36,7 +36,7 @@ if (mode === 'show') {
 
 			let label = machine.label;
 
-			if (label !== config.DB_HOST && label !== config.DB_REPLICA) {
+			if (label !== config.DB.HOST && label !== config.DB.REPLICA) {
 				label = `${machine.label}\t`;
 			}
 

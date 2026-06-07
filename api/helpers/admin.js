@@ -8,11 +8,11 @@ export const adminBlast = async (inputData) => {
 	const messageData = { ...inputData };
 
 	const transporter = nodemailer.createTransport({
-		host           : config.ADMINMAIL?.SERVER || config.MAIL_SERVER || 'localhost',
-		port           : config.ADMINMAIL?.PORT || config.MAIL_PORT || '25',
-		secure         : config.ADMINMAIL?.SECURE || false,
+		host           : config.MAIL.ADMIN?.SERVER || config.MAIL.SERVER || 'localhost',
+		port           : config.MAIL.ADMIN?.PORT || config.MAIL.PORT || '25',
+		secure         : config.MAIL.ADMIN?.SECURE || false,
 		pool           : true,
-		maxConnections : config.MAIL_POOL || 64,
+		maxConnections : config.MAIL.POOL || 64,
 		maxMessages    : 100,
 	});
 
@@ -51,7 +51,7 @@ export const adminBlast = async (inputData) => {
 		messageData.html += 'check off "No Emails", and save</p>';
 	}
 
-	messageData.from = messageData.from ? messageData.from : config.MAIL_FROM;
+	messageData.from = messageData.from ? messageData.from : config.MAIL.FROM;
 
 	const promises = [];
 
@@ -59,8 +59,8 @@ export const adminBlast = async (inputData) => {
 		messageData.to = messageData.email;
 		if (
 			process.env.NODE_ENV === 'production'
-			|| config.MAIL_SERVER === 'mail.in.speechanddebate.org'
-			|| config.MAIL_TEST
+			|| config.MAIL.SERVER === 'mail.in.speechanddebate.org'
+			|| config.MAIL.TEST
 		) {
 			const result = transporter.sendMail(messageData);
 			promises.push(result);

@@ -4,14 +4,14 @@ import config from '../../config/config.js';
 import initModels from './models/init-models.js';
 
 // How slow is too slow?
-const slowQueryMs = Number(config.SLOW_QUERY_MS || 1000);
+const slowQueryMs = Number(config.DB.SLOW_QUERY_MS || 1000);
 
 const sequelize = new Sequelize(
-	config.DB_DATABASE,
-	config.DB_USER,
-	config.DB_PASS,
+	config.DB.DATABASE,
+	config.DB.USER,
+	config.DB.PASS,
 	{
-		...config.sequelizeOptions,
+		...config.DB.sequelizeOptions,
 		benchmark: true,
 		logging: (sql, timingMs) => {
 			if (typeof timingMs === 'number') {
@@ -20,7 +20,7 @@ const sequelize = new Sequelize(
 						durationMs: timingMs,
 						caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),
 					});
-				} else if (!config.DB_NO_LOGGING) {
+				} else if (!config.DB.NO_LOGGING) {
 					logger.debug('SQL query', {
 						durationMs: timingMs,
 						caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),

@@ -1,45 +1,40 @@
 
 export const config = {
-	LOG_LEVEL             : 'info',
-	HIDE_DEV_ENDPOINTS	  : true,
-	PORT                  : 8001,
-	RATE_WINDOW           : 15 * 60 * 1000,
-	RATE_MAX              : 100000,
-	RATE_DELAY            : 0,
-	MESSAGE_RATE_MAX      : 15 * 1000,
-	MESSAGE_RATE_WINDOW   : 1,
-	SEARCH_RATE_WINDOW    : 30 * 1000,
-	SEARCH_RATE_MAX       : 5,
-	BASE_URL 			  : 'http://api.dev.tabroom.com',
-	LOGIN_URL             : 'http://mason.dev.tabroom.com/user/login/login.mhtml',
-	DOCKERHOST		      : 'devenv',
-	CODE_PATH             : '/www/indexcards',
-	MAIL_FROM			  : 'live@www.tabroom.com',
-	MAIL_SERVER			  : 'localhost',
-	MAIL_PORT			  : 25,
-	ERROR_DESTINATION	  : ['errors@tabroom.com'],
-	LOGIN_TOKEN			  : 'flurgleflimmer',
-	JITSI_KEY             : 'campus-jitsi-key',
-	JITSI_URI             : 'https://campus.speechanddebate.org',
-	CASELIST_KEY          : 'caselist-key',
-	SHARE_KEY             : 'fd4af7c6f485',
-	SHARE_SMTP_HOST       : '192.168.37.28',
-	SHARE_SMTP_USER       : 'share@share.tabroom.com',
-	SHARE_SMTP_PASS       : 'sharepass',
-	IPLOCATION            : '/var/lib/GeoIP/GeoLite2-City.mmdb',
-	IPISP                 : '/var/lib/GeoIP/GeoIP2-ISP.mmdb',
-	S3_URL				  : 'https://s3.amazonaws.com/tabroom-files/',
-	COOKIE_NAME           : 'TabroomLocal',
-	COOKIE_DOMAIN         : '.dev.tabroom.com',
-	SESSION_SHARED        : 'random_string',
+	LOG_LEVEL           : 'info',
+	HIDE_DEV_ENDPOINTS  : true,
+	PORT                : 8001,
+	RATE_WINDOW         : 15 * 60 * 1000,
+	RATE_MAX            : 100000,
+	RATE_DELAY          : 0,
+	MESSAGE_RATE_MAX    : 15 * 1000,
+	MESSAGE_RATE_WINDOW : 1,
+	SEARCH_RATE_WINDOW  : 30 * 1000,
+	SEARCH_RATE_MAX     : 5,
+	BASE_URL            : 'http://api.dev.tabroom.com',
+	LOGIN_URL           : 'http://mason.dev.tabroom.com/user/login/login.mhtml',
+	DOCKERHOST          : 'devenv',
+	CODE_PATH           : '/www/indexcards',
+	ERROR_DESTINATION   : ['errors@tabroom.com'],
+	JITSI_KEY           : 'campus-jitsi-key',
+	JITSI_URI           : 'https://campus.speechanddebate.org',
+	CASELIST_KEY        : 'caselist-key',
+	SHARE_KEY           : 'fd4af7c6f485',
+	IPLOCATION          : '/var/lib/GeoIP/GeoLite2-City.mmdb',
+	IPISP               : '/var/lib/GeoIP/GeoIP2-ISP.mmdb',
+	S3_URL              : 'https://s3.amazonaws.com/tabroom-files/',
+	COOKIE_NAME         : 'TabroomLocal',
+	COOKIE_DOMAIN       : '.dev.tabroom.com',
+	SESSION_SHARED      : 'random_string',
 	CORS_ORIGINS		  : ['http://localhost:9000', 'https://localhost:9000'],
 	CSRF                  : {
 		COOKIE_NAME   : 'CSRF_Token',
 		HEADER_NAME   : 'x-csrf-token',
 	},
-	DB_PORT               : '3306',
-	DB_DATABASE           : 'tabroom',
-	SLOW_QUERY_MS         : 1000,
+	MAIL : {
+		FROM   : 'live@www.tabroom.com',
+		SERVER : 'localhost',
+		PORT   : 25,
+	},
 	NSDA 				  : {
 		USER_ID  : '12345678',
 		KEY      : 'IAmNotAPassword',
@@ -51,37 +46,47 @@ export const config = {
 			nco       : 33333,
 		},
 	},
-	NAUDL				  : {
-		USERNAME			: 'nope@nopesauce.org',
-		PW					: 'ThisIsAlsoNotAPassword',
-		TOKEN				: 'NotAToken',
-		CLIENT_SECRET		: 'DoNotEvenThinkIt',
-		CLIENT_ID			: 'IDontThinkThisWasSecretButWhyChanceIt',
-		URL					: 'https://urbandebate.my.salesforce.com',
-		TOURN_ENDPOINT		: '/services/apexrest/v.1/TournamentService',
-		STUDENT_ENDPOINT	: '/services/apexrest/v.1/StudentServiceTabroom',
-		STA_ENDPOINT		: '/services/apexrest/v.1/STATabroomService',
+	SHARE:				  {
+		SMTP_HOST : '192.168.37.28',
+		SMTP_USER : 'share@share.tabroom.com',
+		SMTP_PASS : 'sharepass',
 	},
-	ONESIGNAL    : {
+	NAUDL : {
+		USERNAME         : 'nope@nopesauce.org',
+		PW               : 'ThisIsAlsoNotAPassword',
+		TOKEN            : 'NotAToken',
+		CLIENT_SECRET    : 'DoNotEvenThinkIt',
+		CLIENT_ID        : 'IDontThinkThisWasSecretButWhyChanceIt',
+		URL              : 'https://urbandebate.my.salesforce.com',
+		TOURN_ENDPOINT   : '/services/apexrest/v.1/TournamentService',
+		STUDENT_ENDPOINT : '/services/apexrest/v.1/StudentServiceTabroom',
+		STA_ENDPOINT     : '/services/apexrest/v.1/STATabroomService',
+	},
+	ONESIGNAL : {
 		API_URL  : 'https://onesignal.com/api/v1',
 		URL      : `https://api.onesignal.com/apps/someRandomUUID`,
 		appId    : 'YeahNO',
 		safariId : 'web.onesignal.auto.nothingmuchtoseeherefolks',
 		appKey   : 'cryHavocAndLetLooseTheDogsofWar!',
 	},
-	AWS_CREDENTIALS        : {
+	AWS_CREDENTIALS : {
 		accessKeyId        : 'DefNo',
 		secretAccessKey    : 'DoNotTry',
 		region             : 'us-east-1',
 		Bucket             : 'tabroom-files',
 	},
-	sequelizeOptions : {
-		dialect : 'mariadb',
-		define  : {
-			freezeTableName : true,
-			modelName       : 'singularName',
-			underscored     : true,
-			timestamps      : false,
+	DB : {
+		PORT             : '3306',
+		DATABASE         : 'tabroom',
+		SLOW_QUERY_MS    : 1000,
+		sequelizeOptions : {
+			dialect : 'mariadb',
+			define  : {
+				freezeTableName : true,
+				modelName       : 'singularName',
+				underscored     : true,
+				timestamps      : false,
+			},
 		},
 	},
 	winstonConsoleOptions : {
@@ -102,28 +107,28 @@ const env = process.env.NODE_ENV || 'development';
 
 switch (env) {
 	case 'staging':
-		config.DB_HOST          = 'localhost';
-		config.DB_USER          = 'tabroom';
-		config.DB_PASS          = '';
+		config.DB.HOST          = 'localhost';
+		config.DB.USER          = 'tabroom';
+		config.DB.PASS          = '';
 		config.MESSAGE_RATE_MAX = '1000000000';
 		config.LOG_PATH         = '/var/log/indexcards';
 		config.PROXY_NUMBER = 1;
 		break;
 
 	case 'development':
-		config.DB_HOST          = 'localhost';
-		config.DB_USER          = 'tabroom';
-		config.DB_PASS          = 'lolz',
+		config.DB.HOST          = 'localhost';
+		config.DB.USER          = 'tabroom';
+		config.DB.PASS          = 'lolz',
 		config.MESSAGE_RATE_MAX = '1000000000';
-		config.sequelizeOptions.logging = false;
+		config.DB.sequelizeOptions.logging = false;
 		config.LOG_PATH         = '/var/log/indexcards';
 		config.PROXY_NUMBER = 0;
 		break;
 
 	case 'test':
-		config.DB_HOST                  = 'localhost';
-		config.DB_USER                  = 'tabroom';
-		config.DB_PASS                  = 'tabroom';
+		config.DB.HOST                  = 'localhost';
+		config.DB.USER                  = 'tabroom';
+		config.DB.PASS                  = 'tabroom';
 		config.MESSAGE_RATE_MAX         = '1000000000';
 		config.sequelizeOptions.logging = false;
 		config.MODE                     = 'test';
@@ -134,7 +139,7 @@ switch (env) {
 		break;
 }
 
-config.sequelizeOptions.host = config.DB_HOST;
+config.DB.sequelizeOptions.host = config.DB.HOST;
 
 // Override any config value if corresponding env var is set
 const configKeys = Object.keys(config);

@@ -7,13 +7,13 @@ import config from '../config/config.js';
 import logger from '../api/helpers/logger.js';
 
 // adjust these to match your config shape
-const DB_USER = config.DB_USER;
-const DB_PASS = config.DB_PASS;
-const DB_NAME = config.DB_DATABASE;
+const DB_USER = config.DB.USER || config.DB_USER;
+const DB_PASS = config.DB.PASS || config.DB_PASS;
+const DB_NAME = config.DB.DATABASE || config.DB_DATABASE;
 
 // optional: host/port if you need them
-const DB_HOST = config.DB_HOST;
-const DB_PORT = config.DB_PORT;
+const DB_HOST = config.DB.HOST || config.DB_HOST;
+const DB_PORT = config.DB.PORT || config.DB_PORT;
 
 if (!DB_USER || !DB_PASS || !DB_NAME) {
 	throw new Error('Missing db.user, db.password, or db.database in config.js');

@@ -15,7 +15,7 @@ export const systemStatus = (req, res) => {
 		totalmem : os.totalmem(),
 		node     : process.version,
 		runtime  : process.env?.NODE_ENV,
-		database : config.DB_DATABASE,
+		database : config.DB.DATABASE,
 	});
 };
 
