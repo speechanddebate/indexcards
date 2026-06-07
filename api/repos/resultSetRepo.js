@@ -168,13 +168,21 @@ export const getResultSet = async (scope = {}, query = {}, opts = {}) => {
 		if (query.nocache) delete resultSet.cache;
 
 		let cache = {};
-		if (resultSet.cache) cache = JSON.parse(resultSet.cache);
+
+		if (resultSet.cache) {
+			try {
+				cache = JSON.parse(resultSet.cache);
+			} catch (error) {
+				cache = error;
+				cache = {};
+			}
+		}
 
 		if (Object.keys(cache).length > 0) {
 
 			// If the results are already cached, deliver 'em up.
 			if (cache.headers) resultSet.headers = cache.headers;
-			if (cache.rounds) resultSet.rounds = cache.rounds;
+			if (cache.rounds) resultSet.rounds   = cache.rounds;
 
 			delete resultSet.cache;
 
