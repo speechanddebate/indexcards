@@ -221,6 +221,9 @@ async function savePersonSettings(personId, settings = {}) {
 		if (value instanceof Date) {
 			return db.setting(origin, tag, { date: value });
 		}
+		else if (['paradigm'].includes(tag)){
+			return db.setting(origin, tag, { text: value });
+		}
 		return db.setting(origin, tag, value);
 	}));
 }

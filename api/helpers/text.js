@@ -69,4 +69,39 @@ export const stripNulls = (target, exclude = []) => {
 	return returnObject;
 };
 
+export function profanityCheck(text) {
+	const naughtyWords = [
+		'fuck',
+		'f u c k',
+		'fucker',
+		'fuckee',
+		'phuck',
+		'p h u c k',
+		'motherfucker',
+		'motherphucker',
+		'asshole',
+		'shit',
+		'bullshit',
+		'faggot',
+		'fag',
+		'dyke',
+		'kike',
+		'pussy',
+		'pussies',
+		'goatse',
+		'crip',
+		'tard',
+		'retard',
+		'cunt',
+		'cuntbag',
+	];
+	const found = [];
+	naughtyWords.forEach((word) => {
+		if (text.toLowerCase().includes(word)) {
+			found.push(word);
+		}
+	});
+	return found;
+}
+
 export default addZero;

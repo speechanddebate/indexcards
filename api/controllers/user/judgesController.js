@@ -1,7 +1,11 @@
 import  judgeRepo from '../../repos/judgeRepo.js';
 import chapterJudgeRepo from '../../repos/chapterJudgeRepo.js';
 import chapterRepo from '../../repos/chapterRepo.js';
-import { BadRequest } from '../../helpers/problem.js';
+import personRepo from '../../repos/personRepo.js';
+import tabroomRepo from '../../repos/tabroomRepo.js';
+import changeLogRepo from '../../repos/changeLogRepo.js';
+import { profanityCheck } from '../../helpers/text.js';
+import { BadRequest, Forbidden } from '../../helpers/problem.js';
 import { Op } from 'sequelize';
 import { notify } from '../../helpers/blast.js';
 import logger from '../../helpers/logger.js';
@@ -130,10 +134,61 @@ async function history(req, res) {
 		roundsObligated: (j.obligation ?? 0) + (j.hired ?? 0),
 	})));
 };
+
+async function getParadigm(req, res) {
+	return res.status(501);
+}
+
+async function updateParadigm(req, res) {
+
+	const Person = await personRepo.getPerson(req.actor.Person.id, {
+		settings: ['email_unconfirmed'],
+	});
+	//check ability to save. check email confirmation, word count, profanity
+	if(Person.settings['email_unconfirmed'])
+		return Forbidden(req, res, 'You must confirm your email before saving a paradigm');
+
+	//check word count limits
+	const tabSettings = await tabroomRepo.getSettings([
+		'paradigm_word_limit',
+	]);
+	if(tabSettings.filter(s => s.tag === 'paradigm_word_limit')[0]?.value > 0){
+		const wordLimit = parseInt(tabSettings.filter(s => s.tag === 'paradigm_word_limit')[0].value);
+		const wordCount = req.valid.body.paradigm.split(/\s+/).length;
+		if(wordCount > wordLimit){
+			return BadRequest(req, res, `Paradigm exceeds the word limit of ${wordLimit}. Your paradigm has ${wordCount} words.`);
+		}
+	} else {
+		logger.debug('no paradigm word limit set, skipping word count check');
+	}
+
+	const naughtywords = profanityCheck(req.valid.body.paradigm);
+	if(naughtywords.length > 0){
+		return BadRequest(req, res, 'paradigm contains prohibited words', { words: naughtywords });
+	}
+	//update the paradigm and relevant settings
+	await personRepo.savePersonSettings(Person.id, {
+		paradigm: req.valid.body.paradigm,
+	});
+
+	try {
+		await changeLogRepo.createChangeLog({
+			tag: 'paradigm',
+			person: Person.id,
+			description: `Saved new paradigm from session ${req.session.id} logged in from ${req.ip}${req.actor.su ? ` while SU'd from account ${req.actor.su.email}` : ''}`,
+		});
+	} catch (err) {
+		logger.error('Failed to log paradigm change in change log', { error: err });
+	}
+
+	return res.status(204).send();
+}
 export default {
 	linkRequests,
 	claimRequest,
 	history,
+	getParadigm,
+	updateParadigm,
 };
 
 function buildChapterJudgeClaimEmail(chapterJudge, person) {

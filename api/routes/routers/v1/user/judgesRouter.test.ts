@@ -75,4 +75,20 @@ describe('judgesRouter', () => {
 			expect(res.body).toMatchSchema(z.array(JudgeHistory));
 		});
 	});
+	describe("POST /user/judges/paradigm", () => {
+		it('should update the users paradigm', async () => {
+			const { personId, getPerson } = await factories.person.create();
+			const { userkey } = await factories.session.createTestSession({ person: personId });
+			const res = await request(server)
+				.post('/v1/user/judges/paradigm')
+				.set('Accept', 'application/json')
+				.set('Authorization', `Bearer ${userkey}`)
+				.send({ paradigm: 'word '.repeat(50) })
+				.expect(204);
+			expect(res).not.toBeProblemResponse();
+
+			const updatedPerson = await getPerson() as { settings: { paradigm: string } };
+			expect(updatedPerson.settings.paradigm).toBe('word '.repeat(50));
+		});
+	});
 });

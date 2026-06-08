@@ -64,6 +64,12 @@ expect.extend({
 					body.status === 401 &&
 					body.detail.length > 0;
 				break;
+			case 403:
+				matchesExpectedCode =
+					body.title === 'You Do Not Have Access to This Resource' &&
+					body.status === 403 &&
+					body.detail.length > 0;
+				break;
 			case 404:
 				matchesExpectedCode =
 					body.title === 'The specified resource was not found.' &&

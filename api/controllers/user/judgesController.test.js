@@ -1,18 +1,30 @@
 import con from './judgesController.js';
 import judgeRepo from '../../repos/judgeRepo.js';
 import chapterJudgeRepo from '../../repos/chapterJudgeRepo.js';
+import tabroomRepo from '../../repos/tabroomRepo.js';
 import chapterRepo from '../../repos/chapterRepo.js';
+import personRepo from '../../repos/personRepo.js';
+import changeLogRepo from '../../repos/changeLogRepo.js';
 import { UnlinkedJudge } from '../../routes/openapi/schemas/index.ts';
 import { createContext } from '../../../tests/httpMocks.ts';
 import { notify } from '../../helpers/blast.js';
+import logger from '../../helpers/logger.js';
 import z from 'zod';
 
 vi.mock('../../repos/judgeRepo.js');
 vi.mock('../../repos/chapterJudgeRepo.js');
 vi.mock('../../repos/chapterRepo.js');
+vi.mock('../../repos/personRepo.js');
+vi.mock('../../repos/changeLogRepo.js');
+vi.mock('../../repos/tabroomRepo.js');
 vi.mock('../../helpers/blast.js');
 
+vi.spyOn(logger, ['debug']).mockImplementation(() => {});
+
 describe('judgesController', () => {
+	beforeAll(() => {
+		changeLogRepo.createChangeLog.mockResolvedValue(1);
+	});
 	beforeEach(() => {
 		vi.clearAllMocks();
 	});
@@ -122,6 +134,45 @@ describe('judgesController', () => {
 			chapterRepo.getAdmins.mockResolvedValue([{ id: 1, email: 'admin@example.com' }]);
 			await con.claimRequest(req, res);
 			expect(notify).toHaveBeenCalledWith(expect.objectContaining({ ids: [1] }));
+		});
+	});
+	describe('updateParadigm', () => {
+		let { req, res } = {};
+		beforeEach(() => {
+			({ req, res } = createContext({ actor: { Person: { id: 123 } }, session: { id: 'abc' }, ip: 'ip' }));
+			tabroomRepo.getSettings.mockResolvedValue([{ tag: 'paradigm_word_limit', value: '100' }]);
+			personRepo.getPerson.mockResolvedValue({ id: 123, settings: {} });
+		});
+		it('should return 400 if paradigm exceeds word limit', async () => {
+			req.valid = { body: { paradigm: 'word '.repeat(101) } };
+			await con.updateParadigm(req, res);
+			expect(res).toBeProblemResponse(400);
+		});
+		it('should return 403 if persons email is unconfirmed', async () => {
+			req.valid = { body: { paradigm: 'word '.repeat(50) } };
+			personRepo.getPerson.mockResolvedValue({ id: 123, settings: { email_unconfirmed: true } });
+			await con.updateParadigm(req, res);
+			expect(res).toBeProblemResponse(403);
+		});
+		it('does not fail if no word limit is set', async () => {
+			req.valid = { body: { paradigm: 'word '.repeat(200) } };
+			tabroomRepo.getSettings.mockResolvedValue([]);
+			await con.updateParadigm(req, res);
+			expect(res).not.toBeProblemResponse();
+			expect(logger.debug).toHaveBeenCalled();
+		});
+		it('should return 400 if paradigm contains profanity', async () => {
+			req.valid = { body: { paradigm: 'word '.repeat(50) + ' shit' } };
+			await con.updateParadigm(req, res);
+			expect(res).toBeProblemResponse(400);
+		});
+		it('saves the paradigm if it meets all requirements', async () => {
+			req.valid = { body: { paradigm: 'word '.repeat(50) } };
+			await con.updateParadigm(req, res);
+			expect(res.status).toHaveBeenCalledWith(204);
+			expect(res).not.toBeProblemResponse();
+			expect(changeLogRepo.createChangeLog).toHaveBeenCalled();
+			expect(personRepo.savePersonSettings).toHaveBeenCalledWith(123, { paradigm: 'word '.repeat(50) });
 		});
 	});
 });

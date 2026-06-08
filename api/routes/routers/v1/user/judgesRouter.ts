@@ -88,4 +88,37 @@ router.route('/history')
 			},
 		},
 	}
+
+router.route('/paradigm')
+	.get(judgesController.getParadigm)
+	.post(ValidateRequest, judgesController.updateParadigm).openapi = {
+		path: '/user/judges/paradigm',
+		get: {
+			summary: 'get paradigm',
+			responses: {
+
+			}
+		},
+		post: {
+			summary: 'update paradigm',
+			requestBody: {
+				content: {
+					'application/json': {
+						schema: z.object({
+							paradigm: z.string().max(65535).meta({
+								description: 'The new paradigm for the user',
+							}),
+						}),
+					},
+				},
+			},
+			responses: {
+				204: {
+					description: 'Paradigm updated successfully',
+				},
+				400: { '$ref': '#/components/responses/BadRequest' },
+				403: { '$ref': '#/components/responses/Forbidden' },
+			},
+		}
+	}
 export default router;

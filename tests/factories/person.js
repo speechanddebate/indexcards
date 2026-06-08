@@ -27,7 +27,7 @@ export async function create(overrides = {}) {
 
 	return {
 		personId,
-		getPerson: () => personRepo.getPerson(personId),
+		getPerson: () => personRepo.getPerson(personId, { settings: true }),
 	};
 }
 export async function createJudge(overrides = {}) {
