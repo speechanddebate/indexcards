@@ -1,3 +1,5 @@
+import sanitizeHtml from 'sanitize-html';
+
 export const addZero = (i) => {
 	if (i < 10) {
 		i = `0${i}`;
@@ -103,5 +105,12 @@ export function profanityCheck(text) {
 	});
 	return found;
 }
-
+/**
+ * sanitizes an html string. modify this function to change defaults everywhere
+ */
+export function sanitizeHTML(input, opts = {}) {
+	return sanitizeHtml(input, {
+		...opts,
+	});
+}
 export default addZero;

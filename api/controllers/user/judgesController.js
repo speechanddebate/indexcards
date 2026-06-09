@@ -4,7 +4,7 @@ import chapterRepo from '../../repos/chapterRepo.js';
 import personRepo from '../../repos/personRepo.js';
 import tabroomRepo from '../../repos/tabroomRepo.js';
 import changeLogRepo from '../../repos/changeLogRepo.js';
-import { profanityCheck } from '../../helpers/text.js';
+import { profanityCheck, sanitizeHTML } from '../../helpers/text.js';
 import { BadRequest, Forbidden } from '../../helpers/problem.js';
 import { Op } from 'sequelize';
 import { notify } from '../../helpers/blast.js';
@@ -166,9 +166,13 @@ async function updateParadigm(req, res) {
 	if(naughtywords.length > 0){
 		return BadRequest(req, res, 'paradigm contains prohibited words', { words: naughtywords });
 	}
+	const cleanParadigm = sanitizeHTML(req.valid.body.paradigm);
+	if(cleanParadigm !== req.valid.body.paradigm){
+		logger.debug('Paradigm was modified by sanitization.', { original: req.valid.body.paradigm, clean: cleanParadigm });
+	}
 	//update the paradigm and relevant settings
 	await personRepo.savePersonSettings(Person.id, {
-		paradigm: req.valid.body.paradigm,
+		paradigm: cleanParadigm,
 	});
 
 	try {
