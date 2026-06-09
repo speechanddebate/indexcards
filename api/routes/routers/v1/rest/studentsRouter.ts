@@ -4,6 +4,7 @@ import { ValidateRequest } from '../../../../middleware/validation.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
 import z from 'zod';
 import { UnlinkedStudentSearch } from '../../../openapi/schemas/index.ts';
+import { requireAuth } from '../../../openapi/security.ts';
 
 const router = Router();
 
@@ -14,6 +15,7 @@ router.route('/unlinked/search')
   	description: 'Search for students that are not linked to a Tabroom account.',
   	path: '/rest/students/unlinked/search',
   	tags: ['Students', 'Orval'],
+	security: requireAuth,
   	requestParams: {
   		query: z.object({
 			limit: z.coerce.number().default(100).meta({ description: 'Maximum number of results to return' }),

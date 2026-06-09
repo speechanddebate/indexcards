@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/ext/nsdaController.js';
+import { requireExtApiKey } from '../../../openapi/security.ts';
 
 const router = Router();
 
@@ -7,7 +8,7 @@ router.route('/history').get(controller.getPersonHistory).openapi = {
 	path: '/ext/nsda/history',
 	summary: 'Load history for a NSDA membership ID',
 	operationId: 'getPersonHistory',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : NSDA'],
 	parameters: [
 		{
@@ -35,7 +36,7 @@ router.route('/history').get(controller.getPersonHistory).openapi = {
 router.route('/payment').get(controller.getPayment).openapi = {
 	path: '/ext/nsda/payment',
 	summary: 'Get payment information',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : NSDA'],
 	responses: {
 		200: { description: 'Payment information' },
@@ -46,7 +47,7 @@ router.route('/payment').get(controller.getPayment).openapi = {
 router.route('/payment').post(controller.postPayment).openapi = {
 	path: '/ext/nsda/payment',
 	summary: 'Process payment',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : NSDA'],
 	responses: {
 		201: { description: 'Payment processed' },
@@ -57,7 +58,7 @@ router.route('/payment').post(controller.postPayment).openapi = {
 router.route('/payment/tourn/:tournId').get(controller.getPayment).openapi = {
 	path: '/ext/nsda/payment/tourn/{tournId}',
 	summary: 'Get payment information for tournament',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : NSDA'],
 	parameters: [
 		{
@@ -76,7 +77,7 @@ router.route('/payment/tourn/:tournId').get(controller.getPayment).openapi = {
 router.route('/payment/tourn/:tournId').post(controller.postPayment).openapi = {
 	path: '/ext/nsda/payment/tourn/{tournId}',
 	summary: 'Process payment for tournament',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : NSDA'],
 	parameters: [
 		{
@@ -95,7 +96,7 @@ router.route('/payment/tourn/:tournId').post(controller.postPayment).openapi = {
 router.route('/nats/appearances').get(controller.syncNatsAppearances).openapi = {
 	path: '/ext/nsda/nats/appearances',
 	summary: 'Sync NSDA Nationals appearances',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : NSDA'],
 	responses: {
 		200: { description: 'Appearances synced' },
@@ -106,7 +107,7 @@ router.route('/nats/appearances').get(controller.syncNatsAppearances).openapi = 
 router.route('/nats/placements').get(controller.natsIndividualHonors).openapi = {
 	path: '/ext/nsda/nats/placements',
 	summary: 'Get NSDA Nationals individual placements',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : NSDA'],
 	responses: {
 		200: { description: 'Individual placements' },

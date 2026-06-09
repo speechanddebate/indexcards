@@ -15,14 +15,7 @@
       "identifier": "RPL-1.5"
     }
   },
-  "security": [
-    {
-      "bearer": []
-    },
-    {
-      "cookie": []
-    }
-  ],
+  "security": [],
   "tags": [
     {
       "name": "Admin : Servers",
@@ -1913,6 +1906,15 @@
           "Quizzes",
           "Orval"
         ],
+        "security": [
+          {},
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
         "parameters": [
           {
             "in": "query",
@@ -1964,6 +1966,14 @@
         "tags": [
           "Students",
           "Orval"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
         ],
         "parameters": [
           {
@@ -2257,6 +2267,14 @@
           "Orval",
           "Inbox"
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
         "parameters": [],
         "responses": {
           "200": {
@@ -2289,6 +2307,14 @@
         "tags": [
           "Inbox",
           "Orval"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
         ],
         "parameters": [],
         "responses": {
@@ -2325,6 +2351,14 @@
           "Orval",
           "Inbox"
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
         "parameters": [],
         "responses": {
           "204": {
@@ -2344,6 +2378,14 @@
         "tags": [
           "Orval",
           "Inbox"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
         ],
         "operationId": "UserInboxGetMessage",
         "summary": "Get message",
@@ -2394,6 +2436,14 @@
           "Orval",
           "Inbox"
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
         "operationId": "UserInboxMarkDeleted",
         "summary": "Delete message",
         "description": "Delete a specific message from the users inbox",
@@ -2441,6 +2491,14 @@
           "Orval",
           "Inbox"
         ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
         "parameters": [
           {
             "in": "path",
@@ -2484,6 +2542,14 @@
         "tags": [
           "Orval",
           "Inbox"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
         ],
         "parameters": [
           {
@@ -6461,14 +6527,15 @@
         "type": "http",
         "scheme": "basic"
       },
-      "bearer": {
+      "bearerAuth": {
         "type": "http",
         "scheme": "bearer"
       },
-      "cookie": {
+      "cookieAuth": {
         "type": "apiKey",
         "in": "cookie",
-        "name": "x-tabroom-cookie"
+        "name": "Tabroom_Cookie",
+        "description": "send the session token as a cookie. If making a non GET request, the CSRF token must also be set in the header as x-csrf-token with the value from the CSRF_Token cookie. This will NOT happen automatically. For direct API access we recommend using bearerAuth."
       }
     }
   }

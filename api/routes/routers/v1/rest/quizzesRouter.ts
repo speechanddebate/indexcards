@@ -2,6 +2,7 @@ import { Router } from 'express';
 import con from '../../../../controllers/rest/QuizController.js';
 import z from 'zod';
 import { Quiz } from '../../../openapi/schemas/index.ts';
+import { optionalAuth } from '../../../openapi/security.ts';
 
 const router = Router();
 
@@ -12,6 +13,7 @@ router.route('/')
   	operationId: 'RestQuizzes',
   	description: 'Retrieve a list of all site wide quizzes.',
 	tags: ['Quizzes','Orval'],
+	security: optionalAuth,
 	requestParams: {
 		query: z.object({
 			limit: z.number().optional().describe('Number of quizzes to return'),

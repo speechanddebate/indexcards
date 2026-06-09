@@ -5,6 +5,7 @@ import { tags as declaredTags, declaredTagGroups } from './tags.ts';
 import { parameters } from './parameters.ts';
 import logger from '../../helpers/logger.js';
 import { readFile } from 'node:fs/promises';
+import security from './security.ts';
 
 import type { ZodOpenApiObject, ZodOpenApiOperationObject } from 'zod-openapi';
 import type { RouteOpenApiConfig } from '../../types/express-openapi.d.ts';
@@ -61,7 +62,7 @@ export function createOpenApiSpec(apiRouter: RouterLike) {
 				identifier: pkg.license,
 			},
 		},
-		security: [{ bearer: [] },{ cookie: []}],
+		security: security.defaultSecurity,
 		tags: Array.from(tagMap.values()),
 		'x-tagGroups': buildTagGroups(declaredTagGroups, usedTags),
 		paths,
@@ -69,11 +70,7 @@ export function createOpenApiSpec(apiRouter: RouterLike) {
 			schemas,
 			responses,
 			parameters,
-			securitySchemes: {
-				extApiKey:  { type: 'http', scheme: 'basic' },
-				bearer: { type: 'http', scheme: 'bearer' },
-				cookie: { type: 'apiKey', in: 'cookie', name: 'x-tabroom-cookie' },
-			},
+			securitySchemes: security.schemes,
 		},
 	};
 	return createDocument(doc,{

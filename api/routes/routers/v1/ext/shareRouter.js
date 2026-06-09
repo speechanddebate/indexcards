@@ -1,12 +1,13 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/ext/share/shareController.js';
+import { requireExtApiKey } from '../../../openapi/security.ts';
 const router = Router();
 
 router.route('/sendShareFile').post(controller.sendShareFile).openapi = {
 	path: '/ext/share/sendShareFile',
 	summary: 'Sends a document to the docchain email list for a room',
 	operationId: 'sendShareFile',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : Share'],
 	requestBody: {
 		description: 'Initialize the doc chain room and emails',
@@ -31,7 +32,7 @@ router.route('/sendShareFile').post(controller.sendShareFile).openapi = {
 router.route('/makeShareRooms').post(controller.makeExtShareRooms).openapi = {
 	path: '/ext/share/makeShareRooms',
 	summary: 'Create share rooms',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : Share'],
 	responses: {
 		200: { description: 'Rooms created successfully' },

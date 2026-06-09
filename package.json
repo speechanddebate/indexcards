@@ -59,7 +59,7 @@
 		"@aws-sdk/client-s3": "^3.397.0",
 		"@google/genai": "^1.28.0",
 		"@maxmind/geoip2-node": "^3.2.0",
-		"@scalar/express-api-reference": "^0.9.5",
+		"@scalar/express-api-reference": "^0.10.1",
 		"@speechanddebate/nsda-js-utils": "^1.0.15",
 		"authorizenet": "^1.0.10",
 		"axios": "^1.5.1",
@@ -94,7 +94,7 @@
 		"winston": "^3.2.1",
 		"winston-loki": "^6.1.4",
 		"xml2js": "^0.6.2",
-		"zod": "^4.3.6"
+		"zod": "~4.4.3"
 	},
 	"devDependencies": {
 		"@alt3/sequelize-to-json-schemas": "^0.3.55",

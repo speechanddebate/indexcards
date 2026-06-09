@@ -21,9 +21,12 @@ The full path after the version identifier with path parameters replaced. If the
 The programmatic name of the operation, used to generate code on the frontend. The operationId should match the path in the following form. If the path is `/tab/foo/{fooId}/bars` then the operationId should be `tabFooBars`.
 #### `summary` 
 A human readable name for the operation. Likely a non-camelCase version of the operationId.
-- **`description:`** This can be a longer form explanation of the endpoint.
+#### `description:`
+This can be a longer form explanation of the endpoint.
 #### `tags`
 Tags are how endpoints are organized in scalar
+#### `security`
+define if auth is required or not.
 #### `parameters`
 The parameters the endpoint accepts.
 
@@ -33,19 +36,20 @@ The parameters the endpoint accepts.
 The various response types for an endpoint
 
 A good example of what a openapi definition can look like are:
-```js
+```ts
 
 router.route('/:personId').get(controller.getParadigmByPersonId).openapi = {
 	path: '/rest/paradigms/{personId}',
 	summary: 'Get paradigm details by person ID',
 	operationId: 'getParadigm',
 	tags: ['Paradigms'],
+	security: requireAuth,
 	responses: {
 		200: {
 			description: 'Paradigm details for the specified person ID',
 			content: {
 				'application/json': {
-					schema: {'$ref': '#/components/schemas/ParadigmDetails'},
+					schema: ParadigmDetails,
 				},
 			},
 		},

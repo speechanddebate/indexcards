@@ -2,13 +2,14 @@ import { Router } from 'express';
 import * as controller from '../../../../controllers/ext/caselistController.js';
 import z from 'zod';
 import { Student } from '../../../openapi/schemas/index.ts';
+import { requireExtApiKey } from '../../../openapi/security.ts';
 
 const router = Router();
 
 router.route('/chapters').get(controller.getPersonChapters).openapi = {
 	path: '/ext/caselist/chapters',
 	summary: 'Load chapters for a person ID',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : Caselist'],
 	parameters: [
 		{
@@ -41,7 +42,7 @@ router.route('/chapters').get(controller.getPersonChapters).openapi = {
 router.route('/rounds').get(controller.getPersonRounds).openapi = {
 	path: '/ext/caselist/rounds',
 	summary: 'Load rounds for a person ID',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : Caselist'],
 	parameters: [
 		{
@@ -91,7 +92,7 @@ router.route('/rounds').get(controller.getPersonRounds).openapi = {
 router.route('/students').get(controller.getPersonStudents).openapi = {
 	path: '/ext/caselist/students',
 	summary: 'Load students for a person ID',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : Caselist'],
 	parameters: [
 		{
@@ -121,7 +122,7 @@ router.route('/students').get(controller.getPersonStudents).openapi = {
 router.route('/link').post(controller.postCaselistLink).openapi = {
 	path: '/ext/caselist/link',
 	summary: 'Create a link to a caselist page',
-	security: [{ extApiKey: [] }],
+	security: requireExtApiKey,
 	tags: ['Ext : Caselist'],
 	requestBody: {
 		description: 'The caselist link',

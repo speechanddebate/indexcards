@@ -15,6 +15,8 @@ const router = Router();
 router.route('/login').post(login).openapi = {
 	path: '/ext/login',
 	summary: 'External login',
+	description: 'Login endpoint for external services.',
+	security: [],
 	tags: ['Ext'],
 	responses: {
 		200: { description: 'Login successful' },
