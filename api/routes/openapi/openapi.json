@@ -5790,8 +5790,9 @@
         "properties": {
           "id": {
             "readOnly": true,
-            "type": "number",
-            "exclusiveMinimum": 0
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
           },
           "name": {
             "anyOf": [
@@ -6451,6 +6452,28 @@
                   "title": "Internal Server Error",
                   "status": 500,
                   "detail": "An unexpected error occurred.",
+                  "instance": "/api/v1/example"
+                }
+              }
+            }
+          }
+        }
+      },
+      "Forbidden": {
+        "description": "Forbidden - You do not have permission to perform this action.",
+        "content": {
+          "application/problem+json": {
+            "schema": {
+              "$ref": "#/components/schemas/Problem"
+            },
+            "examples": {
+              "forbidden": {
+                "summary": "403 Forbidden",
+                "value": {
+                  "type": "about:blank",
+                  "title": "Forbidden",
+                  "status": 403,
+                  "detail": "You do not have permission to perform this action.",
                   "instance": "/api/v1/example"
                 }
               }

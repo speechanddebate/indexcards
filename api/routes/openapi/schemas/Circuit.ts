@@ -14,7 +14,7 @@ export const activeCircuitsResponse = z.array(
 ) satisfies ZodOpenApiSchemaObject;
 
 export const restCircuit = z.object({
-	id: z.number().positive().readonly(),
+	id: utils.id.readonly(),
 	name: z.nullish(z.string().max(63)),
 	abbr: z.nullish(z.string().max(15)),
 	//setting .meta will set openapi fields

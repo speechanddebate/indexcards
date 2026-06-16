@@ -85,6 +85,26 @@ export const NotFound = {
 		},
 	},
 } satisfies ProblemResponse;
+export const Forbidden = {
+	description: 'Forbidden - You do not have permission to perform this action.',
+	content: {
+		'application/problem+json': {
+			schema: { $ref: '#/components/schemas/Problem' },
+			examples:{
+				forbidden: {
+					summary: '403 Forbidden',
+					value: {
+						type: 'about:blank',
+						title: 'Forbidden',
+						status: 403,
+						detail: 'You do not have permission to perform this action.',
+						instance: '/api/v1/example',
+					},
+				},
+			},
+		},
+	},
+} satisfies ProblemResponse;
 export const BadRequest = {
 	description: 'BadRequest - the request was invalid or cannot be otherwise served.',
 	content: {
