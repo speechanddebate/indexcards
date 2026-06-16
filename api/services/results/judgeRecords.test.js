@@ -8,13 +8,13 @@ describe('Judge Record Service', async () => {
 		({ personId } = await factories.person.create());
 		({ judgeId } = await factories.judge.createTestJudge({ person: personId }));
 		({ tournId } = await factories.tourn.createTestTourn({ hidden: 0 })); //public tourn
-		({ eventId } = await factories.event.createTestEvent({ tournId }));
-		({ roundId } = await factories.round.createTestRound({
+		({ eventId } = await factories.event.create({ tournId }));
+		({ roundId } = await factories.round.create({
 			eventId,
 			published: true,
 			postPrimary: 3,
 		})); //published round with public primary results
-		({ sectionId } = await factories.section.createTestSection({ roundId }));
+		({ sectionId } = await factories.section.create({ roundId }));
 		const entry = await db.entry.create({
 			event: eventId,
 			tourn: tournId,
@@ -23,7 +23,7 @@ describe('Judge Record Service', async () => {
 		entryId = entry.id;
 	});
 	it('returns the public judging record of a person', async () => {
-		const { ballotId } = await factories.ballot.createTestBallot({
+		const { ballotId } = await factories.ballot.create({
 			sectionId,
 			judgeId,
 			entryId,
