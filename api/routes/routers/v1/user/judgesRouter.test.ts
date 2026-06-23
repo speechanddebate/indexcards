@@ -89,6 +89,13 @@ describe('judgesRouter', () => {
 
 			const updatedPerson = await getPerson() as { settings: { paradigm: string } };
 			expect(updatedPerson.settings.paradigm).toBe('word '.repeat(50));
+
+			const newParadigm = await request(server)
+				.get('/v1/user/judges/paradigm')
+				.set('Accept', 'application/json')
+				.set('Authorization', `Bearer ${userkey}`)
+				.expect(200);
+			expect(newParadigm.body.paradigm).toBe('word '.repeat(50));
 		});
 	});
 });

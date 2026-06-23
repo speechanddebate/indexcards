@@ -2774,11 +2774,35 @@
     },
     "/user/judges/paradigm": {
       "get": {
+        "tags": [
+          "Orval",
+          "Judges"
+        ],
         "summary": "get paradigm",
+        "operationId": "UserJudgesParadigm",
         "description": "GET /user/judges/paradigm is undocumented. Need to add .openapi to handler",
-        "tags": [],
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "paradigm": {
+                      "type": "string",
+                      "description": "The current paradigm for the user"
+                    }
+                  },
+                  "required": [
+                    "paradigm"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            }
+          },
           "401": {
             "$ref": "#/components/responses/Unauthorized"
           },
@@ -2788,9 +2812,13 @@
         }
       },
       "post": {
+        "tags": [
+          "Orval",
+          "Judges"
+        ],
         "summary": "update paradigm",
+        "operationId": "PostUserJudgesParadigm",
         "description": "POST /user/judges/paradigm is undocumented. Need to add .openapi to handler",
-        "tags": [],
         "parameters": [],
         "requestBody": {
           "content": {

@@ -93,14 +93,28 @@ router.route('/paradigm')
 	.get(judgesController.getParadigm)
 	.post(ValidateRequest, judgesController.updateParadigm).openapi = {
 		path: '/user/judges/paradigm',
+		tags: ['Orval','Judges'],
 		get: {
 			summary: 'get paradigm',
+			operationId: 'UserJudgesParadigm',
 			responses: {
-
-			}
+				200: {
+					description: 'Successful response',
+					content: {
+						'application/json': {
+							schema: z.object({
+								paradigm: z.string().meta({
+									description: 'The current paradigm for the user',
+								}),
+							}),
+						},
+					},
+				},
+			},
 		},
 		post: {
 			summary: 'update paradigm',
+			operationId: 'PostUserJudgesParadigm',
 			requestBody: {
 				content: {
 					'application/json': {

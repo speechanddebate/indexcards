@@ -136,7 +136,14 @@ async function history(req, res) {
 };
 
 async function getParadigm(req, res) {
-	return res.status(501);
+	const person = req.actor.Person?.id;
+	if(!person) {
+		return BadRequest(req, res, 'Request not made by a person');
+	}
+	const paradigm = await personRepo.getPerson(person, {
+		settings: ['paradigm'],
+	});
+	return res.status(200).json({ paradigm: paradigm.settings['paradigm'] });
 }
 
 async function updateParadigm(req, res) {
