@@ -25,7 +25,8 @@ export const config = {
 	COOKIE_NAME         : 'TabroomLocal',
 	COOKIE_DOMAIN       : '.dev.tabroom.com',
 	SESSION_SHARED      : 'random_string',
-	CORS_ORIGINS		  : ['http://localhost:9000', 'https://localhost:9000'],
+	// a list of trusted origins to use for BOTH CORS and CSRF
+	TRUSTED_ORIGINS		  : ['http://localhost:9000', 'https://localhost:9000'],
 	CSRF                  : {
 		COOKIE_NAME   : 'CSRF_Token',
 		HEADER_NAME   : 'x-csrf-token',

@@ -7,7 +7,9 @@ import * as problem from '../helpers/problem.js';
 describe('csrfMiddleware', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+		config.TRUSTED_ORIGINS = ['https://trusted.example.com'];
 	});
+	
 
 	it('skips when authType is not cookie', async () => {
 		const { req, res, next } = createContext({
@@ -45,16 +47,15 @@ describe('csrfMiddleware', () => {
 		expect(next).toHaveBeenCalledOnce();
 	});
 
-	it('allows request when CSRF token matches', async () => {
-		const token = 'csrf123';
+	it('allows request when Origin is trusted', async () => {
 
 		const { req, res, next } = createContext({
 			authType: 'cookie',
 			method: 'POST',
-			path: '/rest/anything',
-			csrfToken: token,
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			get: ((name: string) => name === config.CSRF.HEADER_NAME ? token : undefined) as any,
+			path: '/v1/rest/anything',
+			headers: {
+				origin: 'https://trusted.example.com',
+			},
 		});
 
 		await csrfMiddleware(req, res, next);
@@ -62,15 +63,16 @@ describe('csrfMiddleware', () => {
 		expect(next).toHaveBeenCalledOnce();
 	});
 
-	it('rejects when CSRF token is missing', async () => {
-		const spy = vi.spyOn(problem, 'Unauthorized');
+	it('rejects when Origin is missing', async () => {
+		const spy = vi.spyOn(problem, 'Forbidden');
 
 		const { req, res, next } = createContext({
 			authType: 'cookie',
 			method: 'POST',
-			path: '/rest/anything',
-			csrfToken: 'abc',
-			get: () => undefined,
+			path: '/v1/rest/anything',
+			headers: {
+				origin: undefined,
+			},
 		});
 
 		await csrfMiddleware(req, res, next);
@@ -79,18 +81,50 @@ describe('csrfMiddleware', () => {
 		expect(next).not.toHaveBeenCalled();
 	});
 
-	it('rejects when CSRF token does not match', async () => {
-		const spy = vi.spyOn(problem, 'Unauthorized');
+	it('rejects when Origin is untrusted', async () => {
+		const spy = vi.spyOn(problem, 'Forbidden');
 
 		const { req, res, next } = createContext({
 			authType: 'cookie',
 			method: 'POST',
-			path: '/rest/anything',
-			session: {
-				csrfToken: 'expected',
+			path: '/v1/rest/anything',
+			headers: {
+				origin: 'https://evil.trusted.example.com',
 			},
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			get: (() => 'wrong') as any,
+		});
+
+		await csrfMiddleware(req, res, next);
+
+		expect(spy).toHaveBeenCalledOnce();
+		expect(next).not.toHaveBeenCalled();
+	});
+	it('rejects when Origin is empty string', async () => {
+		const spy = vi.spyOn(problem, 'Forbidden');
+
+		const { req, res, next } = createContext({
+			authType: 'cookie',
+			method: 'POST',
+			path: '/v1/rest/anything',
+			headers: {
+				origin: '',
+			},
+		});
+
+		await csrfMiddleware(req, res, next);
+
+		expect(spy).toHaveBeenCalledOnce();
+		expect(next).not.toHaveBeenCalled();
+	});
+	it('rejects when protocol does not match', async () => {
+		const spy = vi.spyOn(problem, 'Forbidden');
+
+		const { req, res, next } = createContext({
+			authType: 'cookie',
+			method: 'POST',
+			path: '/v1/rest/anything',
+			headers: {
+				origin: 'http://trusted.example.com',
+			},
 		});
 
 		await csrfMiddleware(req, res, next);

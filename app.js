@@ -55,7 +55,7 @@ const corsOptions = {
 	methods              : ['GET', 'POST', 'DELETE', 'PUT'],
 	optionsSuccessStatus : 204,
 	credentials          : true,
-	origin               : config.CORS_ORIGINS,
+	origin               : config.TRUSTED_ORIGINS,
 };
 
 app.use('/v1', cors(corsOptions));
@@ -117,7 +117,7 @@ app.use(errorHandler);
 const port = process.env.PORT || config.PORT || 3000;
 
 if (process.env.NODE_ENV !== 'test') {
-	app.listen(port, () => {
+	app.listen(port, '0.0.0.0', () => {
 		logger.info(`Server started. Listening on port ${port}`);
 	});
 }
