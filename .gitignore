@@ -3,7 +3,8 @@ coverage/
 /.env
 logs/
 .pm2/
-config/config.js
+config/config*.json
+!config/config.sample.json
 *.swp
 *.swo
 #sorry
@@ -11,4 +12,4 @@ config/config.js
 npm*
 *.nvimlog
 .devcontainer/
-dist/
+build/

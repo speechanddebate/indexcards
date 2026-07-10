@@ -13,7 +13,7 @@ export async function Authenticate(req, res, next) {
 	try {
 
 		// COOKIE AUTHENTICATION
-		const cookieName = config.COOKIE_NAME;
+		const cookieName = config.cookie.name;
 		const cookie = req.cookies[cookieName] || req.headers[config.SESSION_HEADER];
 
 		if (cookie) {

@@ -1,4 +1,4 @@
-import { createContext } from '../../../../tests/httpMocks.ts';
+import { createContext } from '../../../../tests/httpMocks.js';
 import { getSession } from './session.js';
 
 describe('getSession', () => {

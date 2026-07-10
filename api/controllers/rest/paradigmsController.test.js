@@ -1,8 +1,8 @@
 import personRepo from '../../repos/personRepo.js';
-import { createContext } from '../../../tests/httpMocks.ts';
+import { createContext } from '../../../tests/httpMocks.js';
 import paradigmsController from './paradigmsController';
 import * as judgeRecordsService from '../../services/results/judgeRecords.js';
-import { JudgeRecord, ParadigmDetails } from '../../routes/openapi/schemas/index.ts';
+import { JudgeRecord, ParadigmDetails } from '../../routes/openapi/schemas/index.js';
 afterEach(() => {
 	vi.restoreAllMocks();
 });

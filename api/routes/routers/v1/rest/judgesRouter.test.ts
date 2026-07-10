@@ -2,7 +2,7 @@ import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories/index.js';
 import z from 'zod';
-import { UnlinkedJudge } from '../../../openapi/schemas/index.ts';
+import { UnlinkedJudge } from '../../../openapi/schemas/index.js';
 
 describe('GET /rest/judges/unlinked/search', () => {
 	let userkey: string;

@@ -1,23 +1,22 @@
 {
 	"include": [
 		"app.js",
-		"config/**/*",
 		"api/**/*",
-		"api/routes/openapi/openapi.json"
+		"api/routes/openapi/openapi.json",
+		"tests/vitest.d.ts",
+		"tsconfig.build.json"
 	],
 	"exclude": [
 		"node_modules",
 		"coverage",
 		"logs",
-		"**/*.test.*",
-		"config/config.js"
 	],
 	"compilerOptions": {
 		"module"          : "nodenext",
 		"moduleResolution": "nodenext",
 		"target"          : "es2022",
 		"types"           : ["node", "vitest/globals"],
-   		"outDir": "./dist",
+   		"outDir": "./build",
 		"allowJs"         : true,
 		"checkJs"         : false,
 		"isolatedModules" : true,

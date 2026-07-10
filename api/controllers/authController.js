@@ -27,8 +27,7 @@ export async function login(req, res) {
 			email: person.email,
 		},
 	});
-	res.cookie(config.COOKIE_NAME, token, authService.getAuthCookieOptions());
-	res.cookie(config.CSRF.COOKIE_NAME, authService.generateCSRFToken(token), authService.getCSRFCookieOptions());
+	res.cookie(config.cookie.name, token, authService.getAuthCookieOptions());
 	return res.json(validatedResponse);
 };
 
@@ -39,8 +38,7 @@ export async function logout(req, res){
 	}
 
 	// Clear cookie if present
-	res.clearCookie(config.COOKIE_NAME,authService.getAuthCookieOptions());
-	res.clearCookie(config.CSRF.COOKIE_NAME,authService.getCSRFCookieOptions());
+	res.clearCookie(config.cookie.name,authService.getAuthCookieOptions());
 
 	// Always return success
 	res.status(204).send();
@@ -89,7 +87,6 @@ export async function register(req,res){
 		token: token,
 		personId: personId,
 	};
-	res.cookie(config.COOKIE_NAME, token, authService.getAuthCookieOptions());
-	res.cookie(config.CSRF.COOKIE_NAME, authService.generateCSRFToken(token), authService.getCSRFCookieOptions());
+	res.cookie(config.cookie.name, token, authService.getAuthCookieOptions());
 	return res.json(response);
 }

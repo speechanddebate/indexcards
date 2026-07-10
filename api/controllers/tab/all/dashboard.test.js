@@ -55,7 +55,7 @@ describe('Status Board', () => {
 		const res = await request(server)
 			.get(`/v1/tab/tourns/${testTourn.id}/rounds/${testTourn.round}/attendance`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+			.set('Cookie', [`${config.cookie.name}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -184,7 +184,7 @@ describe.todo('Event Dashboard', () => {
 		const res = await request(server)
 			.get(`/v1/tab/tourns/${testTourn.id}/status/dashboard`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+			.set('Cookie', [`${config.cookie.name}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 

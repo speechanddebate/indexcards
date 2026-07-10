@@ -4,7 +4,7 @@ import sessionRepo from '../repos/sessionRepo.js';
 import personRepo from '../repos/personRepo.js';
 import { Authenticate } from './authentication.js';
 import userData from '../../tests/testFixtures';
-import { createContext } from '../../tests/httpMocks.ts';
+import { createContext } from '../../tests/httpMocks.js';
 
 describe('Authentication Middleware', () => {
 
@@ -38,7 +38,7 @@ describe('Authentication Middleware', () => {
 
 			const { req, res, next } = createContext({
 				cookies: {
-					[config.COOKIE_NAME]: userData.testUserSession.userkey,
+					[config.cookie.name]: userData.testUserSession.userkey,
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -73,7 +73,7 @@ describe('Authentication Middleware', () => {
 
 			const { req, res, next } = createContext({
 				cookies: {
-					[config.COOKIE_NAME]: 'invalidcookie',
+					[config.cookie.name]: 'invalidcookie',
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -92,7 +92,7 @@ describe('Authentication Middleware', () => {
 
 			const { req, res, next } = createContext({
 				cookies: {
-					[config.COOKIE_NAME]: 'somecookie',
+					[config.cookie.name]: 'somecookie',
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -109,7 +109,7 @@ describe('Authentication Middleware', () => {
 			// Arrange
 			const { req, res, next } = createContext({
 				cookies: {
-					[config.COOKIE_NAME]: userData.testUserSession.userkey,
+					[config.cookie.name]: userData.testUserSession.userkey,
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {

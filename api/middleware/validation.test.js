@@ -4,7 +4,7 @@ import z from 'zod';
 import request from 'supertest';
 import bodyParser from 'body-parser';
 import { ValidateRequest } from './validation.js';
-import { createContext } from '../../tests/httpMocks.ts';
+import { createContext } from '../../tests/httpMocks.js';
 
 function createValidationContext(){
 	return createContext({

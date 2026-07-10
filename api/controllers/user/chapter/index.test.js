@@ -33,7 +33,7 @@ describe('User Chapter', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapter`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+			.set('Cookie', [`${config.cookie.name}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -61,7 +61,7 @@ describe('User Chapter', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapter/byTourn/30661`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+			.set('Cookie', [`${config.cookie.name}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 

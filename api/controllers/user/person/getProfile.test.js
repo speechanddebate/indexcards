@@ -11,7 +11,7 @@ describe('User Profile Loader', () => {
 		const res = await request(server)
 			.get(`/v1/user/profile`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+			.set('Cookie', [`${config.cookie.name}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -33,7 +33,7 @@ describe('User Profile Loader', () => {
 		const res = await request(server)
 			.get(`/v1/user/profile/1`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+			.set('Cookie', [`${config.cookie.name}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 

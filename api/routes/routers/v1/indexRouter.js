@@ -16,7 +16,7 @@ import legacyUserRouter from './legacy/userRouter.js';
 import legacyCoachRouter from './legacy/coachRouter.js';
 import legacyPublicRouter from './legacy/public/indexRouter.js';
 import { requireLogin, requireSiteAdmin } from '../../../middleware/authorization/authorization.js';
-import { config } from '../../../../config/config.js';
+import config from '../../../../config/config.js';
 
 const router = Router({ mergeParams: true });
 

@@ -7,28 +7,29 @@ function rateLimitResponse(req: Request, res: Response, detail: string) {
 	return RateLimitExceeded(req, res, detail, { validate: { trustProxy: false } });
 }
 
+const rateConfig = config.ratelimit;
+
 const globalLimiter = rateLimiter({
-	windowMs: config.RATE_WINDOW || 15 * 60 * 1000,
-	max: config.RATE_MAX || 10000,
+	windowMs: rateConfig.window,
+	max: rateConfig.max,
 	handler: (req: Request, res: Response) => {
-		return rateLimitResponse(req, res, `You have reached your rate limit which is ${config.RATE_MAX}.`);
+		return rateLimitResponse(req, res, `You have reached your rate limit which is ${rateConfig.max}.`);
 	},
 });
 
 const messageLimiter = rateLimiter({
-	windowMs: config.MESSAGE_RATE_WINDOW || 15 * 1000,
-	max: config.MESSAGE_RATE_MAX || 1,
+	windowMs: rateConfig.message.window,
+	max: rateConfig.message.max,
 	handler: (req: Request, res: Response) => {
-		return rateLimitResponse(req, res, `You have reached your rate limit on messages which is ${config.MESSAGE_RATE_MAX}.
-            Please do not blast people that persistently.`);
+		return rateLimitResponse(req, res, `You have reached your rate limit on messages which is ${config.ratelimit.message.max}.
+			Please do not blast people that persistently.`);
 	},
 });
-
 const searchLimiter = rateLimiter({
-	windowMs: config.SEARCH_RATE_WINDOW || 30 * 1000,
-	max: config.SEARCH_RATE_MAX || 5,
+	windowMs: rateConfig.search.window,
+	max: rateConfig.search.max,
 	handler: (req: Request, res: Response) => {
-		return rateLimitResponse(req, res, `You have reached your rate limit on searches which is ${config.SEARCH_RATE_MAX}.`);
+		return rateLimitResponse(req, res, `You have reached your rate limit on searches which is ${config.ratelimit.search.max}.`);
 	},
 });
 

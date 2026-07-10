@@ -2,7 +2,7 @@ import factories from '../../../../../tests/factories/index.js';
 import request from 'supertest';
 import server from '../../../../../app.js';
 import z from 'zod';
-import { Student } from '../../../openapi/schemas/Student.ts';
+import { Student } from '../../../openapi/schemas/Student.js';
 
 describe('studentsRouter', () => {
 	let personId : number;

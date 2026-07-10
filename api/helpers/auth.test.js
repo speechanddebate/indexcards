@@ -3,7 +3,7 @@ import { Authenticate } from '../middleware/authentication.js';
 import config from '../../config/config';
 import { tabAuth } from './auth';
 import userData from '../../tests/testFixtures';
-import { createContext } from '../../tests/httpMocks.ts';
+import { createContext } from '../../tests/httpMocks.js';
 
 describe.todo('Authorization Functions', () => {
 
@@ -20,7 +20,7 @@ describe.todo('Authorization Functions', () => {
 				tournId : testTourn,
 			},
 			cookies : {
-				[config.COOKIE_NAME]: userData.testUserSession.userkey,
+				[config.cookie.name]: userData.testUserSession.userkey,
 			},
 		});
 		// Call the middleware to set req.session
@@ -50,7 +50,7 @@ describe.todo('Authorization Functions', () => {
 				tournId : testNotTourn,
 			},
 			cookies : {
-				[config.COOKIE_NAME]: userData.testUserSession.userkey,
+				[config.cookie.name]: userData.testUserSession.userkey,
 			},
 			clearCookie: vi.fn(),
 		};
@@ -76,7 +76,7 @@ describe.todo('Authorization Functions', () => {
 			},
 			config,
 			cookies : {
-				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
+				[config.cookie.name]: userData.testAdminSession.userkey,
 			},
 		});
 
@@ -106,7 +106,7 @@ describe.todo('Authorization Functions', () => {
 				tournId : testNotTourn,
 			},
 			cookies : {
-				[config.COOKIE_NAME]: userData.testAdminSession.userkey,
+				[config.cookie.name]: userData.testAdminSession.userkey,
 			},
 			clearCookie: vi.fn(),
 		});

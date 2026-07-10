@@ -4,7 +4,7 @@ import { encrypt, verify} from 'unixcrypt';
 import { FIELD_MAP,toDomain } from './mappers/sessionMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { personInclude } from './personRepo.js';
-import { config } from '../../config/config.js';
+import config from '../../config/config.js';
 
 async function buildSessionQuery(opts = {}) {
 	const query = {

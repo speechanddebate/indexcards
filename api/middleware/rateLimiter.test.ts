@@ -4,12 +4,18 @@ import request from 'supertest';
 
 vi.mock('../../config/config.js', () => ({
 	default: {
-		RATE_WINDOW: 1000,
-		RATE_MAX: 2,
-		MESSAGE_RATE_WINDOW: 1000,
-		MESSAGE_RATE_MAX: 1,
-		SEARCH_RATE_WINDOW: 1000,
-		SEARCH_RATE_MAX: 1,
+		ratelimit: {
+			window: 1000,
+			max: 2,
+			message: {
+				window: 1000,
+				max: 1
+			},
+			search: {
+				window: 1000,
+				max: 1
+			}
+		}
 	},
 }));
 

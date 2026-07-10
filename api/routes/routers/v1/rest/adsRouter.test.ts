@@ -1,7 +1,7 @@
 import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories/index.js';
-import { HomepageAd } from '../../../openapi/schemas/index.ts';
+import { HomepageAd } from '../../../openapi/schemas/index.js';
 import * as z from 'zod';
 
 describe('/rest/ads', () => {

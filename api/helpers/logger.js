@@ -4,7 +4,7 @@ import winston from 'winston';
 import LokiTransport from 'winston-loki';
 import config from '../../config/config.js';
 
-const logPath = config.LOG_PATH || '/tmp';
+const logPath = config.logging.file.path || '/tmp';
 const requestContext = new AsyncLocalStorage();
 
 function getRequestId() {
@@ -92,26 +92,26 @@ const createLokiTransport = (extraLabels = {}) => {
 
 const createFileTransport =() => {
 	return new winston.transports.File({
-		filename: `${logPath}/${config.LOG_LEVEL}.log`,
+		filename: `${logPath}/${config.logging.level}.log`,
 		format: winston.format.combine(
 			winston.format((info) => { info.labels = Labels(); return info; })(),
 			winston.format.json(),
 		),
-		...config.winstonFileOptions,
+		...config.logging.file,
 	});
 };
 
 const createConsoleTransport = () => {
 	return new winston.transports.Console({
 		format: prettyConsoleFormat,
-		...config.winstonConsoleOptions,
+		...config.logging.console,
 	});
 };
 /**
  * Main application logger. Transports and formatting are configured based on config values.
  */
 const logger = winston.createLogger({
-	level: config.LOG_LEVEL,
+	level: config.logging.level,
 	format: winston.format.combine(
 		requestContextFormat(),
 		winston.format.json(),
@@ -125,7 +125,7 @@ const logger = winston.createLogger({
 });
 
 export function setupLoggers(){
-	if(config.loki && config.loki.host){
+	if(config.logging.loki && config.logging.loki.host){
 		try{
 			const reqTrans = createLokiTransport({type: 'request'});
 			const appTrans = createLokiTransport({type: 'app'});
@@ -161,7 +161,7 @@ logger.progressEnd = (msg) => {
 };
 
 const requestLogger = winston.createLogger({
-	level: config.LOG_LEVEL,
+	level: config.logging.level,
 	format: winston.format.combine(
 		requestContextFormat(),
 		winston.format.json(),
