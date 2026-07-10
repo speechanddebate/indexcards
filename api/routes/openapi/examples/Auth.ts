@@ -2,7 +2,7 @@ import type { z } from 'zod';
 import {
 	LoginRequest as LoginRequestSchema,
 	LoginResponse as LoginResponseSchema,
-} from '../schemas/Auth.ts';
+} from '../schemas/Auth.js';
 
 export const LoginRequest = {
 	username: 'johndoe@tabroom.com',

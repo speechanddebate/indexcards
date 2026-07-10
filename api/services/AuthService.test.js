@@ -1,6 +1,5 @@
 
 import factories from '../../tests/factories/index.js';
-/* eslint-disable-next-line import/no-unresolved */
 import { encrypt } from 'unixcrypt';
 import { ValidationError } from '../helpers/errors/errors.js';
 vi.mock('../repos/personRepo.js', () => ({

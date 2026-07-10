@@ -1,12 +1,12 @@
 import { Router } from 'express';
-import adsRouter from './adsRouter.ts';
-import circuitsRouter from './circuitsRouter.ts';
-import judgesRouter from './judgesRouter.ts';
+import adsRouter from './adsRouter.js';
+import circuitsRouter from './circuitsRouter.js';
+import judgesRouter from './judgesRouter.js';
 import pageRouter from './pageRouter.js';
 import tournsRouter from './tournsRouter.js';
-import paradigmsRouter from './paradigmsRouter.ts';
-import quizzesRouter from './quizzesRouter.ts';
-import studentsRouter from './studentsRouter.ts';
+import paradigmsRouter from './paradigmsRouter.js';
+import quizzesRouter from './quizzesRouter.js';
+import studentsRouter from './studentsRouter.js';
 
 const router = Router();
 

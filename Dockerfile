@@ -13,18 +13,32 @@ ENV TZ="UTC"
 ENV PORT=3000
 CMD ["npm" , "run" , "dev"]
 
+FROM base AS build
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
 FROM node:24-slim AS prod
-WORKDIR /indexcards
 
 ENV NODE_ENV=production
 
-COPY package.json ./
-COPY package-lock.json ./
-RUN npm ci --omit=dev --ignore-scripts
-COPY . .
+WORKDIR /indexcards
+
+COPY package*.json ./
+
+# do not install dev and ignore scripts to prevent husky errors
+# run cache clean to avoid adding npm cache to prod image
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
+
+# copy ONLY the built app
+COPY --from=build /indexcards/dist ./dist
 
 ENV TZ="UTC"
 
 ENV PORT=3000
 ENV NODE_OPTIONS="--max_old_space_size=512 --experimental-vm-modules --experimental-specifier-resolution=node"
-CMD NODE_OPTIONS=${NODE_OPTIONS} node --use_strict app.js
+
+CMD ["node", "dist/app.js"]

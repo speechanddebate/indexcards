@@ -3,7 +3,7 @@ import { ValidateRequest } from '../../../../middleware/validation.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
 import z from 'zod';
 import judgesController from '../../../../controllers/rest/judgesController.js';
-import { UnlinkedJudge } from '../../../openapi/schemas/index.ts';
+import { UnlinkedJudge } from '../../../openapi/schemas/index.js';
 
 const router = Router();
 

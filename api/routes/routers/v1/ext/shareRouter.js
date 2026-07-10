@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/ext/share/shareController.js';
-import { requireExtApiKey } from '../../../openapi/security.ts';
+import { requireExtApiKey } from '../../../openapi/security.js';
 const router = Router();
 
 router.route('/sendShareFile').post(controller.sendShareFile).openapi = {

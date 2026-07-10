@@ -1,5 +1,4 @@
 import personRepo from '../repos/personRepo.js';
-/* eslint-disable-next-line import/no-unresolved */
 import { verify, encrypt } from 'unixcrypt';
 import crypto from 'crypto';
 import config from '../../config/config.js';

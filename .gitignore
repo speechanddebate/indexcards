@@ -11,3 +11,4 @@ config/config.js
 npm*
 *.nvimlog
 .devcontainer/
+dist/

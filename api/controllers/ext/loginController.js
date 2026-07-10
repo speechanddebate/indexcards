@@ -1,4 +1,3 @@
-/* eslint-disable-next-line import/no-unresolved */
 import { verify } from 'unixcrypt';
 import { BadRequest,NotFound,Forbidden } from '../../helpers/problem.js';
 
