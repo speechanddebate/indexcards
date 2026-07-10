@@ -1,7 +1,7 @@
 import CryptoJS from 'crypto-js';
 import axios from 'axios';
 import db from '../data/db.js';
-import config from '../../config/config.js';
+import config from '../config.js';
 
 export const getNSDAMemberId = async (email) => {
 	const path = `/search?q=${email}&type=members`;

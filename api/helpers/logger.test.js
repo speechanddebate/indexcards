@@ -21,8 +21,10 @@ describe('logger request context', () => {
 		res.statusCode = 200;
 		const captureTransport = new CaptureTransport();
 		const originalSilent = logger.silent;
+		const originalLevel = logger.level;
 
 		logger.silent = false;
+		logger.level = 'info';
 		logger.add(captureTransport);
 
 		await new Promise((resolve) => {
@@ -36,8 +38,9 @@ describe('logger request context', () => {
 
 		logger.remove(captureTransport);
 		logger.silent = originalSilent;
+		logger.level = originalLevel;
 
-		expect(captureTransport.entries[0].requestId).toBe('req-123');
+		expect(captureTransport.entries[0]?.requestId).toBe('req-123');
 	});
 
 });

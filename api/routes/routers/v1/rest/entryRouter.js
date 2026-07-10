@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/rest/entryController.js';
 import z from 'zod';
-import * as utils from '../../../openapi/schemas/utils.ts';
+import * as utils from '../../../openapi/schemas/utils.js';
 
 import { ValidateRequest } from '../../../../middleware/validation.js';
 

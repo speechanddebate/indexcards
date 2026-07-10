@@ -1,4 +1,4 @@
-import config from '../../config/config.js';
+import config from '../config.js';
 import { getLinodeInstances, increaseLinodeCount, decreaseLinodeCount } from '../helpers/servers.js';
 
 const mode = process.argv[2];

@@ -12,7 +12,7 @@ try {
 	const spec = createOpenApiSpec(apiRouter);
 
 	// Strict validation
-	const routeCount = Object.keys(spec.paths).length;
+	const routeCount = Object.keys(spec.paths ?? {}).length;
 	if (routeCount === 0) {
 		logger.error('No routes in OpenAPI spec!');
 		process.exit(1);

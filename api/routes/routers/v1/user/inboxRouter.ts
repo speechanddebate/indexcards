@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/user/inbox.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
-import { InboxMessage } from '../../../openapi/schemas/index.ts';
+import { InboxMessage } from '../../../openapi/schemas/index.js';
 import z from 'zod';
-import * as utils from '../../../openapi/schemas/utils.ts';
+import * as utils from '../../../openapi/schemas/utils.js';
 import { ValidateRequest } from '../../../../middleware/validation.js';
-import { requireAuth } from '../../../openapi/security.ts';
+import { requireAuth } from '../../../openapi/security.js';
 
 const router = Router();
 

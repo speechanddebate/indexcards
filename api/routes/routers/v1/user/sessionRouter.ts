@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import * as schemas from '../../../openapi/schemas/index.ts';
+import * as schemas from '../../../openapi/schemas/index.js';
 
 const router = Router();
 

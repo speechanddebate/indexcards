@@ -1,6 +1,6 @@
 import request from 'supertest';
 import server from '../../../../../app.js';
-import { ResultSet, EventResultSets } from '../../../openapi/schemas/ResultSet.ts';
+import { ResultSet, EventResultSets } from '../../../openapi/schemas/index.js';
 import z from 'zod';
 
 describe('GET /results', () => {

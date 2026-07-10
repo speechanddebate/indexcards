@@ -2,7 +2,7 @@ import getNSDA from '../../helpers/nsda.js';
 import { multiObjectify } from '../../helpers/objectify.js';
 import hmacSHA512 from 'crypto-js/hmac-sha512.js';
 import Base64 from 'crypto-js/enc-base64.js';
-import config from '../../../config/config.js';
+import config from '../../config.js';
 import { BadRequest, Forbidden, NotFound } from '../../helpers/problem.js';
 import db from '../../data/db.js';
 

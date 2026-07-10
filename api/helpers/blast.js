@@ -1,7 +1,7 @@
 import axios from 'axios';
 import db from '../data/db.js';
 import emailBlast from './mail.js';
-import config from '../../config/config.js';
+import config from '../config.js';
 import logger from './logger.js';
 
 //*
@@ -139,7 +139,7 @@ export const webBlast = async (inputData) => {
 	// will....
 
 	if (process.env.NODE_ENV !== 'production'
-		&& config.MAIL_SERVER !== 'mail.in.speechanddebate.org'
+		&& config.mail.server !== 'mail.in.speechanddebate.org'
 	) {
 		targetIds = process.env.TEST_USERID || ['100'];
 	}

@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import request from 'supertest';
-import config from '../../../../../config/config.js';
+import config from '../../../../config.js';
 import db from '../../../../data/db.js';
 import server from '../../../../../app.js';
 import { testUserAPIKey, testStoreCartSetting } from '../../../../../tests/testFixtures.js';

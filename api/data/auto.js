@@ -1,5 +1,5 @@
 import { SequelizeAuto } from 'sequelize-auto';
-import config from '../../config/config.js';
+import config from '../config.js';
 import autoConfig from '../../config/sequelize-auto.config.js';
 
 const auto = new SequelizeAuto(

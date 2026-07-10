@@ -1,37 +1,18 @@
 import { Sequelize } from 'sequelize';
-import logger, { getCallerFrame } from '../helpers/logger.js';
-import config from '../../config/config.js';
+import logger, { logDB } from '../helpers/logger.js';
+import config from '../config.js';
 import initModels from './models/init-models.js';
 
-// How slow is too slow?
-const slowQueryMs = Number(config.DB.SLOW_QUERY_MS || 1000);
-
 const sequelize = new Sequelize(
-	config.DB.DATABASE,
-	config.DB.USER,
-	config.DB.PASS,
+	config.db.database,
+	config.db.user,
+	config.db.pass,
 	{
-		...config.DB.sequelizeOptions,
-		host: config.DB.HOST,
-		port: config.DB.PORT,
+		...config.db.sequelizeOptions,
+		host: config.db.host,
+		port: config.db.port,
 		benchmark: true,
-		logging: (sql, timingMs) => {
-			if (typeof timingMs === 'number') {
-				if(timingMs >= slowQueryMs){
-					logger.warn('Slow SQL query', {
-						durationMs: timingMs,
-						caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),
-					});
-				} else if (!config.DB.NO_LOGGING) {
-					logger.debug('SQL query', {
-						durationMs: timingMs,
-						caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),
-					});
-				}
-
-			}
-			logger.silly(`SQL: ${sql}`);
-		},
+		logging: logDB,
 	}
 );
 

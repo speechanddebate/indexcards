@@ -2,8 +2,8 @@ import con from '../../../../controllers/user/studentsController.js';
 import { ValidateRequest } from '../../../../middleware/validation.js';
 import { Router } from 'express';
 import z from 'zod';
-import { Student } from '../../../openapi/schemas/index.ts';
-import * as utils from '../../../openapi/schemas/utils.ts';
+import { Student } from '../../../openapi/schemas/index.js';
+import * as utils from '../../../openapi/schemas/utils.js';
 
 const router = Router();
 

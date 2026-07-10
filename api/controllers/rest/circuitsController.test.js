@@ -1,6 +1,6 @@
 
 import circuitRepo from '../../repos/circuitRepo';
-import { createContext } from '../../../tests/httpMocks.ts';
+import { createContext } from '../../../tests/httpMocks.js';
 import * as c from './circuitsController.js';
 
 describe('getCircuit', () => {

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import controller from '../../../../controllers/user/chapter/index.js';
-import { UserChapter } from '../../../openapi/schemas/index.ts';
+import { UserChapter } from '../../../openapi/schemas/index.js';
 import z from 'zod';
 
 const router = Router();

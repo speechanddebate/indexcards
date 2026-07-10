@@ -3,12 +3,12 @@ import { GoogleGenAI, Type } from '@google/genai';
 import fs, { createWriteStream } from 'fs';
 import path from 'path';
 
-import config from '../../config/config.js';
+import config from '../config.js';
 
 import db from '../helpers/litedb.js';
 
 export const paradigmAnalyzer = async (limit = parseInt(process.argv[1]) || 10) => {
-	const apiKey = process.env.GEMINI_API_KEY || config.GEMINI_API_KEY;
+	const apiKey = config.GEMINI_API_KEY;
 	const ai = new GoogleGenAI({ apiKey });
 
 	const paradigms = await db.sequelize.query(`

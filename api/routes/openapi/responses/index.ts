@@ -1,2 +1,2 @@
-export * from './ProblemResponses.ts';
+export * from './ProblemResponses.js';
 

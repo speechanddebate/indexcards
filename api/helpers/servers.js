@@ -1,6 +1,6 @@
 import axios from 'axios';
 import db from '../data/db.js';
-import config from '../../config/config.js';
+import config from '../config.js';
 import notify from './blast.js';
 import logger from './logger.js';
 

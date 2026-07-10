@@ -1,6 +1,6 @@
 
-import config from '../../config/config.js';
-import { createContext } from '../../tests/httpMocks.ts';
+import config from '../config.js';
+import { createContext } from '../../tests/httpMocks.js';
 import * as controller from './authController.js';
 import authService,{ AUTH_INVALID} from '../services/AuthService.js';
 import sessionRepo from '../repos/sessionRepo.js';
@@ -47,7 +47,6 @@ describe('authController',() => {
 			};
 
 			vi.spyOn(authService, 'login').mockResolvedValue(fakeResult);
-			vi.spyOn(authService, 'generateCSRFToken').mockReturnValue('csrf123');
 
 			const { req, res } = createContext({
 				valid: {
@@ -64,12 +63,7 @@ describe('authController',() => {
 
 			// Auth cookie
 			assert.ok(
-				res.cookie.mock.calls.some(call => call[0] === config.COOKIE_NAME && call[1] === 'jwt123')
-			);
-
-			// CSRF cookie
-			assert.ok(
-				res.cookie.mock.calls.some(call => call[0] === config.CSRF.COOKIE_NAME && call[1] === 'csrf123')
+				res.cookie.mock.calls.some(call => call[0] === config.cookie.name && call[1] === 'jwt123')
 			);
 
 			// Response body
@@ -96,8 +90,7 @@ describe('authController',() => {
 			// Assert
 			expect(spy).toHaveBeenCalledExactlyOnceWith(1);
 
-			expect(res.clearCookie).toHaveBeenCalledWith(config.COOKIE_NAME,expect.any(Object));
-			expect(res.clearCookie).toHaveBeenCalledWith(config.CSRF.COOKIE_NAME,expect.any(Object));
+			expect(res.clearCookie).toHaveBeenCalledWith(config.cookie.name,expect.any(Object));
 
 			expect(res.status).toHaveBeenCalledWith(204);
 			expect(res.send).toHaveBeenCalled();
@@ -117,8 +110,7 @@ describe('authController',() => {
 			// Assert
 			expect(spy).not.toHaveBeenCalled();
 
-			expect(res.clearCookie).toHaveBeenCalledWith(config.COOKIE_NAME,expect.any(Object));
-			expect(res.clearCookie).toHaveBeenCalledWith(config.CSRF.COOKIE_NAME,expect.any(Object));
+			expect(res.clearCookie).toHaveBeenCalledWith(config.cookie.name,expect.any(Object));
 
 			expect(res.status).toHaveBeenCalledWith(204);
 			expect(res.send).toHaveBeenCalled();
@@ -231,8 +223,7 @@ describe('authController',() => {
 				{ ip: req.ip, agentData: 'Mozilla' }
 			);
 			expect(res.json).toHaveBeenCalledWith(fakeResult);
-			expect(res.cookie).toHaveBeenCalledWith(config.COOKIE_NAME, 'jwt456', expect.any(Object));
-			expect(res.cookie).toHaveBeenCalledWith(config.CSRF.COOKIE_NAME, 'csrf456', expect.any(Object));
+			expect(res.cookie).toHaveBeenCalledWith(config.cookie.name, 'jwt456', expect.any(Object));
 		});
 
 		it('returns 400 on ValidationError', async () => {

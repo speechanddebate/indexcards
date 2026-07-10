@@ -1,5 +1,5 @@
 import db from '../helpers/litedb.js';
-import config from '../../config/config.js';
+import config from '../config.js';
 import notify from '../helpers/blast.js';
 
 import {

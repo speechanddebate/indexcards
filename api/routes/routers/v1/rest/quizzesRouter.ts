@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import con from '../../../../controllers/rest/QuizController.js';
 import z from 'zod';
-import { Quiz } from '../../../openapi/schemas/index.ts';
-import { optionalAuth } from '../../../openapi/security.ts';
+import { Quiz } from '../../../openapi/schemas/index.js';
+import { optionalAuth } from '../../../openapi/security.js';
 
 const router = Router();
 

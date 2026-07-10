@@ -1,5 +1,5 @@
 import { Sequelize } from 'sequelize';
-import config from '../../config/config.js';
+import config from '../config.js';
 
 // Tabroom often does not use the ORM fully but instead just takes advantage of
 // Sequelize as a query wrapper which handles things like santizing inputs.
@@ -8,11 +8,11 @@ import config from '../../config/config.js';
 // command line scripts outside of the full app.
 
 const sequelize = new Sequelize(
-	config.DB.DATABASE,
-	config.DB.USER,
-	config.DB.PASS,
+	config.db.database,
+	config.db.user,
+	config.db.pass,
 	{
-		...config.DB.sequelizeOptions,
+		...config.db.sequelizeOptions,
 		logging: false,
 	}
 );

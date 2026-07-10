@@ -1,5 +1,5 @@
 import quizRepo from '../../repos/quizRepo.js';
-import config from '../../../config/config.js';
+import config from '../../config.js';
 
 async function getQuizzes(req, res) {
 	//if a person is requesting, include their PersonQuiz data to determine if they've taken any quizzes or not
@@ -35,7 +35,7 @@ async function getQuizzes(req, res) {
 		circuit: q.circuit === 0 ? null : q.circuit,
 		Badge: {
 			altText: q.badge_description || null,
-			imageUrl: (q.id && q.badge) ? `${config.S3_URL}/badges/${q.id}/${q.badge}`
+			imageUrl: (q.id && q.badge) ? `${config.aws.S3_URL}/badges/${q.id}/${q.badge}`
 					: null,
 			link: q.badge_link || null,
 		},

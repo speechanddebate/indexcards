@@ -1,11 +1,10 @@
 import db from '../data/db.js';
 import crypto from 'crypto';
-// eslint-disable-next-line import/no-unresolved
 import { encrypt, verify} from 'unixcrypt';
 import { FIELD_MAP,toDomain } from './mappers/sessionMapper.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { personInclude } from './personRepo.js';
-import { config } from '../../config/config.js';
+import config from '../config.js';
 
 async function buildSessionQuery(opts = {}) {
 	const query = {
@@ -38,7 +37,7 @@ async function findByUserKey(key, opts = {}) {
 	const s = await db.session.findOne(query);
 	if (!s) return null;
 	// Check for validity
-	const verified = verify(`${s.id}${config.SESSION_SHARED}`, s.userkey);
+	const verified = verify(`${s.id}${config.shared_secret}`, s.userkey);
 	if (verified) return toDomain(s);
 }
 
@@ -66,7 +65,7 @@ async function createSession(session){
 
 	// I don't defend this but it preserves backwards compat -- CLP
 	created.set({
-		userkey: encrypt(`${created.id}${config.SESSION_SHARED}`, '$6$'+userSalt),
+		userkey: encrypt(`${created.id}${config.shared_secret}`, '$6$'+userSalt),
 	});
 	await created.save();
 	return { id: created.id, userkey: created.userkey  };

@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import { convert } from 'html-to-text';
-import config from '../../config/config.js';
+import config from '../config.js';
 import logger from './logger.js';
 
 export const adminBlast = async (inputData) => {
@@ -8,11 +8,11 @@ export const adminBlast = async (inputData) => {
 	const messageData = { ...inputData };
 
 	const transporter = nodemailer.createTransport({
-		host           : config.MAIL.ADMIN?.SERVER || config.MAIL.SERVER || 'localhost',
-		port           : config.MAIL.ADMIN?.PORT || config.MAIL.PORT || '25',
-		secure         : config.MAIL.ADMIN?.SECURE || false,
+		host           : config.mail.admin?.server || config.mail.server,
+		port           : config.mail.admin?.port || config.mail.port,
+		secure         : config.mail.admin?.secure || false,
 		pool           : true,
-		maxConnections : config.MAIL.POOL || 64,
+		maxConnections : config.mail.pool,
 		maxMessages    : 100,
 	});
 
@@ -51,7 +51,7 @@ export const adminBlast = async (inputData) => {
 		messageData.html += 'check off "No Emails", and save</p>';
 	}
 
-	messageData.from = messageData.from ? messageData.from : config.MAIL.FROM;
+	messageData.from = messageData.from ? messageData.from : config.mail.from;
 
 	const promises = [];
 
@@ -59,8 +59,8 @@ export const adminBlast = async (inputData) => {
 		messageData.to = messageData.email;
 		if (
 			process.env.NODE_ENV === 'production'
-			|| config.MAIL.SERVER === 'mail.in.speechanddebate.org'
-			|| config.MAIL.TEST
+			|| config.mail.server === 'mail.in.speechanddebate.org'
+			|| config.mail.test
 		) {
 			const result = transporter.sendMail(messageData);
 			promises.push(result);

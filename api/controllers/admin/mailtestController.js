@@ -1,5 +1,5 @@
 import notify from '../../helpers/blast.js';
-import config from '../../../config/config.js';
+import config from '../../config.js';
 
 // This route will throw a dummy error to test whether the error reporting is
 // working which is apparently pretty goddamned rare.

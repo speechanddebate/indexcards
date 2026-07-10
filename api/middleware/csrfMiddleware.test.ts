@@ -1,13 +1,13 @@
 
 import csrfMiddleware from './csrfMiddleware.js';
-import config from '../../config/config.js';
+import config from '../config.js';
 import { createContext } from '../../tests/httpMocks.js';
 import * as problem from '../helpers/problem.js';
 
 describe('csrfMiddleware', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
-		config.TRUSTED_ORIGINS = ['https://trusted.example.com'];
+		config.csrf.trusted_origins = ['https://trusted.example.com'];
 	});
 	
 

@@ -1,10 +1,10 @@
 
-import config from '../../config/config.js';
+import config from '../config.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import personRepo from '../repos/personRepo.js';
 import { Authenticate } from './authentication.js';
 import userData from '../../tests/testFixtures';
-import { createContext } from '../../tests/httpMocks.ts';
+import { createContext } from '../../tests/httpMocks.js';
 import authService from '../services/AuthService.js';
 
 describe('Authentication Middleware', () => {
@@ -39,7 +39,7 @@ describe('Authentication Middleware', () => {
 
 			const { req, res, next } = createContext({
 				cookies: {
-					[config.COOKIE_NAME]: userData.testUserSession.userkey,
+					[config.cookie.name]: userData.testUserSession.userkey,
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -74,7 +74,7 @@ describe('Authentication Middleware', () => {
 
 			const { req, res, next } = createContext({
 				cookies: {
-					[config.COOKIE_NAME]: 'invalidcookie',
+					[config.cookie.name]: 'invalidcookie',
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -93,7 +93,7 @@ describe('Authentication Middleware', () => {
 			// if the user provides and invalid cookie. we should tell the browser to clear it.
 			const { req, res, next } = createContext({
 				cookies: {
-					[config.COOKIE_NAME]: 'invalidcookie',
+					[config.cookie.name]: 'invalidcookie',
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -104,13 +104,13 @@ describe('Authentication Middleware', () => {
 			await Authenticate(req, res, next);
 
 			//Assert
-			expect(res.clearCookie).toHaveBeenCalledWith(config.COOKIE_NAME, authService.getAuthCookieOptions());
+			expect(res.clearCookie).toHaveBeenCalledWith(config.cookie.name, authService.getAuthCookieOptions());
 		});
 		it('calls next(err) on sessionRepo error', async () => {
 
 			const { req, res, next } = createContext({
 				cookies: {
-					[config.COOKIE_NAME]: 'somecookie',
+					[config.cookie.name]: 'somecookie',
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
@@ -127,7 +127,7 @@ describe('Authentication Middleware', () => {
 			// Arrange
 			const { req, res, next } = createContext({
 				cookies: {
-					[config.COOKIE_NAME]: userData.testUserSession.userkey,
+					[config.cookie.name]: userData.testUserSession.userkey,
 				},
 			});
 			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {

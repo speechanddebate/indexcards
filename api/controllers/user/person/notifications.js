@@ -2,7 +2,7 @@
 import axios from 'axios';
 import { Op } from 'sequelize';
 import logger from '../../../helpers/logger.js';
-import config from '../../../../config/config.js';
+import config from '../../../config.js';
 
 const headers = {
 	Authorization  : `Basic ${config.ONESIGNAL.appKey}`,

@@ -1,8 +1,8 @@
 import z from 'zod';
-import * as utils from './utils.ts';
+import * as utils from './utils.js';
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
-import { Chapter } from './Chapter.ts';
-import { Person } from './Person.ts';
+import { Chapter } from './Chapter.js';
+import { Person } from './Person.js';
 
 export const Student = z.object({
 	id: utils.id.readonly().meta({ description: 'Unique identifier for the student' }),

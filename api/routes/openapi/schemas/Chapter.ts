@@ -1,6 +1,6 @@
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
 import z from 'zod';
-import * as utils from './utils.ts';
+import * as utils from './utils.js';
 
 export const Chapter = z.object({
 	id: utils.id.meta({ description: 'Unique identifier for the chapter' }),

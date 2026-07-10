@@ -6,12 +6,12 @@ import processAuthorizeNetMod from '../../../../controllers/user/enter/processAu
 import updateLastAccess from '../../../../controllers/user/person/access.js';
 import updateLearnCoursesMod from '../../../../controllers/user/person/learnCourse.js';
 
-import inboxRouter from '../user/inboxRouter.ts';
-import tournRouter from '../user/tournRouter.ts';
-import sessionRouter from '../user/sessionRouter.ts';
-import judgesRouter from '../user/judgesRouter.ts';
-import studentsRouter from '../user/studentsRouter.ts';
-import chaptersRouter from '../user/chaptersRouter.ts';
+import inboxRouter from '../user/inboxRouter.js';
+import tournRouter from '../user/tournRouter.js';
+import sessionRouter from '../user/sessionRouter.js';
+import judgesRouter from '../user/judgesRouter.js';
+import studentsRouter from '../user/studentsRouter.js';
+import chaptersRouter from '../user/chaptersRouter.js';
 
 const router = Router();
 

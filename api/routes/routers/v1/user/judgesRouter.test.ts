@@ -2,7 +2,7 @@ import factories from '../../../../../tests/factories/index.js';
 import request from 'supertest';
 import server from '../../../../../app.js';
 import z from 'zod';
-import { JudgeHistory } from '../../../openapi/schemas/index.ts';
+import { JudgeHistory } from '../../../openapi/schemas/index.js';
 
 describe('judgesRouter', () => {
 	let personId : number;

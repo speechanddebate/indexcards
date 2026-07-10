@@ -1,5 +1,5 @@
 import os from 'os';
-import config from '../../../config/config.js';
+import config from '../../config.js';
 import { packageData } from '../../../config/json-loader.js';
 
 export const systemStatus = (req, res) => {
@@ -7,7 +7,7 @@ export const systemStatus = (req, res) => {
 		message  : 'OK',
 		name     : packageData.name,
 		version  : packageData.version,
-		webhost  : config.DOCKERHOST || config.HOST || 'undefined',
+		webhost  : config.dockerhost || config.host || 'undefined',
 		server   : os.hostname(),
 		load     : os.loadavg(),
 		uptime   : os.uptime(),
@@ -15,7 +15,7 @@ export const systemStatus = (req, res) => {
 		totalmem : os.totalmem(),
 		node     : process.version,
 		runtime  : process.env?.NODE_ENV,
-		database : config.DB.DATABASE,
+		database : config.db.database,
 	});
 };
 
