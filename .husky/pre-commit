@@ -1,1 +1,3 @@
 npm run lint
+npm run build:openapi
+git add api/routes/openapi/openapi.json
