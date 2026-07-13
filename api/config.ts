@@ -109,6 +109,7 @@ const ConfigSchema = z.object({
 	}).prefault({}),
 }).strict();
 
+/** Indexcards app configuration */
 const config = ConfigSchema.parse({
 	db: {
 		host: 'localhost',
