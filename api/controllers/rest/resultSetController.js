@@ -6,7 +6,7 @@ export async function getResultSet(req,res) {
 
 	// For now the site admins get to do nocache but nobody else does
 	let queryParams;
-	if (req.person.site_admin || req.person.siteAdmin) {
+	if (req.person?.site_admin) {
 		queryParams = { ...req.valid.query };
 	}
 
@@ -14,7 +14,7 @@ export async function getResultSet(req,res) {
 		{ ...req.valid.params },
 		{ ...queryParams },
 	);
-	if (resultSet) {
+	if (resultSet.length > 0) {
 		return res.status(200).json(resultSet);
 	}
 	return NotFound( req, res, 'No bracket was found for event');
@@ -24,7 +24,7 @@ export async function getResultSets(req,res) {
 
 	// For now the site admins get to do nocache but nobody else does
 	let queryParams;
-	if (req.person.site_admin || req.person.siteAdmin) {
+	if (req.person?.site_admin) {
 		queryParams = { ...req.valid.query };
 	}
 

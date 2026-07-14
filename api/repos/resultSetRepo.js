@@ -89,7 +89,7 @@ export const getResultSets = async (scope = {}, opts = {}) => {
 		// Process Event into standard format if there is one
 		if (!events[eventId]) {
 			if (resultSet.Event?.nsdaCategory && resultSet.rsNSDA) {
-				resultSet.Event.nsdaCategory = resultSet.rsNSDA;
+				resultSet.Event.nsdaCategory = Number(resultSet.rsNSDA);
 			}
 			events[eventId] = {...resultSet.Event};
 			events[eventId].ResultSets = [];

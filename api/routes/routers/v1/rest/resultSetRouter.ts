@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/rest/resultSetController.js';
-import  z from 'zod';
+import z from 'zod';
 import * as utils from '../../../openapi/schemas/utils.ts';
 import { ValidateRequest } from '../../../../middleware/validation.js';
+import { ResultSet, EventResultSets } from '../../../openapi/schemas/ResultSet.ts';
 
 // Note that this endpoint is for the delivery of result sets, which are
 // collated and calculated sets of results organized by tiebreakers, not for
@@ -27,14 +28,12 @@ router.route('/').get(ValidateRequest, controller.getResultSets).openapi = {
 			description: 'Result Sets connected to a given event, with published aggregated result data attached',
 			content: {
 				'application/json': {
-					schema: {
-						type: 'object',
-					},
+					schema: z.record(z.int(), EventResultSets),
 				},
 			},
 		},
 	},
-	tags: ['invite', 'public', 'results', 'pairings'],
+	tags: ['invite', 'public', 'results', 'pairings', 'Orval'],
 };
 
 router.route('/:resultSetId').get(ValidateRequest, controller.getResultSet).openapi = {
@@ -58,14 +57,12 @@ router.route('/:resultSetId').get(ValidateRequest, controller.getResultSet).open
 			description: 'Result Set with published aggregated result data attached',
 			content: {
 				'application/json': {
-					schema: {
-						type: 'object',
-					},
+					schema: z.array(ResultSet),
 				},
 			},
 		},
 	},
-	tags: ['invite', 'public', 'results', 'pairings'],
+	tags: ['invite', 'public', 'results', 'pairings','Orval'],
 };
 
 router.route('/event/:eventId').get(ValidateRequest, controller.getResultSets).openapi = {

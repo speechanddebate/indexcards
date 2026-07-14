@@ -23,4 +23,5 @@ export * from './Topic.ts';
 export * from './Webpage.ts';
 export * from './Person.ts';
 export * from './Quiz.ts';
+export * from './ResultSet.ts';
 export * from './School.ts';

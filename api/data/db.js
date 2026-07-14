@@ -12,6 +12,8 @@ const sequelize = new Sequelize(
 	config.DB.PASS,
 	{
 		...config.DB.sequelizeOptions,
+		host: config.DB.HOST,
+		port: config.DB.PORT,
 		benchmark: true,
 		logging: (sql, timingMs) => {
 			if (typeof timingMs === 'number') {

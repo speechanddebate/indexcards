@@ -4,6 +4,7 @@ coverage/
 logs/
 .pm2/
 config/config.js
+config*.json
 *.swp
 *.swo
 #sorry
@@ -11,3 +12,4 @@ config/config.js
 npm*
 *.nvimlog
 .devcontainer/
+build/

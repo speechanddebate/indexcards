@@ -1149,7 +1149,8 @@
           "invite",
           "public",
           "results",
-          "pairings"
+          "pairings",
+          "Orval"
         ],
         "parameters": [
           {
@@ -1174,7 +1175,15 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "object",
+                  "propertyNames": {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  "additionalProperties": {
+                    "$ref": "#/components/schemas/EventResultSets"
+                  }
                 }
               }
             }
@@ -1197,7 +1206,8 @@
           "invite",
           "public",
           "results",
-          "pairings"
+          "pairings",
+          "Orval"
         ],
         "parameters": [
           {
@@ -1251,7 +1261,10 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object"
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResultSet"
+                  }
                 }
               }
             }
@@ -4823,6 +4836,80 @@
         ],
         "description": "A request to register a new user"
       },
+      "ResultSetEvent": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "tag": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "entity": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "tag",
+          "label",
+          "entity",
+          "createdAt"
+        ]
+      },
+      "EventResultSets": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "nsdacategory": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "name": {
+            "type": "string"
+          },
+          "abbr": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "ResultSets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ResultSetEventOutput"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "nsdacategory",
+          "name",
+          "abbr",
+          "level",
+          "type",
+          "ResultSets"
+        ],
+        "additionalProperties": false
+      },
       "File": {
         "type": "object",
         "properties": {
@@ -5379,6 +5466,136 @@
           "name",
           "lastReviewed",
           "paradigm"
+        ],
+        "additionalProperties": false
+      },
+      "ResultSet": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "tag": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "entity": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "noPlacement": {
+            "type": "boolean"
+          },
+          "headers": {
+            "type": "object",
+            "propertyNames": {
+              "type": "number"
+            },
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "tag": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "no_sort": {
+                  "type": "boolean"
+                },
+                "sort_desc": {
+                  "type": "boolean"
+                },
+                "Protocol": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "integer",
+                      "exclusiveMinimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    "name": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "required": [
+                "tag",
+                "description",
+                "no_sort",
+                "sort_desc"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "Event": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "abbr": {
+                "type": "string"
+              },
+              "level": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "nsdacategory": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "type": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "abbr",
+              "level",
+              "name",
+              "nsdacategory",
+              "type"
+            ],
+            "additionalProperties": false
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "tag",
+          "label",
+          "entity",
+          "createdAt",
+          "headers",
+          "Event",
+          "results"
         ],
         "additionalProperties": false
       },
@@ -6387,6 +6604,38 @@
         ],
         "additionalProperties": false,
         "description": "The badge associated with the certification"
+      },
+      "ResultSetEventOutput": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "tag": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "entity": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "tag",
+          "label",
+          "entity",
+          "createdAt"
+        ],
+        "additionalProperties": false
       },
       "PersonQuizWithQuiz": {
         "type": "object",
