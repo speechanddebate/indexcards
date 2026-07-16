@@ -17,11 +17,10 @@ export async function Authenticate(req, res, next) {
 		const cookie = req.cookies[cookieName] || req.headers[config.SESSION_HEADER];
 
 		if (cookie) {
-
 			let cookieSession = await sessionRepo.findByUserKey(cookie, {include: {su: true, person: true}});
-
 			if (!cookieSession) {
-				res.clearCookie(cookieName);  //invalid cookie, clear it
+				//must use the same options as when the cookie is set.
+				res.clearCookie(cookieName, authService.getAuthCookieOptions());  //invalid cookie, clear it
 			} else {
 				session = cookieSession;
 				req.authType = 'cookie';

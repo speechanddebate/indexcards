@@ -5,6 +5,7 @@ import personRepo from '../repos/personRepo.js';
 import { Authenticate } from './authentication.js';
 import userData from '../../tests/testFixtures';
 import { createContext } from '../../tests/httpMocks.ts';
+import authService from '../services/AuthService.js';
 
 describe('Authentication Middleware', () => {
 
@@ -87,6 +88,23 @@ describe('Authentication Middleware', () => {
 			expect(next).toHaveBeenCalled();
 			expect(req.session).not.toBeDefined();
 			expect(req.person).not.toBeDefined();
+		});
+		it('clears an invalid cookie', async () => {
+			// if the user provides and invalid cookie. we should tell the browser to clear it.
+			const { req, res, next } = createContext({
+				cookies: {
+					[config.COOKIE_NAME]: 'invalidcookie',
+				},
+			});
+			vi.spyOn(sessionRepo, 'findByUserKey').mockImplementationOnce(async () => {
+				return null;
+			});
+
+			//Act
+			await Authenticate(req, res, next);
+
+			//Assert
+			expect(res.clearCookie).toHaveBeenCalledWith(config.COOKIE_NAME, authService.getAuthCookieOptions());
 		});
 		it('calls next(err) on sessionRepo error', async () => {
 
