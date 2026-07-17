@@ -1,7 +1,6 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import os from 'os';
 import winston from 'winston';
-import LokiTransport from 'winston-loki';
 import config from '../../config/config.js';
 
 const logPath = config.LOG_PATH || '/tmp';
@@ -78,23 +77,16 @@ const prettyConsoleFormat = winston.format.combine(
 	})
 );
 
-const createLokiTransport = (extraLabels = {}) => {
-	return new LokiTransport({
-		host: config.loki.host,
-		json: true,
-		labels: {
-			...Labels(extraLabels),
-		},
-		format: winston.format.json(),
-		onConnectionError: (err) => logger.error('Loki connection error', err),
-	});
-};
-
 const createFileTransport =() => {
 	return new winston.transports.File({
-		filename: `${logPath}/${config.LOG_LEVEL}.log`,
+		filename: `${logPath}/indexcards.log`,
 		format: winston.format.combine(
-			winston.format((info) => { info.labels = Labels(); return info; })(),
+			winston.format((info) => {
+				return {
+					...info,
+					...Labels(),
+				};
+			})(),
 			winston.format.json(),
 		),
 		...config.winstonFileOptions,
@@ -123,22 +115,6 @@ const logger = winston.createLogger({
 		createFileTransport(),
 	],
 });
-
-export function setupLoggers(){
-	if(config.loki && config.loki.host){
-		try{
-			const reqTrans = createLokiTransport({type: 'request'});
-			const appTrans = createLokiTransport({type: 'app'});
-			requestLogger.add(reqTrans);
-			logger.add(appTrans);
-			logger.info('Loki transport setup complete');
-		} catch (err) {
-			logger.error('Error setting up Loki transport', err);
-		}
-	} else {
-		logger.warn(`Loki host is not configured. logging to ${logPath} only`);
-	}
-}
 
 //write progress messages that can be overwritten by later messages (e.g. for progress bars or status updates) no-op is not a TTY
 logger.progress = (msg) => {
@@ -186,10 +162,10 @@ function normalizePath(urlPath) {
 }
 
 export const setupRequest = (req, res, next) => {
-	req.recieved = Date.now();
+	req.received = Date.now();
 
 	res.on('finish', () => {
-		const duration = Date.now() - req.recieved;
+		const duration = Date.now() - req.received;
 
 		requestLogger.info('Request handled', {
 			method: req.method,
