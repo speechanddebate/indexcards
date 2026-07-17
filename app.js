@@ -16,8 +16,10 @@ import {
 } from './api/helpers/auth.js';
 
 import db from './api/data/db.js';
-import logger, { setupRequest } from './api/helpers/logger.js';
+import logger, { setupRequest, setupLoggers } from './api/helpers/logger.js';
 import { Forbidden, Unauthorized } from './api/helpers/problem.js';
+
+setupLoggers();
 
 const app = express();
 
