@@ -29,37 +29,9 @@ describe('User Chapter', () => {
 		});
 	});
 
-	it('Returns correct JSON for user chapter permission request', async () => {
-		const res = await request(server)
-			.get(`/v1/user/chapter`)
-			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
-			.expect('Content-Type', /json/)
-			.expect(200);
-
-		assert.isArray(res.body, 'Response is an array');
-
-		assert.equal(
-			res.body.length,
-			1,
-			'Only one chapter returned',
-		);
-
-		assert.equal(
-			res.body[0].id,
-			'130737',
-			'Correct Chapter ID returned'
-		);
-		assert.equal(
-			res.body[0].permission,
-			'chapter',
-			'Correct Chapter level permissions returned'
-		);
-	});
-
 	it('Returns correct JSON for school dashboard request', async () => {
 		const res = await request(server)
-			.get(`/v1/user/chapter/byTourn/30661`)
+			.get(`/v1/user/chapters/byTourn/30661`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)

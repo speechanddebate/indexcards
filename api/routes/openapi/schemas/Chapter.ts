@@ -8,20 +8,34 @@ export const Chapter = z.object({
 	formal: z.string().nullish(),
 	street: z.string().nullish(),
 	city: z.string().nullish(),
-	state: z.string().nullish(),
+	state: z.string().max(4).nullish(),
 	zip: z.number().nullish(),
-	postal: z.string().nullish(),
-	country: z.string().nullish(),
+	postal: z.string().max(15).nullish(),
+	country: z.string().max(4).nullish(),
 	coaches: z.string().nullish(),
-	selfPrefs: z.boolean().nullish(),
+	self_prefs: z.coerce.boolean().nullish(),
 	level: z.string().nullish(),
-	nsdaId: z.number().nullish(),
-	districtId: z.number().nullish(),
-	naudl: z.boolean().nullish(),
+	nsda: z.number().nullish(),
+	district: z.number().nullish(),
+	naudl: z.coerce.boolean().nullish(),
 	ipeds: z.string().nullish(),
 	nces: z.string().nullish(),
 	ceeb: z.string().nullish(),
 	timestamp: z.string().nullish(),
-	createdAt: z.string().nullish(),
+	created_at: z.string().nullish(),
+}).meta({
+	id: 'Chapter',
+	description: 'A chapter object representing a chapter entity'
+}).strict() satisfies ZodOpenApiSchemaObject;
+
+// A user's relation to a chapter, including their permission level
+export const UserChapter = z.object({
+	...Chapter.shape,
+	permission: z.string().meta({ description: 'Permission level for the user in this chapter' }),
+})
+.strict()
+.meta({
+	id: 'UserChapter',
+	description: "A user's relation to a chapter, including their permission level"
 }) satisfies ZodOpenApiSchemaObject;
 

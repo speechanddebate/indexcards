@@ -1,4 +1,5 @@
-export async function userChapters(req,res) {
+import * as schools from './school.js';
+async function userChapters(req,res) {
 	const chapters = await req.db.sequelize.query(`
 		select
 			chapter.*,
@@ -16,7 +17,7 @@ export async function userChapters(req,res) {
 	return res.status(200).json(chapters);
 };
 
-export async function userChaptersByTourn(req, res)  {
+async function userChaptersByTourn(req, res)  {
 	const chapters = await req.db.sequelize.query(`
 			select
 				chapter.*,
@@ -95,4 +96,8 @@ export async function userChaptersByTourn(req, res)  {
 	});
 };
 
-export default userChapters;
+export default {
+	userChapters,
+	userChaptersByTourn,
+	...schools,
+};

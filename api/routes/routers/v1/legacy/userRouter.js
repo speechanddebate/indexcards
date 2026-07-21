@@ -1,15 +1,5 @@
 import { Router } from 'express';
 
-import {
-	userChaptersByTourn,
-	userChapters,
-} from '../../../../controllers/user/chapter/index.js';
-
-import {
-	getMySchoolsByTourn,
-	getMyChaptersNonTourn,
-} from '../../../../controllers/user/chapter/school.js';
-
 import getProfileMod from '../../../../controllers/user/person/getProfile.js';
 import acceptPayPalMod from '../../../../controllers/user/enter/acceptPayPal.js';
 import processAuthorizeNetMod from '../../../../controllers/user/enter/processAuthorizeNet.js';
@@ -21,6 +11,7 @@ import tournRouter from '../user/tournRouter.ts';
 import sessionRouter from '../user/sessionRouter.ts';
 import judgesRouter from '../user/judgesRouter.ts';
 import studentsRouter from '../user/studentsRouter.ts';
+import chaptersRouter from '../user/chaptersRouter.ts';
 
 const router = Router();
 
@@ -41,32 +32,8 @@ router.use('/inbox', inboxRouter);
 router.use('/session', sessionRouter);
 router.use('/judges', judgesRouter);
 router.use('/students', studentsRouter);
+router.use('/chapters', chaptersRouter);
 // User session/profile/payment/learn
-
-// User chapters
-router.get('/chapter', userChapters).openapi = {
-	path: '/user/chapter',
-	tags: ['legacy', 'User Chapters'],
-	responses: { 200: { description: 'User chapters' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
-router.get('/chapter/byTourn/:tournId', userChaptersByTourn).openapi = {
-	path: '/user/chapter/byTourn/{tournId}',
-	tags: ['legacy', 'User Chapters'],
-	parameters: [{ in: 'path', name: 'tournId', required: true, schema: { type: 'integer' } }],
-	responses: { 200: { description: 'Chapters by tournament' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
-router.get('/chapter/byTourn/:tournId/mySchools', getMySchoolsByTourn).openapi = {
-	path: '/user/chapter/byTourn/{tournId}/mySchools',
-	tags: ['legacy', 'User Chapters'],
-	parameters: [{ in: 'path', name: 'tournId', required: true, schema: { type: 'integer' } }],
-	responses: { 200: { description: 'My schools by tournament' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
-router.get('/chapter/byTourn/:tournId/nonSchools', getMyChaptersNonTourn).openapi = {
-	path: '/user/chapter/byTourn/{tournId}/nonSchools',
-	tags: ['legacy', 'User Chapters'],
-	parameters: [{ in: 'path', name: 'tournId', required: true, schema: { type: 'integer' } }],
-	responses: { 200: { description: 'Non-school chapters by tournament' }, default: { $ref: '#/components/responses/ErrorResponse' } },
-};
 
 router.get('/profile', extractHandler(getProfileMod, 'GET')).openapi = {
 	path: '/user/profile',

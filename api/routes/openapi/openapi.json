@@ -200,6 +200,18 @@
     {
       "name": "User Tournament",
       "description": "Auto-discovered tag"
+    },
+    {
+      "name": "Chapter",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "legacy",
+      "description": "Auto-discovered tag"
+    },
+    {
+      "name": "User Chapters",
+      "description": "Auto-discovered tag"
     }
   ],
   "x-tagGroups": [
@@ -244,6 +256,7 @@
       "tags": [
         "Ads",
         "Auth",
+        "Chapter",
         "Circuits",
         "Entries",
         "Events",
@@ -261,11 +274,13 @@
         "Schematics",
         "Students",
         "Tournaments",
+        "User Chapters",
         "User Tournament",
         "event",
         "eventAbbr",
         "futureTourns",
         "invite",
+        "legacy",
         "pairings",
         "public",
         "results",
@@ -2959,6 +2974,150 @@
           }
         }
       }
+    },
+    "/user/chapters": {
+      "get": {
+        "summary": "GET User Chapters",
+        "description": "returns a list of chapters a person has permissions in.",
+        "operationId": "UserChapters",
+        "tags": [
+          "Orval",
+          "Chapter"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User chapters",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserChapter"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/user/chapters/byTourn/{tournId}": {
+      "get": {
+        "tags": [
+          "legacy",
+          "User Chapters"
+        ],
+        "summary": "GET /user/chapters/byTourn/{tournId}",
+        "description": "GET /user/chapters/byTourn/{tournId} is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Chapters by tournament"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/user/chapters/byTourn/{tournId}/mySchools": {
+      "get": {
+        "tags": [
+          "legacy",
+          "User Chapters"
+        ],
+        "summary": "GET /user/chapters/byTourn/{tournId}/mySchools",
+        "description": "GET /user/chapters/byTourn/{tournId}/mySchools is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "My schools by tournament"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
+    "/user/chapters/byTourn/{tournId}/nonSchools": {
+      "get": {
+        "tags": [
+          "legacy",
+          "User Chapters"
+        ],
+        "summary": "GET /user/chapters/byTourn/{tournId}/nonSchools",
+        "description": "GET /user/chapters/byTourn/{tournId}/nonSchools is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Non-school chapters by tournament"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          },
+          "default": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -4308,7 +4467,8 @@
           "state": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 4
               },
               {
                 "type": "null"
@@ -4328,7 +4488,8 @@
           "postal": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 15
               },
               {
                 "type": "null"
@@ -4338,7 +4499,8 @@
           "country": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "maxLength": 4
               },
               {
                 "type": "null"
@@ -4355,7 +4517,7 @@
               }
             ]
           },
-          "selfPrefs": {
+          "self_prefs": {
             "anyOf": [
               {
                 "type": "boolean"
@@ -4375,7 +4537,7 @@
               }
             ]
           },
-          "nsdaId": {
+          "nsda": {
             "anyOf": [
               {
                 "type": "number"
@@ -4385,7 +4547,7 @@
               }
             ]
           },
-          "districtId": {
+          "district": {
             "anyOf": [
               {
                 "type": "number"
@@ -4445,7 +4607,7 @@
               }
             ]
           },
-          "createdAt": {
+          "created_at": {
             "anyOf": [
               {
                 "type": "string"
@@ -4459,7 +4621,8 @@
         "required": [
           "id",
           "name"
-        ]
+        ],
+        "additionalProperties": false
       },
       "LoginRequest": {
         "type": "object",
@@ -5763,7 +5926,7 @@
             ]
           },
           "Chapter": {
-            "$ref": "#/components/schemas/ChapterOutput"
+            "$ref": "#/components/schemas/Chapter"
           },
           "Person": {
             "$ref": "#/components/schemas/PersonOutput"
@@ -5967,6 +6130,215 @@
         ],
         "additionalProperties": false
       },
+      "UserChapter": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991,
+            "description": "Unique identifier for the chapter"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the chapter"
+          },
+          "formal": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "street": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "city": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "state": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "zip": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "postal": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 15
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "country": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 4
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "coaches": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "self_prefs": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "level": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nsda": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "district": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "naudl": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ipeds": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "nces": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "ceeb": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "timestamp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "permission": {
+            "type": "string",
+            "description": "Permission level for the user in this chapter"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "permission"
+        ],
+        "additionalProperties": false,
+        "description": "A user's relation to a chapter, including their permission level"
+      },
       "activeCircuitsResponse": {
         "type": "array",
         "items": {
@@ -6121,206 +6493,6 @@
         },
         "required": [
           "id"
-        ],
-        "additionalProperties": false
-      },
-      "ChapterOutput": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer",
-            "exclusiveMinimum": 0,
-            "maximum": 9007199254740991,
-            "description": "Unique identifier for the chapter"
-          },
-          "name": {
-            "type": "string",
-            "description": "Name of the chapter"
-          },
-          "formal": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "street": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "city": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "state": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "zip": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "postal": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "country": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "coaches": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "selfPrefs": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "level": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "nsdaId": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "districtId": {
-            "anyOf": [
-              {
-                "type": "number"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "naudl": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "ipeds": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "nces": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "ceeb": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "timestamp": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "createdAt": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          }
-        },
-        "required": [
-          "id",
-          "name"
         ],
         "additionalProperties": false
       },

@@ -63,7 +63,7 @@ describe ('getMySchoolsByTourn', () => {
 	it ('User has no school in an unexpected tournament', async () => {
 
 		const res = await request(server)
-			.get(`/v1/user/chapter/byTourn/29807/mySchools`)
+			.get(`/v1/user/chapters/byTourn/29807/mySchools`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
@@ -78,7 +78,7 @@ describe ('getMySchoolsByTourn', () => {
 	it ('User has a school in an expected tournament by permission', async () => {
 
 		const res = await request(server)
-			.get(`/v1/user/chapter/byTourn/${testUserChapterPerm.tourn}/mySchools`)
+			.get(`/v1/user/chapters/byTourn/${testUserChapterPerm.tourn}/mySchools`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
@@ -95,7 +95,7 @@ describe ('getMySchoolsByTourn', () => {
 	it ('User has a school in an expected tournament by contact status', async () => {
 
 		const res = await request(server)
-			.get(`/v1/user/chapter/byTourn/${ testUserSchoolContact.tourn }/mySchools`)
+			.get(`/v1/user/chapters/byTourn/${ testUserSchoolContact.tourn }/mySchools`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
@@ -112,7 +112,7 @@ describe ('getMySchoolsByTourn', () => {
 	it ('Schools not in a tournament are delivered correctly', async () => {
 
 		const res = await request(server)
-			.get(`/v1/user/chapter/byTourn/30661/nonSchools`)
+			.get(`/v1/user/chapters/byTourn/30661/nonSchools`)
 			.set('Accept', 'application/json')
 			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
 			.expect('Content-Type', /json/)
