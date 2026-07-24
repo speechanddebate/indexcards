@@ -4,18 +4,15 @@ import cors from 'cors';
 import { v4 as uuid } from 'uuid';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
+
 import config from './api/config.js';
 import errorHandler from './api/helpers/errors/errorHandler.js';
 import { Authenticate } from './api/middleware/authentication.js';
 import csrfMiddleware from './api/middleware/csrfMiddleware.js';
 import v1Router from './api/routes/routers/v1/indexRouter.js';
 import { rateLimiterMiddleware } from './api/middleware/rateLimiter.js';
-
-import {
-	localAuth,
-} from './api/helpers/auth.js';
-
 import db from './api/data/db.js';
+import { localAuth } from './api/helpers/auth.js';
 import logger, { setupRequest } from './api/helpers/logger.js';
 import { Forbidden, Unauthorized } from './api/helpers/problem.js';
 
@@ -25,6 +22,13 @@ logger.debug('Starting Indexcards using config:', config);
 // Startup log message
 logger.info('Initializing API...');
 logger.info(`Loading environment ${process.env?.NODE_ENV}`);
+
+try {
+	await db.sequelize.authenticate();
+	logger.info(`Successfully connected to database ${config.db.database} at ${config.db.host}:${config.db.port}`);
+} catch (error) {
+	logger.error(`Failed to connect to database ${config.db.database} at ${config.db.host}:${config.db.port}`, error );
+}
 
 // Enable Helmet security
 app.use(helmet({
@@ -79,8 +83,9 @@ app.use(Authenticate);
 if (config.proxy) {
 	app.set('trust proxy', config.proxy);
 }
-if(process.env.NODE_ENV === 'production')
+if(process.env.NODE_ENV === 'production') {
 	app.use(rateLimiterMiddleware);
+}
 
 app.use(csrfMiddleware);
 
