@@ -40,7 +40,7 @@ const s3Client = {
 			Key        : dest,
 		});
 
-		let response = '';
+		let response;
 		try {
 			response = await client.send(cpCommand);
 		} catch (err) {

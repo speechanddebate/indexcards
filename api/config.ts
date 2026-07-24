@@ -47,6 +47,7 @@ const ConfigSchema = z.object({
 		host: z.string(),
 		port: z.int().min(1).max(65535).default(3306),
 		database: z.string().default('tabroom'),
+		replica: z.string().min(1).optional(),
 		user: z.string().default('root'),
 		pass: z.string().min(1),
 		sequelizeOptions : z.object({
@@ -57,6 +58,12 @@ const ConfigSchema = z.object({
 				underscored     : z.boolean().default(true),
 				timestamps      : z.boolean().default(false),
 			}).prefault({}),
+			pool: z.object({
+				max: z.int().min(1),
+				min: z.int().min(0),
+				acquire: z.int().min(0),
+				idle: z.int().min(0),
+			}).optional(),
 		}).prefault({}),
 	}),
 	//------------------------------------------------------------------------------
@@ -71,6 +78,7 @@ const ConfigSchema = z.object({
 		name: z.string().default('TabroomToken'),
 		domain: z.string().default('.tabroom.com'),
 	}).prefault({}),
+	session_header: z.string().min(1).default('tabroom-session'),
 	csrf: z.object({
 		trusted_origins: z.array(z.string()).default(['*.tabroom.com','tabroom.com']),
 	}).prefault({}),
@@ -100,7 +108,7 @@ const ConfigSchema = z.object({
 			path: z.string().min(1),
 		}).optional(),
 	}).prefault({}),
-	ERROR_DESTINATION: z.string().optional(), // only used in errorHandler
+	ERROR_DESTINATION: z.array(z.string().min(1)).optional(), // only used in errorHandler
 	//--------------------------------------------------------------------
 	// EXTERNAL SERVICES
 	// -------------------------------------------------------------------

@@ -21,7 +21,7 @@ import config from '../../../config.js';
 const router = Router({ mergeParams: true });
 
 // hide in progress endpoints behind a flag, so that we don't have to worry about them
-if (!config.HIDE_DEV_ENDPOINTS || process.env.NODE_ENV === 'test') {
+if (!config.features.HIDE_DEV_ENDPOINTS || process.env.NODE_ENV === 'test') {
 	router.use('/coach' , legacyCoachRouter);
 	router.use('/tab'   , tabRouter);
 	router.use('/admin' , requireSiteAdmin, adminRouter);

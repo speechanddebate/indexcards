@@ -14,7 +14,7 @@ export async function Authenticate(req, res, next) {
 
 		// COOKIE AUTHENTICATION
 		const cookieName = config.cookie.name;
-		const cookie = req.cookies[cookieName] || req.headers[config.SESSION_HEADER];
+		const cookie = req.cookies[cookieName] || req.headers[config.session_header];
 
 		if (cookie) {
 			let cookieSession = await sessionRepo.findByUserKey(cookie, {include: {su: true, person: true}});
