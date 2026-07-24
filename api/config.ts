@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import z from 'zod';
 
 /** This schema defines the app config. add comments to a config value to get descriptions at usage. */
@@ -109,15 +111,65 @@ const ConfigSchema = z.object({
 	}).prefault({}),
 }).strict();
 
-/** Indexcards app configuration */
-const config = ConfigSchema.parse({
-	db: {
-		host: 'localhost',
-		pass: 'tabroom',
-	},
-	logging: {
-		level: process.env.NODE_ENV === 'test' ? 'error' : 'debug',
-	}
-});
+type RuntimeConfig = z.infer<typeof ConfigSchema>;
+
+// Load a config file from path
+function loadConfigFile(filePath: string): Record<string, any> {
+  try {
+    if (!fs.existsSync(filePath)) {
+      return {};
+    }
+    const configText = fs.readFileSync(filePath, 'utf-8');
+    return JSON.parse(configText);
+  } catch (error) {
+    if (error instanceof SyntaxError) {
+      console.warn(`Invalid JSON in ${filePath}: ${error.message}`);
+    } else {
+      console.warn(`Error loading ${filePath}: ${error}`);
+    }
+    return {};
+  }
+}
+
+// Load and validate runtime config from JSON files
+async function loadRuntimeConfig(): Promise<RuntimeConfig> {
+  const configDir = process.env.CONFIG_DIR || './config';
+  const nodeEnv = process.env.NODE_ENV || 'development';
+  
+  const baseConfigPath = path.join(configDir, 'config.json');
+  const envConfigPath = path.join(configDir, `config.${nodeEnv}.json`);
+
+  // Load base config
+  const baseConfig = loadConfigFile(baseConfigPath);
+  if (Object.keys(baseConfig).length > 0) {
+    console.info(`Loaded base configuration from ${baseConfigPath}`);
+  }
+
+  // Load environment-specific override
+  const envConfig = loadConfigFile(envConfigPath);
+  if (Object.keys(envConfig).length > 0) {
+    console.info(`Loaded ${nodeEnv}-specific overrides from ${envConfigPath}`);
+  }
+
+  // Merge: base → env-specific
+  const mergedData = { ...baseConfig, ...envConfig };
+
+  // Validate against schema
+  try {
+    const validated = ConfigSchema.parse(mergedData);
+    console.info('Configuration validated successfully against schema');
+    
+    return validated;
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      console.error('Configuration validation error:', error.issues);
+      throw new Error(`Invalid configuration: ${error.message}`);
+    }
+    throw error;
+  }
+}
+
+// Load runtime config with schema defaults
+const config = await loadRuntimeConfig();
 
 export default config;

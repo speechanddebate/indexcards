@@ -1,6 +1,6 @@
 import { assert } from 'chai';
 import { Authenticate } from '../middleware/authentication.js';
-import config from '../../config/config';
+import config from '../config.js';
 import { tabAuth } from './auth';
 import userData from '../../tests/testFixtures';
 import { createContext } from '../../tests/httpMocks.js';

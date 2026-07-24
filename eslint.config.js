@@ -29,7 +29,7 @@ export default [
 			'config/*',
 			'*.config.js',
 			'.gitignore',
-			'build/'
+			'dist/'
 		],
 	},
 	{

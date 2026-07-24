@@ -9,12 +9,21 @@ ENV NODE_ENV=development
 RUN npm ci --include=dev
 
 COPY . .
+
 ENV TZ="UTC"
 ENV PORT=3000
+
 CMD ["npm" , "run" , "dev"]
 
+FROM base AS build
+
+RUN npm ci
+
+COPY . .
+
+RUN npm run build
+
 FROM node:24.13.1-trixie-slim AS prod
-WORKDIR /indexcards
 
 ENV NODE_ENV=production
 
@@ -26,11 +35,9 @@ COPY package*.json ./
 # run cache clean to avoid adding npm cache to prod image
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
-# copy build contents directly to /indexcards (so import paths work correctly)
-COPY --from=build /indexcards/build .
+# copy ONLY the built app
+COPY --from=build /indexcards/dist ./dist
 
-ENV TZ="UTC"
+EXPOSE 3000
 
-ENV PORT=3000
-ENV NODE_OPTIONS="--max_old_space_size=512 --experimental-vm-modules --experimental-specifier-resolution=node"
-CMD ["node","--use_strict","app.js"]
+CMD ["node", "dist/app.js"]
