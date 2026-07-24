@@ -39,5 +39,6 @@ RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY --from=build /indexcards/dist ./dist
 
 EXPOSE 3000
+ENV CONFIG_DIR="/config"
 
 CMD ["node", "dist/app.js"]

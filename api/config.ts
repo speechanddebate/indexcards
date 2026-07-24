@@ -117,7 +117,8 @@ type RuntimeConfig = z.infer<typeof ConfigSchema>;
 function loadConfigFile(filePath: string): Record<string, any> {
   try {
     if (!fs.existsSync(filePath)) {
-      return {};
+	console.info(`Config not found at ${filePath}`);
+	return {};
     }
     const configText = fs.readFileSync(filePath, 'utf-8');
     return JSON.parse(configText);
