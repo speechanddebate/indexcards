@@ -71,7 +71,7 @@ if (mode === 'show') {
 				console.log(consoleColor, `\t\tFree ${tag}: \t${free[tag]}%`);
 			});
 
-			if (machine.tags.includes(config.LINODE.WEBHOST_BASE)) {
+			if (machine.tags.includes(config.linode.webhost_base)) {
 				let masonString = '\t\tMason Dockers\t';
 				let indexString = '\t\tIDX Dockers\t';
 

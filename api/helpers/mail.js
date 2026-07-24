@@ -14,7 +14,7 @@ export const emailBlast = async (inputData) => {
 	if (messageData.share) {
 
 		transporter = nodemailer.createTransport({
-			host           : config.SHARE.SMTP_HOST,
+			host           : config.share.smtp.host,
 			port           : 25,
 			secure         : false, // Still allows STARTTLS
 			pool           : true,
@@ -25,8 +25,8 @@ export const emailBlast = async (inputData) => {
 				rejectUnauthorized : false,
 			},
 			auth: {
-				user: config.SHARE.SMTP_USER,
-				pass: config.SHARE.SMTP_PASS,
+				user: config.share.smtp.user,
+				pass: config.share.smtp.pass,
 			},
 		});
 

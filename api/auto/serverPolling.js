@@ -5,10 +5,10 @@ import config from '../config.js';
 const checkServerExistence = async () => {
 
 	const existingMachines = await axios.get(
-		`${config.LINODE.API_URL}/instances`,
+		`${config.linode.api_url}/instances`,
 		{
 			headers : {
-				Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
+				Authorization  : `Bearer ${config.linode.api_token}`,
 				'Content-Type' : 'application/json',
 				Accept         : 'application/json',
 			},
@@ -18,7 +18,7 @@ const checkServerExistence = async () => {
 	const activeMachines = [];
 
 	for (const machine of existingMachines.data.data) {
-		if (machine.tags.includes(config.LINODE.WEBHOST_BASE)) {
+		if (machine.tags.includes(config.linode.webhost_base)) {
 			activeMachines.push(machine.id);
 		}
 	}

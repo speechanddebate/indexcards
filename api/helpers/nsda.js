@@ -18,8 +18,8 @@ export const getNSDAMemberId = async (email) => {
 
 export const getNSDA  = async (path) => {
 
-	const uri = `${config.NSDA.ENDPOINT}${config.NSDA.PATH}${path}`;
-	const words = CryptoJS.enc.Utf8.parse(`${config.NSDA.USER_ID}:${config.NSDA.KEY}`);
+	const uri = `${config.nsda.endpoint}${config.nsda.path}${path}`;
+	const words = CryptoJS.enc.Utf8.parse(`${config.nsda.user_id}:${config.nsda.key}`);
 	const authToken = CryptoJS.enc.Base64.stringify(words);
 
 	try {

@@ -47,10 +47,10 @@ export async function getTabroomUsage(req, res) {
 // machines.
 export async function getTabroomInstance(req, res) {
 	const linodeData = await axios.get(
-		`${config.LINODE.API_URL}/instances/${req.params.linodeId}`,
+		`${config.linode.api_url}/instances/${req.params.linodeId}`,
 		{
 			headers : {
-				Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
+				Authorization  : `Bearer ${config.linode.api_token}`,
 				'Content-Type' : 'application/json',
 				Accept         : 'application/json',
 			},
@@ -108,7 +108,7 @@ export async function rebootInstance(req, res) {
 
 	if (!machine
 		|| (
-			!machine?.tags?.includes(config.LINODE.WEBHOST_BASE)
+			!machine?.tags?.includes(config.linode.webhost_base)
 			&& !machine?.tags?.includes('tab-admin')
 		)
 	) {
@@ -125,11 +125,11 @@ export async function rebootInstance(req, res) {
 	try {
 
 		const rebootReply = await axios.post(
-			`${config.LINODE.API_URL}/instances/${machine.id}/reboot`,
+			`${config.linode.api_url}/instances/${machine.id}/reboot`,
 			{},
 			{
 				headers : {
-					Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
+					Authorization  : `Bearer ${config.linode.api_token}`,
 					'Content-Type' : 'application/json',
 					Accept         : 'application/json',
 				},
@@ -192,8 +192,8 @@ const notifyCloudAdmins = async (req, log, subject) => {
 		subject : `Tabroom Cloud Change: ${subject}`,
 	};
 
-	if (config.LINODE.NOTIFY_SLACK) {
-		message.emailInclude = [config.LINODE.NOTIFY_SLACK];
+	if (config.linode.notify_slack) {
+		message.emailInclude = [config.linode.notify_slack];
 	}
 
 	const emailResponse = await notify(message);

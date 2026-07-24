@@ -153,7 +153,7 @@ export const webBlast = async (inputData) => {
 	if (targetIds && targetIds.length > 0) {
 
 		const notification = {
-			app_id          : config.ONESIGNAL.appId,
+			app_id          : config.onesignal.appId,
 			name            : inputData.sender || 'Tournament Blast',
 			url 		    : inputData.url || 'https://www.tabroom.com/user/home.mhtml',
 			contents        : { en: inputData.text },
@@ -165,11 +165,11 @@ export const webBlast = async (inputData) => {
 		};
 
 		const webPromise = axios.post(
-			`${config.ONESIGNAL.API_URL}/notifications`,
+			`${config.onesignal.api_url}/notifications`,
 			notification,
 			{
 				headers : {
-					Authorization  : `Basic ${config.ONESIGNAL.appKey}`,
+					Authorization  : `Basic ${config.onesignal.appKey}`,
 					'Content-Type' : 'application/json',
 					Accept         : 'application/json',
 				},

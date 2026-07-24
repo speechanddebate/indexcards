@@ -12,6 +12,34 @@ const ConfigSchema = z.object({
 	dockerhost: z.string().default(process.env.DOCKERHOST ?? 'unknown'),
 	/** An IP address, subnet, or an array of IP addresses and subnets to trust as being a reverse proxy. */
 	proxy: z.array(z.string().min(1)).min(1).optional(),
+	internal_domain: z.string().optional(),
+	autoscale: z.object({
+		enabled: z.boolean(),
+		alert_threshold: z.number().int().min(0),
+		alert_15_threshold: z.number().int().min(0),
+		scale_threshold: z.number().int().min(0),
+		scale_15_threshold: z.number().int().min(0),
+		scale_max: z.number().int().min(0),
+		scale_min: z.number().int().min(0),
+		scale_increment: z.number().int().min(0),
+	}).optional(),
+	linode: z.object({
+		api_url: z.string().min(1).default('https://api.linode.com/v4/linode'),
+		api_token: z.string().min(1),
+		users_per_server: z.number().int().min(1).default(1250),
+		image: z.string().min(1),
+		region: z.string().min(1),
+		instance_type: z.string().min(1),
+		swap_size: z.number().int().min(0),
+		interface_label: z.string().min(1),
+		ipam_address: z.string().min(1),
+		webhost_base: z.string().min(1),
+		monitor_targets: z.array(z.string().min(1)),
+		stackscript_id: z.number().int().min(0),
+		firewall_id: z.number().int().min(0),
+		tabweb_cap: z.number().int().min(0),
+		notify_slack: z.string().min(1),
+	}).optional(),
 	//--------------------------------------------------------------------------
 	// DATABASE 
 	// ------------------------------------------------------------------------
@@ -76,8 +104,42 @@ const ConfigSchema = z.object({
 	//--------------------------------------------------------------------
 	// EXTERNAL SERVICES
 	// -------------------------------------------------------------------
+	nsda: z.object({
+		user_id: z.string().min(1).optional(),
+		key: z.string().min(1).optional(),
+		endpoint: z.string().min(1).optional(),
+		path: z.string().min(1).default('/v2'),
+		product_codes: z.object({
+			tabroom: z.int().optional(),
+			nc: z.int().optional(),
+			nco: z.int().optional(),
+		}).prefault({}),
+	}).prefault({}),
+	share: z.object({
+		smtp: z.object({
+			host: z.string().min(1).optional(),
+			user: z.string().min(1).optional(),
+			pass: z.string().min(1).optional(),
+		}).prefault({}),
+	}).prefault({}),
+	naudl: z.object({
+		username: z.string().min(1).optional(),
+		pw: z.string().min(1).optional(),
+		token: z.string().min(1).optional(),
+		client_secret: z.string().min(1).optional(),
+		client_id: z.string().min(1).optional(),
+		url: z.string().min(1).default('https://urbandebate.my.salesforce.com'),
+		tourn_endpoint: z.string().min(1).default('/services/apexrest/v.1/TournamentService'),
+		student_endpoint: z.string().min(1).default('/services/apexrest/v.1/StudentServiceTabroom'),
+		sta_endpoint: z.string().min(1).default('/services/apexrest/v.1/STATabroomService'),
+
+	}).prefault({}),
 	aws: z.object({
-		S3_URL: z.string().default('https://s3.amazonaws.com/tabroom-files/'),
+		s3_url: z.string().default('https://s3.amazonaws.com/tabroom-files/'),
+		accessKeyId: z.string().optional(),
+		secretAccessKey: z.string().optional(),
+		region: z.string().default('us-east-1'),
+		Bucket: z.string().default('tabroom-files'),
 	}).prefault({}),
 	jitsi: z.object({
 		key: z.string(),
@@ -96,6 +158,13 @@ const ConfigSchema = z.object({
 		port: z.int().default(25),
 		pool: z.int().positive().default(128),
 		}).optional(),
+	}).prefault({}),
+	onesignal: z.object({
+		api_url: z.string().min(1).default('https://onesignal.com/api/v1'),
+		url: z.string().min(1).optional(),
+		appId: z.string().min(1).optional(),
+		safariId: z.string().min(1).optional(),
+		appKey: z.string().min(1).optional(),
 	}).prefault({}),
 	//--------------------------------------------------------------------
 	// MISC

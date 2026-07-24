@@ -62,9 +62,9 @@ describe.todo('Payment Gateway', () => {
 				invoice_id : '1234567890abcdef-1',
 				hash_key   : hashDigest,
 				items      : {
-					[config.NSDA.PRODUCT_CODES.tabroom] : 10,
-					[config.NSDA.PRODUCT_CODES.nc] : 20,
-					[config.NSDA.PRODUCT_CODES.nco] : 30,
+					[config.nsda.product_codes.tabroom] : 10,
+					[config.nsda.product_codes.nc] : 20,
+					[config.nsda.product_codes.nco] : 30,
 				},
 			})
 			.expect('Content-Type', /json/)

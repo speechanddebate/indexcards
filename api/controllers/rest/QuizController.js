@@ -35,7 +35,7 @@ async function getQuizzes(req, res) {
 		circuit: q.circuit === 0 ? null : q.circuit,
 		Badge: {
 			altText: q.badge_description || null,
-			imageUrl: (q.id && q.badge) ? `${config.aws.S3_URL}/badges/${q.id}/${q.badge}`
+			imageUrl: (q.id && q.badge) ? `${config.aws.s3_url}/badges/${q.id}/${q.badge}`
 					: null,
 			link: q.badge_link || null,
 		},

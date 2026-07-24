@@ -288,7 +288,7 @@ export async function postPayment(req, res) {
 		return BadRequest(req, res, 'Invalid request sent: no invoice ID');
 	}
 
-	const hashDigest = Base64.stringify(hmacSHA512(postRequest.invoice_id, config.NSDA.KEY));
+	const hashDigest = Base64.stringify(hmacSHA512(postRequest.invoice_id, config.nsda.key));
 
 	if (hashDigest !== postRequest.hash_key) {
 		return Forbidden(req, res, `Permission key invalid`);
@@ -314,9 +314,9 @@ export async function postPayment(req, res) {
 
 	const now = new Date();
 
-	tournCart.tabroom   = postRequest.items[config.NSDA.PRODUCT_CODES.tabroom];
-	tournCart.nc        = postRequest.items[config.NSDA.PRODUCT_CODES.campus];
-	tournCart.nco       = postRequest.items[config.NSDA.PRODUCT_CODES.campus_observers];
+	tournCart.tabroom   = postRequest.items[config.nsda.product_codes.tabroom];
+	tournCart.nc        = postRequest.items[config.nsda.product_codes.campus];
+	tournCart.nco       = postRequest.items[config.nsda.product_codes.campus_observers];
 	tournCart.paid      = 1;
 	tournCart.paid_at   = now;
 

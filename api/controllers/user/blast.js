@@ -26,10 +26,10 @@ export async function getSubscription(req, res) {
 
 		try {
 			const oneSignalSubscription = await axios.get(
-				`${config.ONESIGNAL.URL}/users/by/external_id/${externalId}`,
+				`${config.onesignal.url}/users/by/external_id/${externalId}`,
 				{
 					headers : {
-						Authorization  : `Basic ${config.ONESIGNAL.appKey}`,
+						Authorization  : `Basic ${config.onesignal.appKey}`,
 						'Content-Type' : 'application/json',
 						Accept         : 'application/json',
 					},
@@ -60,10 +60,10 @@ export async function deleteSubscription(req, res) {
 
 	if (subscriptionId) {
 		const deleteReply = await axios.delete(
-			`${config.ONESIGNAL.URL}/subscriptions/${subscriptionId}`,
+			`${config.onesignal.url}/subscriptions/${subscriptionId}`,
 			{
 				headers : {
-					Authorization  : `Basic ${config.ONESIGNAL.appKey}`,
+					Authorization  : `Basic ${config.onesignal.appKey}`,
 					'Content-Type' : 'application/json',
 					Accept         : 'application/json',
 				},
