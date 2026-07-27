@@ -72,7 +72,7 @@ const ConfigSchema = z.object({
 	/** a shared secret with classic tabroom. used for shared sessions*/
 	shared_secret: z.string().default(''),
 	cors: z.object({
-		origins: z.array(z.string().min(1)).default(['*.tabroom.com','tabroom.com']),
+		origins: z.array(z.string().min(1)).default(['*']),
 	}).prefault({}),
 	cookie: z.object({
 		name: z.string().default('TabroomToken'),
@@ -80,7 +80,7 @@ const ConfigSchema = z.object({
 	}).prefault({}),
 	session_header: z.string().min(1).default('tabroom-session'),
 	csrf: z.object({
-		trusted_origins: z.array(z.string()).default(['*.tabroom.com','tabroom.com']),
+		trusted_origins: z.array(z.string()).default(['/tabroom\.com$/']),
 	}).prefault({}),
 	ratelimiter: z.object({
 		enabled: z.boolean().default(true),
