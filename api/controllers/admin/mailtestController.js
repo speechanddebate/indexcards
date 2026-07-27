@@ -1,5 +1,5 @@
 import notify from '../../helpers/blast.js';
-import config from '../../../config/config.js';
+import config from '../../config.js';
 
 // This route will throw a dummy error to test whether the error reporting is
 // working which is apparently pretty goddamned rare.
@@ -17,8 +17,8 @@ export async function testSlackNotification(req, res) {
 		subject : `Slack Channel Message Test`,
 	};
 
-	if (config.LINODE.NOTIFY_SLACK) {
-		message.emailInclude = [config.LINODE.NOTIFY_SLACK];
+	if (config.linode.notify_slack) {
+		message.emailInclude = [config.linode.notify_slack];
 	}
 
 	const emailResponse = await notify(message);

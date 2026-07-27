@@ -4,7 +4,7 @@ import * as schematController from '../../../../controllers/pages/invite/schemat
 import * as pageResultController from '../../../../controllers/pages/invite/resultsController.js';
 import * as resultSetController from '../../../../controllers/rest/resultSetController.js';
 import z from 'zod';
-import * as utils from '../../../openapi/schemas/utils.ts';
+import * as utils from '../../../openapi/schemas/utils.js';
 
 import { ValidateRequest } from '../../../../middleware/validation.js';
 const router = Router();

@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/rest/resultSetController.js';
 import z from 'zod';
-import * as utils from '../../../openapi/schemas/utils.ts';
+import * as utils from '../../../openapi/schemas/utils.js';
 import { ValidateRequest } from '../../../../middleware/validation.js';
-import { ResultSet, EventResultSets } from '../../../openapi/schemas/ResultSet.ts';
+import { ResultSet, EventResultSets } from '../../../openapi/schemas/ResultSet.js';
 
 // Note that this endpoint is for the delivery of result sets, which are
 // collated and calculated sets of results organized by tiebreakers, not for

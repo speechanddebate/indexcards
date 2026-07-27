@@ -4,26 +4,31 @@ import cors from 'cors';
 import { v4 as uuid } from 'uuid';
 import bodyParser from 'body-parser';
 import cookieParser from 'cookie-parser';
-import config from './config/config.js';
+
+import config from './api/config.js';
 import errorHandler from './api/helpers/errors/errorHandler.js';
 import { Authenticate } from './api/middleware/authentication.js';
-import csrfMiddleware from './api/middleware/csrfMiddleware.ts';
+import csrfMiddleware from './api/middleware/csrfMiddleware.js';
 import v1Router from './api/routes/routers/v1/indexRouter.js';
-import { rateLimiterMiddleware } from './api/middleware/rateLimiter.ts';
-
-import {
-	localAuth,
-} from './api/helpers/auth.js';
-
+import { rateLimiterMiddleware } from './api/middleware/rateLimiter.js';
 import db from './api/data/db.js';
+import { localAuth } from './api/helpers/auth.js';
 import logger, { setupRequest } from './api/helpers/logger.js';
 import { Forbidden, Unauthorized } from './api/helpers/problem.js';
 
 const app = express();
 
+logger.debug('Starting Indexcards using config:', config);
 // Startup log message
 logger.info('Initializing API...');
 logger.info(`Loading environment ${process.env?.NODE_ENV}`);
+
+try {
+	await db.sequelize.authenticate();
+	logger.info(`Successfully connected to database ${config.db.database} at ${config.db.host}:${config.db.port}`);
+} catch (error) {
+	logger.error(`Failed to connect to database ${config.db.database} at ${config.db.host}:${config.db.port}`, error );
+}
 
 // Enable Helmet security
 app.use(helmet({
@@ -53,7 +58,7 @@ const corsOptions = {
 	methods              : ['GET', 'POST', 'DELETE', 'PUT'],
 	optionsSuccessStatus : 204,
 	credentials          : true,
-	origin               : config.TRUSTED_ORIGINS,
+	origin               : config.cors.origins,
 };
 
 app.use('/v1', cors(corsOptions));
@@ -75,12 +80,10 @@ app.use(cookieParser());
 // Authenticate all requests and set req.actor
 app.use(Authenticate);
 
-if (process.env.NODE_ENV !== 'test'
-	&& process.env.NODE_ENV !== 'development'
-) {
-	// Enable getting forwarded client IP from proxy
-	const proxyNumber = config.PROXY_NUMBER;
-	if (proxyNumber !== 0) app.enable('trust proxy', proxyNumber);
+if (config.proxy) {
+	app.set('trust proxy', config.proxy);
+}
+if(process.env.NODE_ENV === 'production') {
 	app.use(rateLimiterMiddleware);
 }
 
@@ -111,12 +114,10 @@ app.use('/v1/local', async (req, res, next) => {
 // Final fallback error handling
 app.use(errorHandler);
 
-// Start server
-const port = process.env.PORT || config.PORT || 3000;
-
+//start server
 if (process.env.NODE_ENV !== 'test') {
-	app.listen(port, '0.0.0.0', () => {
-		logger.info(`Server started. Listening on port ${port}`);
+	app.listen(config.port,config.host, () => {
+		logger.info(`Server started. Listening on host ${config.host} on port ${config.port}`);
 	});
 }
 

@@ -1,4 +1,4 @@
-import config from '../../config/config.js';
+import config from '../config.js';
 import { getLinodeInstances, increaseLinodeCount, decreaseLinodeCount } from '../helpers/servers.js';
 
 const mode = process.argv[2];
@@ -71,7 +71,7 @@ if (mode === 'show') {
 				console.log(consoleColor, `\t\tFree ${tag}: \t${free[tag]}%`);
 			});
 
-			if (machine.tags.includes(config.LINODE.WEBHOST_BASE)) {
+			if (machine.tags.includes(config.linode.webhost_base)) {
 				let masonString = '\t\tMason Dockers\t';
 				let indexString = '\t\tIDX Dockers\t';
 

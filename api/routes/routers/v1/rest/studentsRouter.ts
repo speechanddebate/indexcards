@@ -3,8 +3,8 @@ import * as con from '../../../../controllers/rest/studentsController.js';
 import { ValidateRequest } from '../../../../middleware/validation.js';
 import { requireLogin } from '../../../../middleware/authorization/authorization.js';
 import z from 'zod';
-import { UnlinkedStudentSearch } from '../../../openapi/schemas/index.ts';
-import { requireAuth } from '../../../openapi/security.ts';
+import { UnlinkedStudentSearch } from '../../../openapi/schemas/index.js';
+import { requireAuth } from '../../../openapi/security.js';
 
 const router = Router();
 

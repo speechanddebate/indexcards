@@ -1,6 +1,6 @@
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
 import z from 'zod';
-import * as utils from './utils.ts';
+import * as utils from './utils.js';
 
 export const QuizBadge = z.object({
 	altText: z.string().nullable().meta({ description: 'The alt text for the badge image' }),

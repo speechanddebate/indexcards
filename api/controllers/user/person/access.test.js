@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { assert } from 'chai';
 import db from '../../../data/db';
-import config from '../../../../config/config';
+import config from '../../../config.js';
 import server from '../../../../app';
 import { testUserSession } from '../../../../tests/testFixtures';
 
@@ -34,7 +34,7 @@ describe.todo('Session Last Access Updated', () => {
 			res = await request(server)
 				.get(`/v1/user/session`)
 				.set('Accept', 'application/json')
-				.set('Cookie', [`${config.COOKIE_NAME}=${testUserSession.userkey}`])
+				.set('Cookie', [`${config.cookie.name}=${testUserSession.userkey}`])
 				.expect('Content-Type', /json/)
 				.expect(200);
 		}

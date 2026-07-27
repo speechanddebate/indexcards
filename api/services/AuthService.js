@@ -1,8 +1,7 @@
 import personRepo from '../repos/personRepo.js';
-/* eslint-disable-next-line import/no-unresolved */
 import { verify, encrypt } from 'unixcrypt';
 import crypto from 'crypto';
-import config from '../../config/config.js';
+import config from '../config.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import { ValidationError } from '../helpers/errors/errors.js';
 
@@ -74,7 +73,7 @@ export function getAuthCookieOptions() {
 		httpOnly: true,
 		secure,
 		sameSite : 'lax',
-		domain   : config.COOKIE_DOMAIN,
+		domain   : config.cookie.domain,
 		path     : '/',
 	};
 };
@@ -84,7 +83,7 @@ export function getCSRFCookieOptions() {
 		httpOnly : false,
 		secure,
 		sameSite : 'lax',
-		domain   : config.COOKIE_DOMAIN,
+		domain   : config.cookie.domain,
 		path     : '/',
 	};
 }

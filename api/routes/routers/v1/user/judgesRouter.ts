@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import { ValidateRequest } from '../../../../middleware/validation.js';
 import judgesController from '../../../../controllers/user/judgesController.js';
-import { UnlinkedJudge, JudgeHistory } from '../../../openapi/schemas/index.ts';
+import { UnlinkedJudge, JudgeHistory } from '../../../openapi/schemas/index.js';
 import z from 'zod';
-import * as utils from '../../../openapi/schemas/utils.ts';
+import * as utils from '../../../openapi/schemas/utils.js';
 
 const router = Router();
 

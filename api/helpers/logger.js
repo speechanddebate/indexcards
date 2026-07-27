@@ -1,9 +1,8 @@
 import { AsyncLocalStorage } from 'node:async_hooks';
 import os from 'os';
 import winston from 'winston';
-import config from '../../config/config.js';
+import config from '../config.js';
 
-const logPath = config.LOG_PATH || '/tmp';
 const requestContext = new AsyncLocalStorage();
 
 function getRequestId() {
@@ -19,8 +18,8 @@ function attachRequestContext(info) {
 
 	return info;
 }
-
-export function getCallerFrame(options = {}) {
+/** helper function to get the caller of a sequelize call for logging */
+function getCallerFrame(options = {}) {
 	const {
 		skipContains = [],
 		preferContains = '/api/',
@@ -30,18 +29,33 @@ export function getCallerFrame(options = {}) {
 	Error.captureStackTrace(stackHolder, getCallerFrame);
 
 	const frames = String(stackHolder.stack || '')
-		.split('\n')
-		.slice(1)
-		.map((line) => line.trim())
-		.filter(Boolean)
-		.filter((line) => !line.includes('node:internal'))
-		.filter((line) => !line.includes('/node_modules/'))
-		.filter((line) => !line.includes('/api/helpers/logger.js'))
-		.filter((line) => skipContains.every((token) => !line.includes(token)));
+	.split('\n')
+	.slice(1)
+	.map((line) => line.trim())
+	.filter(Boolean)
+	.filter((line) => !line.includes('node:internal'))
+	.filter((line) => !line.includes('/node_modules/'))
+	.filter((line) => !line.includes('/api/helpers/logger.js'))
+	.filter((line) => skipContains.every((token) => !line.includes(token)));
 
 	const preferred = frames.find((line) => line.includes(preferContains));
 	return preferred ?? frames[0] ?? 'unknown';
 }
+
+export function logDB(_sql, timingMs) {
+	//if debug logging is on, log all queries otherwise just log the slow ones
+	if(timingMs >= config.logging.slowQueryLimit){
+		logger.warn('Slow SQL query', {
+			durationMs: timingMs,
+			caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),
+		});
+	} else {
+		logger.debug('SQL query', {
+			durationMs: timingMs,
+			caller: getCallerFrame({ skipContains: ['/node_modules/sequelize/', '/api/data/db.js'] }),
+		});
+	}
+};
 
 const requestContextFormat = winston.format((info) => attachRequestContext(info));
 
@@ -49,7 +63,7 @@ function Labels(props = {}) {
 	return {
 		app: 'indexcards',
 		host: os.hostname(),
-		container: config.DOCKERHOST ?? 'unknown',
+		container: config.dockerhost,
 		...props,
 	};
 }
@@ -76,10 +90,10 @@ const prettyConsoleFormat = winston.format.combine(
 		return `${timestamp} ${level} ${msg}${restStr}`;
 	})
 );
-
-const createFileTransport =() => {
-	return new winston.transports.File({
-		filename: `${logPath}/indexcards.log`,
+const transports = [];
+if(config.logging.file) {
+	transports.push(new winston.transports.File({
+		filename: `${config.logging.file.path}/indexcards.log`,
 		format: winston.format.combine(
 			winston.format((info) => {
 				return {
@@ -89,31 +103,25 @@ const createFileTransport =() => {
 			})(),
 			winston.format.json(),
 		),
-		...config.winstonFileOptions,
-	});
+	}));
 };
 
-const createConsoleTransport = () => {
-	return new winston.transports.Console({
-		format: prettyConsoleFormat,
-		...config.winstonConsoleOptions,
-	});
-};
+transports.push(new winston.transports.Console({
+	level: config.logging.level,
+	format: prettyConsoleFormat,
+}));
 /**
  * Main application logger. Transports and formatting are configured based on config values.
  */
 const logger = winston.createLogger({
-	level: config.LOG_LEVEL,
+	level: config.logging.level,
 	format: winston.format.combine(
 		requestContextFormat(),
 		winston.format.json(),
 	),
 	exitOnError: false,
 	//silent: process.env.NODE_ENV === 'test',
-	transports: [
-		createConsoleTransport(),
-		createFileTransport(),
-	],
+	transports,
 });
 
 //write progress messages that can be overwritten by later messages (e.g. for progress bars or status updates) no-op is not a TTY
@@ -137,17 +145,14 @@ logger.progressEnd = (msg) => {
 };
 
 const requestLogger = winston.createLogger({
-	level: config.LOG_LEVEL,
+	level: config.logging.level,
 	format: winston.format.combine(
 		requestContextFormat(),
 		winston.format.json(),
 	),
 	exitOnError: false,
 	silent: process.env.NODE_ENV === 'test',
-	transports: [
-		createConsoleTransport(),
-		createFileTransport(),
-	],
+	transports,
 });
 
 function normalizePath(urlPath) {

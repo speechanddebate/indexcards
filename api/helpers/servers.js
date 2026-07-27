@@ -1,6 +1,6 @@
 import axios from 'axios';
 import db from '../data/db.js';
-import config from '../../config/config.js';
+import config from '../config.js';
 import notify from './blast.js';
 import logger from './logger.js';
 
@@ -121,7 +121,7 @@ export const showTabroomUsage = async () => {
 		+ (allStudents[0]?.count || 0)
 		+ (onlineStudents[0]?.count || 0);
 
-	let serverTarget = Math.ceil(totalUsers / (config.LINODE.USERS_PER_SERVER || 1250));
+	let serverTarget = Math.ceil(totalUsers / (config.linode.users_per_server));
 
 	const overrides = await db.sequelize.query(`
 		select
@@ -149,8 +149,8 @@ export const showTabroomUsage = async () => {
 		}
 	}
 
-	if (serverTarget < (config.AUTOSCALE?.SCALE_MIN || 2)) {
-		serverTarget = (config.AUTOSCALE?.SCALE_MIN || 2);
+	if (serverTarget < (config.autoscale?.scale_min || 2)) {
+		serverTarget = (config.autoscale?.scale_min || 2);
 	}
 
 	return {
@@ -170,10 +170,10 @@ export const getLinodeInstances = async ( limit ) => {
 
 	try {
 		existingMachines = await axios.get(
-			`${config.LINODE.API_URL}/instances`,
+			`${config.linode.api_url}/instances`,
 			{
 				headers : {
-					Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
+					Authorization  : `Bearer ${config.linode.api_token}`,
 					'Content-Type' : 'application/json',
 					Accept         : 'application/json',
 				},
@@ -207,7 +207,7 @@ export const getLinodeInstances = async ( limit ) => {
 			}
 		} else {
 
-			for (const tag of [config.LINODE.WEBHOST_BASE, ...config.LINODE.MONITOR_TARGETS]) {
+			for (const tag of [config.linode.webhost_base, ...config.linode.monitor_targets]) {
 
 				if (machine.tags.includes(tag) ) {
 					return machine;
@@ -221,7 +221,7 @@ export const getLinodeInstances = async ( limit ) => {
 
 		const status = serverByLinodeId[machine.id]?.status || machine.status;
 
-		if (machine.tags.includes(config.LINODE.WEBHOST_BASE) && (!serverByLinodeId[machine.id])) {
+		if (machine.tags.includes(config.linode.webhost_base) && (!serverByLinodeId[machine.id])) {
 			databaseSyncs.push(machine);
 		}
 
@@ -302,7 +302,7 @@ export const increaseLinodeCount = async (whodunnit, countNumber, silent) => {
 	);
 
 	const tabwebs = existingMachines.filter(
-		machine => machine.tags.includes(config.LINODE.WEBHOST_BASE)
+		machine => machine.tags.includes(config.linode.webhost_base)
 	);
 
 	const hostnames = tabwebs.map( (machine) => machine.label );
@@ -323,7 +323,7 @@ export const increaseLinodeCount = async (whodunnit, countNumber, silent) => {
 	// Find the next serial number needed.  Tabweb1 should always exist.
 	let serialNumber = 2;
 
-	while (hostnames.includes(`${config.LINODE.WEBHOST_BASE}${serialNumber}`)) {
+	while (hostnames.includes(`${config.linode.webhost_base}${serialNumber}`)) {
 		serialNumber++;
 	}
 
@@ -336,21 +336,21 @@ export const increaseLinodeCount = async (whodunnit, countNumber, silent) => {
 
 	while (serialNumber < limit) {
 
-		const hostname = config.LINODE.WEBHOST_BASE + serialNumber;
+		const hostname = config.linode.webhost_base + serialNumber;
 
 		const machineDefinition = {
 			booted          : true,
 			label           : `${hostname}`,
-			type            : config.LINODE.INSTANCE_TYPE,
-			region          : config.LINODE.REGION,
-			tags            : [config.LINODE.WEBHOST_BASE],
+			type            : config.linode.instance_type,
+			region          : config.linode.region,
+			tags            : [config.linode.webhost_base],
 			has_user_data   : false,
 			disk_encryption : 'disabled',
-			swap_size       : config.LINODE.SWAP_SIZE,
-			image           : config.LINODE.IMAGE,
+			swap_size       : config.linode.swap_size,
+			image           : config.linode.image,
 			private_ip      : false,
 			migration_type  : 'warm',
-			root_pass       : config.DB_PASS,
+			root_pass       : config.db.pass,
 			interfaces      : [
 				{
 					purpose 	: 'public',
@@ -362,8 +362,8 @@ export const increaseLinodeCount = async (whodunnit, countNumber, silent) => {
 				},
 			],
 			depends_on       : [control[0].linode_id],
-			firewall_id      : config.LINODE.FIREWALL_ID,
-			stackscript_id   : config.LINODE.STACKSCRIPT_ID,
+			firewall_id      : config.linode.firewall_id,
+			stackscript_id   : config.linode.stackscript_id,
 			stackscript_data : {
 				hostname     : `${hostname}`,
 			},
@@ -372,11 +372,11 @@ export const increaseLinodeCount = async (whodunnit, countNumber, silent) => {
 		try {
 
 			const creationReply = axios.post(
-				`${config.LINODE.API_URL}/instances`,
+				`${config.linode.api_url}/instances`,
 				machineDefinition,
 				{
 					headers : {
-						Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
+						Authorization  : `Bearer ${config.linode.api_token}`,
 						'Content-Type' : 'application/json',
 						Accept         : 'application/json',
 					},
@@ -448,7 +448,7 @@ export const decreaseLinodeCount = async (whodunnit, countNumber, silent) => {
 	const existingMachines = await getLinodeInstances();
 
 	const tabwebs = existingMachines.filter(
-		machine => machine.tags.includes(config.LINODE.WEBHOST_BASE)
+		machine => machine.tags.includes(config.linode.webhost_base)
 	);
 
 	const hostnames = tabwebs.map( (machine) => machine.label );
@@ -468,9 +468,9 @@ export const decreaseLinodeCount = async (whodunnit, countNumber, silent) => {
 
 	const destroyMe = [];
 
-	while (hostnames.includes(`${config.LINODE.WEBHOST_BASE}${serialNumber}`)) {
+	while (hostnames.includes(`${config.linode.webhost_base}${serialNumber}`)) {
 
-		const hostname = `${config.LINODE.WEBHOST_BASE}${serialNumber}`;
+		const hostname = `${config.linode.webhost_base}${serialNumber}`;
 
 		const matches = tabwebs.filter(
 			host => host.label === hostname
@@ -482,10 +482,10 @@ export const decreaseLinodeCount = async (whodunnit, countNumber, silent) => {
 
 			try {
 				const deletionReply = await axios.delete(
-					`${config.LINODE.API_URL}/instances/${machine.linode_id}`,
+					`${config.linode.api_url}/instances/${machine.linode_id}`,
 					{
 						headers : {
-							Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
+							Authorization  : `Bearer ${config.linode.api_token}`,
 							'Content-Type' : 'application/json',
 							Accept         : 'application/json',
 						},
@@ -573,8 +573,8 @@ export const notifyCloudAdmins = async (whodunnit, log, subject) => {
 		subject : `Tabroom Cloud Change: ${subject}`,
 	};
 
-	if (config.LINODE.NOTIFY_SLACK) {
-		message.emailInclude = [config.LINODE.NOTIFY_SLACK];
+	if (config.linode.notify_slack) {
+		message.emailInclude = [config.linode.notify_slack];
 	}
 
 	const emailResponse = await notify(message);
@@ -593,7 +593,7 @@ export const getProxyStatus = async(existingMachines) => {
 	}
 
 	const tabwebs = checkMachines.filter(
-		machine => machine.label.includes(config.LINODE.WEBHOST_BASE)
+		machine => machine.label.includes(config.linode.webhost_base)
 	);
 
 	allStatus.tabwebCount = tabwebs.length;
@@ -604,7 +604,7 @@ export const getProxyStatus = async(existingMachines) => {
 
 	try {
 		haproxyData = await axios.get(
-			`http://haproxy.${config.INTERNAL_DOMAIN}:9000/;json`,
+			`http://haproxy.${config.internal_domain}:9000/;json`,
 		);
 	} catch (err) {
 		return `Could not connect to HAProxy.  Try again later. Error: ${JSON.stringify(err)} `;
@@ -643,7 +643,7 @@ export const getProxyStatus = async(existingMachines) => {
 
 	checkMachines.forEach( (machine) => {
 		const metric = axios.get(
-			`http://${machine.label}.${config.INTERNAL_DOMAIN}:9100/metrics`,
+			`http://${machine.label}.${config.internal_domain}:9100/metrics`,
 		);
 		metrics.push(metric);
 	});

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { createOpenApiSpec } from '../api/routes/openapi/createOpenApiSpec.ts';
+import { createOpenApiSpec } from '../api/routes/openapi/createOpenApiSpec.js';
 import apiRouter from '../api/routes/routers/v1/indexRouter.js';
 import { writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
@@ -12,7 +12,7 @@ try {
 	const spec = createOpenApiSpec(apiRouter);
 
 	// Strict validation
-	const routeCount = Object.keys(spec.paths).length;
+	const routeCount = Object.keys(spec.paths ?? {}).length;
 	if (routeCount === 0) {
 		logger.error('No routes in OpenAPI spec!');
 		process.exit(1);

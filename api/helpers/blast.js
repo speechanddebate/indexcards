@@ -1,7 +1,7 @@
 import axios from 'axios';
 import db from '../data/db.js';
 import emailBlast from './mail.js';
-import config from '../../config/config.js';
+import config from '../config.js';
 import logger from './logger.js';
 
 //*
@@ -139,7 +139,7 @@ export const webBlast = async (inputData) => {
 	// will....
 
 	if (process.env.NODE_ENV !== 'production'
-		&& config.MAIL_SERVER !== 'mail.in.speechanddebate.org'
+		&& config.mail.server !== 'mail.in.speechanddebate.org'
 	) {
 		targetIds = process.env.TEST_USERID || ['100'];
 	}
@@ -153,7 +153,7 @@ export const webBlast = async (inputData) => {
 	if (targetIds && targetIds.length > 0) {
 
 		const notification = {
-			app_id          : config.ONESIGNAL.appId,
+			app_id          : config.onesignal.appId,
 			name            : inputData.sender || 'Tournament Blast',
 			url 		    : inputData.url || 'https://www.tabroom.com/user/home.mhtml',
 			contents        : { en: inputData.text },
@@ -165,11 +165,11 @@ export const webBlast = async (inputData) => {
 		};
 
 		const webPromise = axios.post(
-			`${config.ONESIGNAL.API_URL}/notifications`,
+			`${config.onesignal.api_url}/notifications`,
 			notification,
 			{
 				headers : {
-					Authorization  : `Basic ${config.ONESIGNAL.appKey}`,
+					Authorization  : `Basic ${config.onesignal.appKey}`,
 					'Content-Type' : 'application/json',
 					Accept         : 'application/json',
 				},

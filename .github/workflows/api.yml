@@ -24,7 +24,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - run: cp config/config.sample.js config/config.js
       - uses: actions/setup-node@v6
         with:
           node-version-file: package.json
@@ -36,7 +35,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - run: cp config/config.sample.js config/config.js
       - uses: actions/setup-node@v6
         with:
           node-version-file: package.json
@@ -58,8 +56,7 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
     steps:
       - uses: actions/checkout@v6
-      - run: cp ./config/config.sample.js ./config/config.js
-
+      - run: cp ./.github/config/config.ci.json ./config/config.test.json
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:

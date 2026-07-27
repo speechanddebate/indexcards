@@ -1,5 +1,5 @@
 import request from 'supertest';
-import config from '../../../../../config/config.js';
+import config from '../../../../config.js';
 import server from '../../../../../app.js';
 import z from 'zod';
 import { UserChapter } from '../../../openapi/schemas/index.js';
@@ -22,7 +22,7 @@ it('Returns a list of chapters a person has permissions in', async () => {
 	const res = await request(server)
 		.get(`/v1/user/chapters`)
 		.set('Accept', 'application/json')
-		.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+		.set('Cookie', [`${config.cookie.name}=${userkey}`])
 		.expect('Content-Type', /json/)
 		.expect(200);
 

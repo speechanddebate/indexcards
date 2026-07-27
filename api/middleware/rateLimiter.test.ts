@@ -1,15 +1,21 @@
-
 import express from 'express';
 import request from 'supertest';
 
-vi.mock('../../config/config.js', () => ({
+vi.mock('../config.js', () => ({
 	default: {
-		RATE_WINDOW: 1000,
-		RATE_MAX: 2,
-		MESSAGE_RATE_WINDOW: 1000,
-		MESSAGE_RATE_MAX: 1,
-		SEARCH_RATE_WINDOW: 1000,
-		SEARCH_RATE_MAX: 1,
+		ratelimiter: {
+			enabled: true,
+			window: 1000,
+			max: 2,
+			message: {
+				window: 1000,
+				max: 1,
+			},
+			search: {
+				window: 1000,
+				max: 1,
+			},
+		},
 	},
 }));
 
@@ -21,10 +27,10 @@ async function makeApp() {
 	const app = express();
 	app.use(rateLimiterMiddleware);
 
-	app.get('/v1/other', (req, res) => res.json({ ok: true }));
-	app.get('/v1/public/search', (req, res) => res.json({ ok: true }));
-	app.post('/v1/tab/123/message', (req, res) => res.json({ ok: true }));
-	app.post('/v1/tab/123/other', (req, res) => res.json({ ok: true }));
+	app.get('/v1/other', (_req, res) => res.json({ ok: true }));
+	app.get('/v1/public/search', (_req, res) => res.json({ ok: true }));
+	app.post('/v1/tab/123/message', (_req, res) => res.json({ ok: true }));
+	app.post('/v1/tab/123/other', (_req, res) => res.json({ ok: true }));
 
 	return app;
 }

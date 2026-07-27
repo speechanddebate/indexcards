@@ -1,4 +1,4 @@
-import { createContext } from '../../../tests/httpMocks.ts';
+import { createContext } from '../../../tests/httpMocks.js';
 import { getPublishedFiles } from './tournsController';
 import fileRepo from '../../repos/fileRepo';
 describe('getFiles', () => {

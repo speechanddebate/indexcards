@@ -1,6 +1,6 @@
 import z from 'zod';
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
-import * as utils from './utils.ts';
+import * as utils from './utils.js';
 
 export const InboxMessage = z.object({
 	id: utils.id.meta({ description: 'The unique identifier for the message' }),

@@ -1,4 +1,4 @@
-import * as utils from './utils.ts';
+import * as utils from './utils.js';
 import * as z from 'zod';
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
 

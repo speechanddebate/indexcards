@@ -1,6 +1,6 @@
 import personRepo from '../../repos/personRepo.js';
 import { NotFound } from '../../helpers/problem.js';
-import config from '../../../config/config.js';
+import config from '../../config.js';
 import { judgeRecord } from '../../services/results/judgeRecords.js';
 
 async function getParadigms(req, res) {
@@ -101,7 +101,7 @@ async function getParadigmByPersonId(req, res) {
 			circuit: pq.Quiz.circuit,
 			Badge: {
 				altText: pq.Quiz?.badge_description || null,
-				imageUrl: (pq.Quiz?.id && pq.Quiz?.badge) ? `${config.S3_URL}/badges/${pq.Quiz.id}/${pq.Quiz.badge}`
+				imageUrl: (pq.Quiz?.id && pq.Quiz?.badge) ? `${config.aws.s3_url}/badges/${pq.Quiz.id}/${pq.Quiz.badge}`
 					: null,
 				link: pq.Quiz?.badge_link || null,
 			},

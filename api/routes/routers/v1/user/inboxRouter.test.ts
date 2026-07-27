@@ -3,7 +3,7 @@ import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories/index.js';
 import z from 'zod';
-import { InboxMessage } from '../../../openapi/schemas/index.ts';
+import { InboxMessage } from '../../../openapi/schemas/index.js';
 import messageRepo from '../../../../repos/messageRepo.js';
 
 describe('Inbox Router', () => {

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { collectOpenApi, createOpenApiSpec } from './createOpenApiSpec.ts';
+import { collectOpenApi, createOpenApiSpec } from './createOpenApiSpec.js';
 describe('collectOpenApi', () => {
 	it('should collect OpenAPI metadata from .route form', () => {
 		const router = Router();

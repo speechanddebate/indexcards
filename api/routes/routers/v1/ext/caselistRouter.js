@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/ext/caselistController.js';
 import z from 'zod';
-import { Student } from '../../../openapi/schemas/index.ts';
-import { requireExtApiKey } from '../../../openapi/security.ts';
+import { Student } from '../../../openapi/schemas/index.js';
+import { requireExtApiKey } from '../../../openapi/security.js';
 
 const router = Router();
 

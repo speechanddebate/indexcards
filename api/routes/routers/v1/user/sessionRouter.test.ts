@@ -2,7 +2,7 @@
 import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories/index.js';
-import * as schemas from '../../../openapi/schemas/index.ts';
+import * as schemas from '../../../openapi/schemas/index.js';
 
 describe('Session Router', () => {
 	let personId : number;

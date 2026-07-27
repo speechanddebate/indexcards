@@ -4,7 +4,7 @@ import server from '../../../../app';
 
 import db from '../../../data/db';
 import factories from '../../../../tests/factories';
-import config from '../../../../config/config';
+import config from '../../../config.js';
 
 import {
 	testUserChapterPerm,
@@ -65,7 +65,7 @@ describe ('getMySchoolsByTourn', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapters/byTourn/29807/mySchools`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+			.set('Cookie', [`${config.cookie.name}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -80,7 +80,7 @@ describe ('getMySchoolsByTourn', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapters/byTourn/${testUserChapterPerm.tourn}/mySchools`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+			.set('Cookie', [`${config.cookie.name}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -97,7 +97,7 @@ describe ('getMySchoolsByTourn', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapters/byTourn/${ testUserSchoolContact.tourn }/mySchools`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+			.set('Cookie', [`${config.cookie.name}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 
@@ -114,7 +114,7 @@ describe ('getMySchoolsByTourn', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapters/byTourn/30661/nonSchools`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+			.set('Cookie', [`${config.cookie.name}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 

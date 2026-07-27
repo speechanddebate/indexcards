@@ -1,5 +1,5 @@
 import judgesController from './judgesController.js';
-import { createReq, createRes } from '../../../tests/httpMocks.ts';
+import { createReq, createRes } from '../../../tests/httpMocks.js';
 
 vi.mock('../../repos/judgeRepo.js', () => ({
 	default: {

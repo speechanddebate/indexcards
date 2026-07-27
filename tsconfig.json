@@ -1,24 +1,28 @@
 {
-	"include": ["app.js", "api/**/*", "api/**/*.ts", "tests/**/*", "tests/**/*"],
+	"include": [
+		"app.js",
+		"config/**/*",
+		"api/**/*",
+		"tests/**/*",
+		"api/routes/openapi/openapi.json"
+	],
 	"exclude": [
-		"../wwwroot/app",
 		"node_modules",
 		"coverage",
-		"logs"
+		"logs",
+		"config/config.js"
 	],
 	"compilerOptions": {
 		"module"          : "nodenext",
 		"moduleResolution": "nodenext",
 		"target"          : "es2022",
 		"types"           : ["node", "vitest/globals"],
+   		"outDir": "./dist",
 		"allowJs"         : true,
 		"checkJs"         : false,
-		"noEmit"          : true,
 		"isolatedModules" : true,
 		"esModuleInterop" : true,
-		"allowSyntheticDefaultImports": true,
 		"resolveJsonModule": true,
 		"skipLibCheck"    : true,
-		"allowImportingTsExtensions": true
 	}
 }

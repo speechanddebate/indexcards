@@ -7007,7 +7007,7 @@
         "type": "apiKey",
         "in": "cookie",
         "name": "TabroomToken",
-        "description": "send the session token as a cookie. If making a non GET request, the CSRF token must also be set in the header as x-csrf-token with the value from the CSRF_Token cookie. This will NOT happen automatically. For direct API access we recommend using bearerAuth."
+        "description": "send the session token as a cookie. For direct API access, we recommend using bearerAuth."
       }
     }
   }

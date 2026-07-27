@@ -1,6 +1,6 @@
 import axios from 'axios';
 import db from '../helpers/litedb.js';
-import config from '../../config/config.js';
+import config from '../config.js';
 
 const checkServerDeployments = async () => {
 
@@ -17,10 +17,10 @@ const checkServerDeployments = async () => {
 	for (const server of servers) {
 
 		const linodeReply = await axios.get(
-			`${config.LINODE.API_URL}/instances/${server.linode_id}`,
+			`${config.linode.api_url}/instances/${server.linode_id}`,
 			{
 				headers : {
-					Authorization  : `Bearer ${config.LINODE.API_TOKEN}`,
+					Authorization  : `Bearer ${config.linode.api_token}`,
 					'Content-Type' : 'application/json',
 					Accept         : 'application/json',
 				},

@@ -4,22 +4,22 @@ import {
 	PutObjectCommand,
 	CopyObjectCommand,
 	S3Client } from '@aws-sdk/client-s3';
-import config from '../../config/config';
-import logger from './logger';
+import config from '../config.js';
+import logger from './logger.js';
 
-const client = new S3Client(config.AWS);
+const client = new S3Client(config.aws);
 
 const s3Client = {
 
 	client,
 
-	rm: async (filepath) => {
+	rm: async (filepath: string) => {
 		const rmCommand = new DeleteObjectCommand({
-			Bucket     : config.AWS.Bucket,
+			Bucket     : config.aws.Bucket,
 			Key        : filepath,
 		});
 
-		let response = '';
+		let response;
 
 		try {
 			response = await client.send(rmCommand);
@@ -32,15 +32,15 @@ const s3Client = {
 		return response;
 	},
 
-	cp: async (filepath, dest) => {
+	cp: async (filepath: string, dest: string) => {
 
 		const cpCommand = new CopyObjectCommand({
-			CopySource : `${config.AWS.Bucket}/${filepath}`,
-			Bucket     : config.AWS.Bucket,
+			CopySource : `${config.aws.Bucket}/${filepath}`,
+			Bucket     : config.aws.Bucket,
 			Key        : dest,
 		});
 
-		let response = '';
+		let response;
 		try {
 			response = await client.send(cpCommand);
 		} catch (err) {
@@ -51,16 +51,16 @@ const s3Client = {
 		return response;
 	},
 
-	mv: async (filepath, dest) => {
+	mv: async (filepath: string, dest: string) => {
 
 		const cpCommand = new CopyObjectCommand({
-			CopySource : `${config.AWS.Bucket}/${filepath}`,
-			Bucket     : config.AWS.Bucket,
+			CopySource : `${config.aws.Bucket}/${filepath}`,
+			Bucket     : config.aws.Bucket,
 			Key        : dest,
 		});
 
 		const rmCommand = new DeleteObjectCommand({
-			Bucket     : config.AWS.Bucket,
+			Bucket     : config.aws.Bucket,
 			Key        : filepath,
 		});
 
@@ -72,7 +72,7 @@ const s3Client = {
 			return err;
 		}
 
-		let response = '';
+		let response;
 
 		try {
 			response = await client.send(rmCommand);
@@ -85,9 +85,9 @@ const s3Client = {
 		return response;
 	},
 
-	get : async (filepath) => {
+	get : async (filepath: string) => {
 		const getCommand = new GetObjectCommand({
-			Bucket : config.AWS.Bucket,
+			Bucket : config.aws.Bucket,
 			Key    : filepath,
 		});
 
@@ -95,21 +95,21 @@ const s3Client = {
 
 		try {
 			const response = await client.send(getCommand);
-			stream = await response.Body.transformToWebStream();
+			stream = await response.Body?.transformToWebStream();
 		} catch (err) {
 			console.error(err);
 		}
 		return stream;
 	},
 
-	put : async (filepath, data) => {
+	put : async (filepath: string, data: any) => {
 		const putCommand = new PutObjectCommand({
-			Bucket : config.AWS.Bucket,
+			Bucket : config.aws.Bucket,
 			Key    : filepath,
 			Body   : data,
 		});
 
-		let response = '';
+		let response;
 
 		try {
 			response = await client.send(putCommand);

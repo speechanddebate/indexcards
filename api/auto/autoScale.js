@@ -1,5 +1,5 @@
 import db from '../helpers/litedb.js';
-import config from '../../config/config.js';
+import config from '../config.js';
 import notify from '../helpers/blast.js';
 
 import {
@@ -11,9 +11,9 @@ import {
 
 const autoScale = async () => {
 
-	const loadThresholds = config.AUTOSCALE;
+	const loadThresholds = config.autoscale;
 	const usageData = await showTabroomUsage();
-	const serverList = await getLinodeInstances(config.LINODE.WEBHOST_BASE);
+	const serverList = await getLinodeInstances(config.linode.webhost_base);
 
 	const user = {
 		id       : 5,
@@ -50,17 +50,17 @@ const autoScale = async () => {
 	const fifteenPercentage = ( loadNumbers.fifteen / loadNumbers.cpus ) * 100;
 
 	// If load levels are very high, take action yourself
-	if (onePercentage > (loadThresholds?.SCALE_THRESHOLD || 120)
-		&& fifteenPercentage > (loadThresholds?.SCALE_15_THRESHOLD  || 100)
+	if (onePercentage > (loadThresholds?.scale_threshold || 120)
+		&& fifteenPercentage > (loadThresholds?.scale_15_threshold  || 100)
 	) {
 
-		let addTo = loadThresholds?.SCALE_INCREMENT || 2;
+		let addTo = loadThresholds?.scale_increment || 2;
 
-		if (servers.length >= config.LINODE.SCALE_MAX) {
+		if (servers.length >= config.linode.scale_max) {
 			alert += `<h3>SERVER CLUSTER AT CAPACITY.</h3>`;
 			addTo = 0;
-		} else if ( (servers.length + addTo) > config.LINODE.SCALE_MAX) {
-			addTo = config.LINODE.SCALE_MAX - servers.length;
+		} else if ( (servers.length + addTo) > loadThresholds?.scale_max) {
+			addTo = loadThresholds?.scale_max - servers.length;
 		}
 
 		let alert = '';
@@ -69,7 +69,7 @@ const autoScale = async () => {
 
 			alert = `<p>Load levels are over capacity.  Adding another ${addTo} servers for the next few hours</p>`;
 
-			if (loadThresholds?.ENABLED) {
+			if (loadThresholds?.enabled) {
 
 				await db.sequelize.query(`
 					delete ts.* from tabroom_setting ts where ts.tag = 'min_servers'
@@ -115,19 +115,19 @@ const autoScale = async () => {
 
 	// If load levels are high in a sustained manner send out a hey yo shit goin' down
 
-	if (onePercentage > (loadThresholds?.ALERT_THRESHOLD || 80)
-		&& fifteenPercentage > (loadThresholds?.ALERT_15_THRESHOLD  || 60)
+	if (onePercentage > (loadThresholds?.alert_threshold || 80)
+		&& fifteenPercentage > (loadThresholds?.alert_15_threshold  || 60)
 	) {
 		let alert = `<p>Load levels are approaching capacity</p>`;
 		alert += `<p>One minute load average across tabweb machines is ${onePercentage}</p>`;
 		alert += `<p>One minute load average across tabweb machines is ${fifteenPercentage}</p>`;
 
-		if (!loadThresholds?.ENABLED) {
+		if (!loadThresholds?.enabled) {
 			alert += `<h5>Autoscaling is NOT CURRENTLY ENABLED.  System will not scale automatically</h5>`;
 		}
 
-		if (database.one > (loadThresholds?.ALERT_THRESHOLD || 80)
-			&& database.fifteen > (loadThresholds?.ALERT_15_THRESHOLD  || 60)
+		if (database.one > (loadThresholds?.alert_threshold || 80)
+			&& database.fifteen > (loadThresholds?.alert_15_threshold  || 60)
 		) {
 			alert += `<h5>Database server load is also high.  Possible issue there: ${database.one} 1m load, ${database.fifteen} 15m.</h5>`;
 			await notifyCloudAdmins(alert, 'AutoScaling May Be Required.  DB Server Load Also High.');
@@ -144,7 +144,7 @@ const autoScale = async () => {
 		let alert = `<p>Under forecasted needs. Spinning up ${needed} machines</p>`;
 		let response = {};
 
-		if (loadThresholds?.ENABLED) {
+		if (loadThresholds?.enabled) {
 			response = await increaseLinodeCount(user, needed, true);
 			alert += '<pre>';
 			alert += JSON.stringify(response.message);
@@ -196,7 +196,7 @@ const autoScale = async () => {
 			alert += `<p>Load too high to adjust. ${onePercentage.toFixed(2)}% of capacity in active use. 15 minute load is ${fifteenPercentage.toFixed(2)} </p>`;
 		}
 
-		if (loadThresholds?.ENABLED) {
+		if (loadThresholds?.enabled) {
 			const response = await decreaseLinodeCount(user, needed, true);
 			alert += '<pre>';
 			alert += JSON.stringify(response, null, 2);
@@ -214,7 +214,7 @@ const notifyCloudAdmins = async (log, subject) => {
 	// Testing Mode for Palmer Only
 	let sqlLimit = '';
 
-	if (!config.AUTOSCALE?.ENABLED) {
+	if (!config.autoscale?.enabled) {
 		sqlLimit = ' and person.id = 1 ';
 	}
 
@@ -239,8 +239,8 @@ const notifyCloudAdmins = async (log, subject) => {
 		subject : `Cloud Scale Change: ${subject}`,
 	};
 
-	if (config.LINODE.NOTIFY_SLACK) {
-		message.emailInclude = [config.LINODE.NOTIFY_SLACK];
+	if (config.linode.notify_slack) {
+		message.emailInclude = [config.linode.notify_slack];
 	}
 
 	const emailResponse = await notify(message);

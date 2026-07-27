@@ -1,6 +1,6 @@
 import logger from '../logger.js';
 import { adminBlast } from '../admin.js';
-import config from '../../../config/config.js';
+import config from '../../config.js';
 
 export const errorHandler = (err, req, res, next) => {
 	logger.error('Error while processing request', {
@@ -24,7 +24,7 @@ export const errorHandler = (err, req, res, next) => {
 			subject : `Indexcards Bug Tripped`,
 			text    : `
 Host
-${config.DOCKERHOST}
+${config.dockerhost}
 
 Request URL
 ${req?.originalUrl}
@@ -57,7 +57,7 @@ ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
 
 	return res.status(500).json({
 		message          : err.message || 'Internal server error',
-		host             : config.DOCKERHOST,
+		host             : config.dockerhost,
 		logCorrelationId : req.uuid,
 		url              : req.originalUrl,
 		path             : req.path,
@@ -77,7 +77,7 @@ export const inlineError = (err, location = 'Unknown') => {
 				message          : `OpenAPI Validation error : ${err.message}`,
 				errors           : err.errors,
 				stack            : err.stack,
-				host             : config.DOCKERHOST,
+				host             : config.dockerhost,
 				env              : process.env,
 			};
 		}
@@ -99,7 +99,7 @@ export const inlineError = (err, location = 'Unknown') => {
 			subject : `Indexcards Bug Tripped`,
 			text    : `
 Host
-${config.DOCKERHOST}
+${config.dockerhost}
 
 Location
 ${location}
@@ -123,7 +123,7 @@ ${JSON.stringify(err, Object.getOwnPropertyNames(err))}`,
 
 	return {
 		message          : err.message || 'Internal server error',
-		host             : config.DOCKERHOST,
+		host             : config.dockerhost,
 		path             : location,
 		stack            : err.stack,
 		env              : process.env,

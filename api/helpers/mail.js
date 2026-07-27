@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import { convert } from 'html-to-text';
-import config from '../../config/config.js';
+import config from '../config.js';
 import logger from './logger.js';
 import { inlineError } from './errors/errorHandler.js';
 
@@ -14,7 +14,7 @@ export const emailBlast = async (inputData) => {
 	if (messageData.share) {
 
 		transporter = nodemailer.createTransport({
-			host           : config.SHARE.SMTP_HOST,
+			host           : config.share.smtp.host,
 			port           : 25,
 			secure         : false, // Still allows STARTTLS
 			pool           : true,
@@ -25,16 +25,16 @@ export const emailBlast = async (inputData) => {
 				rejectUnauthorized : false,
 			},
 			auth: {
-				user: config.SHARE.SMTP_USER,
-				pass: config.SHARE.SMTP_PASS,
+				user: config.share.smtp.user,
+				pass: config.share.smtp.pass,
 			},
 		});
 
-	} else if (config.MAIL.TEST) {
+	} else if (config.mail.test) {
 
 		transporter = nodemailer.createTransport({
-			host           : config.MAIL.SERVER,
-			port           : config.MAIL.PORT,
+			host           : config.mail.server,
+			port           : config.mail.port,
 			secure         : false,
 			pool           : true,
 			maxConnections : 400,
@@ -48,11 +48,11 @@ export const emailBlast = async (inputData) => {
 
 	} else {
 		transporter = nodemailer.createTransport({
-			host           : config.MAIL.SERVER,
-			port           : config.MAIL.PORT,
+			host           : config.mail.server,
+			port           : config.mail.port,
 			secure         : false,
 			pool           : true,
-			maxConnections : config.MAIL.POOL || 128,
+			maxConnections : config.mail.pool,
 			maxMessages    : 'Infinity',
 		});
 	}
@@ -73,8 +73,8 @@ export const emailBlast = async (inputData) => {
 	// etc. And then add the sender as the To as well so it will not deliver.
 
 	messageData.bcc = Array.from(new Set(messageData.email));
-	messageData.to = messageData.to || config.MAIL.FROM;
-	messageData.from = messageData.from || config.MAIL.FROM;
+	messageData.to = messageData.to || config.mail.from;
+	messageData.from = messageData.from || config.mail.from;
 	messageData.replyTo = messageData.replyTo || messageData.from;
 	messageData.subject = messageData.subject || 'Message from Tab';
 	messageData.subject = `[TAB] ${messageData.subject}`;
@@ -117,7 +117,7 @@ export const emailBlast = async (inputData) => {
 
 	if (
 		process.env.NODE_ENV === 'production'
-		|| config.MAIL.TEST
+		|| config.mail.test
 	) {
 		try {
 			const result = transporter.sendMail(messageData);

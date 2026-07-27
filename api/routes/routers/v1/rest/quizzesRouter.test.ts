@@ -1,7 +1,7 @@
 import request from 'supertest';
 import server from '../../../../../app.js';
 import z from 'zod';
-import { Quiz } from '../../../openapi/schemas/Quiz.ts';
+import { Quiz } from '../../../openapi/schemas/index.js';
 import factories from '../../../../../tests/factories/index.js';
 
 describe('Quizzes Router', () => {

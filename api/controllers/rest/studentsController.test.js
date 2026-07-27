@@ -1,4 +1,4 @@
-import { createContext } from '../../../tests/httpMocks.ts';
+import { createContext } from '../../../tests/httpMocks.js';
 import * as controller from './studentsController.js';
 import studentRepo from '../../repos/studentRepo.js';
 import personRepo from '../../repos/personRepo.js';

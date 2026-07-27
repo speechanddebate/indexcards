@@ -2,7 +2,7 @@ import moment from 'moment-timezone';
 import { ordinalize } from '@speechanddebate/nsda-js-utils';
 import { notify } from './blast.js';
 import { sidelocks } from './round.js';
-import { config } from '../../config/config.js';
+import config from '../config.js';
 import db from '../data/db.js';
 
 // Functions related to creating pairing blasts for each section.

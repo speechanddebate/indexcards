@@ -2,7 +2,7 @@
 // data has been loaded onto the test environment database
 
 import db from '../api/helpers/litedb.js';
-import config from '../config/config.js';
+import config from '../api/config.js';
 import logger from '../api/helpers/logger.js';
 
 // run big cascading deletes in batches to avoid locking the whole database

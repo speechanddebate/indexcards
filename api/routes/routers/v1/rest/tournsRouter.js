@@ -5,12 +5,12 @@ import { ValidateRequest } from '../../../../middleware/validation.js';
 import * as controller from '../../../../controllers/rest/tournsController.js';
 import { requirePublicTourn } from '../../../../policy/tournPolicy.js';
 import roundRouter from './roundRouter.js';
-import resultSetRouter from './resultSetRouter.ts';
+import resultSetRouter from './resultSetRouter.js';
 import eventRouter from './eventRouter.js';
 import entryRouter from './entryRouter.js';
 
-import { File } from '../../../openapi/schemas/index.ts';
-import * as utils from '../../../openapi/schemas/utils.ts';
+import { File } from '../../../openapi/schemas/index.js';
+import * as utils from '../../../openapi/schemas/utils.js';
 const router = Router({ mergeParams: true });
 
 router.route('/').get(ValidateRequest,controller.getTourns).openapi = {

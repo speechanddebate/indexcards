@@ -1,4 +1,4 @@
-import config from '../../config/config.js';
+import config from '../config.js';
 import { Forbidden } from '../helpers/problem.js';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -18,7 +18,7 @@ export default async function csrfMiddleware(req: Request, res: Response, next: 
 
 	//validate csrf
 	const origin = req.headers['origin'];
-	if(origin && config.TRUSTED_ORIGINS.includes(origin)){
+	if(origin && config.csrf.trusted_origins.includes(origin)){
 		return next();
 	}
 	Forbidden(req,res,'request failed Origin validation');

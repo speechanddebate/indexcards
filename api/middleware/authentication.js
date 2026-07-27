@@ -1,5 +1,5 @@
 import basic from 'basic-auth';
-import config from '../../config/config.js';
+import config from '../config.js';
 import authService from '../services/AuthService.js';
 import sessionRepo from '../repos/sessionRepo.js';
 import personRepo from '../repos/personRepo.js';
@@ -13,8 +13,8 @@ export async function Authenticate(req, res, next) {
 	try {
 
 		// COOKIE AUTHENTICATION
-		const cookieName = config.COOKIE_NAME;
-		const cookie = req.cookies[cookieName] || req.headers[config.SESSION_HEADER];
+		const cookieName = config.cookie.name;
+		const cookie = req.cookies[cookieName] || req.headers[config.session_header];
 
 		if (cookie) {
 			let cookieSession = await sessionRepo.findByUserKey(cookie, {include: {su: true, person: true}});

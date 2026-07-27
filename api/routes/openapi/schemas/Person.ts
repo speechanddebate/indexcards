@@ -1,7 +1,7 @@
 import z from 'zod';
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
-import { Quiz } from './Quiz.ts';
-import * as utils from './utils.ts';
+import { Quiz } from './Quiz.js';
+import * as utils from './utils.js';
 
 export const Person = z.object({
 	id: utils.id,

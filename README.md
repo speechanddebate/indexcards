@@ -19,23 +19,27 @@ cd indexcards
 npm install
 ```
 
-### 2) Create `config/config.js`
+### 2) Create `config/config.json`
 
 Copy the sample config and then update database + environment values for your machine:
 
 ```bash
-cp config/config.sample.js config/config.js
+cp config/config.sample.json config/config.json
 ```
-  
-At minimum, make sure your local values for `development` and `test` DB settings are correct in `config/config.js`.
+ To create an environment specific config, create a `config.NODE_ENV.json` file. For example, creating a `config/config.production.json` file will load those parameters when `NODE_ENV` is production.
+ 
+At minimum, make sure your local values for `development` and `test` DB settings are correct in `config/config.json`.
+
+> [!NOTE]
+> When using the indexcards Docker image, the config file will have to be mounted in the container to the `/config` directory. ex: `docker run -v ./config/config.json:/config/config.json:ro indexcards`
 
 ### 3) Create and load the test database
 
 Create a MariaDB/MySQL database (for example `tabtest`) and import `tests/test.sql`:
 
 ```bash
-mysql -u <user> -p -e "CREATE DATABASE IF NOT EXISTS tabtest;"
-mysql -u <user> -p tabtest < tests/test.sql
+mysql -u <user> -p -e "CREATE DATABASE IF NOT EXISTS tabroom;"
+mysql -u <user> -p tabroom < tests/test.sql
 ```
 
 Then run tests with the test environment:

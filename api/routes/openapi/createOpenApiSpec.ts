@@ -1,14 +1,14 @@
-import * as schemas from './schemas/index.ts';
+import * as schemas from './schemas/index.js';
 import { createDocument } from 'zod-openapi';
-import * as responses from './responses/index.ts';
-import { tags as declaredTags, declaredTagGroups } from './tags.ts';
-import { parameters } from './parameters.ts';
+import * as responses from './responses/index.js';
+import { tags as declaredTags, declaredTagGroups } from './tags.js';
+import { parameters } from './parameters.js';
 import logger from '../../helpers/logger.js';
 import { readFile } from 'node:fs/promises';
-import security from './security.ts';
+import security from './security.js';
 
 import type { ZodOpenApiObject, ZodOpenApiOperationObject } from 'zod-openapi';
-import type { RouteOpenApiConfig } from '../../types/express-openapi.d.ts';
+import type { RouteOpenApiConfig } from '../../types/express-openapi.d.js';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'] as const;
 type HttpMethod = (typeof HTTP_METHODS)[number];

@@ -1,14 +1,14 @@
 import type { ZodOpenApiSecuritySchemeObject, ZodOpenApiObject } from 'zod-openapi';
 
-import config from '../../../config/config.js';
+import config from '../../config.js';
 const schemes: Record<string, ZodOpenApiSecuritySchemeObject> = {
 	extApiKey:  { type: 'http', scheme: 'basic' },
 	bearerAuth: { type: 'http', scheme: 'bearer' },
 	cookieAuth: {
 		type: 'apiKey',
 		in: 'cookie',
-		name: config.COOKIE_NAME, 
-		description: `send the session token as a cookie. If making a non GET request, the CSRF token must also be set in the header as ${config.CSRF.HEADER_NAME} with the value from the ${config.CSRF.COOKIE_NAME} cookie. This will NOT happen automatically. For direct API access we recommend using bearerAuth.`,
+		name: config.cookie.name, 
+		description: `send the session token as a cookie. For direct API access, we recommend using bearerAuth.`,
 	},
 };
 

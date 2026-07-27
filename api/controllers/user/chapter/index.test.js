@@ -1,6 +1,6 @@
 import request from 'supertest';
 import { assert } from 'chai';
-import config from '../../../../config/config';
+import config from '../../../config';
 import server from '../../../../app';
 import db from '../../../data/db';
 import factories from '../../../../tests/factories';
@@ -33,7 +33,7 @@ describe('User Chapter', () => {
 		const res = await request(server)
 			.get(`/v1/user/chapters/byTourn/30661`)
 			.set('Accept', 'application/json')
-			.set('Cookie', [`${config.COOKIE_NAME}=${userkey}`])
+			.set('Cookie', [`${config.cookie.name}=${userkey}`])
 			.expect('Content-Type', /json/)
 			.expect(200);
 

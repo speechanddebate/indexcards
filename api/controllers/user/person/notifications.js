@@ -2,10 +2,10 @@
 import axios from 'axios';
 import { Op } from 'sequelize';
 import logger from '../../../helpers/logger.js';
-import config from '../../../../config/config.js';
+import config from '../../../config.js';
 
 const headers = {
-	Authorization  : `Basic ${config.ONESIGNAL.appKey}`,
+	Authorization  : `Basic ${config.onesignal.appKey}`,
 	'Content-Type' : 'application/json',
 	Accept         : 'application/json',
 };
@@ -14,7 +14,7 @@ export async function getSubscribe(req, res) {
 	try {
 
 		const reply = await axios.get(
-			`${config.ONESIGNAL.URL}/users/by/external_id/${req.params.tabroomId}`,
+			`${config.onesignal.url}/users/by/external_id/${req.params.tabroomId}`,
 			{ headers },
 		);
 
@@ -50,7 +50,7 @@ export async function pushSubscribe(req,res) {
 
 	try {
 		await axios.patch(
-			`${config.ONESIGNAL.URL}/subscriptions/${req.params.subscriptionId}`,
+			`${config.onesignal.url}/subscriptions/${req.params.subscriptionId}`,
 			{ subscription } ,
 			{ headers },
 		);

@@ -1,5 +1,5 @@
 import db from '../api/data/db.js';
-import config from '../config/config.js';
+import config from '../api/config.js';
 import testData from './testFixtures';
 
 export const setup = async () => {

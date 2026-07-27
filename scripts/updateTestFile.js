@@ -3,7 +3,7 @@ import { once } from 'node:events';
 import fs from 'node:fs';
 import path from 'node:path';
 import readline from 'node:readline';
-import config from '../config/config.js';
+import config from '../api/config.js';
 import logger from '../api/helpers/logger.js';
 
 // adjust these to match your config shape

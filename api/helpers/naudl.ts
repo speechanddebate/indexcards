@@ -1,7 +1,7 @@
 import axios from 'axios';
-import config from '../../config/config.js';
+import config from '../config.js';
 
-export const getSalesforceStudents = async (naudlChapter) => {
+export const getSalesforceStudents = async (naudlChapter: string) => {
 	const authData = await authSalesforce();
 	const queryBase = `${authData.instance_url}/services/data/v59.0/query`;
 	const queryText = `?q=SELECT+Id,Tabroom_ID__c,School__c+FROM+Student__c+WHERE+School__c=+'${naudlChapter}'`;
@@ -20,7 +20,7 @@ export const getSalesforceStudents = async (naudlChapter) => {
 	return getResponse.data?.records;
 };
 
-export const getOneSalesforceStudent = async (studentId) => {
+export const getOneSalesforceStudent = async (studentId: string) => {
 	const authData = await authSalesforce();
 	const queryBase = `${authData.instance_url}/services/data/v59.0/query`;
 	const queryText = `?q=SELECT+Id,Tabroom_ID__c,School__c+FROM+Student__c+WHERE+Tabroom_ID__c=+'${studentId}'`;
@@ -58,12 +58,12 @@ export const getAllSalesforceStudents = async () => {
 	return getResponse.data?.records;
 };
 
-export const postSalesforceStudents = async (body) => {
+export const postSalesforceStudents = async (body: Record<string, any>) => {
 
 	const authData = await authSalesforce();
 	if (authData) {
 		const postResponse = await axios.post(
-			`${authData.instance_url}${config.NAUDL.STUDENT_ENDPOINT}`,
+			`${authData.instance_url}${config.naudl.student_endpoint}`,
 			body,
 			{
 				headers : {
@@ -101,10 +101,10 @@ export const getSalesforceChapters = async () => {
 
 const authSalesforce = async () => {
 
-	const naudl = config.NAUDL;
+	const naudl = config.naudl;
 
-	const authClient = `grant_type=password&client_id=${naudl.CLIENT_ID}&client_secret=${naudl.CLIENT_SECRET}`;
-	const authUser = `&username=${naudl.USERNAME}&password=${naudl.PW}`;
+	const authClient = `grant_type=password&client_id=${naudl.client_id}&client_secret=${naudl.client_secret}`;
+	const authUser = `&username=${naudl.username}&password=${naudl.pw}`;
 	const authResponse = await axios.post(
 		`https://login.salesforce.com/services/oauth2/token?${authClient}${authUser}`,
 	);

@@ -1,7 +1,7 @@
 import request from 'supertest';
 import server from '../../../../../app.js';
 import factories from '../../../../../tests/factories/index.js';
-import { activeCircuitsResponse, restCircuit } from '../../../openapi/schemas/index.ts';
+import { activeCircuitsResponse, restCircuit } from '../../../openapi/schemas/index.js';
 
 describe('GET /rest/circuits/active', () => {
 	it('Returns active circuits for the current school year', async () => {

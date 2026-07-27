@@ -1,5 +1,5 @@
 import db from '../../data/db.js';
-import config from '../../../config/config.js';
+import config from '../../config.js';
 
 export async function getPublishedAds(req,res) {
 	const currentAds = await db.sequelize.query(`
@@ -15,7 +15,7 @@ export async function getPublishedAds(req,res) {
 
 	return res.status(200).json(currentAds.map(ad => ({
 		url: ad.url,
-		imgSrc: `${config.S3_URL}/ads/${ad.id}/${ad.filename}`,
+		imgSrc: `${config.aws.s3_url}/ads/${ad.id}/${ad.filename}`,
 		background: ad.background,
 	})));
 };

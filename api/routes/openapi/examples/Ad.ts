@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import { HomepageAd as HomepageAdSchema } from '../schemas/Ad.ts';
+import { HomepageAd as HomepageAdSchema } from '../schemas/Ad.js';
 
 export const HomepageAdExample = [
 	{
