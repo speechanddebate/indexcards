@@ -35,6 +35,16 @@ app.use(helmet({
 	contentSecurityPolicy: false, //helmet v3 had this off by default
 }));
 
+// Enable CORS Access, hopefully in a way that means I don't
+// have to fight with it ever again.
+const corsOptions = {
+	methods              : ['GET', 'POST', 'DELETE', 'PUT'],
+	optionsSuccessStatus : 204,
+	credentials          : true,
+	origin               : config.cors.origins,
+};
+app.use(cors(corsOptions));
+
 // Add a unique UUID to every request, and add the configuration for easy
 // transport
 //
@@ -51,17 +61,6 @@ app.use((req, res, next) => {
 app.use(setupRequest);
 
 app.get('/v1/ip', (request, response) => response.send(request.ip));
-
-// Enable CORS Access, hopefully in a way that means I don't
-// have to fight with it ever again.
-const corsOptions = {
-	methods              : ['GET', 'POST', 'DELETE', 'PUT'],
-	optionsSuccessStatus : 204,
-	credentials          : true,
-	origin               : config.cors.origins,
-};
-
-app.use('/v1', cors(corsOptions));
 
 // Parse body
 app.use(bodyParser.urlencoded({ extended: true }));
