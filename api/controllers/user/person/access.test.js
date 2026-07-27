@@ -1,7 +1,7 @@
 import request from 'supertest';
 import { assert } from 'chai';
 import db from '../../../data/db';
-import config from '../../../../config/config';
+import config from '../../../config.js';
 import server from '../../../../app';
 import { testUserSession } from '../../../../tests/testFixtures';
 
