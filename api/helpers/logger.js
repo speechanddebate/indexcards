@@ -90,25 +90,27 @@ const prettyConsoleFormat = winston.format.combine(
 		return `${timestamp} ${level} ${msg}${restStr}`;
 	})
 );
+
+const lokiFormat = winston.format.combine(
+	winston.format((info) => {
+		return {
+			...info,
+			...Labels(),
+		};
+	})(),
+	winston.format.json(),
+);
 const transports = [];
 if(config.logging.file) {
 	transports.push(new winston.transports.File({
 		filename: `${config.logging.file.path}/indexcards.log`,
-		format: winston.format.combine(
-			winston.format((info) => {
-				return {
-					...info,
-					...Labels(),
-				};
-			})(),
-			winston.format.json(),
-		),
+		format: lokiFormat,
 	}));
 };
 
 transports.push(new winston.transports.Console({
 	level: config.logging.level,
-	format: prettyConsoleFormat,
+	format: config.logging.usePrettyConsole ? prettyConsoleFormat : lokiFormat,
 }));
 /**
  * Main application logger. Transports and formatting are configured based on config values.

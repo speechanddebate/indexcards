@@ -103,6 +103,7 @@ const ConfigSchema = z.object({
 		level: z.enum(['error','warn','info','http','verbose','debug','silly']).default('info'),
 		/** The value that sets what is considered a slow query for logging */
 		slowQueryLimit: z.int().default(5000),
+		usePrettyConsole: z.boolean().default(process.env.NODE_ENV === 'development'),
 		file: z.object({
 			/** The file path to log to. */
 			path: z.string().min(1),
