@@ -2,12 +2,14 @@ import * as utils from './utils.js';
 import * as z from 'zod';
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
 
-export const Judge = {
-	type: 'object',
-	properties: {
-
-	},
-} as const satisfies ZodOpenApiSchemaObject;
+export const Judge = z.object({
+	id: utils.id,
+	code: z.string().max(8).nullable(),
+	first: z.string().max(63).nullable(),
+	middle: z.string().max(63).nullable(),
+	last: z.string().max(63).nullable(),
+	obligation: z.int().nullable(),
+}).meta({ id: 'Judge'}) satisfies ZodOpenApiSchemaObject;
 
 export const UnlinkedJudge = z.object({
 	id: utils.id,

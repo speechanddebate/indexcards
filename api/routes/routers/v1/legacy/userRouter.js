@@ -12,6 +12,7 @@ import sessionRouter from '../user/sessionRouter.js';
 import judgesRouter from '../user/judgesRouter.js';
 import studentsRouter from '../user/studentsRouter.js';
 import chaptersRouter from '../user/chaptersRouter.js';
+import sectionsRouter from '../user/sectionsRouter.js';
 
 const router = Router();
 
@@ -23,7 +24,6 @@ function extractHandler(mod, method) {
 }
 
 // Non legacy things
-
 //User inbox
 router.use('/tourn', tournRouter);
 //User inbox
@@ -33,6 +33,7 @@ router.use('/session', sessionRouter);
 router.use('/judges', judgesRouter);
 router.use('/students', studentsRouter);
 router.use('/chapters', chaptersRouter);
+router.use('/sections', sectionsRouter);
 // User session/profile/payment/learn
 
 router.get('/profile', extractHandler(getProfileMod, 'GET')).openapi = {

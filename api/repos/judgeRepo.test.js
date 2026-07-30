@@ -39,7 +39,7 @@ describe('judgeRepo', () => {
 
 		it('includes Ballots when requested', async () => {
 			const { judgeId } = await factories.judge.createTestJudge();
-			await factories.ballot.create({ judgeId });
+			await factories.ballot.create({ judge: judgeId });
 
 			const judge = await judgeRepo.getJudge(judgeId, { include: { Ballots: true } });
 

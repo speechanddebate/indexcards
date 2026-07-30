@@ -13,6 +13,7 @@ export * from './Judge.js';
 export * from './Legacy.js';
 export * from './Message.js';
 export * from './NSDACategory.js';
+export * from './Section.js';
 export * from './Problem.js';
 export * from './ResultSet.js';
 export * from './Site.js';

@@ -3118,6 +3118,26 @@
           }
         }
       }
+    },
+    "/user/sections/current": {
+      "get": {
+        "summary": "Get current ballots",
+        "operationId": "UserBallotsCurrent",
+        "description": "GET /user/sections/current is undocumented. Need to add .openapi to handler",
+        "tags": [],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3196,73 +3216,6 @@
             ]
           }
         }
-      },
-      "Category": {
-        "type": "object",
-        "required": [
-          "id",
-          "name",
-          "abbr",
-          "tournId"
-        ],
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "name": {
-            "type": "string"
-          },
-          "abbr": {
-            "type": "string"
-          },
-          "tournId": {
-            "type": "integer"
-          },
-          "pattern": {
-            "type": [
-              "integer",
-              "null"
-            ]
-          },
-          "settings": {
-            "type": "array",
-            "items": {
-              "type": "object"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "updatedAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "Events": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Event"
-            }
-          },
-          "Judges": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Event"
-            }
-          }
-        },
-        "examples": [
-          {
-            "id": 1,
-            "name": "Lincoln-Douglas",
-            "abbr": "LD",
-            "tournId": 42,
-            "patternId": 7,
-            "settings": [],
-            "createdAt": "2023-01-01T00:00:00Z",
-            "updatedAt": "2023-01-02T00:00:00Z"
-          }
-        ]
       },
       "Contact": {
         "type": "object",
@@ -3547,84 +3500,6 @@
           }
         }
       },
-      "Event": {
-        "type": "object",
-        "description": "An event",
-        "required": [
-          "id",
-          "name",
-          "abbr",
-          "type",
-          "categoryId",
-          "tournId"
-        ],
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "abbr": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "fee": {
-            "type": "number"
-          },
-          "type": {
-            "type": "string",
-            "enum": [
-              "debate",
-              "speech",
-              "mockTrial",
-              "congress",
-              "wsdc",
-              "wudc",
-              "attendee",
-              "academic"
-            ]
-          },
-          "categoryId": {
-            "type": "integer"
-          },
-          "settings": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "metadata": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "Tourn": {
-            "$ref": "#/components/schemas/Category"
-          },
-          "Category": {
-            "$ref": "#/components/schemas/Category"
-          },
-          "Topic": {
-            "$ref": "#/components/schemas/Topic"
-          },
-          "Entries": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Entry"
-            }
-          },
-          "nsdaCategoryId": {
-            "type": [
-              "integer",
-              "null"
-            ]
-          },
-          "NSDACategory": {
-            "$ref": "#/components/schemas/NSDACategory"
-          }
-        }
-      },
       "EventInvite": {},
       "Invite": {
         "type": "object",
@@ -3636,10 +3511,6 @@
             ]
           }
         }
-      },
-      "Judge": {
-        "type": "object",
-        "properties": {}
       },
       "NSDACategory": {
         "type": "object",
@@ -6806,6 +6677,363 @@
           "label",
           "entity",
           "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "Category": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "name": {
+            "type": "string"
+          },
+          "abbr": {
+            "type": "string"
+          },
+          "tournId": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "pattern": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "settings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {},
+              "additionalProperties": false
+            }
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "abbr",
+          "tournId",
+          "pattern",
+          "settings",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "CurrentBallot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "flight": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "startText": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "Judge": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "code": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 8
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "first": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 63
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "last": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 63
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "code",
+              "first",
+              "last"
+            ],
+            "additionalProperties": false
+          },
+          "Category": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "name": {
+                "type": "string"
+              },
+              "abbr": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "abbr"
+            ],
+            "additionalProperties": false
+          },
+          "Event": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "name": {
+                "type": "string"
+              },
+              "abbr": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "debate",
+                  "speech",
+                  "mockTrial",
+                  "congress",
+                  "wsdc",
+                  "wudc",
+                  "attendee",
+                  "academic"
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "abbr",
+              "type"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "id",
+          "flight",
+          "startText",
+          "Judge",
+          "Category",
+          "Event"
+        ],
+        "additionalProperties": false
+      },
+      "Event": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "abbr": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "fee": {
+            "type": "number"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "debate",
+              "speech",
+              "mockTrial",
+              "congress",
+              "wsdc",
+              "wudc",
+              "attendee",
+              "academic"
+            ]
+          },
+          "categoryId": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "settings": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {},
+            "additionalProperties": false
+          },
+          "nsdaCategoryId": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "abbr",
+          "name",
+          "fee",
+          "type",
+          "categoryId",
+          "settings",
+          "metadata",
+          "nsdaCategoryId"
+        ],
+        "additionalProperties": false
+      },
+      "Judge": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 8
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "first": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 63
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "middle": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 63
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "last": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 63
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "obligation": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "first",
+          "middle",
+          "last",
+          "obligation"
         ],
         "additionalProperties": false
       },
