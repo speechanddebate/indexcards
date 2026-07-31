@@ -1,9 +1,9 @@
 {
 	"include": [
 		"app.js",
-		"config/**/*",
-		"api/**/*",
-		"tests/**/*",
+		"config",
+		"api",
+		"tests",
 		"api/routes/openapi/openapi.json"
 	],
 	"exclude": [
@@ -24,5 +24,6 @@
 		"esModuleInterop" : true,
 		"resolveJsonModule": true,
 		"skipLibCheck"    : true,
+		"removeComments": true
 	}
 }

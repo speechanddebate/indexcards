@@ -1,6 +1,7 @@
 {
 	"extends": "./tsconfig.json",
 	"include": [
+		"api",
 		"app.js",
 		"api/routes/openapi/openapi.json"
 	],
