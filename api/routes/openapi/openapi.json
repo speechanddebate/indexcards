@@ -6863,7 +6863,7 @@
                 "enum": [
                   "debate",
                   "speech",
-                  "mockTrial",
+                  "mock_trial",
                   "congress",
                   "wsdc",
                   "wudc",
@@ -6913,7 +6913,7 @@
             "enum": [
               "debate",
               "speech",
-              "mockTrial",
+              "mock_trial",
               "congress",
               "wsdc",
               "wudc",

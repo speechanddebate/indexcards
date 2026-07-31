@@ -7,7 +7,7 @@ export const Event = z.object({
 	abbr: z.string(),
 	name: z.string(),
 	fee: z.number(),
-	type: z.enum(['debate', 'speech', 'mockTrial', 'congress', 'wsdc', 'wudc', 'attendee', 'academic']),
+	type: z.enum(['debate', 'speech', 'mock_trial', 'congress', 'wsdc', 'wudc', 'attendee', 'academic']),
 	categoryId: utils.id,
 	settings: z.object(),
 	metadata: z.object(),

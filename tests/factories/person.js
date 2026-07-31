@@ -48,7 +48,7 @@ export async function createJudge(overrides = {}) {
 export async function createBallot(overrides = {}) {
 	let personId, judgeId;
 
-	const tourn = await factories.tourn.createFull();
+	const tourn = await factories.tourn.createFull(overrides);
 
 	({ personId, judgeId } = await factories.person.createJudge({
 		personId: overrides.personId,
@@ -72,6 +72,7 @@ export async function createBallot(overrides = {}) {
 		judge: judgeId,
 		entry: entry2,
 		section: sectionId,
+		...overrides.Ballot,
 	});
 
 	return {

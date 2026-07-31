@@ -8,5 +8,8 @@ declare module 'express-serve-static-core' {
 	interface IRoute<Route extends string = string> {
 		openapi?: RouteOpenApiConfig;
 	}
+	interface Request {
+		actor: any; // Replace `any` with the actual type of `actor` if available
+	}
 }
 

@@ -2,7 +2,7 @@ import z from 'zod';
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
 import { Judge, Category, Event } from './index.js';
 import * as utils from './utils.js';
-export const CurrentBallots = z.object({
+export const CurrentBallot = z.object({
 	id: utils.id,
 	flight: z.int().positive().nullable(),
 	startText: z.string().nullable(),
@@ -26,3 +26,4 @@ export const CurrentBallots = z.object({
 }).meta({
 	id: 'CurrentBallot',
 }) satisfies ZodOpenApiSchemaObject;
+export type CurrentBallotType = z.infer<typeof CurrentBallot>;

@@ -248,6 +248,7 @@ order by timeslot.start, event.abbr, round.name, panel.flight, ballot.audit
 							abbr: row.eventAbbr,
 							type: row.eventType,
 							settings: {
+								online_mode: row.onlineMode,
 								start_button: row.startButton,
 								start_button_text: row.startButtonText,
 							},
@@ -258,12 +259,12 @@ order by timeslot.start, event.abbr, round.name, panel.flight, ballot.audit
 					id: row.roundId,
 					name: row.roundName,
 					label: row.roundLabel,
-					published: row.roundPublished,
+					published: row.roundPublished === 1,
 					flighted: row.roundFlighted,
 					type: row.roundType,
 					start: row.roundStart,
 					settings: {
-						judges_ballots_visible: row.judgesBallotsVisible,
+						judges_ballots_visible: row.judgesBallotsVisible === '1',
 					},
 					Timeslot: {
 						start: row.timeslotStart,
