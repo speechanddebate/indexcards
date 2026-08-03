@@ -198,6 +198,45 @@ async function getJudgeHistory(personId, limit, offset) {
 	}));
 }
 
+async function getLiveDocs(personId){
+	const res = await db.sequelize.query(`
+		select judge.id,
+			category.abbr,
+			tourn.name tourn_name,
+			tourn.end tourn_end, tourn.tz tourn_tz,
+			livedoc_url.value_text url,
+			livedoc_caption.value caption
+
+		from (judge, category, tourn, category_setting livedoc_url)
+
+			left join category_setting livedoc_caption
+				on livedoc_caption.category = category.id
+				and livedoc_caption.tag = 'livedoc_caption'
+
+		where judge.person = :personId
+			and judge.category = category.id
+			and category.tourn = tourn.id
+			and tourn.end > NOW()
+			and tourn.start > DATE_SUB(NOW(), INTERVAL 7 DAY)
+			and tourn.hidden != 1
+			and category.id = livedoc_url.category
+		and livedoc_url.tag = 'livedoc_url'
+		`, {
+		replacements: {
+			personId,
+		},
+		type: db.Sequelize.QueryTypes.SELECT,
+	});
+	return res.map(row => ({
+		judgeId: row.id,
+		categoryAbbr: row.abbr,
+		tournName: row.tourn_name,
+		tournEnd: row.tourn_end,
+		tournTz: row.tourn_tz,
+		url: row.url,
+		caption: row.caption,
+	}));
+}
 export default {
 	getJudge,
 	getJudges,
@@ -205,4 +244,5 @@ export default {
 	updateJudge,
 	unlinkedSearch,
 	getJudgeHistory,
+	getLiveDocs,
 };

@@ -84,7 +84,7 @@ export function buildSettingsRows({
 	return Object.entries(settings).map(([tag, value]) => ({
 		[ownerKey]: ownerId,
 		tag,
-		...encodeSettingValue(value),
+		...encodeSettingValue(value, tag),
 	}));
 }
 /**
@@ -149,7 +149,8 @@ export function flattenSettingsTimestamps(settingRows) {
  * @param {*} value  - the setting value
  * @returns an object with keys: value, value_text, value_date
  */
-function encodeSettingValue(value) {
+function encodeSettingValue(value, tag) {
+	const VALUE_TEXT_TAGS = ['livedoc_url'];
 	// null / undefined -> clear all value fields
 	if (value === null || value === undefined) {
 		return {
@@ -188,7 +189,7 @@ function encodeSettingValue(value) {
 
 	// String → value or value_text
 	if (typeof value === 'string') {
-		if (value.length <= 64) {
+		if (value.length <= 64 && !VALUE_TEXT_TAGS.includes(tag)) {
 			return {
 				value,
 				value_text: null,
@@ -197,7 +198,7 @@ function encodeSettingValue(value) {
 		}
 
 		return {
-			value: null,
+			value: 'text',
 			value_text: value,
 			value_date: null,
 		};

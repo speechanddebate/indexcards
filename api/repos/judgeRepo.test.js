@@ -1,6 +1,7 @@
 import judgeRepo, { judgeInclude } from './judgeRepo';
 import factories from '../../tests/factories/index.js';
 import db from '../data/db.js';
+import { faker } from '@faker-js/faker';
 
 describe('judgeRepo', () => {
 	describe('buildJudgeQuery', () => {
@@ -200,6 +201,95 @@ describe('judgeRepo', () => {
 			expect(history.length).toBeGreaterThan(0);
 			expect(history[0].id).toBe(judgeId);
 			expect(history[0].Category.id).toBe(categoryId);
+		});
+	});
+	describe('getLiveDocs', async () => {
+		it('returns the correct shape for livedocs', async () => {
+			const { tournId, getTourn } = await factories.tourn.createTestTourn();
+			const { categoryId, getCategory } = await factories.category.createTestCategory({
+				tourn: tournId,
+				settings: {
+					livedoc_url: 'example.com',
+					livedoc_caption: 'example',
+				},
+			});
+			const { personId, judgeId } = await factories.person.createJudge({ Judge: { category: categoryId }});
+			const res = await judgeRepo.getLiveDocs(personId);
+
+			const tourn = await getTourn();
+			const cat = await getCategory();
+
+			expect(res).toBeInstanceOf(Array);
+			expect(res.length).toBe(1);
+			const livedoc = res[0];
+			expect(livedoc).toEqual({
+				judgeId: judgeId,
+				categoryAbbr: cat.abbr,
+				tournName: tourn.name,
+				tournEnd: tourn.end,
+				tournTz: tourn.tz,
+				url: 'example.com',
+				caption: 'example',
+			});
+		});
+		it('does not return tourns out of range', async () => {
+			//only should return docs from tourns that have not ended and started within 7 days
+			const { tournId } = await factories.tourn.createTestTourn({ end: new Date(Date.now() - 10000) });
+			const { categoryId } = await factories.category.createTestCategory({
+				tourn: tournId,
+				settings: {
+					livedoc_url: 'example.com',
+					livedoc_caption: 'example',
+				},
+			});
+			const { personId } = await factories.person.createJudge({ Judge: { category: categoryId }});
+			const res = await judgeRepo.getLiveDocs(personId);
+
+			expect(res).toBeInstanceOf(Array);
+			expect(res.length).toBe(0);
+
+			const { tournId: tourn2Id } = await factories.tourn.createTestTourn({ start: faker.date.past() });
+			const { categoryId: category2Id } = await factories.category.createTestCategory({
+				tourn: tourn2Id,
+				settings: {
+					livedoc_url: 'example.com',
+					livedoc_caption: 'example',
+				},
+			});
+			const { personId: person2Id } = await factories.person.createJudge({ Judge: { category: category2Id }});
+			const res2 = await judgeRepo.getLiveDocs(person2Id);
+
+			expect(res2).toBeInstanceOf(Array);
+			expect(res2.length).toBe(0);
+		});
+		it('does not return hidden tourns', async () => {
+			const { tournId } = await factories.tourn.createTestTourn({ hidden: 1 });
+			const { categoryId } = await factories.category.createTestCategory({
+				tourn: tournId,
+				settings: {
+					livedoc_url: 'example.com',
+					livedoc_caption: 'example',
+				},
+			});
+			const { personId } = await factories.person.createJudge({ Judge: { category: categoryId }});
+			const res = await judgeRepo.getLiveDocs(personId);
+
+			expect(res).toBeInstanceOf(Array);
+			expect(res.length).toBe(0);
+		});
+		it('does not return results without a livedoc url', async () => {
+			const { tournId } = await factories.tourn.createTestTourn({ hidden: 1 });
+			const { categoryId } = await factories.category.createTestCategory({
+				tourn: tournId,
+				settings: {
+					livedoc_caption: 'example',
+				},
+			});
+			const { personId } = await factories.person.createJudge({ Judge: { category: categoryId }});
+			const res = await judgeRepo.getLiveDocs(personId);
+
+			expect(res).toBeInstanceOf(Array);
+			expect(res.length).toBe(0);
 		});
 	});
 });

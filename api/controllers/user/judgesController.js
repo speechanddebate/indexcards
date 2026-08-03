@@ -194,12 +194,19 @@ async function updateParadigm(req, res) {
 
 	return res.status(204).send();
 }
+
+async function getLiveDocs(req, res){
+	const personId = req.actor.Person.id;
+	const liveDocs = await judgeRepo.getLiveDocs(personId);
+	return res.status(200).json(liveDocs);
+}
 export default {
 	linkRequests,
 	claimRequest,
 	history,
 	getParadigm,
 	updateParadigm,
+	getLiveDocs,
 };
 
 function buildChapterJudgeClaimEmail(chapterJudge, person) {

@@ -1,6 +1,6 @@
 
 import db from '../data/db.js';
-import { withSettingsInclude } from './utils/settings.js';
+import { saveSettings, withSettingsInclude } from './utils/settings.js';
 import { FIELD_MAP,toDomain, toPersistence } from './mappers/categoryMapper.js';
 import { tournInclude } from './tournRepo.js';
 import { judgeInclude } from './judgeRepo.js';
@@ -72,6 +72,12 @@ async function getCategories(scope, opts = {}) {
 }
 async function createCategory(data, opts = {}) {
 	const dbRow = await db.category.create(toPersistence(data));
+	await saveSettings({
+		model: db.categorySetting,
+		settings: data.settings,
+		ownerKey: 'category',
+		ownerId: dbRow.id,
+	});
 	return dbRow.id;
 }
 async function deleteCategory(id) {
