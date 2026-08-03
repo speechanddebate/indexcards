@@ -1,5 +1,16 @@
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
+import z from 'zod';
+import * as utils from './utils.js';
 
+export const Tourn = z.object({
+	id: utils.id,
+	name: z.string().max(63),
+	tz: z.string().max(31).nullable(),
+}).strict().meta({
+	id: 'Tourn',
+}) satisfies ZodOpenApiSchemaObject;
+
+/**
 export const Tourn = {
 	type : 'object',
 	description: 'A tournament',
@@ -103,6 +114,7 @@ export const Tourn = {
 		metadata  : { type : 'object', additionalProperties: { type: ['string', 'integer', 'boolean'] } } ,
 	},
 } as const satisfies ZodOpenApiSchemaObject;
+ */
 export const TournRequest = {
 	type : 'object',
 	description: 'A request to create or update a Tournament',

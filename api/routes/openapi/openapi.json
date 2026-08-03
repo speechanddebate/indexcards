@@ -3423,83 +3423,6 @@
           }
         }
       },
-      "Entry": {
-        "type": "object",
-        "description": "An entry",
-        "required": [
-          "id",
-          "code",
-          "eventId"
-        ],
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "code": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "ada": {
-            "type": "boolean"
-          },
-          "active": {
-            "type": "boolean"
-          },
-          "dropped": {
-            "type": "boolean"
-          },
-          "waitlist": {
-            "type": "boolean"
-          },
-          "unconfirmed": {
-            "type": "boolean"
-          },
-          "eventId": {
-            "type": "integer"
-          },
-          "schoolId": {
-            "type": "integer"
-          },
-          "registeredById": {
-            "type": "integer"
-          },
-          "RegisteredBy": {
-            "$ref": "#/components/schemas/Person"
-          },
-          "Event": {
-            "$ref": "#/components/schemas/Event"
-          },
-          "School": {
-            "$ref": "#/components/schemas/School"
-          },
-          "Students": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Student"
-            }
-          },
-          "settings": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "metadata": {
-            "type": "object",
-            "additionalProperties": {
-              "type": "string"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "readOnly": true,
-            "format": "date-time",
-            "description": "Creation timestamp"
-          }
-        }
-      },
       "EventInvite": {},
       "Invite": {
         "type": "object",
@@ -3577,27 +3500,6 @@
             "type": "string",
             "format": "uri",
             "description": "A URI reference to the specific occurrence."
-          }
-        }
-      },
-      "Round": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "integer"
-          },
-          "name": {
-            "type": [
-              "string",
-              "null"
-            ]
-          },
-          "timestamp": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "pattern": "^([0-9]{2,4})-([0-1][0-9])-([0-3][0-9])(?:( [0-2][0-9]):([0-5][0-9]):([0-5][0-9]))?$"
           }
         }
       },
@@ -3898,148 +3800,6 @@
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/Event"
-            }
-          }
-        }
-      },
-      "Tourn": {
-        "type": "object",
-        "description": "A tournament",
-        "required": [
-          "id",
-          "name",
-          "tz",
-          "webname",
-          "start",
-          "end"
-        ],
-        "properties": {
-          "id": {
-            "type": "integer",
-            "description": "The unique identifier for the tournament",
-            "readOnly": true,
-            "example": 123
-          },
-          "name": {
-            "type": "string",
-            "description": "The name of the tournament",
-            "example": "National Speech & Debate Tournament"
-          },
-          "city": {
-            "type": "string",
-            "description": "The city where the tournament is held",
-            "example": "Phoenix/Mesa"
-          },
-          "state": {
-            "type": "string",
-            "description": "The state where the tournament is held",
-            "example": "AZ"
-          },
-          "country": {
-            "type": "string",
-            "description": "The country where the tournament is held",
-            "example": "US"
-          },
-          "tz": {
-            "type": "string",
-            "description": "The IANA timezone of the tournament location",
-            "example": "America/Chicago"
-          },
-          "webname": {
-            "type": "string",
-            "description": "The web name of the tournament",
-            "example": "nationals"
-          },
-          "start": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The start date and time of the tournament",
-            "example": "2023-06-11T15:00:00.000Z"
-          },
-          "end": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The end date and time of the tournament",
-            "example": "2023-06-17T05:00:00.000Z"
-          },
-          "regStart": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The registration start date and time of the tournament",
-            "example": "2023-03-15T13:00:00.000Z"
-          },
-          "regEnd": {
-            "type": "string",
-            "format": "date-time",
-            "description": "The registration end date and time of the tournament",
-            "example": "2023-06-02T06:59:00.000Z"
-          },
-          "Contacts": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Contact"
-            }
-          },
-          "Categories": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Category"
-            }
-          },
-          "Events": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Event"
-            }
-          },
-          "Schools": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/School"
-            }
-          },
-          "Webpages": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Webpage"
-            }
-          },
-          "Files": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/File"
-            }
-          },
-          "Emails": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Email"
-            }
-          },
-          "createdAt": {
-            "type": "string",
-            "readOnly": true,
-            "format": "date-time",
-            "description": "Creation timestamp"
-          },
-          "settings": {
-            "type": "object",
-            "additionalProperties": {
-              "type": [
-                "string",
-                "integer",
-                "boolean"
-              ]
-            }
-          },
-          "metadata": {
-            "type": "object",
-            "additionalProperties": {
-              "type": [
-                "string",
-                "integer",
-                "boolean"
-              ]
             }
           }
         }
@@ -6680,6 +6440,34 @@
         ],
         "additionalProperties": false
       },
+      "Ballot": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "side": {
+            "type": "boolean"
+          },
+          "chair": {
+            "type": "boolean"
+          },
+          "speakerOrder": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "side",
+          "chair",
+          "speakerOrder"
+        ],
+        "additionalProperties": false
+      },
       "Category": {
         "type": "object",
         "properties": {
@@ -6750,6 +6538,16 @@
             "exclusiveMinimum": 0,
             "maximum": 9007199254740991
           },
+          "flipStatus": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "flight": {
             "anyOf": [
               {
@@ -6766,6 +6564,70 @@
             "anyOf": [
               {
                 "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "show_async": {
+            "type": "boolean"
+          },
+          "legion": {
+            "type": "boolean"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time",
+            "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
+          },
+          "roomId": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "roomUrl": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 255
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "roomNotes": {
+            "anyOf": [
+              {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 63
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
               },
               {
                 "type": "null"
@@ -6822,6 +6684,37 @@
             ],
             "additionalProperties": false
           },
+          "Tourn": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "name": {
+                "type": "string",
+                "maxLength": 63
+              },
+              "tz": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 31
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "tz"
+            ],
+            "additionalProperties": false
+          },
           "Category": {
             "type": "object",
             "properties": {
@@ -6870,24 +6763,213 @@
                   "attendee",
                   "academic"
                 ]
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "flight_offset": {
+                    "anyOf": [
+                      {
+                        "type": "integer",
+                        "minimum": -9007199254740991,
+                        "maximum": 9007199254740991
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "online_mode": {
+                    "anyOf": [
+                      {
+                        "type": "string"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "online_ballots": {
+                    "type": "boolean"
+                  }
+                },
+                "required": [
+                  "flight_offset",
+                  "online_mode",
+                  "online_ballots"
+                ],
+                "additionalProperties": false
               }
             },
             "required": [
               "id",
               "name",
               "abbr",
-              "type"
+              "type",
+              "settings"
             ],
             "additionalProperties": false
+          },
+          "Round": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "integer",
+                "exclusiveMinimum": 0,
+                "maximum": 9007199254740991
+              },
+              "name": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "label": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "maxLength": 31
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "flighted": {
+                "anyOf": [
+                  {
+                    "type": "boolean"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "label",
+              "flighted"
+            ],
+            "additionalProperties": false
+          },
+          "Ballots": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "side": {
+                  "type": "boolean"
+                },
+                "speakerOrder": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "chair": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "id",
+                "side",
+                "speakerOrder",
+                "chair"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "Entries": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 9007199254740991
+                },
+                "code": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              },
+              "required": [
+                "id",
+                "code"
+              ],
+              "additionalProperties": false
+            }
           }
         },
         "required": [
           "id",
+          "flipStatus",
           "flight",
           "startText",
+          "show_async",
+          "legion",
+          "start",
+          "end",
+          "roomId",
+          "roomUrl",
+          "roomNotes",
           "Judge",
+          "Tourn",
           "Category",
-          "Event"
+          "Event",
+          "Round",
+          "Ballots",
+          "Entries"
+        ],
+        "additionalProperties": false
+      },
+      "Entry": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "event": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "event"
         ],
         "additionalProperties": false
       },
@@ -6928,7 +7010,38 @@
           },
           "settings": {
             "type": "object",
-            "properties": {},
+            "properties": {
+              "flight_offset": {
+                "anyOf": [
+                  {
+                    "type": "integer",
+                    "minimum": -9007199254740991,
+                    "maximum": 9007199254740991
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "online_mode": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "online_ballots": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "flight_offset",
+              "online_mode",
+              "online_ballots"
+            ],
             "additionalProperties": false
           },
           "metadata": {
@@ -7087,6 +7200,142 @@
           "pending",
           "updatedAt",
           "Quiz"
+        ],
+        "additionalProperties": false
+      },
+      "Room": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 127
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 255
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 63
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "url",
+          "notes"
+        ],
+        "additionalProperties": false
+      },
+      "Round": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "type": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 15
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 31
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "flighted": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name",
+          "label",
+          "flighted"
+        ],
+        "additionalProperties": false
+      },
+      "Tourn": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 63
+          },
+          "tz": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 31
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "tz"
         ],
         "additionalProperties": false
       }

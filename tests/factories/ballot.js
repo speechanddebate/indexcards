@@ -3,6 +3,8 @@ import factories from './index.js';
 
 export function buildBallotData(overrides = {}) {
 	return {
+		speakerorder: 0,
+		chair: 0,
 		...overrides,
 	};
 }

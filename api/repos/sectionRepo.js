@@ -95,7 +95,7 @@ round.id roundId, round.name roundName, round.label roundLabel, round.published 
 timeslot.start timeslotStart,
 timeslot.end timeslotEnd,
 panel.id panelId, panel.letter panelLetter, panel.flight panelFlight,
-ballot.id ballotId, ballot.side ballotSide, ballot.speakerorder ballotSpeakerorder, ballot.audit ballotAudit, ballot.judge_started ballotJudgeStarted, ballot.chair ballotChair,
+ballot.id ballotId, ballot.side ballotSide, ballot.speakerorder ballotSpeakerOrder, ballot.audit ballotAudit, ballot.judge_started ballotJudgeStarted, ballot.chair ballotChair,
 entry.id entryId, entry.code entryCode,
 room.id roomId, room.name roomName, room.url roomUrl, room.notes roomNotes,
 online_mode.value onlineMode,
@@ -224,6 +224,10 @@ order by timeslot.start, event.abbr, round.name, panel.flight, ballot.audit
 				id: row.panelId,
 				letter: row.panelLetter,
 				flight: row.panelFlight,
+				settings: {
+					flip_status: row.flipStatus,
+					show_async: row.asyncValue,
+				},
 				Judge: {
 					id: row.judgeId,
 					code: row.judgeCode,
@@ -241,6 +245,9 @@ order by timeslot.start, event.abbr, round.name, panel.flight, ballot.audit
 							tz: row.tournTz,
 							hidden: row.tournHidden,
 							end: row.tournEnd,
+							settings: {
+								legion: row.legion,
+							},
 						},
 						Event: {
 							id: row.eventId,
@@ -251,6 +258,7 @@ order by timeslot.start, event.abbr, round.name, panel.flight, ballot.audit
 								online_mode: row.onlineMode,
 								start_button: row.startButton,
 								start_button_text: row.startButtonText,
+								flight_offset: row.flightOffset,
 							},
 						},
 					},
@@ -270,6 +278,12 @@ order by timeslot.start, event.abbr, round.name, panel.flight, ballot.audit
 						start: row.timeslotStart,
 						end: row.timeslotEnd,
 					},
+				},
+				Room: {
+					id: row.roomId,
+					name: row.roomName,
+					notes: row.roomNotes,
+					url: row.roomUrl,
 				},
 				Ballots: [],
 				Entries: [],

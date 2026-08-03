@@ -14,15 +14,6 @@ export const CaselistLink = {
 	},
 } as const satisfies ZodOpenApiSchemaObject;
 
-export const Round = {
-	type : 'object',
-	properties : {
-		id         : { type : 'integer' },
-		name       : { type : ['string', 'null'] },
-		timestamp  : { type : ['string', 'null'], pattern : mysqlDate },
-	},
-} as const satisfies ZodOpenApiSchemaObject;
-
 export const Share = {
 	type : 'object',
 	properties : {

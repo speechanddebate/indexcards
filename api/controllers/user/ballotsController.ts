@@ -27,7 +27,20 @@ export async function getCurrentBallots(req: Request, res: Response) {
 		ballots.push({
 			id: s.id,
 			flight: s.flight,
+			flipStatus: s.settings.flip_status,
 			startText: s.Judge.Category.Event.settings.start_button_text,
+			show_async: s.settings.show_async === 1,
+			legion: s.Judge.Category.Tourn.settings.legion === 1,
+			start: s.Round.Timeslot.start,
+			end: s.Round.Timeslot.end,
+			roomId: s.Room.id,
+			roomUrl: s.Room.url,
+			roomNotes: s.Room.notes,
+			Tourn: {
+				id: s.Judge.Category.Tourn.id,
+				name: s.Judge.Category.Tourn.name,
+				tz: s.Judge.Category.Tourn.tz,
+			},
 			Category: {
 				id: s.Judge.Category.id,
 				name: s.Judge.Category.name,
@@ -38,6 +51,11 @@ export async function getCurrentBallots(req: Request, res: Response) {
 				name: s.Judge.Category.Event.name,
 				abbr: s.Judge.Category.Event.abbr,
 				type: s.Judge.Category.Event.type,
+				settings: {
+					flight_offset: s.Judge.Category.Event.settings.flight_offset,
+					online_mode: s.Judge.Category.Event.settings.online_mode,
+					online_ballots: s.Judge.Category.Event.settings.online_ballots === 1,
+				},
 			},
 			Judge: {
 				id: s.Judge.id,
@@ -45,6 +63,22 @@ export async function getCurrentBallots(req: Request, res: Response) {
 				first: s.Judge.first,
 				last: s.Judge.last,
 			},
+			Round: {
+				id: s.Round.id,
+				name: s.Round.name,
+				label: s.Round.label,
+				flighted: s.Round.flighted,
+			},
+			Ballots: s.Ballots.map((b: any) => ({
+				id: b.id,
+				side: b.side === 1,
+				speakerOrder: b.speakerOrder,
+				chair: b.chair === 1,
+			})),
+			Entries: s.Entries.map((e: any) => ({
+				id: e.id,
+				code: e.code,
+			})),
 		});
 		return;
 	});
