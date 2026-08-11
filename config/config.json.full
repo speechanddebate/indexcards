@@ -1,0 +1,91 @@
+{
+  "host": "0.0.0.0",
+  "port": 8001,
+  "dockerhost": "unknown",
+  "db": {
+    "host": "localhost",
+    "port": 3306,
+    "database": "tabroom",
+    "user": "root",
+    "pass": "root",
+    "sequelizeOptions": {
+      "dialect": "mariadb",
+      "define": {
+        "freezeTableName": true,
+        "modelName": "singularName",
+        "underscored": true,
+        "timestamps": false
+      }
+    }
+  },
+  "shared_secret": "",
+  "cors": {
+    "origins": [
+      "*"
+    ]
+  },
+  "cookie": {
+    "name": "TabroomToken",
+    "domain": ".tabroom.com"
+  },
+  "session_header": "tabroom-session",
+  "csrf": {
+    "trusted_origins": [
+      "/tabroom.com$/"
+    ]
+  },
+  "ratelimiter": {
+    "enabled": true,
+    "window": 900000,
+    "max": 100000,
+    "delay": 0,
+    "message": {
+      "window": 1,
+      "max": 15000
+    },
+    "search": {
+      "window": 30000,
+      "max": 5
+    }
+  },
+  "logging": {
+    "level": "info",
+    "slowQueryLimit": 5000,
+    "usePrettyConsole": false
+  },
+  "nsda": {
+    "path": "/v2",
+    "product_codes": {}
+  },
+  "share": {
+    "smtp": {}
+  },
+  "naudl": {
+    "url": "https://urbandebate.my.salesforce.com",
+    "tourn_endpoint": "/services/apexrest/v.1/TournamentService",
+    "student_endpoint": "/services/apexrest/v.1/StudentServiceTabroom",
+    "sta_endpoint": "/services/apexrest/v.1/STATabroomService"
+  },
+  "aws": {
+    "s3_url": "https://s3.amazonaws.com/tabroom-files/",
+    "region": "us-east-1",
+    "Bucket": "tabroom-files"
+  },
+  "mail": {
+    "test": true,
+    "from": "live@www.tabroom.com",
+    "server": "localhost",
+    "port": 25,
+    "pool": 128
+  },
+  "onesignal": {
+    "api_url": "https://onesignal.com/api/v1"
+  },
+  "features": {
+    "HIDE_DEV_ENDPOINTS": true
+  },
+  "ip": {
+    "locationDB": "/var/lib/GeoIP/GeoLite2-City.mmdb",
+    "ispDB": "/var/lib/GeoIP/GeoIP2-ISP.mmdb"
+  }
+}

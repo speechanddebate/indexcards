@@ -3,7 +3,7 @@ import path from 'path';
 import z from 'zod';
 
 /** This schema defines the app config. add comments to a config value to get descriptions at usage. */
-const ConfigSchema = z.object({
+export const ConfigSchema = z.object({
 	//----------------------------------------------------------------------
 	// SERVER
 	// ---------------------------------------------------------------------
