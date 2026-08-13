@@ -197,6 +197,7 @@ on async.panel = panel.id
 and async.tag = 'show_async'
 
 where judge.person = :personId
+and tourn.end >= now()
 and judge.person = person.id
 and judge.category = category.id
 and category.tourn = tourn.id

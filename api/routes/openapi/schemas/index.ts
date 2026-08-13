@@ -9,6 +9,7 @@ export * from './Entry.js';
 export * from './Event.js';
 export * from './Contact.js';
 export * from './File.js';
+export * from './Fine.js';
 export * from './Invite.js';
 export * from './Judge.js';
 export * from './Legacy.js';

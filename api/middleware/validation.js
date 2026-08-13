@@ -51,6 +51,8 @@ export async function ValidateRequest(req, res, next) {
 				}
 				req.valid.query = result.data;
 			}
+		} else {
+			logger.debug('no schema found for RequestParams');
 		}
 		if (bodySchema && typeof bodySchema.safeParse === 'function') {
 			const result = bodySchema.safeParse(req.body);

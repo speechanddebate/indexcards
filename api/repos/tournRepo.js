@@ -258,6 +258,198 @@ export async function getContacts(tournId) {
 	});
 };
 
+async function getPersonTourns(personId, opts = {}) {
+	const conditions = [
+		't.hidden != 1',
+	];
+
+	const replacements = {
+		personId,
+	};
+
+	if (opts.endAfter) {
+		conditions.push('t.end >= :endAfter');
+		replacements.endAfter = opts.endAfter;
+	}
+
+	const data = await db.sequelize.query(`
+		SELECT t.*
+		FROM tourn t
+
+		WHERE ${conditions.join('\n\t\tAND ')}
+		AND (
+			EXISTS (
+				SELECT 1
+				FROM student
+				JOIN entry_student
+					ON entry_student.student = student.id
+				JOIN entry
+					ON entry.id = entry_student.entry
+				JOIN event e
+					ON e.id = entry.event
+				WHERE student.person = :personId
+				AND student.retired != 1
+				AND e.tourn = t.id
+			)
+			OR EXISTS (
+				SELECT 1
+				FROM judge
+				JOIN category
+					ON category.id = judge.category
+				WHERE judge.person = :personId
+				AND category.tourn = t.id
+			)
+			OR EXISTS (
+				SELECT 1
+				FROM permission
+				JOIN chapter
+					ON chapter.id = permission.chapter
+				JOIN school
+					ON school.chapter = chapter.id
+				WHERE permission.person = :personId
+				AND school.tourn = t.id
+			)
+		)
+
+		ORDER BY t.start;
+	`, {
+		replacements,
+		type: db.Sequelize.QueryTypes.SELECT,
+	});
+
+	return data;
+}
+
+async function getPersonTournSummary(person,tourn){
+	const data = await db.sequelize.query(`
+	SELECT
+		t.id AS tourn_id,
+
+		j.judge_id,
+		j.category_id,
+		j.category_name,
+		j.livedoc_url,
+		j.livedoc_caption,
+
+		e.entry_id,
+
+		(coach.school_id is not null) as is_coach,
+		coach.school_id,
+		coach.school_name
+
+
+	FROM tourn t
+
+	LEFT JOIN (
+		SELECT
+			j.id AS judge_id,
+			c.tourn AS tourn_id,
+			c.id AS category_id,
+			c.name AS category_name,
+			(
+				SELECT cs.value_text
+				FROM category_setting cs
+				WHERE cs.category = c.id
+				  AND cs.tag = 'livedoc_url'
+				LIMIT 1
+			) AS livedoc_url,
+			(
+				SELECT cs.value
+				FROM category_setting cs
+				WHERE cs.category = c.id
+				  AND cs.tag = 'livedoc_caption'
+				LIMIT 1
+			) AS livedoc_caption
+		FROM judge j
+		JOIN category c
+			ON c.id = j.category
+		WHERE j.person = :person
+	) j
+		ON j.tourn_id = t.id
+
+	LEFT JOIN (
+		SELECT
+			e.id AS entry_id,
+			ev.tourn AS tourn_id
+		FROM student st
+		JOIN entry_student es
+			ON es.student = st.id
+		JOIN entry e
+			ON e.id = es.entry
+		JOIN event ev
+			ON ev.id = e.event
+		WHERE st.person = :person
+		  AND st.retired != 1
+	) e
+		ON e.tourn_id = t.id
+
+	LEFT JOIN (
+		SELECT
+			s.tourn AS tourn_id,
+			s.id AS school_id,
+			s.name AS school_name
+		FROM permission p
+		JOIN chapter ch
+			ON ch.id = p.chapter
+		JOIN school s
+			ON s.chapter = ch.id
+		WHERE p.person = :person
+	) coach
+		ON coach.tourn_id = t.id
+
+	WHERE t.id = :tourn
+	`,{
+		replacements: {
+			person,
+			tourn,
+		},
+		type: db.Sequelize.QueryTypes.SELECT,
+	});
+	if (data.length === 0)
+		return null;
+
+	const result = {
+		tourn_id: data[0].tourn_id,
+		judges: [],
+		entries: [],
+		coaches: [],
+	};
+
+	const judges = new Map();
+	const entries = new Map();
+	const coaches = new Map();
+
+	for (const row of data) {
+		if (row.judge_id != null && !judges.has(row.judge_id)) {
+			judges.set(row.judge_id, {
+				id: row.judge_id,
+				category_id: row.category_id,
+				category_name: row.category_name,
+				livedoc_url: row.livedoc_url,
+				livedoc_caption: row.livedoc_caption,
+			});
+		}
+
+		if (row.entry_id != null && !entries.has(row.entry_id)) {
+			entries.set(row.entry_id, {
+				id: row.entry_id,
+			});
+		}
+
+		if (row.school_id != null && !coaches.has(row.school_id)) {
+			coaches.set(row.school_id, {
+				id: row.school_id,
+				name: row.school_name,
+			});
+		}
+	}
+
+	result.judges = [...judges.values()];
+	result.entries = [...entries.values()];
+	result.coaches = [...coaches.values()];
+
+	return result;
+}
 export default {
 	getTourn,
 	getTourns,
@@ -267,4 +459,6 @@ export default {
 	addSite,
 	getSchedule,
 	getContacts,
+	getPersonTourns,
+	getPersonTournSummary,
 };

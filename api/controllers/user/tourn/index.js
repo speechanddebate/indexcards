@@ -1,4 +1,6 @@
 import db from '../../../data/db.js';
+import fineRepo from '../../../repos/fineRepo.js';
+import tournRepo from '../../../repos/tournRepo.js';
 
 // The purpose of this function is to deliver a complete list of "things I care
 // about" at a tournament. That will help sorting the relevant judges, entries,
@@ -187,6 +189,70 @@ export const getPersonTournSchools = async (personId, tournId) => {
 		if (school.events) sdata.events.push(...school.events.split(',').map(Number));
 		if (school.categories) sdata.categories.push(...school.categories.split(',').map(Number));
 	});
-
 	return sdata;
+};
+
+export async function getPersonTourns(req, res){
+	const { endAfter } = req.valid.query;
+	const data = await tournRepo.getPersonTourns(req.actor.id, {
+		endAfter,
+	});
+	const tourns = data.map((row) => ({
+		id: row.id,
+		name: row.name,
+		city: row.city,
+		state: row.state,
+		country: row.country,
+		tz: row.tz,
+		webname: row.webname,
+		hidden: row.hidden,
+		start: row.start,
+		end: row.end,
+		regStart: row.reg_start,
+		regEnd: row.reg_end,
+	}));
+
+	return res.json(tourns);
+};
+
+export async function getTournSummary(req,res){
+	const tourn = await tournRepo.getPersonTournSummary(req.actor.id,req.valid.params.tournId);
+	let roles = [];
+	let livedocs = [];
+	if(tourn.judges.length > 0)
+		roles.push('judge');
+	if(tourn.entries.length > 0)
+		roles.push('student');
+	if(tourn.coaches.length > 0)
+		roles.push('coach');
+
+	for(const judge of tourn.judges){
+		if (judge.livedoc_url) {
+			livedocs.push({
+				categoryId: judge.category_id,
+				categoryName: judge.category_name,
+				url: judge.livedoc_url,
+				caption: judge.livedoc_caption,
+			});
+		}
+	}
+
+	return res.json({
+		id: tourn.tourn_id,
+		roles: roles,
+		livedocs,
+	});
+}
+export async function getTournFines(req,res){
+	const { tournId } = req.valid.params;
+	const data = await fineRepo.getFines(req.actor.id,tournId);
+
+	return res.json(data.map((row) => ({
+		...row,
+	})));
+};
+
+export async function getTournBallots(req,res){
+
+	return res.status(501).send();
 };

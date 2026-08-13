@@ -1,15 +1,45 @@
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
 import z from 'zod';
 import * as utils from './utils.js';
+import { Fine } from './Fine.js';
 
 export const Tourn = z.object({
 	id: utils.id,
 	name: z.string().max(63),
-	tz: z.string().max(31).nullable(),
+	city: z.string().max(31).nullable(),
+	state: z.string().max(6).nullable(),
+	country: z.string().max(4).nullable(),
+	tz: z.string().max(31),
+	webname: z.string(),
+	hidden: z.boolean(),
+	start: z.iso.datetime(),
+	end: z.iso.datetime(),
+	regStart: z.iso.datetime(),
+	regEnd: z.iso.datetime(),
 }).strict().meta({
 	id: 'Tourn',
 }) satisfies ZodOpenApiSchemaObject;
 
+export const PersonTournSummary = z.object({
+	id: Tourn.shape.id,
+	name: Tourn.shape.name,
+	webname: Tourn.shape.webname,
+	start: Tourn.shape.start,
+	end: Tourn.shape.end,
+	tz: Tourn.shape.tz,
+	roles: z.array(z.enum(['student','coach','judge'])),
+	livedocs: z.array(z.object({
+		url: z.string(),
+		caption: z.string().nullable(),
+	})),
+	Judge: z.object({
+		categoryName: z.string(),
+		schoolName: z.string().nullable(),
+	}).nullable(),
+}).meta({
+	id: 'PersonTournSummary',
+	description: 'A summary of a tourn and a persons role in it for the user homepage'
+}) satisfies ZodOpenApiSchemaObject;
 /**
 export const Tourn = {
 	type : 'object',
