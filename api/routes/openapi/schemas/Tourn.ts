@@ -1,7 +1,6 @@
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
 import z from 'zod';
 import * as utils from './utils.js';
-import { Fine } from './Fine.js';
 
 export const Tourn = z.object({
 	id: utils.id,

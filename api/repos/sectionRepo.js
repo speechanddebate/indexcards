@@ -80,7 +80,7 @@ async function deleteSection(id){
 
 }
 
-async function getCurrentBallots(personId){
+async function getCurrentBallots(personId,tournId){
 	const rows = await db.sequelize.query(`
 select
 judge.id judgeId,
@@ -197,6 +197,7 @@ on async.panel = panel.id
 and async.tag = 'show_async'
 
 where judge.person = :personId
+and tourn.id = :tournId
 and tourn.end >= now()
 and judge.person = person.id
 and judge.category = category.id
@@ -214,7 +215,7 @@ group by panel.id, judge.id, ballot.entry
 order by timeslot.start, event.abbr, round.name, panel.flight, ballot.audit
 `, {
 		type: db.Sequelize.QueryTypes.SELECT,
-		replacements: { personId },
+		replacements: { personId, tournId },
 	});
 
 	const panels = new Map();

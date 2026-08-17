@@ -46,7 +46,6 @@ export async function createTestTourn(overrides = {}) {
 export async function createFull(overrides = {}){
 	const data = createTournData(overrides);
 	const tournId = await tournRepo.createTourn(data);
-
 	const { categoryId } = await factories.category.createTestCategory({ tourn: tournId });
 	const { eventId } = await factories.event.create({ ...overrides.Event, category: categoryId });
 	const { timeslotId } = await factories.timeslot.createTestTimeslot(overrides.Timeslot);

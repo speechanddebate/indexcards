@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import * as controller from '../../../../controllers/user/tourn/index.js';
+import * as ballots from '../../../../controllers/user/tourn/ballotsController.js';
 import { ValidateRequest } from '../../../../middleware/validation.js';
 import z from 'zod';
 import { Tourn, Fine, CurrentBallot, PersonTournSummary } from '../../../openapi/schemas/index.js';
@@ -111,4 +112,24 @@ router.route('/:tournId/ballots').get(ValidateRequest,controller.getTournBallots
 	},
 };
 
+router.route('/:tournId/ballots/current')
+	.get(ValidateRequest,ballots.getCurrent).openapi = {
+		summary: "Get current ballots",
+		path: "/user/tourns/{tournId}/ballots/current",
+		operationId: "UserTournsBallotsCurrent",
+		tags: ['Orval'],
+	requestParams: {
+		path: z.object({ tournId: z.coerce.number().int().positive() }),
+			},
+		responses: {
+			200: {
+				description: 'Successful response',
+				content: {
+					'application/json': {
+						schema: z.array(CurrentBallot),
+					},
+				},
+			},
+		},
+	};
 export default router;

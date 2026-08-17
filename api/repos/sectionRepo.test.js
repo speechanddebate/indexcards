@@ -144,7 +144,7 @@ describe('SectionRepo', () => {
 		it('returns a current ballot when one exists', async () => {
 			const data = await factories.person.createBallot();
 
-			const result = await sectionRepo.getCurrentBallots(data.personId);
+			const result = await sectionRepo.getCurrentBallots(data.personId,data.tournId);
 
 			expect(result).instanceof(Array);
 			const ballot = result[0];

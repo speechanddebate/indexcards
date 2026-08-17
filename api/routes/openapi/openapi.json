@@ -2475,6 +2475,52 @@
         }
       }
     },
+    "/user/tourns/{tournId}/ballots/current": {
+      "get": {
+        "summary": "Get current ballots",
+        "operationId": "UserTournsBallotsCurrent",
+        "tags": [
+          "Orval"
+        ],
+        "description": "GET /user/tourns/{tournId}/ballots/current is undocumented. Need to add .openapi to handler",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tournId",
+            "schema": {
+              "type": "integer",
+              "exclusiveMinimum": 0,
+              "maximum": 9007199254740991
+            },
+            "required": true
+          },
+          {
+            "$ref": "#/components/parameters/tournId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CurrentBallot"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/ErrorResponse"
+          }
+        }
+      }
+    },
     "/user/inbox": {
       "get": {
         "operationId": "UserInbox",
@@ -3380,26 +3426,6 @@
             "$ref": "#/components/responses/ErrorResponse"
           },
           "default": {
-            "$ref": "#/components/responses/ErrorResponse"
-          }
-        }
-      }
-    },
-    "/user/sections/current": {
-      "get": {
-        "summary": "Get current ballots",
-        "operationId": "UserBallotsCurrent",
-        "description": "GET /user/sections/current is undocumented. Need to add .openapi to handler",
-        "tags": [],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "Success"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "500": {
             "$ref": "#/components/responses/ErrorResponse"
           }
         }

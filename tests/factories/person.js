@@ -49,7 +49,6 @@ export async function createBallot(overrides = {}) {
 	let personId, judgeId;
 
 	const tourn = await factories.tourn.createFull(overrides);
-
 	({ personId, judgeId } = await factories.person.createJudge({
 		personId: overrides.personId,
 		Judge: { category: tourn.categoryId },
@@ -74,8 +73,8 @@ export async function createBallot(overrides = {}) {
 		section: sectionId,
 		...overrides.Ballot,
 	});
-
 	return {
+		tournId: tourn.tournId,
 		personId,
 		judgeId,
 	};

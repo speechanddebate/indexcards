@@ -1,9 +1,10 @@
 import type { Request, Response } from 'express';
-import type { CurrentBallotType } from '../../routes/openapi/schemas/index.js';
-import sectionRepo from '../../repos/sectionRepo.js';
+import type { CurrentBallotType } from '../../../routes/openapi/schemas/index.js';
+import sectionRepo from '../../../repos/sectionRepo.js';
 
-export async function getCurrentBallots(req: Request, res: Response) {
-	const sections = await sectionRepo.getCurrentBallots(req.actor.Person.id);
+export async function getCurrent(req: Request,res: Response) {
+	const { tournId } = req.params;
+	const sections = await sectionRepo.getCurrentBallots(req.actor.Person.id,tournId);
 
 	let ballots: CurrentBallotType[] = [];
 
@@ -84,4 +85,6 @@ export async function getCurrentBallots(req: Request, res: Response) {
 	});
 
 	return res.json(ballots);
+}
+export async function getCurrentBallots(req: Request, res: Response) {
 }
