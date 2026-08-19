@@ -4981,17 +4981,8 @@
               {
                 "type": "null"
               }
-            ]
-          },
-          "startText": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ]
+            ],
+            "description": "null if flighted. otherwise flight num."
           },
           "show_async": {
             "type": "boolean"
@@ -5004,7 +4995,7 @@
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
           },
-          "end": {
+          "deadline": {
             "type": "string",
             "format": "date-time",
             "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))T(?:(?:[01]\\d|2[0-3]):[0-5]\\d(?::[0-5]\\d(?:\\.\\d+)?)?(?:Z))$"
@@ -5015,6 +5006,17 @@
                 "type": "integer",
                 "exclusiveMinimum": 0,
                 "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "roomName": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 127
               },
               {
                 "type": "null"
@@ -5057,55 +5059,46 @@
               }
             ]
           },
-          "Judge": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "integer",
-                "exclusiveMinimum": 0,
-                "maximum": 9007199254740991
+          "JudgeId": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_started",
+              "started",
+              "scored"
+            ]
+          },
+          "startText": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 127
               },
-              "code": {
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "maxLength": 8
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "first": {
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "maxLength": 63
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "last": {
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "maxLength": 63
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+              {
+                "type": "null"
               }
-            },
-            "required": [
-              "id",
-              "code",
-              "first",
-              "last"
-            ],
-            "additionalProperties": false
+            ]
+          },
+          "ballotText": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 127
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "chair": {
+            "type": "boolean"
+          },
+          "audited": {
+            "type": "boolean"
           },
           "Tourn": {
             "type": "object",
@@ -5183,18 +5176,6 @@
               "settings": {
                 "type": "object",
                 "properties": {
-                  "flight_offset": {
-                    "anyOf": [
-                      {
-                        "type": "integer",
-                        "minimum": -9007199254740991,
-                        "maximum": 9007199254740991
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
                   "online_mode": {
                     "anyOf": [
                       {
@@ -5210,7 +5191,6 @@
                   }
                 },
                 "required": [
-                  "flight_offset",
                   "online_mode",
                   "online_ballots"
                 ],
@@ -5256,23 +5236,12 @@
                     "type": "null"
                   }
                 ]
-              },
-              "flighted": {
-                "anyOf": [
-                  {
-                    "type": "boolean"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
               }
             },
             "required": [
               "id",
               "name",
-              "label",
-              "flighted"
+              "label"
             ],
             "additionalProperties": false
           },
@@ -5293,16 +5262,12 @@
                   "type": "integer",
                   "minimum": 0,
                   "maximum": 9007199254740991
-                },
-                "chair": {
-                  "type": "boolean"
                 }
               },
               "required": [
                 "id",
                 "side",
-                "speakerOrder",
-                "chair"
+                "speakerOrder"
               ],
               "additionalProperties": false
             }
@@ -5340,15 +5305,20 @@
           "id",
           "flipStatus",
           "flight",
-          "startText",
           "show_async",
           "legion",
           "start",
-          "end",
+          "deadline",
           "roomId",
+          "roomName",
           "roomUrl",
           "roomNotes",
-          "Judge",
+          "JudgeId",
+          "status",
+          "startText",
+          "ballotText",
+          "chair",
+          "audited",
           "Tourn",
           "Category",
           "Event",

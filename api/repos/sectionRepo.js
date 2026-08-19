@@ -226,6 +226,7 @@ order by timeslot.start, event.abbr, round.name, panel.flight, ballot.audit
 				id: row.panelId,
 				letter: row.panelLetter,
 				flight: row.panelFlight,
+				scored: row.scoreId != null,
 				settings: {
 					flip_status: row.flipStatus,
 					show_async: row.asyncValue,
