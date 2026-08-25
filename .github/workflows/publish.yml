@@ -28,7 +28,7 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
         registry: registry.speechanddebate.org
-        tags: "latest,${{ env.COMMIT_VERSION }}"
+        tags: "production,${{ env.COMMIT_VERSION }}"
 
     - name: Publish cron image to Registry
       uses: elgohr/Publish-Docker-Github-Action@v4
@@ -37,7 +37,7 @@ jobs:
         username: ${{ secrets.REGISTRY_USERNAME }}
         password: ${{ secrets.REGISTRY_PASSWORD }}
         registry: registry.speechanddebate.org
-        tags: "latest,${{ env.COMMIT_VERSION }}"
+        tags: "production,${{ env.COMMIT_VERSION }}"
         dockerfile: cron.Dockerfile
 
     - name: If publish succeeded, change icon
