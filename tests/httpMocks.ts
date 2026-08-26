@@ -28,8 +28,10 @@ export function createReq(overrides: Partial<Request> & Record<string, unknown> 
 		...overrides,
 	} as unknown as Request;
 }
-
-export function createRes(): Response {
+export type MockResponse = Response & {
+	body: unknown;
+};
+export function createRes(): MockResponse {
 	const headers: Record<string, string> = {};
 
 	const res = {

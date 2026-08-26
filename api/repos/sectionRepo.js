@@ -262,6 +262,8 @@ order by timeslot.start, event.abbr, round.name, panel.flight, ballot.audit
 								start_button: row.startButton,
 								start_button_text: row.startButtonText,
 								flight_offset: row.flightOffset,
+								aff_label: row.affLabel,
+								neg_label: row.negLabel,
 							},
 						},
 					},
@@ -300,6 +302,7 @@ order by timeslot.start, event.abbr, round.name, panel.flight, ballot.audit
 			audit: row.ballotAudit,
 			judge_started: row.ballotJudgeStarted,
 			chair: row.ballotChair,
+			entry: row.entryId,
 		});
 		panel.Entries.push({
 			id: row.entryId,

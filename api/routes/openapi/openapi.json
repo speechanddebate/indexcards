@@ -4961,10 +4961,39 @@
             "exclusiveMinimum": 0,
             "maximum": 9007199254740991
           },
+          "name": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": -9007199254740991,
+                "maximum": 9007199254740991
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "label": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 31
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
           "flipStatus": {
             "anyOf": [
               {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "done",
+                  "winner",
+                  "second",
+                  "anyone"
+                ]
               },
               {
                 "type": "null"
@@ -4982,10 +5011,14 @@
                 "type": "null"
               }
             ],
-            "description": "null if flighted. otherwise flight num."
+            "description": "null if not flighted. otherwise flight num."
           },
           "show_async": {
             "type": "boolean"
+          },
+          "onlineBallots": {
+            "type": "boolean",
+            "description": "true if the tournament uses online ballots"
           },
           "legion": {
             "type": "boolean"
@@ -5064,6 +5097,11 @@
             "exclusiveMinimum": 0,
             "maximum": 9007199254740991
           },
+          "RoundId": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
           "status": {
             "type": "string",
             "enum": [
@@ -5100,177 +5138,32 @@
           "audited": {
             "type": "boolean"
           },
-          "Tourn": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "integer",
-                "exclusiveMinimum": 0,
-                "maximum": 9007199254740991
-              },
-              "name": {
-                "type": "string",
-                "maxLength": 63
-              },
-              "tz": {
-                "type": "string",
-                "maxLength": 31
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "tz"
-            ],
-            "additionalProperties": false
+          "TournTz": {
+            "type": "string",
+            "maxLength": 31
           },
-          "Category": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "integer",
-                "exclusiveMinimum": 0,
-                "maximum": 9007199254740991
-              },
-              "name": {
+          "eventType": {
+            "type": "string",
+            "enum": [
+              "debate",
+              "speech",
+              "mock_trial",
+              "congress",
+              "wsdc",
+              "wudc",
+              "attendee",
+              "academic"
+            ]
+          },
+          "onlineMode": {
+            "anyOf": [
+              {
                 "type": "string"
               },
-              "abbr": {
-                "type": "string"
+              {
+                "type": "null"
               }
-            },
-            "required": [
-              "id",
-              "name",
-              "abbr"
-            ],
-            "additionalProperties": false
-          },
-          "Event": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "integer",
-                "exclusiveMinimum": 0,
-                "maximum": 9007199254740991
-              },
-              "name": {
-                "type": "string"
-              },
-              "abbr": {
-                "type": "string"
-              },
-              "type": {
-                "type": "string",
-                "enum": [
-                  "debate",
-                  "speech",
-                  "mock_trial",
-                  "congress",
-                  "wsdc",
-                  "wudc",
-                  "attendee",
-                  "academic"
-                ]
-              },
-              "settings": {
-                "type": "object",
-                "properties": {
-                  "online_mode": {
-                    "anyOf": [
-                      {
-                        "type": "string"
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  },
-                  "online_ballots": {
-                    "type": "boolean"
-                  }
-                },
-                "required": [
-                  "online_mode",
-                  "online_ballots"
-                ],
-                "additionalProperties": false
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "abbr",
-              "type",
-              "settings"
-            ],
-            "additionalProperties": false
-          },
-          "Round": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "integer",
-                "exclusiveMinimum": 0,
-                "maximum": 9007199254740991
-              },
-              "name": {
-                "anyOf": [
-                  {
-                    "type": "integer",
-                    "minimum": -9007199254740991,
-                    "maximum": 9007199254740991
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              },
-              "label": {
-                "anyOf": [
-                  {
-                    "type": "string",
-                    "maxLength": 31
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
-              }
-            },
-            "required": [
-              "id",
-              "name",
-              "label"
-            ],
-            "additionalProperties": false
-          },
-          "Ballots": {
-            "type": "array",
-            "items": {
-              "type": "object",
-              "properties": {
-                "id": {
-                  "type": "integer",
-                  "exclusiveMinimum": 0,
-                  "maximum": 9007199254740991
-                },
-                "side": {
-                  "type": "boolean"
-                },
-                "speakerOrder": {
-                  "type": "integer",
-                  "minimum": 0,
-                  "maximum": 9007199254740991
-                }
-              },
-              "required": [
-                "id",
-                "side",
-                "speakerOrder"
-              ],
-              "additionalProperties": false
-            }
+            ]
           },
           "Entries": {
             "type": "array",
@@ -5291,11 +5184,35 @@
                       "type": "null"
                     }
                   ]
+                },
+                "side": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "speakerOrder": {
+                  "anyOf": [
+                    {
+                      "type": "integer",
+                      "minimum": 0,
+                      "maximum": 9007199254740991
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
                 }
               },
               "required": [
                 "id",
-                "code"
+                "code",
+                "side",
+                "speakerOrder"
               ],
               "additionalProperties": false
             }
@@ -5303,9 +5220,12 @@
         },
         "required": [
           "id",
+          "name",
+          "label",
           "flipStatus",
           "flight",
           "show_async",
+          "onlineBallots",
           "legion",
           "start",
           "deadline",
@@ -5314,16 +5234,15 @@
           "roomUrl",
           "roomNotes",
           "JudgeId",
+          "RoundId",
           "status",
           "startText",
           "ballotText",
           "chair",
           "audited",
-          "Tourn",
-          "Category",
-          "Event",
-          "Round",
-          "Ballots",
+          "TournTz",
+          "eventType",
+          "onlineMode",
           "Entries"
         ],
         "additionalProperties": false
