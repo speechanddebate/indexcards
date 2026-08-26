@@ -61,5 +61,5 @@ export function createRes(): MockResponse {
 		cookie: vi.fn(),
 	};
 
-	return res as unknown as Response;
+	return res as unknown as MockResponse;
 }
