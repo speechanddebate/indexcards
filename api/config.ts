@@ -3,7 +3,7 @@ import path from 'path';
 import z from 'zod';
 
 /** This schema defines the app config. add comments to a config value to get descriptions at usage. */
-const ConfigSchema = z.object({
+export const ConfigSchema = z.object({
 	//----------------------------------------------------------------------
 	// SERVER
 	// ---------------------------------------------------------------------
@@ -72,7 +72,7 @@ const ConfigSchema = z.object({
 	/** a shared secret with classic tabroom. used for shared sessions*/
 	shared_secret: z.string().default(''),
 	cors: z.object({
-		origins: z.array(z.string().min(1)).default(['*']),
+		origins: z.array(z.string().min(1)).default(['http://dev.tabroom.com']),
 	}).prefault({}),
 	cookie: z.object({
 		name: z.string().default('TabroomToken'),

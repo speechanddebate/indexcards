@@ -2,6 +2,7 @@ import entryRepo from '../../api/repos/entryRepo.js';
 
 function buildEntryData(overrides = {}) {
 	return {
+		active: 1,
 		...overrides,
 	};
 }

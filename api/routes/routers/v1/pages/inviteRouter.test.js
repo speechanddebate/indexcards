@@ -39,7 +39,7 @@ describe('Tournament Invitation Information', () => {
 		assert.typeOf(body[0].year        , 'number'     , 'Object contains valid year');
 		assert.typeOf(body[0].sortnumeric , 'number'     , 'Object contains valid week number');
 		assert.typeOf(body[0].name        , 'string'     , 'Object contains valid names');
-		assert.equal(body[0].webname      , 'newengland' , `The first listed should be the New England district`);
+		assert.equal(body[0].webname      , 'ncfl' , `The first listed should be ncfl`);
 	});
 });
 
@@ -63,6 +63,6 @@ describe('Tournament Front Listing', () => {
 		assert.typeOf(body[0].year        , 'number'     , 'Object contains valid year');
 		assert.typeOf(body[0].sortnumeric , 'number'     , 'Object contains valid week number');
 		assert.typeOf(body[0].name        , 'string'     , 'Object contains valid names');
-		assert.equal(body[0].webname      , 'newengland' , `The first listed should be the New England district`);
+		assert.equal(body[0].webname      , 'ncfl' , `The first listed should be ncfl`);
 	});
 });

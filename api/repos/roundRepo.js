@@ -1,7 +1,7 @@
 import db from '../data/db.js';
 import  { FIELD_MAP, toDomain, toPersistence } from './mappers/roundMapper.js';
 import { eventInclude } from './eventRepo.js';
-import { withSettingsInclude } from './utils/settings.js';
+import { saveSettings, withSettingsInclude } from './utils/settings.js';
 import { resolveAttributesFromFields } from './utils/repoUtils.js';
 import { sectionInclude } from './sectionRepo.js';
 import { protocolInclude } from './protocolRepo.js';
@@ -123,6 +123,12 @@ export async function getRounds(scope = {}, opts = {}) {
 
 async function createRound(data){
 	const dbRow = await db.round.create(toPersistence(data));
+	await saveSettings({
+		model: db.roundSetting,
+		settings: data.settings,
+		ownerKey: 'round',
+		ownerId: dbRow.id,
+	});
 	return dbRow.id;
 }
 

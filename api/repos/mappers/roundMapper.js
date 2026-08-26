@@ -8,12 +8,13 @@ export const FIELD_MAP = {
 	name          : 'name',
 	label         : 'label',
 	flighted      : 'flighted',
-	postPrimary   : 'post_primary',
-	postSecondary : 'post_secondary',
-	postFeedback  : 'post_feedback',
+	post_primary   : 'post_primary',
+	post_pecondary : 'post_secondary',
+	post_feedback  : 'post_feedback',
 	published     : 'published',
-	eventId       : 'event',
-	protocolId    : 'protocol',
+	event         : 'event',
+	protocol      : 'protocol',
+	timeslot      : 'timeslot',
 };
 
 export const toDomain = dbRow => {

@@ -141,7 +141,7 @@ describe('buildSettingsRows', () => {
 			{
 				[ownerKey]: ownerId,
 				tag: 'long',
-				value: null,
+				value: 'text',
 				value_text: longStr,
 				value_date: null,
 			},
@@ -160,14 +160,14 @@ describe('buildSettingsRows', () => {
 			{
 				[ownerKey]: ownerId,
 				tag: 'obj',
-				value: null,
+				value: 'json',
 				value_text: JSON.stringify(obj),
 				value_date: null,
 			},
 			{
 				[ownerKey]: ownerId,
 				tag: 'arr',
-				value: null,
+				value: 'json',
 				value_text: JSON.stringify(arr),
 				value_date: null,
 			},
@@ -207,7 +207,7 @@ describe('buildSettingsRows', () => {
 			{
 				[ownerKey]: ownerId,
 				tag: 'c',
-				value: null,
+				value: 'text',
 				value_text: 'c'.repeat(100),
 				value_date: null,
 			},
@@ -235,7 +235,7 @@ describe('buildSettingsRows', () => {
 			{
 				[ownerKey]: ownerId,
 				tag: 'g',
-				value: null,
+				value: 'json',
 				value_text: JSON.stringify({ x: 1 }),
 				value_date: null,
 			},
@@ -324,7 +324,7 @@ describe('flattenSettings', () => {
 			{ tag: 'obj', value: 'json', value_text: '{"a":1}' },
 		];
 		expect(flattenSettings(rows)).toEqual({
-			obj: '{"a":1}',
+			obj: {'a':1},
 		});
 	});
 
@@ -381,7 +381,7 @@ describe('flattenSettings', () => {
 		];
 		expect(flattenSettings(rows)).toEqual({
 			a: 'short',
-			b: '{"x":1}',
+			b: {'x':1},
 			c: date,
 			d: 42,
 			e: 'notanumber',

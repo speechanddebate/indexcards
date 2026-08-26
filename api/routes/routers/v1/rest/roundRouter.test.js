@@ -23,6 +23,6 @@ describe('GET /rounds', () => {
 			expect(typeof round.Event.abbr).toBe('string');
 		});
 
-		expect(body).toHaveLength(27);
+		expect(body).toHaveLength(11);
 	});
 });

@@ -10,9 +10,9 @@ describe('ballotRepo', async () => {
 	});
 	describe('buildBallotQuery', () => {
 		it('does not include associations by default', async () => {
-			const ballotId = await ballotRepo.createBallot({sectionId});
+			const ballotId = await ballotRepo.createBallot({section: sectionId});
 
-			const ballots = await ballotRepo.getBallots({ sectionId });
+			const ballots = await ballotRepo.getBallots({ section: sectionId });
 			const ballot = ballots.find(b => b.id === ballotId);
 
 			expect(ballot).toBeDefined();
@@ -22,7 +22,7 @@ describe('ballotRepo', async () => {
 		});
 		it('includes Judge when requested', async () => {
 			const { judgeId } = await factories.judge.createTestJudge();
-			const ballotId = await ballotRepo.createBallot({sectionId, judgeId});
+			const ballotId = await ballotRepo.createBallot({ section: sectionId, judge: judgeId});
 
 			const ballot = await ballotRepo.getBallot(
 				ballotId,
@@ -34,7 +34,7 @@ describe('ballotRepo', async () => {
 			expect(ballot.Judge.id).toBeDefined();
 		});
 		it('includes scores when requested', async () => {
-			const ballotId = await ballotRepo.createBallot({sectionId});
+			const ballotId = await ballotRepo.createBallot({section: sectionId});
 
 			const ballot = await ballotRepo.getBallot(
 				ballotId,
@@ -46,7 +46,7 @@ describe('ballotRepo', async () => {
 			expect(Array.isArray(ballot.Scores)).toBe(true);
 		});
 		it('includes section when requested', async () => {
-			const ballotId = await ballotRepo.createBallot({sectionId});
+			const ballotId = await ballotRepo.createBallot({section: sectionId});
 
 			const ballot = await ballotRepo.getBallot(
 				ballotId,
@@ -74,18 +74,18 @@ describe('ballotRepo', async () => {
 		});
 
 		it('should return ballots for a given sectionId', async () => {
-			const ballotId = await ballotRepo.createBallot({ sectionId });
+			const ballotId = await ballotRepo.createBallot({ section: sectionId });
 			const ballots = await ballotRepo.getBallots({ sectionId });
 			expect(Array.isArray(ballots)).toBe(true);
 			expect(ballots.length).toBeGreaterThan(0);
 			const found = ballots.find(b => b.id === ballotId);
 			expect(found).toBeDefined();
-			expect(found.sectionId).toBe(sectionId);
+			expect(found.section).toBe(sectionId);
 		});
 	});
 	describe('createBallot', async () => {
 		it('should create a ballot and retrieve it', async () => {
-			const ballotId = await ballotRepo.createBallot({ sectionId });
+			const ballotId = await ballotRepo.createBallot({ section: sectionId });
 			const ballot = await ballotRepo.getBallot(ballotId);
 
 			//ensure that id, updatedAt and createdAt are present and not null
