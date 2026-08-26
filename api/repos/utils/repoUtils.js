@@ -1,4 +1,4 @@
-//TODO this silently fails on unknown mapping, it should log a warning or something
+import logger from '../../helpers/logger.js';
 export function resolveAttributesFromFields(fields, FIELD_MAP) {
 	// Default: all fields
 	if (!fields) return undefined;
@@ -14,6 +14,7 @@ export function resolveAttributesFromFields(fields, FIELD_MAP) {
 				const config = FIELD_MAP[f];
 				if (typeof config === 'string') return config;
 				if (typeof config === 'object' && config.db) return config.db;
+				logger.warn(`Unknown field mapping for "${f}" in resolveAttributesFromFields`);
 				return undefined;
 			})
 			.filter(Boolean);

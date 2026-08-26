@@ -46,9 +46,9 @@ export async function buildTarget(resource, resourceId, targetCache) {
 			break;
 		}
 		case 'round': {
-			const round = await roundRepo.getRound(resourceId, { fields: ['eventId'] });
+			const round = await roundRepo.getRound(resourceId, { fields: ['event'] });
 			if (round) {
-				target.eventId = round.eventId;
+				target.eventId = round.event;
 				target ={
 					...await buildTarget('event', target.eventId, targetCache),
 					...target,
