@@ -1,4 +1,4 @@
-
+import logger from '../../helpers/logger.js';
 export async function saveSettings({
 	model,
 	settings,
@@ -84,7 +84,7 @@ export function buildSettingsRows({
 	return Object.entries(settings).map(([tag, value]) => ({
 		[ownerKey]: ownerId,
 		tag,
-		...encodeSettingValue(value),
+		...encodeSettingValue(value, tag),
 	}));
 }
 /**
@@ -101,7 +101,16 @@ export function flattenSettings(settingRows) {
 		const setting = s.dataValues || s;
 
 		if (setting.value === 'text' || setting.value === 'json') {
-			out[setting.tag] = setting.value_text;
+			if(setting.value === 'json') {
+				try {
+					out[setting.tag] = JSON.parse(setting.value_text);
+				} catch (e) {
+					logger.warn(`Failed to parse JSON setting for tag ${setting.tag} with value ${setting.value_text}:`, e);
+					out[setting.tag] = setting.value_text;
+				}
+			} else {
+				out[setting.tag] = setting.value_text;
+			}
 			continue;
 		}
 
@@ -149,7 +158,8 @@ export function flattenSettingsTimestamps(settingRows) {
  * @param {*} value  - the setting value
  * @returns an object with keys: value, value_text, value_date
  */
-function encodeSettingValue(value) {
+function encodeSettingValue(value, tag) {
+	const VALUE_TEXT_TAGS = ['livedoc_url'];
 	// null / undefined -> clear all value fields
 	if (value === null || value === undefined) {
 		return {
@@ -188,7 +198,7 @@ function encodeSettingValue(value) {
 
 	// String → value or value_text
 	if (typeof value === 'string') {
-		if (value.length <= 64) {
+		if (value.length <= 64 && !VALUE_TEXT_TAGS.includes(tag)) {
 			return {
 				value,
 				value_text: null,
@@ -197,7 +207,7 @@ function encodeSettingValue(value) {
 		}
 
 		return {
-			value: null,
+			value: 'text',
 			value_text: value,
 			value_date: null,
 		};
@@ -205,7 +215,7 @@ function encodeSettingValue(value) {
 
 	// Object / Array → JSON in value_text
 	return {
-		value: null,
+		value: 'json',
 		value_text: JSON.stringify(value),
 		value_date: null,
 	};

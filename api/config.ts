@@ -72,7 +72,7 @@ export const ConfigSchema = z.object({
 	/** a shared secret with classic tabroom. used for shared sessions*/
 	shared_secret: z.string().default(''),
 	cors: z.object({
-		origins: z.array(z.string().min(1)).default(['*']),
+		origins: z.array(z.string().min(1)).default(['http://dev.tabroom.com']),
 	}).prefault({}),
 	cookie: z.object({
 		name: z.string().default('TabroomToken'),

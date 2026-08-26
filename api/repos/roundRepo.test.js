@@ -10,7 +10,7 @@ describe('getRounds', () => {
 
 		rounds.forEach((round, i) => {
 			assert.equal(round.published, 1, `Round at index ${i} (roundId=${round.roundId}) is not published`);
-			assert.strictEqual(round.event, undefined, `Round at index ${i} (id=${round.id}) should not have event data`);
+			assert.strictEqual(round.Event, undefined, `Round at index ${i} (id=${round.id}) should not have event data`);
 		});
 	});
 	it('returns event info when include.event is true', async () => {

@@ -98,4 +98,26 @@ describe('judgesRouter', () => {
 			expect(newParadigm.body.paradigm).toBe('word '.repeat(50));
 		});
 	});
+	describe("GET /user/judges/livedocs", () => {
+		it('should return the live docs for the logged in user', async () => {
+			const { tournId } = await factories.tourn.createTestTourn();
+			const { categoryId } = await factories.category.createTestCategory({
+				tourn: tournId,
+				settings: {
+					livedoc_url: 'example.com',
+					livedoc_caption: 'example',
+				},
+			});
+
+			await factories.person.createJudge({ personId, Judge: { category: categoryId } });
+			const res = await request(server)
+				.get('/v1/user/judges/livedocs')
+				.set('Accept', 'application/json')
+				.set('Authorization', `Bearer ${userkey}`)
+				.expect(200);
+			expect(res.body).toBeInstanceOf(Array);
+			expect(res.body[0].url).toBe('example.com');
+			expect(res.body[0].caption).toBe('example');
+		});
+	});
 });

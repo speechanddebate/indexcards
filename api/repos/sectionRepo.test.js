@@ -9,7 +9,7 @@ describe('SectionRepo', () => {
 			const section = await sectionRepo.getSection(sectionId);
 
 			expect(section).toBeDefined();
-			expect(section.round).toBeUndefined();
+			expect(section.Round).toBeUndefined();
 			expect(section.Ballots).toBeUndefined();
 		});
 		it('includes ballots when requested', async () => {
@@ -35,6 +35,18 @@ describe('SectionRepo', () => {
 			expect(section).toBeDefined();
 			expect(section.settings).toBeDefined();
 		});
+		it('includes Round when requested', async () => {
+			const { roundId } = await factories.round.create();
+			const { sectionId } = await factories.section.create({ round: roundId });
+
+			const section = await sectionRepo.getSection(
+				sectionId,
+				{ include: { Round: true } }
+			);
+
+			expect(section).toBeDefined();
+			expect(section.Round).toBeDefined();
+		});
 	});
 	describe('sectionInclude', () => {
 		it('returns base section include config', () => {
@@ -59,14 +71,14 @@ describe('SectionRepo', () => {
 	describe('getSections', () => {
 		it('retrieves all sections for a given round', async () => {
 			const { roundId } = await factories.round.create();
-			const { sectionId: section1Id } = await factories.section.create({ roundId });
-			const { sectionId: section2Id } = await factories.section.create({ roundId });
+			const { sectionId: section1Id } = await factories.section.create({ round: roundId });
+			const { sectionId: section2Id } = await factories.section.create({ round: roundId });
 
 			const results = await sectionRepo.getSections({ roundId });
 			expect(results).toBeDefined();
 			expect(results.length).toBeGreaterThanOrEqual(2);
 			results.forEach(s => {
-				expect(s.roundId, `expected roundId to be ${roundId} but was ${s.roundId}`).toBe(roundId);
+				expect(s.round, `expected roundId to be ${roundId} but was ${s.round}`).toBe(roundId);
 			});
 			expect(results.map(s => s.id)).toEqual(expect.arrayContaining([section1Id, section2Id]));
 		});
@@ -126,6 +138,18 @@ describe('SectionRepo', () => {
 		});
 		it('throws an error when id is not provided', async () => {
 			await expect(sectionRepo.deleteSection()).rejects.toThrow('deleteSection: id is required');
+		});
+	});
+	describe('getCurrentBallots', async () => {
+		it('returns a current ballot when one exists', async () => {
+			const data = await factories.person.createBallot();
+
+			const result = await sectionRepo.getCurrentBallots(data.personId,data.tournId);
+
+			expect(result).instanceof(Array);
+			const ballot = result[0];
+			expect(ballot).toBeDefined();
+			expect(ballot.Judge.id).toBe(data.judgeId);
 		});
 	});
 });

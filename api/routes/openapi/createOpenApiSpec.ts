@@ -8,7 +8,7 @@ import { readFile } from 'node:fs/promises';
 import security from './security.js';
 
 import type { ZodOpenApiObject, ZodOpenApiOperationObject } from 'zod-openapi';
-import type { RouteOpenApiConfig } from '../../types/express-openapi.d.js';
+import type { RouteOpenApiConfig } from '../../types/express.d.js';
 
 const HTTP_METHODS = ['get', 'post', 'put', 'patch', 'delete', 'options', 'head', 'trace'] as const;
 type HttpMethod = (typeof HTTP_METHODS)[number];

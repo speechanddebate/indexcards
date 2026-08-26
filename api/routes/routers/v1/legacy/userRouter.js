@@ -7,11 +7,12 @@ import updateLastAccess from '../../../../controllers/user/person/access.js';
 import updateLearnCoursesMod from '../../../../controllers/user/person/learnCourse.js';
 
 import inboxRouter from '../user/inboxRouter.js';
-import tournRouter from '../user/tournRouter.js';
+import tournsRouter from '../user/tournsRouter.js';
 import sessionRouter from '../user/sessionRouter.js';
 import judgesRouter from '../user/judgesRouter.js';
 import studentsRouter from '../user/studentsRouter.js';
 import chaptersRouter from '../user/chaptersRouter.js';
+import sectionsRouter from '../user/sectionsRouter.js';
 
 const router = Router();
 
@@ -23,9 +24,8 @@ function extractHandler(mod, method) {
 }
 
 // Non legacy things
-
 //User inbox
-router.use('/tourn', tournRouter);
+router.use('/tourns', tournsRouter);
 //User inbox
 router.use('/inbox', inboxRouter);
 //sessions
@@ -33,6 +33,7 @@ router.use('/session', sessionRouter);
 router.use('/judges', judgesRouter);
 router.use('/students', studentsRouter);
 router.use('/chapters', chaptersRouter);
+router.use('/sections', sectionsRouter);
 // User session/profile/payment/learn
 
 router.get('/profile', extractHandler(getProfileMod, 'GET')).openapi = {

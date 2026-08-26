@@ -135,4 +135,31 @@ router.route('/paradigm')
 			},
 		}
 	}
+
+router.route('/livedocs')
+	.get(ValidateRequest, judgesController.getLiveDocs).openapi = {
+		summary: 'Get live docs',
+		description: 'Get live docs for the logged in user',
+		path: '/user/judges/livedocs',
+		operationId: 'UserJudgesLiveDocs',
+		tags: ['Orval','Judges'],
+		responses: {
+			200: {
+				description: 'Successful response',
+				content: {
+					'application/json': {
+						schema: z.array(z.object({
+							judgeId: utils.id,
+							categoryAbbr: z.string(),
+							tournName: z.string(),
+							tournEnd: z.iso.datetime(),
+							tournTz: z.string(),
+							url: z.string(),
+							caption: z.string().nullable(),
+						})),
+					},
+				},
+			},
+		},
+	};
 export default router;

@@ -1,49 +1,19 @@
 import type { ZodOpenApiSchemaObject } from 'zod-openapi';
+import z from 'zod';
+import * as utils from './utils.js';
 
-export const Event = {
-	type        : 'object',
-	description : 'An event',
-	required    : ['id', 'name', 'abbr', 'type', 'categoryId', 'tournId'],
-	properties  : {
-		id: {
-			type : 'integer',
-		},
-		abbr: {
-			type: 'string',
-		},
-		name: {
-			type: 'string',
-		},
-		fee: {
-			type: 'number',
-		},
-		type: {
-			type: 'string',
-			enum: ['debate', 'speech', 'mockTrial', 'congress', 'wsdc', 'wudc', 'attendee', 'academic'],
-		},
-		categoryId: {
-			type: 'integer',
-		},
-		settings  : { type : 'object', additionalProperties: { type: 'string' } } ,
-		metadata  : { type : 'object', additionalProperties: { type: 'string' } } ,
-		Tourn: {
-			$ref: '#/components/schemas/Category',
-		},
-		Category: {
-			$ref: '#/components/schemas/Category',
-		},
-		Topic: {
-			$ref: '#/components/schemas/Topic',
-		},
-		Entries: {
-			type  : 'array',
-			items : { $ref:'#/components/schemas/Entry' },
-		},
-		nsdaCategoryId: {
-			type     : ['integer', 'null'],
-		},
-		NSDACategory: {
-			$ref: '#/components/schemas/NSDACategory',
-		},
-	},
-} as const satisfies ZodOpenApiSchemaObject;
+export const Event = z.object({
+	id: utils.id,
+	abbr: z.string(),
+	name: z.string(),
+	fee: z.number(),
+	type: z.enum(['debate', 'speech', 'mock_trial', 'congress', 'wsdc', 'wudc', 'attendee', 'academic']),
+	categoryId: utils.id,
+	settings: z.object({
+		flight_offset: z.int().nullable(),
+		online_mode: z.string().nullable(),
+		online_ballots: z.boolean(),
+	}),
+	metadata: z.object(),
+	nsdaCategoryId: utils.id.nullable(),
+}).meta({ id: 'Event'}) satisfies ZodOpenApiSchemaObject;

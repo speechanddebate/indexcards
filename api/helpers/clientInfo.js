@@ -10,7 +10,7 @@ export const findLocation = async (ipAddress) => {
 		|| ipAddress.startsWith('172.17')
 		|| ipAddress.startsWith('10')
 		|| ipAddress.startsWith('127')
-		|| !config.IPLOCATION
+		|| !config.ip.locationDB
 	) {
 		return;
 	}
@@ -51,7 +51,7 @@ export const findISP = async (ipAddress) => {
 		|| ipAddress.startsWith('172.17')
 		|| ipAddress.startsWith('10')
 		|| ipAddress.startsWith('127')
-		|| !config.IPISP
+		|| !config.ip.ispDB
 	) {
 		return;
 	}
