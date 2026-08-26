@@ -1,4 +1,4 @@
-
+import logger from '../../helpers/logger.js';
 export async function saveSettings({
 	model,
 	settings,
@@ -101,7 +101,16 @@ export function flattenSettings(settingRows) {
 		const setting = s.dataValues || s;
 
 		if (setting.value === 'text' || setting.value === 'json') {
-			out[setting.tag] = setting.value_text;
+			if(setting.value === 'json') {
+				try {
+					out[setting.tag] = JSON.parse(setting.value_text);
+				} catch (e) {
+					logger.warn(`Failed to parse JSON setting for tag ${setting.tag} with value ${setting.value_text}:`, e);
+					out[setting.tag] = setting.value_text;
+				}
+			} else {
+				out[setting.tag] = setting.value_text;
+			}
 			continue;
 		}
 
@@ -206,7 +215,7 @@ function encodeSettingValue(value, tag) {
 
 	// Object / Array → JSON in value_text
 	return {
-		value: null,
+		value: 'json',
 		value_text: JSON.stringify(value),
 		value_date: null,
 	};

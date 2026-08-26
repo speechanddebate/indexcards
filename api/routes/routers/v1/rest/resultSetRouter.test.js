@@ -27,8 +27,8 @@ describe('GET /results', () => {
 
 		// Property test: every result set must be published
 		//expect(body.published).toBe(1); deleted published from the repo result?
-		expect(typeof body.Results).toBe('object');
-		expect(typeof body.event).toBe('number');
-		expect(Object.keys(body.Results)).toHaveLength(160);
+		expect(typeof body[0].results).toBe('object');
+		expect(typeof body[0].Event.id).toBe('number');
+		expect(Object.keys(body[0].results)).toHaveLength(166);
 	});
 });

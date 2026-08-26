@@ -71,9 +71,9 @@ export async function getCurrent(req: Request,res: Response) {
 			JudgeId: s.Judge.id,
 			RoundId: s.Round.id,
 			Entries: s.Entries.map((e: any) => {
+				let ballot = s.Ballots.find(b => b.entry === e.id)	
 				let side = null;
 				if (s.settings.flip_status === undefined || s.settings.flip_status === 'done'){
-					let ballot = s.Ballots.some(b => b.entry === e.id)	
 					if (ballot.side) {
 						if (ballot.side === 1){
 							side = s.Event.settings.aff_label ?? "Aff";
@@ -83,10 +83,12 @@ export async function getCurrent(req: Request,res: Response) {
 						}
 					}
 				}
+				let speakerOrder = ballot.speakerOrder ? JSON.parse(ballot.speakerOrder) : null;
 				return {
 					id: e.id,
 					code: e.code,
 					side,
+					speakerOrder,
 				};
 			}),
 		});
