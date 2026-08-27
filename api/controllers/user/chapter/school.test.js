@@ -27,7 +27,7 @@ describe ('getMySchoolsByTourn', () => {
 		await db.contact.create({
 			school   : 694009,
 			tourn    : 30661,
-			chapter  : 130140,
+			chapter  : 26719,
 			person   : personId,
 			official : 1,
 			onsite   : 1,

@@ -79,7 +79,7 @@ export const testUserChapterPerm = {
 export const testUserSchoolContact = {
 	school   : 694009,
 	tourn    : 30661,
-	chapter  : 130140,
+	chapter  : 26719,
 	person   : 69,
 	official : 1,
 	onsite   : 1,
