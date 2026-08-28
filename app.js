@@ -88,6 +88,10 @@ if(process.env.NODE_ENV === 'production') {
 
 app.use(csrfMiddleware);
 
+app.get('/', (req, res) => {
+	res.redirect(301, '/v1/reference');
+});
+
 app.use('/v1',v1Router);
 
 app.use('/v1/local', async (req, res, next) => {

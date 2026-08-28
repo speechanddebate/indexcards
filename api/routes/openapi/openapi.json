@@ -7878,7 +7878,7 @@
       "cookieAuth": {
         "type": "apiKey",
         "in": "cookie",
-        "name": "TabroomLocal",
+        "name": "TabroomToken",
         "description": "send the session token as a cookie. For direct API access, we recommend using bearerAuth."
       }
     }
